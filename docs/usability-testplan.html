@@ -1,0 +1,901 @@
+<title>Lernlabor Usability-Testplan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap">
+<style>
+/* Layout: eine Lesespalte mit Sprungleiste, breite Tabellen scrollen in sich; Farben aus dem Lernlabor-Logo (Marine + Mint) */
+:root{
+ --bg:#f6f8f8; --paper:#ffffff; --ink:#0c1a26; --muted:#4c5d68; --line:#d5dee2;
+ --navy:#0b1a2b; --mint:#1f8a6d; --mint-soft:#e1f3ed;
+ --ok:#1f7a4d; --ok-bg:#e2f3ea; --no:#a3332b; --no-bg:#f9e3e1; --mid:#8a5a00; --mid-bg:#fbefd5;
+ --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+ --body:"Atkinson Hyperlegible",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+ --bg:#0c141b; --paper:#121d26; --ink:#e6eef2; --muted:#9fb2bd; --line:#2a3a46;
+ --navy:#06101a; --mint:#5fd0ad; --mint-soft:#163a31;
+ --ok:#7fdcaa; --ok-bg:#173726; --no:#f2a199; --no-bg:#3d1c1a; --mid:#f0c46a; --mid-bg:#3a2c0f; color-scheme:dark}}
+:root[data-theme="dark"]{
+ --bg:#0c141b; --paper:#121d26; --ink:#e6eef2; --muted:#9fb2bd; --line:#2a3a46;
+ --navy:#06101a; --mint:#5fd0ad; --mint-soft:#163a31;
+ --ok:#7fdcaa; --ok-bg:#173726; --no:#f2a199; --no-bg:#3d1c1a; --mid:#f0c46a; --mid-bg:#3a2c0f; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;margin:0}
+.wrap{max-width:980px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
+header.top{background:var(--navy);color:#eef6f3;padding-block:36px 28px}
+header.top .wrap{padding-block:0}
+.eyebrow{font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:#7fe0c2;font-weight:700}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(1.9rem,5vw,2.8rem);line-height:1.1;margin:.3em 0 .35em;text-wrap:balance}
+header.top p{max-width:62ch;margin:0;color:#c9d9d4}
+nav.jump{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);border-bottom:1px solid var(--line)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+nav.jump .wrap{display:flex;gap:6px;overflow-x:auto;padding-block:10px}
+nav.jump a{flex:none;font-size:.85rem;text-decoration:none;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:5px 12px;white-space:nowrap}
+nav.jump a:hover,nav.jump a:focus-visible{border-color:var(--mint);color:var(--mint);outline:none}
+.kurz{margin-top:28px;background:var(--mint-soft);border-left:4px solid var(--mint);padding:18px 20px;border-radius:0 10px 10px 0}
+.kurz h2{margin:0 0 .4em;font-size:1.2rem;border:0;padding:0}
+.kurz ol{margin:.2em 0 0;padding-left:1.2em;display:grid;gap:4px}
+main h2{font-family:var(--display);font-weight:800;font-size:1.55rem;line-height:1.2;margin:2.2em 0 .6em;padding-top:.6em;border-top:2px solid var(--ink);text-wrap:balance;scroll-margin-top:64px}
+main h3{font-family:var(--display);font-weight:600;font-size:1.15rem;margin:1.6em 0 .5em;scroll-margin-top:64px}
+main p,main li{max-width:72ch}
+main hr{display:none}
+a{color:var(--mint)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.88em;background:var(--mint-soft);padding:1px 5px;border-radius:4px}
+.tw{overflow-x:auto;margin:1em 0;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
+table{border-collapse:collapse;width:100%;font-size:.9rem;min-width:560px}
+th,td{text-align:left;vertical-align:top;padding:9px 11px;border-bottom:1px solid var(--line)}
+th{background:var(--bg);font-weight:700;font-size:.8rem;letter-spacing:.03em;color:var(--muted)}
+tr:last-child td{border-bottom:0}
+td:first-child{font-weight:700}
+td{font-variant-numeric:tabular-nums}
+.pill{display:inline-block;font-weight:700;font-size:.8rem;padding:1px 8px;border-radius:999px;white-space:nowrap}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}.pill.no{background:var(--no-bg);color:var(--no)}.pill.mid{background:var(--mid-bg);color:var(--mid)}
+figure.shot{display:flex;gap:16px;align-items:flex-start;margin:1.5em 0;flex-wrap:wrap}
+figure.shot img{width:190px;max-width:100%;border-radius:14px;border:1px solid var(--line)}
+figure.shot figcaption{flex:1 1 240px;min-width:0;color:var(--muted);font-size:.9rem}
+blockquote{margin:1em 0;padding:.6em 1em;border-left:3px solid var(--line);color:var(--muted)}
+footer{color:var(--muted);font-size:.85rem;margin-top:3em;border-top:1px solid var(--line);padding-top:1em}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+</style>
+<header class="top"><div class="wrap">
+<div class="eyebrow">Lernlabor · Version 153 · Stand 25.10.2026</div>
+<h1>Usability-Testplan</h1>
+<p>Wie wir mit rund 6,5 Stunden bis zum 1. Kurstag (28.11.2026) sehen, wie echte Lernende die App bedienen, ohne Konten, ohne Tracking und ohne neuen Code.</p>
+</div></header>
+<nav class="jump" aria-label="Teile"><div class="wrap"><a href="#teil-1-machbarkeit-was-ich-selbst-kann-und-was-nicht">1 Machbarkeit</a><a href="#teil-2-methodenvergleich">2 Methodenvergleich</a><a href="#teil-3-empfehlung">3 Empfehlung</a><a href="#teil-4-konkreter-pilotversuch">4 Konkreter Pilotversuch</a><a href="#teil-5-technische-umsetzung">5 Technische Umsetzung</a><a href="#teil-6-testskript">6 Testskript</a><a href="#teil-7-auswertungsvorlage">7 Auswertungsvorlage</a><a href="#datenschutz-und-praktische-grenzen">Datenschutz</a><a href="#teil-8-nachste-schritte-was-ich-von-dir-brauche">8 Nächste Schritte</a></div></nav>
+<div class="wrap">
+<section class="kurz">
+<h2>Kurz gesagt</h2>
+<ol>
+<li>Ich kann die App selbst bedienen (heute v153 auf Handy-Größe durchgeklickt), aber keine echten Menschen beobachten. Alle vier bisherigen Gremien waren simuliert.</li>
+<li>Empfehlung: 5 Erwachsene je 30–40 Minuten auf dem eigenen Handy, lautes Denken, 11 feste Aufgaben, freiwillige Bildschirmaufnahme mit Bordmitteln. Ich werte aus und priorisiere.</li>
+<li>Kein Session-Replay-Dienst und kein Event-Tracking: Beides bräche „kein Tracking“ und bräuchte Einwilligungsbanner. Zahlen liefern das vorhandene „Lernfortschritt senden“ und die Umfrage.</li>
+<li>Von Dir brauche ich jetzt nur: Ja zur Testrunde, wer moderiert, ob aufgenommen wird (Teil 8).</li>
+</ol>
+</section>
+<main>
+<p>Zweck: Wie wir mit wenig Aufwand herausfinden, wie echte Lernende das Lernlabor bedienen, und wie daraus Verbesserungen werden. Gilt für den Pilot (NTG-Kurs ab 28.11.2026) und danach als wiederholbarer Ablauf.</p>
+<p>Kennzeichnung: <strong>Fakt</strong> = geprüft oder entschieden. <strong>Annahme</strong> = plausibel, nicht geprüft. <strong>Empfehlung</strong> = Vorschlag, braucht Dein Ja. Rechtliche Hinweise sind keine Rechtsberatung.</p>
+<p>Rahmen (Fakt): Reine Web-App (index.html + sw.js) auf GitHub Pages. Lernstand nur im Browser, keine Konten, kein Server, kein Tracking (ADR 001). Nutzungszählung hast Du am 21.10.2026 für den Pilot abgelehnt. Pilot ohne KI (ADR 003). Handy ist der kritische Fall. Erfolgskriterium: mindestens zwei Drittel erledigen die Hausaufgabe bis zum nächsten Termin, anonyme Umfrage nach dem 3. Samstag. Dein Zeitbudget: 5 bis 7 Stunden pro Woche.</p>
+<p>Vorarbeit, die hier nicht wiederholt wird: Produkt-UX-Gutachten (v58), Lernenden-Konsortium mit 12 fiktiven Lernenden (v106/107), Design-/UX-Audit (v140), Fachkonsortium (v140), offene Punkte in <code>docs/OFFENE-EMPFEHLUNGEN-KONSORTIEN.md</code>. Alle diese Berichte sind <strong>simulierte</strong> Tests: technisch echt ausgeführt, aber ohne echte Menschen. Ein Test mit echten Lernenden fehlt bisher ganz.</p>
+<hr />
+<h2 id="teil-1-machbarkeit-was-ich-selbst-kann-und-was-nicht">Teil 1 – Machbarkeit: Was ich selbst kann und was nicht</h2>
+<p>Heute tatsächlich gemacht (Fakt): Repo geklont (main = v153), index.html lokal in Chromium per Playwright geöffnet, Handy-Größe 390 × 844 mit Touch, leerer Lernstand. Erststart mit Einführung (7 Karten), Menüs Lernen / Üben &amp; Prüfen / Ich, Suche „Ohm“ (findet „Ohmsches Gesetz“), Hausaufgaben-Übersicht (24 Aufgaben in 8 Einheiten), Lernstand, Meine Fehler und Lernfortschritt senden aufgerufen. Keine Skriptfehler. Alle Testaufgaben in Teil 6 haben einen vorhandenen Weg in v153.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Frage</th>
+<th>Antwort</th>
+<th>Grenze</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. App selbst bedienen und reale Nutzerinteraktionen nachvollziehen?</td>
+<td><strong>Bedienen: ja.</strong> Ich steuere die App per Browser-Automation (Chromium, Safari näherungsweise über WebKitGTK), tippe, scrolle, fülle Felder aus, mache Bildschirmfotos. <strong>Reale Nutzerinteraktionen: nein.</strong> Ich sehe nur meine eigenen Schritte.</td>
+<td>Kein echtes iPhone/Android, keine echte Systemschrift-Vergrößerung, kein echtes langsames Netz (nur emuliert). Ich kenne den Code, bin also nie ein unbefangener Erstnutzer.</td>
+</tr>
+<tr>
+<td>2. Zugriff über Link, Bilder, Videos, Testzugang, Quellcode?</td>
+<td><strong>Quellcode: ja</strong> (Repo, lokal startbar, identisch mit Pages). <strong>Live-Link: nein</strong>, der Proxy meiner Umgebung sperrt den Aufruf von github.io. <strong>Bildschirmfotos: ja.</strong> <strong>Videos: ja, indirekt</strong> (ich zerlege sie mit ffmpeg in Einzelbilder und werte Bildfolgen aus, Ton nur, wenn Du eine Abschrift mitgibst). <strong>Testzugang: nicht nötig</strong>, es gibt keine Konten.</td>
+<td>Bei Videos sehe ich Einzelbilder (z. B. jede Sekunde), keine flüssige Bewegung.</td>
+</tr>
+<tr>
+<td>3. Selbst navigieren, Aufgaben ausführen, Probleme dokumentieren?</td>
+<td><span class="pill ok">Ja</span>, reproduzierbar als Prüfskript (wie in den bisherigen Gremien). Ich messe Anzahl der Schritte, ob Ziele sichtbar sind, Schriftgrößen, Fehler im Skript, Ladezeiten.</td>
+<td>Ich finde, was technisch hakt, nicht was Menschen missverstehen.</td>
+</tr>
+<tr>
+<td>4. Echte Testpersonen beobachten oder deren Daten auswerten?</td>
+<td><strong>Beobachten: nein.</strong> <strong>Auswerten: ja</strong>, wenn Du mir Material gibst: ausgefüllte Beobachtungsbögen, Notizen, Bildschirmaufnahmen, freiwillige Lernfortschritt-Dateien, Umfrageergebnisse.</td>
+<td>Was nicht aufgeschrieben oder aufgenommen ist, kann ich nicht auswerten.</td>
+</tr>
+<tr>
+<td>5. Nur Simulation oder echte Werkzeuge?</td>
+<td><strong>Beides.</strong> Werkzeug echt: Browser-Automation auf dem echten Code. Simulation: Nutzertypen (Personas) sind ausgedacht.</td>
+<td>Simulierte Nutzer liefern Hypothesen, keine Belege.</td>
+</tr>
+<tr>
+<td>6. Was brauche ich?</td>
+<td>Für Runde 1 nichts Neues: Code habe ich. Von Dir: 5 Testpersonen, die ausgefüllten Bögen, optional Bildschirmaufnahmen. Details in Teil 5.</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<figure class="shot"><img src="data:image/jpeg;base64,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" alt="Lernlabor v153 beim Erststart auf 390 × 844 mit Einführungskarte 1 von 7"><figcaption>Heute selbst aufgerufen: v153, Erststart, Handy-Größe 390 × 844 (Chromium per Playwright). Das ist mein eigener Durchlauf, keine Beobachtung echter Nutzer.</figcaption></figure><h2 id="teil-2-methodenvergleich">Teil 2 – Methodenvergleich</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Methode</th>
+<th>Was sie zeigt</th>
+<th>Voraussetzungen</th>
+<th>Grenzen</th>
+<th>Aufwand für Dich</th>
+<th>Vereinbar mit „keine Konten / keine Zählung“?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A1 Moderierter Test mit lautem Denken</strong> (vor Ort, eigenes Handy)</td>
+<td>Wo Menschen zögern, falsch tippen, Begriffe missverstehen, aufgeben. Das stärkste Signal.</td>
+<td>5 Personen, 30–40 min je Person, Testskript, Bogen</td>
+<td>Kleine Zahl, Testsituation ist künstlich, Du als Entwickler kannst die Antworten beeinflussen</td>
+<td>ca. 5 h für 5 Personen</td>
+<td><span class="pill ok">Ja</span>, keine Technik nötig</td>
+</tr>
+<tr>
+<td><strong>A2 Unmoderierter Test</strong> (Aufgabenblatt zu Hause, Person nimmt den Bildschirm selbst auf)</td>
+<td>Ablauf in echter Umgebung</td>
+<td>Person kann Bildschirmaufnahme starten, schickt Video</td>
+<td>Ohne lautes Denken oft unklar, warum etwas passiert; viele schicken nichts</td>
+<td>gering, aber unzuverlässig</td>
+<td><span class="pill ok">Ja</span>, Aufnahme bleibt bei der Person, Weitergabe freiwillig</td>
+</tr>
+<tr>
+<td><strong>B1 Bildschirmaufnahme mit Bordmitteln</strong> (iPhone/Android/Laptop) während A1</td>
+<td>Nachträglich genau: Tipps, Scrollen, Umwege, Zeit je Schritt</td>
+<td>Einwilligung, Aufnahme lokal, Speicherort bei Dir</td>
+<td>Kein Gesicht, Ton nur mit Einwilligung</td>
+<td>+10 min je Person</td>
+<td><span class="pill ok">Ja</span>, nichts wird in die App eingebaut</td>
+</tr>
+<tr>
+<td><strong>B2 Session-Replay-Dienst</strong> (z. B. Microsoft Clarity, PostHog, Hotjar)</td>
+<td>Aufnahmen aller Sitzungen, Heatmaps</td>
+<td>Skript in index.html, Einwilligungsbanner nach § 25 TDDDG, Auftragsverarbeitung, Drittland-Prüfung</td>
+<td>Widerspricht ADR 001, dem Hinweis „kein Tracking“ in der App und dem Datenschutzentwurf</td>
+<td>hoch (Recht + Pflege)</td>
+<td><span class="pill no">Nein, Abweichung.</span> Technisch auf GitHub Pages möglich, für den Pilot <strong>nicht empfohlen</strong></td>
+</tr>
+<tr>
+<td><strong>C1 Zentrales Event-Tracking</strong> (Klicks, Abbrüche, Verweildauer an einen Server)</td>
+<td>Quantitative Abbruch- und Erfolgsraten</td>
+<td>Server oder Analysedienst, Einwilligung</td>
+<td>Widerspricht der Entscheidung vom 21.10.2026</td>
+<td>hoch</td>
+<td><span class="pill no">Nein, Abweichung.</span> Nicht empfohlen</td>
+</tr>
+<tr>
+<td><strong>C2 Vorhandene lokale Daten + freiwilliges „Lernfortschritt senden“</strong></td>
+<td>Hausaufgaben erledigt, Ergebnisse je Thema, Prüfungssimulationen, aktive Tage, Fehlerarten; in der Dozentenversion als Kursübersicht</td>
+<td>Teilnehmende senden freiwillig (Kürzel); gibt es schon</td>
+<td>Nur wer sendet, zählt; keine Klickwege, keine Zeiten je Schritt</td>
+<td>gering (Einsammeln am Samstag)</td>
+<td><span class="pill ok">Ja</span>, ist schon so geplant und im Datenschutzentwurf beschrieben</td>
+</tr>
+<tr>
+<td><strong>C3 Lokales Testprotokoll</strong> (Ereignisse nur auf dem Gerät, nur nach Einschalten in einer Testsitzung, Export per Hand)</td>
+<td>Zeiten und Wege je Aufgabe, ohne Video</td>
+<td>Code-Änderung</td>
+<td>Neue Datenerhebung, auch wenn lokal; erklärungsbedürftig</td>
+<td>mittel</td>
+<td><span class="pill mid">Grenzfall, Entscheidungsfrage.</span> Für Runde 1 nicht nötig</td>
+</tr>
+<tr>
+<td><strong>D KI-Simulation</strong> (Personas per Browser-Automation)</td>
+<td>Technische Hürden, Wegelängen, Lesbarkeit, Widersprüche in Texten</td>
+<td>Code, Prüfskripte</td>
+<td>Keine Aussage über echtes Verstehen, Motivation, Häufigkeit; vier Gremien liegen schon vor</td>
+<td>gering (macht Claude)</td>
+<td><span class="pill ok">Ja</span></td>
+</tr>
+<tr>
+<td><strong>E Umfrage</strong> (anonym nach dem 3. Samstag, geplant)</td>
+<td>Zufriedenheit, Selbstauskunft Nutzung</td>
+<td>Fragebogen (noch offen, OFFENE-FRAGEN Nr. 5)</td>
+<td>Meinung statt Verhalten</td>
+<td>gering</td>
+<td><span class="pill ok">Ja</span></td>
+</tr>
+</tbody>
+</table></div>
+<p>Was Kennzahlen hier bedeuten (Empfehlung): <strong>Zeigt ein Usability-Problem an:</strong> Aufgabe im Test nicht ohne Hilfe geschafft; dieselbe falsche Stelle bei zwei oder mehr Personen; Hausaufgabe begonnen, aber nicht abgeschlossen (aus C2). <strong>Nur Anlass zum Nachschauen:</strong> geringe Erledigungsquote insgesamt (kann Zeitmangel sein), wenige aktive Tage, viele Fehler in einem Thema (kann Fachschwäche sein statt Bedienproblem), schlechte Umfragewerte ohne Begründung.</p>
+<p>Falls Du Event-Tracking später doch willst (zum Beispiel für eine Träger-Lizenz), wären diese Ereignisse der Kern. <strong>Nur als Vorrat, nicht für den Pilot:</strong></p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Ereignis</th>
+<th>Zweck</th>
+<th>Felder (ohne Personenbezug)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>app_start</code></td>
+<td>Rückkehr, Wiederaufnahme</td>
+<td>Version, Gerätetyp (Handy/Tablet/Laptop), erster Start ja/nein</td>
+</tr>
+<tr>
+<td><code>view</code></td>
+<td>Navigationswege, Hin-und-her</td>
+<td>Ansicht (Hash, z. B. <code>thema/ohmsches-gesetz</code>), vorherige Ansicht</td>
+</tr>
+<tr>
+<td><code>task_start</code> / <code>task_end</code></td>
+<td>Abschluss- und Abbruchrate, Zeit</td>
+<td>Modus (Hausaufgabe/Üben/Prüfung), Thema, Aufgabentyp, Stufe, Dauer, Ergebnis richtig/falsch/Lösung angesehen</td>
+</tr>
+<tr>
+<td><code>hint_used</code></td>
+<td>Hilfebedarf</td>
+<td>Thema, Hilfestufe</td>
+</tr>
+<tr>
+<td><code>hw_done</code></td>
+<td>Erfolgskriterium</td>
+<td>Einheit, Anzahl erledigt</td>
+</tr>
+<tr>
+<td><code>feature_use</code></td>
+<td>Auffindbarkeit</td>
+<td>Funktion (Formelsammlung, Glossar, Suche, Meine Fehler, Letzte Aufgabe, Senden)</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="teil-3-empfehlung">Teil 3 – Empfehlung</h2>
+<p><strong>Empfehlung: A1 + B1 + C2 + D + E, ohne neues Tracking.</strong></p>
+<ol>
+<li><strong>D vorher (Claude):</strong> Ich spiele das Testskript aus Teil 6 automatisch auf Handy-Größe durch, damit jede Aufgabe lösbar ist und wir keine Testzeit an Abstürzen verlieren.</li>
+<li><strong>A1 mit B1 (Du):</strong> 5 Personen, je 30–40 min, eigenes Handy, lautes Denken, freiwillige Bildschirmaufnahme. Das ist der größte Erkenntnisgewinn je Stunde: Erfahrungsgemäß zeigen schon 5 Personen die meisten groben Bedienprobleme (Annahme, keine repräsentative Stichprobe).</li>
+<li><strong>Auswertung (Claude):</strong> Problemliste nach Teil 7, priorisiert, mit Vorschau für jede Darstellungsänderung.</li>
+<li><strong>Verbessern und gleiche Aufgaben erneut testen</strong> mit 2–3 neuen Personen.</li>
+<li><strong>C2 + E im Pilot:</strong> Lernfortschritt-Dateien am 2. und 3. Samstag einsammeln, Umfrage nach dem 3. Samstag mit drei Usability-Fragen.</li>
+</ol>
+<p>Warum: Bisher gibt es nur simulierte Tests. Der blinde Fleck ist genau das, was nur Menschen zeigen: Verstehen sie Begriffe, Rückmeldungen und den Weg zur Hausaufgabe? Das klärt A1 ohne Code, ohne Recht und ohne Kosten. B2 und C1 würden die Kernzusage der App („keine Konten, kein Tracking“) brechen und Einwilligungsbanner, Verträge und Pflege nach sich ziehen, für eine Kursgröße, bei der Zahlen ohnehin wenig belastbar sind.</p>
+<hr />
+<h2 id="teil-4-konkreter-pilotversuch">Teil 4 – Konkreter Pilotversuch</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Nr.</th>
+<th>Schritt</th>
+<th>Wer</th>
+<th>Bis</th>
+<th>Aufwand</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Testskript per Browser-Automation durchspielen (Handy 390 × 844 und 320 px, Chromium und WebKit), Sollwege und Schrittzahl je Aufgabe festhalten</td>
+<td>Claude</td>
+<td>31.10.2026</td>
+<td>Dich 0 h</td>
+</tr>
+<tr>
+<td>1</td>
+<td>5 Testpersonen ansprechen, Termine, Bögen drucken (Vorlagen aus Teil 6/7)</td>
+<td>Du</td>
+<td>02.11.2026</td>
+<td>1 h</td>
+</tr>
+<tr>
+<td>2</td>
+<td>5 Sitzungen à 30–40 min + 10 min Notizen direkt danach</td>
+<td>Du (besser mit zweiter Person, die moderiert, während Du schweigst)</td>
+<td>15.11.2026</td>
+<td>4 h</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Bögen abfotografieren oder abtippen, Aufnahmen (falls vorhanden) übergeben</td>
+<td>Du</td>
+<td>16.11.2026</td>
+<td>0,5 h</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Auswertung: Aufgabenmatrix, Problemliste, Prioritäten, Vorschau der Verbesserungen</td>
+<td>Claude</td>
+<td>18.11.2026</td>
+<td>Dich 0,5 h zum Lesen</td>
+</tr>
+<tr>
+<td>5</td>
+<td>P0/P1 umsetzen nach Deinem Ja (PR wie gewohnt)</td>
+<td>Claude, Ja von Dir</td>
+<td>25.11.2026</td>
+<td>0,5 h</td>
+</tr>
+<tr>
+<td>6</td>
+<td>1. Kurstag 28.11.2026: Beim gemeinsamen Speichern der App und Öffnen der ersten Hausaufgabe 5 Minuten still beobachten, wo die Gruppe hängt (nur Strichliste, keine Namen)</td>
+<td>Du</td>
+<td>28.11.2026</td>
+<td>10 min im Kurs</td>
+</tr>
+<tr>
+<td>7</td>
+<td>2. und 3. Kurstag (16.01. und 23.01.2027): freiwillige Lernfortschritt-Dateien einsammeln, Kursübersicht in der Dozentenversion</td>
+<td>Du, Auswertung Claude</td>
+<td>23.01.2027</td>
+<td>0,5 h</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Umfrage nach dem 3. Samstag mit drei Usability-Fragen (Teil 6, Nachbefragung)</td>
+<td>Fragebogen Claude, Ausgabe Du</td>
+<td>23.01.2027</td>
+<td>0,5 h</td>
+</tr>
+</tbody>
+</table></div>
+<p>Gesamt für Dich bis zum Kursstart: rund 6,5 Stunden, also etwa eine Woche Deines Budgets.</p>
+<p>Testpersonen (Empfehlung): 5 Erwachsene, möglichst nah an der Zielgruppe: Facharbeiterinnen und Facharbeiter, frühere Lehrgangsteilnehmende, Kolleginnen und Kollegen aus Betrieben. Mischung: 2 mit wenig Übung am Handy oder in Mathe, 2 typisch, 1 mit Deutsch als Zweitsprache. Geräte: mindestens 2 iPhones und 2 Android-Handys. Niemand, der den Code oder frühere Fassungen gut kennt. Keine Minderjährigen (siehe Teil 7 Datenschutz). Teilnehmende des eigenen Kurses erst ab dem 1. Kurstag und nur in der Gruppe (Schritt 6), damit niemand das Gefühl hat, bewertet zu werden.</p>
+<h3 id="wiederholbarer-ablauf-fur-spatere-versionen">Wiederholbarer Ablauf für spätere Versionen</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Anlass</th>
+<th>Was</th>
+<th>Aufwand</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Jeder PR</td>
+<td>Prüfskript (gibt es: <code>tests/check.js</code>, CI „Prüfskript“)</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Jeder PR mit Änderung an Bedienung</td>
+<td>Automatischer Durchlauf der Testskript-Aufgaben (Empfehlung: <code>tests/aufgabenpfade.js</code>, Code nur nach Deinem Ja)</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Neue sichtbare Funktion</td>
+<td>1 Person, 10 min, nur die betroffene Aufgabe („Flurtest“)</td>
+<td>15 min</td>
+</tr>
+<tr>
+<td>Vor jedem Kurshalbjahr oder vor einem Träger-Angebot</td>
+<td>3–5 Personen mit dem vollen Testskript, gleiche Aufgaben, Vergleich mit der Vorrunde</td>
+<td>4 h</td>
+</tr>
+<tr>
+<td>Nach jedem 3. Kurstag</td>
+<td>Lernfortschritt-Dateien + Umfrage</td>
+<td>1 h</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="teil-5-technische-umsetzung">Teil 5 – Technische Umsetzung</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Bereich</th>
+<th>Was</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Zugang zur App</td>
+<td>Pages-Adresse https://84g64ds8jm-cmyk.github.io/LernLabor/ auf dem eigenen Handy der Testperson. Vorher die Websitedaten der Seite in den Browser-Einstellungen löschen (oder einen Browser nehmen, in dem die App noch nie offen war), damit der Erststart echt ist. Kein privates Fenster: Dort geht der Lernstand beim Schließen verloren, dann scheitert T7 künstlich.</td>
+<td>vorhanden</td>
+</tr>
+<tr>
+<td>Testkonto</td>
+<td>nicht nötig, es gibt keine Konten</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Aufnahme iPhone</td>
+<td>Kontrollzentrum → Bildschirmaufnahme (Mikrofon aus lassen, wenn keine Tonaufnahme vereinbart ist)</td>
+<td>Bordmittel</td>
+</tr>
+<tr>
+<td>Aufnahme Android</td>
+<td>Schnelleinstellungen → Bildschirmaufnahme (ab Android 11, je nach Hersteller benannt)</td>
+<td>Bordmittel</td>
+</tr>
+<tr>
+<td>Aufnahme Laptop</td>
+<td>macOS: Umschalt+Cmd+5. Windows: Win+Alt+R (Xbox Game Bar) oder OBS Studio</td>
+<td>Bordmittel / kostenlos</td>
+</tr>
+<tr>
+<td>Alternative ohne Aufnahme auf dem Gerät</td>
+<td>Zweites Handy filmt von schräg oben nur Bildschirm und Hände</td>
+<td>Bordmittel</td>
+</tr>
+<tr>
+<td>Daten an Claude</td>
+<td>Fotos der Bögen oder abgetippte Notizen, optional Videos (ich ziehe Einzelbilder), optional die Lernfortschritt-Datei der Testsitzung mit Kürzel</td>
+<td>Upload in den Projektordner</td>
+</tr>
+<tr>
+<td>Automatischer Aufgabendurchlauf</td>
+<td>Playwright gegen lokale index.html, gleiche Aufgaben wie Teil 6</td>
+<td>läuft bei mir; ins Repo nur nach Ja</td>
+</tr>
+<tr>
+<td>Neue Integrationen</td>
+<td>keine</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Nicht nötig</td>
+<td>Analysedienst, Session-Replay-Dienst, Server, Cookie-Banner</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="teil-6-testskript">Teil 6 – Testskript</h2>
+<h3 id="begruung-vorlesen-2-min">Begrüßung (vorlesen, 2 min)</h3>
+<p>„Danke, dass Du mitmachst. Wir testen die App, nicht Dich. Wenn etwas nicht klappt, liegt das an der App, und genau das wollen wir finden. Sag bitte laut, was Du denkst, was Du suchst und was Du erwartest. Ich helfe absichtlich nicht gleich, auch wenn es komisch wirkt. Du kannst jederzeit aufhören.“</p>
+<h3 id="vorfragen-1-min">Vorfragen (1 min)</h3>
+<ol>
+<li>Wie oft lernst Du mit Apps oder Webseiten auf dem Handy? (nie / selten / oft)</li>
+<li>Wie sicher fühlst Du Dich beim Rechnen mit Formeln? (1 = gar nicht bis 5 = sehr)</li>
+<li>Hast Du schon eine IHK-Prüfung abgelegt? (ja / nein)</li>
+</ol>
+<h3 id="aufgaben">Aufgaben</h3>
+<p>Kern = immer. Zusatz = wenn Zeit bleibt. Die Spalte „Sollweg“ ist nur für die Beobachtung, nicht vorlesen.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Nr.</th>
+<th>Auftrag (wörtlich vorlesen)</th>
+<th>Startpunkt</th>
+<th>Geschafft, wenn</th>
+<th>Sollweg in v153</th>
+<th>Zeitgrenze</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T1 Kern</td>
+<td>„Du hast diesen Link von Deinem Dozenten bekommen. Schau Dich zwei Minuten um und erzähl mir, wofür Du die App nutzen würdest.“</td>
+<td>Link frisch geöffnet</td>
+<td>nennt mindestens zwei Dinge (z. B. üben, Hausaufgaben, Bilder zum Einstellen)</td>
+<td>Einführung (7 Karten) lesen oder überspringen, Startseite</td>
+<td>2 min</td>
+</tr>
+<tr>
+<td>T2 Kern</td>
+<td>„Dein Dozent hat gesagt: Bis zum nächsten Termin sollt ihr die Aufgaben zum ersten Unterrichtstag machen. Fang mit der ersten an.“</td>
+<td>Startseite</td>
+<td>erste Hausaufgabe von Kapitel 1.1 beantwortet</td>
+<td>Start → Karte Hausaufgaben → Öffnen → Aufgabe 1</td>
+<td>4 min</td>
+</tr>
+<tr>
+<td>T3 Kern</td>
+<td>„Gib bei der nächsten Rechenaufgabe absichtlich eine falsche Zahl ein. Finde dann heraus, was richtig gewesen wäre und warum.“</td>
+<td>Hausaufgabe oder Üben</td>
+<td>erklärt den Rechenweg in eigenen Worten</td>
+<td>Prüfen → Rückmeldung → Lösungsweg</td>
+<td>4 min</td>
+</tr>
+<tr>
+<td>T4 Kern</td>
+<td>„Im Unterricht ging es um den Zusammenhang von Spannung, Strom und Widerstand. Such Dir die Erklärung dazu mit dem Bild, an dem man etwas einstellen kann.“</td>
+<td>beliebig</td>
+<td>Thema „Ohmsches Gesetz“ offen, Regler bewegt</td>
+<td>Suche oben („Ohm“, „Spannung“) oder Lernen → Physik → Thema</td>
+<td>3 min</td>
+</tr>
+<tr>
+<td>T5 Kern</td>
+<td>„Stell im Bild ein, dass doppelt so viel Strom fließt. Was hast Du dafür verändert?“</td>
+<td>Thema Ohmsches Gesetz</td>
+<td>Strom verdoppelt und Begründung genannt</td>
+<td>Regler U oder R</td>
+<td>3 min</td>
+</tr>
+<tr>
+<td>T6 Kern</td>
+<td>„Übe jetzt zwei Aufgaben genau zu diesem Thema. Danach geh zurück zum Bild.“</td>
+<td>Thema Ohmsches Gesetz</td>
+<td>2 Aufgaben beantwortet, wieder im Thema</td>
+<td>„Aufgaben zu diesem Thema üben“ → … → „‹ Zurück zum Thema“</td>
+<td>5 min</td>
+</tr>
+<tr>
+<td>T7 Kern</td>
+<td>„Mach eine Pause: Schließ die App ganz. Jetzt öffne sie wieder und mach da weiter, wo Du warst.“</td>
+<td>App geschlossen</td>
+<td>wieder im zuletzt bearbeiteten Thema oder in der Aufgabe</td>
+<td>Menü „↩ Weiter: <Thema>“ oder Fach öffnet zuletzt besuchtes Thema</td>
+<td>2 min</td>
+</tr>
+<tr>
+<td>T8 Kern</td>
+<td>„Finde heraus, bei welcher Aufgabe Du heute einen Fehler gemacht hast, und rechne sie noch einmal.“</td>
+<td>beliebig</td>
+<td>Fehleraufgabe erneut gelöst</td>
+<td>Meine Fehler (Startseite oder Ich → Lernstand)</td>
+<td>3 min</td>
+</tr>
+<tr>
+<td>T9 Zusatz</td>
+<td>„Du hast die Formel für den Wirkungsgrad vergessen. Schlag sie nach.“</td>
+<td>beliebig</td>
+<td>Formel η = P_ab / P_zu gefunden</td>
+<td>Suche oder Lernen → Formelsammlung</td>
+<td>2 min</td>
+</tr>
+<tr>
+<td>T10 Zusatz</td>
+<td>„Dein Dozent möchte vor dem nächsten Termin sehen, wie weit Du bist. Bereite das so vor, dass Du es ihm schicken könntest. Schick es nicht ab.“</td>
+<td>beliebig</td>
+<td>Senden-Ansicht mit Kürzel ausgefüllt</td>
+<td>Ich → Lernfortschritt senden</td>
+<td>3 min</td>
+</tr>
+<tr>
+<td>T11 Zusatz</td>
+<td>„Richte es so ein, dass Du die App nächste Woche schnell wiederfindest.“</td>
+<td>beliebig</td>
+<td>Symbol auf dem Homebildschirm oder klarer eigener Weg</td>
+<td>Karte „Als App speichern“ oder Browsermenü</td>
+<td>2 min</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="hilfe-in-drei-stufen-immer-gleich-im-bogen-notieren">Hilfe in drei Stufen (immer gleich, im Bogen notieren)</h3>
+<ol>
+<li>„Was würdest Du jetzt versuchen?“</li>
+<li>„Wo würdest Du so etwas erwarten?“</li>
+<li>Zeigen. Dann zählt die Aufgabe als <strong>nicht geschafft</strong>.</li>
+</ol>
+<h3 id="beobachten-je-aufgabe">Beobachten je Aufgabe</h3>
+<ul>
+<li>Ergebnis: ✓ ohne Hilfe · H1/H2 mit Hilfe · ✗ nicht geschafft oder abgebrochen</li>
+<li>Zeit (Stoppuhr am Handy reicht)</li>
+<li>Umwege: falsche Ansicht geöffnet, zurück gegangen, gleiche Stelle mehrfach angetippt</li>
+<li>Zögern über 10 Sekunden, Suchen durch Scrollen</li>
+<li>Wörtliche Zitate, besonders „Ah“, „Hä?“, „Wo ist …?“, „Ich dachte …“</li>
+<li>Liest die Person Rückmeldungen und Lösungsweg oder tippt sie weg?</li>
+<li>Schwierigkeit nach jeder Aufgabe erfragen: „Wie leicht war das, von 1 (sehr schwer) bis 7 (sehr leicht)?“</li>
+</ul>
+<h3 id="nachfragen-5-min">Nachfragen (5 min)</h3>
+<ol>
+<li>„Die App hat die Funktionen, die ich zum Lernen brauche.“ (1 bis 7)</li>
+<li>„Die App ist leicht zu bedienen.“ (1 bis 7)</li>
+<li>Was war am verwirrendsten?</li>
+<li>Was würdest Du als Erstes ändern?</li>
+<li>Würdest Du die App zwischen zwei Kursterminen nutzen? Warum oder warum nicht?</li>
+</ol>
+<p>Die Fragen 1 und 2 sind die zwei Aussagen des kurzen Fragebogens UMUX-Lite. Dieselben zwei Fragen in die Umfrage nach dem 3. Samstag, dann sind Test und Kurs vergleichbar.</p>
+<hr />
+<h2 id="teil-7-auswertungsvorlage">Teil 7 – Auswertungsvorlage</h2>
+<h3 id="aufgabenmatrix-je-testrunde-ein-blatt">Aufgabenmatrix (je Testrunde ein Blatt)</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Person</th>
+<th>Gerät</th>
+<th>T1</th>
+<th>T2</th>
+<th>T3</th>
+<th>T4</th>
+<th>T5</th>
+<th>T6</th>
+<th>T7</th>
+<th>T8</th>
+<th>T9</th>
+<th>T10</th>
+<th>T11</th>
+<th>UMUX 1</th>
+<th>UMUX 2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P1</td>
+<td>iPhone</td>
+<td>✓ 1:10 · 6</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>P2</td>
+<td>Android</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p>Eintrag je Zelle: Ergebnis · Zeit · Schwierigkeit 1–7.</p>
+<h3 id="problemkarte-je-problem-eine-zeile">Problemkarte (je Problem eine Zeile)</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Feld</th>
+<th>Inhalt</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ID</td>
+<td>U-JJJJ-NN, zum Beispiel U-2026-01</td>
+</tr>
+<tr>
+<td>Art</td>
+<td><strong>B</strong> beobachtet (echte Person) · <strong>D</strong> datenbasiert (Lernfortschritt, Umfrage) · <strong>H</strong> Hypothese (Simulation, noch prüfen)</td>
+</tr>
+<tr>
+<td>Ansicht / Funktion</td>
+<td>z. B. Startseite, Hausaufgabe, Thema Ohmsches Gesetz</td>
+</tr>
+<tr>
+<td>Aufgabe</td>
+<td>T1–T11</td>
+</tr>
+<tr>
+<td>Beobachtetes Verhalten</td>
+<td>was die Person tat, möglichst wörtlich</td>
+</tr>
+<tr>
+<td>Erwartet</td>
+<td>was die Person erwartete (aus lautem Denken)</td>
+</tr>
+<tr>
+<td>Tatsächlich</td>
+<td>was die App tat</td>
+</tr>
+<tr>
+<td>Beleg</td>
+<td>Bogen P2 T4, Video P2 ab 03:12, Zitat</td>
+</tr>
+<tr>
+<td>Auswirkung</td>
+<td>was dadurch für das Lernen verloren geht</td>
+</tr>
+<tr>
+<td>Schweregrad</td>
+<td>4 blockiert Kernaufgabe · 3 große Verzögerung oder Fehlverständnis · 2 kleiner Umweg · 1 Schönheitsfehler</td>
+</tr>
+<tr>
+<td>Häufigkeit</td>
+<td>x von n Personen</td>
+</tr>
+<tr>
+<td>Vermutete Ursache</td>
+<td>Begriff, Position, Größe, fehlende Rückmeldung …</td>
+</tr>
+<tr>
+<td>Verbesserungsvorschlag</td>
+<td>konkret, mit Ort</td>
+</tr>
+<tr>
+<td>Aufwand</td>
+<td>S (unter 1 h) · M (halber Tag) · L (mehr)</td>
+</tr>
+<tr>
+<td>Prüfung der Verbesserung</td>
+<td>gleiche Aufgabe mit 2–3 neuen Personen, Ziel: ✓ ohne Hilfe</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>offen · Vorschau · umgesetzt in vNNN · bestätigt</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="prioritat">Priorität</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Stufe</th>
+<th>Regel</th>
+<th>Umgang</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P0</td>
+<td>Schweregrad 4 bei einer Kernaufgabe (T2, T3, T6, T8) und mindestens 1 Person</td>
+<td>vor dem 1. Kurstag beheben</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>Schweregrad 4 bei Zusatzaufgabe, oder Schweregrad 3 bei mindestens 2 von 5</td>
+<td>vor dem 1. Kurstag, wenn Aufwand S oder M</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>Schweregrad 3 bei 1 Person, oder Schweregrad 2 bei mindestens 3 von 5</td>
+<td>in die nächste Version</td>
+</tr>
+<tr>
+<td>P3</td>
+<td>sonst</td>
+<td>sammeln in <code>OFFENE-EMPFEHLUNGEN-KONSORTIEN.md</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Art <strong>H</strong> bekommt nie mehr als P2, bis eine echte Person sie bestätigt.</p>
+<h3 id="beispiel-hypothese-aus-meinem-heutigen-durchlauf-nicht-beobachtet">Beispiel (Hypothese aus meinem heutigen Durchlauf, nicht beobachtet)</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Feld</th>
+<th>Inhalt</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ID</td>
+<td>U-2026-H1</td>
+</tr>
+<tr>
+<td>Art</td>
+<td>H</td>
+</tr>
+<tr>
+<td>Ansicht</td>
+<td>Startseite, Erststart</td>
+</tr>
+<tr>
+<td>Aufgabe</td>
+<td>T2</td>
+</tr>
+<tr>
+<td>Beobachtet</td>
+<td>(noch keine Person)</td>
+</tr>
+<tr>
+<td>Erwartet</td>
+<td>Kursteilnehmende suchen die Hausaufgabe zuerst</td>
+</tr>
+<tr>
+<td>Tatsächlich</td>
+<td>„Dein nächster Schritt“ zeigt zuerst die Hydraulik-Probe und den Mathe-Check (20 min). Die Hausaufgabe steht in der zweiten Karte.</td>
+</tr>
+<tr>
+<td>Beleg</td>
+<td>Playwright v153, 390 × 844, Bildschirmfoto Erststart</td>
+</tr>
+<tr>
+<td>Auswirkung</td>
+<td>möglicher Umweg vor der Aufgabe, an der der Pilot gemessen wird</td>
+</tr>
+<tr>
+<td>Schweregrad</td>
+<td>offen</td>
+</tr>
+<tr>
+<td>Häufigkeit</td>
+<td>offen</td>
+</tr>
+<tr>
+<td>Ursache</td>
+<td>Startseite richtet sich an Neue ohne Kurs</td>
+</tr>
+<tr>
+<td>Vorschlag</td>
+<td>erst nach dem Test entscheiden</td>
+</tr>
+<tr>
+<td>Aufwand</td>
+<td>S</td>
+</tr>
+<tr>
+<td>Prüfung</td>
+<td>T2: Anteil, der die Hausaufgabe ohne Umweg öffnet</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="datenschutz-und-praktische-grenzen">Datenschutz und praktische Grenzen</h2>
+<p>Keine Rechtsberatung. <strong>Allgemeine Empfehlung</strong> = guter Brauch, wenig Risiko. <strong>Prüfen</strong> = Anwendbarkeit klären lassen.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Punkt</th>
+<th>Empfehlung</th>
+<th>Art</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Information und Einwilligung</td>
+<td>Kurzes Blatt: Zweck (App verbessern), was aufgezeichnet wird (Bildschirm, ggf. Ton, Notizen), wer es sieht (Du, Claude zur Auswertung), Löschung, Freiwilligkeit, jederzeit abbrechen. Unterschrift oder Zustimmung per Mail.</td>
+<td>Allgemein; Einwilligung nach Art. 6 Abs. 1 lit. a DSGVO <strong>prüfen</strong></td>
+</tr>
+<tr>
+<td>Datensparsamkeit</td>
+<td>Kürzel P1–P5 statt Namen, kein Gesicht, Ton nur wenn nötig, Notizen statt Video, wo es reicht</td>
+<td>Allgemein</td>
+</tr>
+<tr>
+<td>Zweckbindung</td>
+<td>Daten nur für die App-Verbesserung, nicht für Noten oder Kursbewertung</td>
+<td>Allgemein</td>
+</tr>
+<tr>
+<td>Weitergabe an Claude</td>
+<td>Hochgeladene Bögen und Videos werden von einem KI-Dienst verarbeitet; im Einwilligungsblatt nennen, Videos vorher auf das Nötige kürzen</td>
+<td><strong>Prüfen</strong> (Auftragsverarbeitung, Drittland)</td>
+</tr>
+<tr>
+<td>Speicherung und Zugriff</td>
+<td>Nur auf Deinem Rechner bzw. im privaten Projektordner, keine private Cloud</td>
+<td>Allgemein</td>
+</tr>
+<tr>
+<td>Löschfristen</td>
+<td>Videos 4 Wochen nach Auswertung löschen, anonymisierte Problemliste darf bleiben</td>
+<td>Allgemein</td>
+</tr>
+<tr>
+<td>Minderjährige</td>
+<td>Im Pilot keine. Falls Azubis unter 18: Einwilligung der Eltern, besser ganz vermeiden</td>
+<td><strong>Prüfen</strong></td>
+</tr>
+<tr>
+<td>Zugangsdaten / sensible Daten</td>
+<td>Die App hat keine Passwörter. Bei Bildschirmaufnahme vorher Benachrichtigungen aus (Nicht stören), keine anderen Apps öffnen</td>
+<td>Allgemein</td>
+</tr>
+<tr>
+<td>Eigene Kursteilnehmende</td>
+<td>Abhängigkeit vom Dozenten: Teilnahme freiwillig, anonym, nicht im Kurs bewerten. Verschwiegenheit gegenüber RBZ (§ 5.1 Honorarvertrag): keine Namen, Zitate oder Zahlen aus dem Kurs im Pitch ohne Zustimmung</td>
+<td>Allgemein; RBZ-Bestätigung ist noch offen</td>
+</tr>
+<tr>
+<td>Alternativen zu Session-Replays</td>
+<td>Moderierter Test mit Notizen, Bordmittel-Aufnahme einzelner Testsitzungen, Lernfortschritt senden, Umfrage</td>
+<td>Empfehlung</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="teil-8-nachste-schritte-was-ich-von-dir-brauche">Teil 8 – Nächste Schritte (was ich von Dir brauche)</h2>
+<ol>
+<li><strong>Ja oder Nein zur Testrunde vor Kursstart</strong> mit 5 Erwachsenen außerhalb des Kurses. Wenn ja: Wen könntest Du fragen? Mir reichen Anzahl, Gerät (iPhone/Android) und ob jemand wenig Übung mit Handy oder Mathe hat.</li>
+<li><strong>Wer moderiert?</strong> Du selbst oder eine zweite Person (empfohlen, damit Du still beobachten kannst).</li>
+<li><strong>Bildschirmaufnahme ja oder nein?</strong> Empfehlung: ja, nur Bildschirm, ohne Ton und Gesicht.</li>
+<li><strong>Darf ich den automatischen Aufgabendurchlauf als <code>tests/aufgabenpfade.js</code> ins Repo legen?</strong> Das ist eine Code-Änderung, nur nach Deinem Ja. Schritt 0 mache ich ohnehin lokal.</li>
+<li><strong>Sollen die zwei UMUX-Lite-Fragen in die Umfrage nach dem 3. Samstag?</strong> Der Fragebogen ist noch offen (OFFENE-FRAGEN Nr. 5); ich kann ihn mit entwerfen.</li>
+</ol>
+<p>Nicht nötig für den Start: Testkonto, Analysedienst, Session-Replay, neue Integrationen.</p>
+</main>
+<footer>Quelle: docs/USABILITY-TESTPLAN.md im Projektordner. Keine Rechtsberatung. Fakten beziehen sich auf Lernlabor v153 (main b405ad6).</footer>
+</div>
