@@ -14133,5 +14133,39 @@ nav.glab{flex-wrap:wrap!important;overflow:visible!important;row-gap:2px}
   if(fo){const p=[...fo.querySelectorAll('p')].find(x=>x.textContent.length>200);if(p){p.classList.add('uicl');const w=document.createElement('button');w.type='button';w.className='uiwhy';w.textContent='Wie wird das berechnet? ▾';w.setAttribute('aria-expanded','false');w.onclick=()=>{const o=p.classList.toggle('uicl');w.textContent=o?'Wie wird das berechnet? ▾':'Weniger ▴';w.setAttribute('aria-expanded',o?'false':'true')};p.after(w)}}}
  if(document.getElementById('mem')&&!document.getElementById('mem').hidden)try{lay()}catch(e){}
 })();</script>
+<!-- Ansicht im Bild (v255) -->
+<style>/* Ansicht-/Beispiel-/Schaltungs-Umschalter klein unten rechts in der Skizzenkarte, neben „mehr ▾“ */
+#pft{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;margin:6px 0 0}
+#pft>.legm{margin-right:auto}
+html body #pft>#gsw.gsw{position:static;order:0;margin:0 0 0 auto;padding:0;max-width:100%;background:none;border:0;border-radius:0;box-shadow:none}
+#pft #gsw h3{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+#pft #gsw .gsb{display:inline-flex;flex-wrap:nowrap;gap:2px;margin:0;padding:3px;border:1px solid var(--line);border-radius:999px;background:var(--bg)}
+#pft #gsw .gsb button{min-height:36px;padding:4px 14px;border:0;border-radius:999px;background:transparent;color:var(--mute);font-size:14px;font-weight:600;white-space:nowrap}
+#pft #gsw .gsb button[aria-pressed="true"]{background:var(--acc);color:#fff}
+#pft #gsw .gsb.pftsel{display:none}
+#pft .pfts{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--mute)}
+#pft .pfts select{min-height:40px;max-width:60vw;padding:4px 30px 4px 12px;border:1px solid var(--line);border-radius:999px;background:var(--bg);color:var(--ink);font:inherit;font-size:14px;font-weight:600}
+@media(max-width:340px){#pft #gsw .gsb button{padding:4px 10px;font-size:13px}}
+</style>
+<script>(function(){
+ const $=s=>document.querySelector(s);
+ function place(){const w=$('#gsw'),L=$('#leg');if(!w||!L)return;const old=$('#pft');
+  if(w.hidden||!w.querySelector('.gsb')){if(old){const lb=old.querySelector('.legm');if(lb)old.before(lb);if(old.contains(w))old.after(w);old.remove()}return}
+  const f=old||document.createElement('div');f.id='pft';const lb=$('#legm');
+  const anchor=(lb&&lb.parentElement===L.parentElement)?lb:L;if(f.parentElement!==L.parentElement||f.previousElementSibling!==anchor)anchor.after(f);
+  if(lb&&lb.parentElement!==f)f.prepend(lb);if(w.parentElement!==f)f.append(w);
+  const g=w.querySelector('.gsb'),bs=[...g.querySelectorAll('button')];{const o=w.querySelector('.pfts');if(o)o.remove()}g.classList.remove('pftsel');
+  if(bs.length>2){/* mehr als zwei Möglichkeiten: Auswahlliste statt Knopfreihe */
+   const h=w.querySelector('h3'),t=(h?h.textContent:'').replace(/^Art der /,'').trim()||'Ansicht';
+   const lab=document.createElement('label');lab.className='pfts';const sel=document.createElement('select');sel.setAttribute('aria-label',h?h.textContent:t);
+   bs.forEach((b,i)=>{const o=document.createElement('option');o.value=i;o.textContent=b.textContent;if(b.getAttribute('aria-pressed')==='true')o.selected=true;sel.append(o)});
+   lab.append(t+':',sel);g.classList.add('pftsel');g.before(lab);
+   sel.onchange=()=>{const b=bs[+sel.value];if(b)b.click();const s2=$('#pft .pfts select');if(s2)s2.focus({preventScroll:true})}}
+ }
+ const b0=build;build=function(){const r=b0.apply(this,arguments);try{place()}catch(e){}return r};
+ /* Knöpfe ohne Neuaufbau (z. B. Seil/Klimmzug) ändern nur aria-pressed: Auswahlliste nachziehen */
+ document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#pft .gsb button'))setTimeout(()=>{const s=$('#pft .pfts select'),bs=[...document.querySelectorAll('#pft .gsb button')];if(s)s.value=Math.max(0,bs.findIndex(b=>b.getAttribute('aria-pressed')==='true'))},0)});
+ try{if(typeof cur!=='undefined'&&cur>=0)place()}catch(e){}
+})();</script>
 </body>
 </html>
