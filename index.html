@@ -14725,8 +14725,8 @@ window.dozHwTxt=function(o,s){const hw=o.hw||{},inK=o.kurs===KURS0.n;const due=i
   const late=dd&&x.last>dd;return`<span class="dzhw">${kk} ${full?(late?'⏰':'✓'):x.d+'/'+x.n} <small>${dshow(x.last)}</small></span>`}).filter(Boolean);
  return L.length?L.join('<br>'):'–'};
 
-/* Menü-Abzeichen und Startseite mit den neuen Regeln neu aufbauen */
-try{nav()}catch(e){if($('#home')&&!$('#home').hidden)homeView()}
+/* Startseite und Menü-Abzeichen mit den neuen Regeln neu aufbauen. nav() nur auf der Startseite: Auf Unterseiten (Direktlinks wie #simulation) würde es die Seite schließen. */
+if($('#home')&&!$('#home').hidden){try{nav()}catch(e){homeView()}}
 })();</script>
 </body>
 </html>
