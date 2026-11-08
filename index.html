@@ -3100,7 +3100,7 @@ fm(FP,SR,'Steuerung oder Regelung (Heizung)','Steuerung: offener Wirkungsweg ohn
  'Probiere: Störwärme z erhöhen. Die Steuerung merkt nichts und überheizt, die Regelung gleicht fast aus. Ein reiner P-Regler behält eine kleine bleibende Abweichung – größeres K_P verkleinert sie.');
 
 /* ===== Reiter Energie: Kraftwerke & alternative Energieerzeugung ===== */
-const FE='Energie',E1='Überblick & Wärmekraft',E2='Wasser & Wind',E3='Sonne & Erde',E4='Chemische Energie';
+const FE='Energie',E1='Überblick & Wärmekraft',E2='Wasser & Wind',E3='Sonne & Erde',E4='Chemische Energie',E5='Heizen & Dämmen';
 const EB=(x,y,w,h,l,col='var(--ink)',fill='var(--bg)')=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="7" fill="${fill}" stroke="${col}" stroke-width="2.2"/>`+l.split('|').map((q,i,a)=>T(x+w/2,y+h/2+4+(i-(a.length-1)/2)*14,q,'t2','middle')).join('');
 const PL=(pts,col='var(--mute)',w=3)=>`<polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"/>`;
 const FLO=(pts,t=0,n=6,col='var(--amber)',r=3.6,sp=45)=>{const L=[0];for(let i=1;i<pts.length;i++)L.push(L[i-1]+Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]));const tot=L[L.length-1];let o='';for(let k=0;k<n;k++){const d=((t*sp+k*tot/n)%tot+tot)%tot;let i=1;while(i<L.length-1&&L[i]<d)i++;const f=(d-L[i-1])/((L[i]-L[i-1])||1);o+=`<circle cx="${(pts[i-1][0]+(pts[i][0]-pts[i-1][0])*f).toFixed(1)}" cy="${(pts[i-1][1]+(pts[i][1]-pts[i-1][1])*f).toFixed(1)}" r="${r}" fill="${col}"/>`}return o};
@@ -3301,6 +3301,177 @@ fm(FE,E3,'Geothermie','Mit der Tiefe steigt die Temperatur (in Deutschland im Mi
  +T(430,90,'Oberflächennah ≤ 400 m:','t1')+T(430,108,'Wärmepumpe nötig','t2')+T(430,134,'Tiefe Geothermie ≤ 5 km:','t1')+T(430,152,'100–200 °C, Strom + Wärme','t2')+T(430,178,'Vorteil:','t1')+T(430,196,'rund um die Uhr, wetterfrei','t2'),vb:'0 0 640 270',
  res:[[nf(Te)+' °C','Temperatur in der Tiefe'],[nf(P/1000)+' MW','nutzbare Wärmeleistung'],[Te>=100?nf(Pel/1000)+' MW':'–',Te>=100?'elektrische Leistung':'Strom erst ab ≈ 100 °C']],rows:[['Nutzung',s.z<=400?'oberflächennah: Heizen mit Wärmepumpe':Te<100?'Fernwärme / Heizen':'Strom + Wärme (KWK)'],['Temperaturdifferenz ΔT',nf(dT)+' K'],['Verfügbarkeit','ganzjährig, wetterunabhängig']],st:[['ϑ = ϑ₀ + Gradient · z / 100 m',`10 °C + ${nf(s.g)} K · ${nf(s.z)} m / 100 m = ${nf(Te)} °C`],['P_th = ṁ · c · ΔT',`${s.m} kg/s · 4,19 kJ/(kg·K) · ${nf(dT)} K = ${nf(P)} kW`],['P_el = η · P_th',Te>=100?nf(Pel)+' kW':'zu kalt für Stromerzeugung']]}},
  'Zwei Bohrungen: Kaltes Wasser wird in die Tiefe gepumpt, erwärmt sich im heißen Gestein und kommt heiß wieder nach oben. Das Wasser zirkuliert im geschlossenen Kreis.',1);
+/* ===== Energie, Gruppe „Heizen & Dämmen“ (v268): Wärmedämmung und Wärmepumpe ===== */
+/* Mauerwerk [Name, Dicke m, λ in W/(m·K), Muster], Dämmstoff [Name, λ, Muster]. R_si + R_se = 0,13 + 0,04 = 0,17 m²·K/W, innen 20 °C, Wandfläche 100 m², 3500 Kelvin-Tage (84 000 K·h) im Jahr */
+const WDM=[['Ziegel 36,5 cm',.365,.44,'Z'],['Kalksandstein 24 cm',.24,.99,'K'],['Beton 20 cm',.2,2.1,'B']],
+ WDS=[['Mineralwolle',.035,'M'],['EPS (Polystyrol)',.032,'E'],['Holzfaser',.045,'H'],['PUR-Hartschaum',.024,'P']],
+ WDF=(v,n=2)=>(Math.round(v*10**n)/10**n).toFixed(n).replace('.',',').replace('-','−'),
+ WDN=v=>{v=Math.round(v);const a=Math.abs(v);return (v<0?'−':'')+(a>=10000&&a%1000===0?String(a).replace(/\B(?=(\d{3})+(?!\d))/g,' '):String(a))},
+ WDU=(w,s,d)=>1/(.17+WDM[w][1]/WDM[w][2]+d/100/WDS[s][1]),
+ WDK=s=>{const Mw=WDM[s.w],Ds=WDS[s.s],RM=Math.round(Mw[1]/Mw[2]*100)/100,RD=Math.round(s.d/100/Ds[1]*100)/100,R=Math.round((.17+RM+RD)*100)/100,U=Math.round(100/R)/100,dT=20-s.ta,q=U*dT,Ph=q*100,tsi=Math.round((20-U*.13*dT)*10)/10,t2=tsi-q*RM,tse=t2-q*RD,Qa=U*100*84000/1000;
+  return{Mw,Ds,RM,RD,R,U,dT,q,Ph,tsi,t2,tse,Qa,Ue:WDU(s.w,s.s,s.d)}},
+ WDPAT=`<defs><pattern id="wdpZ" width="30" height="20" patternUnits="userSpaceOnUse"><rect width="30" height="20" fill="#c2643a"/><path d="M0 9.6H30M0 19.6H30M15 0V9.6M5 9.6V20M25 9.6V20" stroke="#ecdcc6" stroke-width="1.6"/>${[[3,3],[8,3],[18,3],[23,3],[9,13],[14,13],[29,13]].map(([x,y])=>`<rect x="${x-1}" y="${y}" width="3" height="4" fill="#7c2d12" opacity=".5"/>`).join('')}</pattern>`
+ +`<pattern id="wdpK" width="40" height="22" patternUnits="userSpaceOnUse"><rect width="40" height="22" fill="#ebe7df"/><path d="M0 10.6H40M0 21.6H40M20 0V10.6M0 10.6V22" stroke="#bdb6aa" stroke-width="1.4"/></pattern>`
+ +`<pattern id="wdpB" width="22" height="22" patternUnits="userSpaceOnUse"><rect width="22" height="22" fill="#a9afb5"/><circle cx="4" cy="5" r="1.6" fill="#7b828a"/><circle cx="15" cy="9" r="2.3" fill="#c9ced3"/><circle cx="9" cy="17" r="1.3" fill="#6b7280"/><circle cx="19" cy="19" r="1.1" fill="#d6dade"/></pattern>`
+ +`<pattern id="wdpM" width="16" height="10" patternUnits="userSpaceOnUse"><rect width="16" height="10" fill="#f2cf5f"/><path d="M0 5Q4 1 8 5T16 5" fill="none" stroke="#c9952a" stroke-width="1.1"/><path d="M0 9Q4 6 8 9T16 9" fill="none" stroke="#e0b444" stroke-width=".8"/></pattern>`
+ +`<pattern id="wdpE" width="12" height="12" patternUnits="userSpaceOnUse"><rect width="12" height="12" fill="#f8fafc"/><circle cx="3" cy="3" r="2.6" fill="none" stroke="#cfd8e3" stroke-width=".9"/><circle cx="9" cy="9" r="2.6" fill="none" stroke="#cfd8e3" stroke-width=".9"/></pattern>`
+ +`<pattern id="wdpH" width="10" height="7" patternUnits="userSpaceOnUse"><rect width="10" height="7" fill="#bd8a55"/><path d="M0 2H10M0 5.5H6" stroke="#93653a" stroke-width=".9"/></pattern>`
+ +`<pattern id="wdpP" width="14" height="14" patternUnits="userSpaceOnUse"><rect width="14" height="14" fill="#f3e2a3"/><circle cx="4" cy="4" r="1.2" fill="#d4ba6c"/><circle cx="10" cy="10" r="1.5" fill="#d4ba6c"/><circle cx="11" cy="3" r=".9" fill="#e2cc85"/></pattern>`
+ +`<filter id="wdBl" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3.5"/></filter></defs>`,
+ WDIR=f=>{f=Math.max(0,Math.min(1,f));const S=[[0,[11,11,52]],[.22,[75,15,138]],[.45,[190,36,92]],[.65,[240,100,42]],[.85,[251,191,36]],[1,[255,247,200]]];let i=1;while(i<S.length-1&&S[i][0]<f)i++;const[a,A]=S[i-1],[b,B]=S[i],u=(f-a)/(b-a||1);return `rgb(${A.map((v,j)=>Math.round(v+(B[j]-v)*u)).join(',')})`};
+/* Ansicht Wand: Schnitt durch die Außenwand (innen links, außen rechts), Temperaturverlauf, Wärmestrom-Pfeile; rechts U über d */
+function wdWand(s,t,K){const x0=128,y0=80,y1=248,dz=28,dy=16,wM=Math.round(K.Mw[1]*260),wD=Math.round(s.d*3.2),x1=x0+7,x2=x1+wM,x3=x2+wD,x4=x3+6,Y=v=>92+(20-v)*4,fr=x=>x.toFixed(1);
+ const lay=(x,w,fill,last)=>w<=0?'':`<rect x="${x}" y="${y0}" width="${w}" height="${y1-y0}" fill="${fill}" stroke="var(--ink)" stroke-width="1"/><polygon points="${x},${y0} ${x+dz},${y0-dy} ${x+w+dz},${y0-dy} ${x+w},${y0}" fill="${fill}" stroke="var(--ink)" stroke-width="1"/><polygon points="${x},${y0} ${x+dz},${y0-dy} ${x+w+dz},${y0-dy} ${x+w},${y0}" fill="#fff" opacity=".3"/>`+(last?`<polygon points="${x+w},${y0} ${x+w+dz},${y0-dy} ${x+w+dz},${y1-dy} ${x+w},${y1}" fill="${fill}" stroke="var(--ink)" stroke-width="1"/><polygon points="${x+w},${y0} ${x+w+dz},${y0-dy} ${x+w+dz},${y1-dy} ${x+w},${y1}" fill="#000" opacity=".22"/>`:'');
+ let g=WDPAT+`<rect x="6" y="26" width="${x0-6}" height="${y1-26}" fill="#f97316" opacity=".09"/><rect x="${x4}" y="26" width="${436-x4}" height="${y1-26}" fill="#3b82f6" opacity=".1"/>`
+  +`<line x1="6" x2="436" y1="${y1}" y2="${y1}" stroke="var(--ink)" stroke-width="1.6"/>`;
+ /* Heizkörper innen mit aufsteigender Warmluft */
+ g+=[0,1,2,3,4,5].map(i=>`<rect x="${22+i*9}" y="178" width="7" height="52" rx="3" fill="#e5e7eb" stroke="var(--ink)" stroke-width="1"/>`).join('')+`<rect x="20" y="226" width="56" height="4" fill="#9ca3af"/><path d="M26 178V172H70V178" fill="none" stroke="var(--ink)" stroke-width="1.4"/>`
+  +[0,1,2].map(i=>{const f=((t*.35+i/3)%1);return `<path d="M${30+i*16} ${(170-f*60).toFixed(1)}q4 -6 0 -12q-4 -6 0 -12" fill="none" stroke="#f97316" stroke-width="1.8" opacity="${(.8*(1-f)).toFixed(2)}"/>`}).join('');
+ /* Schichten: Innenputz, Mauerwerk, Dämmung, Außenputz */
+ g+=lay(x0,7,'#efe9df')+lay(x1,wM,'url(#wdp'+K.Mw[3]+')')+lay(x2,wD,'url(#wdp'+K.Ds[2]+')')+lay(x3,6,'#e4ddd1',1);
+ /* Schnee außen */
+ if(s.ta<=0)g+=Array.from({length:9},(_,i)=>{const x=x4+dz+8+((i*37)%Math.max(20,420-x4-dz)),y=30+((t*22+i*29)%(y1-40));return `<circle cx="${fr(x+3*Math.sin(t+i))}" cy="${fr(y)}" r="2" fill="#fff" stroke="#93c5fd" stroke-width=".7"/>`}).join('')+`<rect x="${x4+dz}" y="${y1-4}" width="${436-x4-dz}" height="4" fill="#fff" stroke="#cbd5e1" stroke-width=".6"/>`;
+ /* Wärmestrom: wandernde Pfeilspitzen, Strichstärke ~ q */
+ const ww=1.4+9*Math.min(1,K.q/120),L=436-40;
+ g+=[118,162,206].map((y,j)=>Array.from({length:7},(_,k)=>{const x=40+((t*38+k*L/7+j*19)%L);return `<path d="M${fr(x-7)} ${y-7}L${fr(x)} ${y}L${fr(x-7)} ${y+7}" fill="none" stroke="#f97316" stroke-width="${ww.toFixed(1)}" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/>`}).join('')).join('');
+ /* Schimmelgrenze und Schimmel */
+ const mold=K.tsi<12.6;
+ g+=`<line x1="10" x2="${x0}" y1="${Y(12.6)}" y2="${Y(12.6)}" stroke="var(--amber)" stroke-width="1.4" stroke-dasharray="5 4"/>`+TH(10,Y(12.6)+16,'Schimmelgrenze 12,6 °C','t2');
+ if(mold)g+=[[x0+2,228,7,5],[x0+4,214,5,4],[x0+3,240,6,3],[x0+5,201,4,3]].map(([x,y,a,b])=>`<ellipse cx="${x}" cy="${y}" rx="${a}" ry="${b}" fill="#1f3d2b" opacity=".75"/>`).join('')+LBL(x0-114,198,'Schimmelgefahr!');
+ /* Temperaturkurve */
+ const P=[[10,Y(20)],[x0-14,Y(20)],[x0,Y(K.tsi)],[x1,Y(K.tsi)],[x2,Y(K.t2)],[x3,Y(K.tse)],[x4,Y(K.tse)],[x4+14,Y(s.ta)],[436,Y(s.ta)]].map(p=>p.map(fr).join(',')).join(' ');
+ g+=`<defs><linearGradient id="wdTG" gradientUnits="userSpaceOnUse" x1="${x0}" x2="${x4}" y1="0" y2="0"><stop offset="0" stop-color="#ef4444"/><stop offset="1" stop-color="#2563eb"/></linearGradient></defs><polyline points="${P}" fill="none" stroke="var(--card)" stroke-width="7" stroke-linejoin="round" opacity=".85"/><polyline points="${P}" fill="none" stroke="url(#wdTG)" stroke-width="3.4" stroke-linejoin="round"/>`
+  +`<circle cx="${x0}" cy="${fr(Y(K.tsi))}" r="4.5" fill="${mold?'var(--red)':'#ef4444'}" stroke="var(--ink)"/><circle cx="${x4}" cy="${fr(Y(K.tse))}" r="4" fill="#2563eb" stroke="var(--ink)"/>`
+  +TH(x0-10,Y(K.tsi)+(K.tsi>16?-8:20),'Wand '+WDF(K.tsi,1)+' °C','t1','end')+TH(x4+dz+4>400?x4+6:x4+dz+4,Y(K.tse)-10,WDF(K.tse,1)+' °C','t2');
+ g+=TH(10,46,'innen 20 °C','t1')+TH(434,46,'außen '+WDF(s.ta,0)+' °C','t1','end');
+ /* Beschriftung der Schichten */
+ g+=`<line x1="${x1+wM/2}" x2="${x1+wM/2}" y1="${y1}" y2="${y1+8}" stroke="var(--mute)"/>`+T(x1+wM/2,y1+22,K.Mw[0],'t2','middle');
+ if(wD>0)g+=`<line x1="${x2+wD/2}" x2="${x2+wD/2}" y1="${y1}" y2="${y1+26}" stroke="var(--mute)"/>`+T(Math.max(x2+wD/2,x1+wM/2+70),y1+40,K.Ds[0]+' '+s.d+' cm','t2','middle');
+ else g+=T(x4+10,y1+40,'ohne Dämmung','t2');
+ g+=EFT(10,y1+40,'q = '+WDF(K.q,1)+' W/m²','t2');
+ /* Diagramm U über d */
+ const X0=482,X1=622,YA=230,YB=88,U0=WDU(s.w,s.s,0),st=U0>2.5?1:U0>1.2?.5:.2,Um=Math.ceil(U0/st)*st,px=d=>X0+d/30*(X1-X0),py=u=>YA-u/Um*(YA-YB);
+ let cv='';for(let d=0;d<=30;d++)cv+=(d?'L':'M')+fr(px(d))+' '+fr(py(WDU(s.w,s.s,d)));
+ g+=T(456,48,'U-Wert und Dämmstärke','t1')+EFT(456,70,'U in W/(m²·K)','t2')
+  +`<path d="M${X0} ${YB-6}V${YA}H${X1+4}" fill="none" stroke="var(--ink)" stroke-width="1.4"/>`
+  +Array.from({length:Math.round(Um/st)+1},(_,i)=>{const u=i*st;return `<line x1="${X0-4}" x2="${X0}" y1="${fr(py(u))}" y2="${fr(py(u))}" stroke="var(--ink)"/>`+T(X0-7,py(u)+4,WDF(u,st<.5?1:st<1?1:0),'t2','end')}).join('')
+  +[0,10,20,30].map(d=>`<line x1="${fr(px(d))}" x2="${fr(px(d))}" y1="${YA}" y2="${YA+4}" stroke="var(--ink)"/>`+T(px(d),YA+18,String(d),'t2','middle')).join('')+T(X1+4,YA+34,'d in cm','t2','end')
+  +(.24<Um?`<line x1="${X0}" x2="${X1}" y1="${fr(py(.24))}" y2="${fr(py(.24))}" stroke="var(--ok)" stroke-width="1.6" stroke-dasharray="5 4"/>`+TH(X1,py(.24)-5,'GEG 0,24','t2','end'):'')
+  +`<path d="${cv}" fill="none" stroke="var(--acc)" stroke-width="2.6"/><circle cx="${fr(px(s.d))}" cy="${fr(py(K.Ue))}" r="5.5" fill="var(--red)" stroke="var(--ink)" stroke-width="1.4"/>`;
+ return g}
+/* Ansicht Wärmebild: Fassade, wie die Wärmebildkamera sie von außen sieht. Hell = viel Wärmeverlust */
+function wdBild(s,t,K){const dT=Math.max(0,20-s.ta),c=q=>WDIR(Math.pow(Math.max(0,q)/95,.8)),qW=K.q,ins=s.d>0;
+ const qR=.25*dT,qF=1.1*dT,qT=1.6*dT,qRK=dT*(.85+.35*K.U),qB=1.9*dT,qD=ins?qW*1.15:dT*Math.min(3.4,K.U*1.5+.4),qL=dT*(.3+.5*K.U),qS=dT*(.55+.4*K.U);
+ const R=(x,y,w,h,q,bl=0)=>(bl?`<rect x="${x-2}" y="${y-2}" width="${w+4}" height="${h+4}" fill="${c(q)}" filter="url(#wdBl)" opacity=".9"/>`:'')+`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c(q)}"/>`;
+ let g=WDPAT+`<g transform="translate(-14 20) scale(.84)"><rect x="40" y="10" width="384" height="262" rx="10" fill="#0a0f2a" stroke="var(--ink)" stroke-width="1.5"/>`;
+ /* Dach, Seitenwand, Giebel */
+ g+=`<polygon points="220,44 262,22 412,80 370,102" fill="${c(qR)}"/><polygon points="370,252 412,230 412,80 370,102" fill="${c(qW*.9)}"/><polygon points="370,252 412,230 412,80 370,102" fill="#000" opacity=".25"/>`
+  +`<polygon points="70,102 220,44 370,102" fill="${c(qW)}"/>`+R(70,102,300,150,qW);
+ /* Deckenränder und Sockel */
+ g+=R(70,99,300,7,qD,1)+R(70,174,300,7,qD,1)+R(70,242,300,10,qS,1);
+ /* Fenster mit Laibung und Rollladenkasten; Tür; Balkon */
+ const win=(x,y,w,h)=>R(x-4,y-4,w+8,h+8,qL,1)+R(x,y,w,h,qF)+`<path d="M${x+w/2} ${y}V${y+h}M${x} ${y+h*.45}H${x+w}" stroke="#0a0f2a" stroke-width="2" opacity=".6"/>`+R(x-4,y-12,w+8,7,qRK,1);
+ g+=win(96,122,46,44)+win(170,122,46,44)+win(96,198,46,40)+win(298,198,46,40)+R(222,196,38,56,qT)+`<circle cx="254" cy="226" r="1.8" fill="#0a0f2a"/>`;
+ g+=R(286,114,40,58,qF)+R(282,104,48,7,qRK,1)+R(244,176,124,8,qB,1)+`<polygon points="244,176 258,168 382,168 368,176" fill="${c(qB*.9)}"/>`+`<path d="M248 176V150H366V176M262 150V176M276 150V176M290 150V176M304 150V176M318 150V176M332 150V176M346 150V176" fill="none" stroke="#c7d2fe" stroke-width="1.2" opacity=".5"/>`;
+ /* Schnee am Boden, Kamerarahmen, Fadenkreuz */
+ if(s.ta<=0)g+=`<rect x="40" y="252" width="384" height="6" fill="#1e293b"/>`;
+ g+=`<path d="M52 34V22H64M412 34V22H400M52 248V260H64M412 248V260H400" fill="none" stroke="#fff" stroke-width="2" opacity=".8"/><circle cx="306" cy="180" r="9" fill="none" stroke="#fff" stroke-width="1.4"/><path d="M306 166V172M306 188V194M292 180H298M314 180H320" stroke="#fff" stroke-width="1.4"/>`+SXT(56,52,'IR',13,'start','#fff',700);
+ /* Nummern an den kritischen Stellen */
+ const NR=(x,y,n)=>`<circle cx="${x}" cy="${y}" r="9" fill="var(--card)" stroke="var(--ink)" stroke-width="1.4"/>`+T(x,y+4.5,String(n),'t2','middle');
+ g+=NR(388,188,1)+NR(156,113,2)+NR(321,218,3)+(ins?NR(152,218,4):NR(60,178,4))+NR(200,262,5)+'</g>';
+ /* Farbskala und Liste */
+ g+=`<defs><linearGradient id="wdIR" x1="0" y1="1" x2="0" y2="0">${[0,.2,.4,.6,.8,1].map(f=>`<stop offset="${f}" stop-color="${WDIR(f)}"/>`).join('')}</linearGradient></defs><rect x="350" y="40" width="12" height="190" fill="url(#wdIR)" stroke="var(--ink)" stroke-width="1"/>`
+  +T(368,50,'viel','t2')+T(368,232,'wenig','t2')+T(344,252,'Wärmeverlust','t2');
+ const L=[['Balkonplatte','Beton läuft durch'],['Rollladenkasten','oft kaum gedämmt'],['Fenster','U ≈ 1,1, Wand 0,2'],ins?['Fensterlaibung','Dämmung fehlt']:['Deckenrand','Beton-Decke'],['Sockel','Spritzwasser, Erde']];
+ g+=T(412,34,'Kritische Punkte','t1')+L.map((q,i)=>NR(420,62+i*40,i+1)+T(436,60+i*40,q[0],'t1')+T(436,76+i*40,q[1],'t2')).join('');
+ return g}
+fm(FE,E5,'Wärmedämmung','Wärme fließt immer von warm nach kalt: durch die Wand (Leitung), mit bewegter Luft (Konvektion) und als Strahlung. Dämmung kann das nicht stoppen, aber stark bremsen. Der U-Wert sagt, wie viel Wärme je m² Wand und je Kelvin Temperaturunterschied hindurchgeht.',
+ [['v','Ansicht','sel',['Wand','Wärmebild'],0],['w','Mauerwerk','sel',WDM.map(x=>x[0]),0],['s','Dämmstoff','sel',WDS.map(x=>x[0]),0],['d','Dämmstärke d',0,30,1,'cm',0],['ta','Außentemp. ϑ_a',-15,10,1,'°C',-10]],
+ (s,t=0)=>{const K=WDK(s),geg=K.Ue<=.24;
+  return{d:s.v==1?wdBild(s,t,K):wdWand(s,t,K),vb:'0 0 640 300',
+  res:[[WDF(K.U)+' W/(m²·K)','U-Wert der Wand'],[WDN(K.Ph)+' W','Wärmestrom durch 100 m²'],[WDF(K.tsi,1)+' °C','Wandoberfläche innen']],
+  rows:[['Wandaufbau',K.Mw[0]+(s.d?' + '+s.d+' cm '+K.Ds[0]:', ungedämmt')],['Wärmeverlust im Jahr','≈ '+WDN(K.Qa)+' kWh (3500 Kelvin-Tage)'],['Gebäudeenergiegesetz',geg?'erfüllt: U ≤ 0,24 W/(m²·K)':'nicht erfüllt: U über 0,24 W/(m²·K)'],['Schimmel',K.tsi<12.6?'Gefahr: Wand innen unter 12,6 °C':'kein Risiko an der ebenen Wand'],['Kritische Punkte','Wärmebrücken (Balkonplatte, Rollladenkasten, Fensteranschluss), undichte Fugen, Feuchte in der Dämmung, Schimmel an kalten Ecken, Brandschutz bei EPS, sehr dicke Dämmung bringt kaum noch mehr']],
+  st:[['R_M = d_M / λ_M',`${WDF(K.Mw[1],3)} m / ${WDF(K.Mw[2])} W/(m·K) = ${WDF(K.RM)} m²·K/W`],...(s.d?[['R_D = d / λ_D',`${WDF(s.d/100)} m / ${WDF(K.Ds[1],3)} W/(m·K) = ${WDF(K.RD)} m²·K/W`]]:[]),
+   ['R_ges = R_si + R_M + R_D + R_se',`0,17 m²·K/W + ${WDF(K.RM)} m²·K/W${s.d?' + '+WDF(K.RD)+' m²·K/W':''} = ${WDF(K.R)} m²·K/W`],
+   ['U = 1 / R_ges',`1 / ${WDF(K.R)} m²·K/W = ${WDF(K.U)} W/(m²·K)`],
+   ['Φ = U · A · ΔT',`${WDF(K.U)} W/(m²·K) · 100 m² · ${K.dT} K = ${WDN(K.Ph)} W`],
+   ['ϑ_si = ϑ_i − U · R_si · ΔT',`20 °C − ${WDF(K.U)} W/(m²·K) · 0,13 m²·K/W · ${K.dT} K = ${WDF(K.tsi,1)} °C`]]}},
+ 'Ansicht Wand: Schnitt durch die Außenwand, innen links mit 20 °C, außen rechts. Die rot-blaue Kurve zeigt die Temperatur in der Wand, die orangen Pfeile den Wärmestrom (je dicker, desto mehr). Ansicht Wärmebild: So sieht eine Wärmebildkamera die Fassade von außen, hell heißt viel Wärmeverlust. Putz wird vernachlässigt, Fläche 100 m².',1);
+M[M.length-1].knb='v';
+/* Wärmepumpe: Quelle Luft (Regler), Erdreich (Sole ≈ 5 °C), Grundwasser (≈ 10 °C); ε = Gütegrad 0,5 · Carnot-Wert. Annahmen Preise und CO₂ */
+const WPA={pS:.30,pG:.11,cS:.36,cG:.20,eG:.95},WPQ=['Außenluft','Erdreich (Sonde)','Grundwasser'],
+ WPK=s=>{const TQ=s.q==0?s.T:s.q==1?5:10,TV=s.V+273,Tq=TQ+273,dT=TV-Tq,eC=Math.round(TV/dT*10)/10,e=Math.round(.5*eC*10)/10,W=Math.round(s.Q/e),QU=s.Q-W,G=Math.round(s.Q/WPA.eG);
+  return{TQ,TV,Tq,dT,eC,e,W,QU,G,K:Math.round(W*WPA.pS),KG:Math.round(G*WPA.pG),KH:Math.round(s.Q*WPA.pS),CW:Math.round(W*WPA.cS),CG:Math.round(G*WPA.cG),CH:Math.round(s.Q*WPA.cS)}};
+/* Ansicht Kreislauf: Quelle links, Kältemittelkreis in der Mitte, Haus mit Heizung rechts */
+function wpKreis(s,t,K){const fr=x=>x.toFixed(1),fbh=s.V<=45;let g='';
+ g+=`<rect x="0" y="244" width="640" height="2" fill="var(--ink)"/>`;
+ /* Quelle */
+ if(s.q==0){g+=BOX3(18,156,118,86,16,'#e5e7eb','#f3f4f6','#cbd5e1')+[0,1,2,3,4,5,6].map(i=>`<line x1="${139+i*2}" y1="${150-i*1.4+8}" x2="${139+i*2}" y2="${236-i*1.4}" stroke="#94a3b8" stroke-width=".8"/>`).join('')
+   +`<circle cx="70" cy="199" r="34" fill="#1f2937" stroke="var(--ink)" stroke-width="1.5"/>`+[14,22,30].map(r=>`<circle cx="70" cy="199" r="${r}" fill="none" stroke="#6b7280" stroke-width="1"/>`).join('')
+   +[0,1,2].map(i=>{const a=t*6+i*2*PI/3;return `<path d="M70 199L${fr(70+30*Math.cos(a))} ${fr(199+30*Math.sin(a))}L${fr(70+26*Math.cos(a+.5))} ${fr(199+26*Math.sin(a+.5))}Z" fill="#cbd5e1" opacity=".85"/>`}).join('')+`<circle cx="70" cy="199" r="5" fill="#9ca3af" stroke="var(--ink)"/><rect x="26" y="240" width="10" height="5" fill="#64748b"/><rect x="118" y="240" width="10" height="5" fill="#64748b"/>`
+   +[0,1,2].map(i=>{const f=(t*.6+i/3)%1;return `<path d="M${fr(-10+f*30)} ${170+i*22}q6 -4 12 0t12 0" fill="none" stroke="#60a5fa" stroke-width="2" opacity="${(1-f).toFixed(2)}"/>`}).join('')
+   +TH(77,140,'Außenluft '+WDF(s.T,0)+' °C','t1','middle')+(s.T<3?TH(4,122,s.T<-7?'Frost: Heizstab hilft oft':'Lamellen können vereisen','t2'):'');
+  if(s.T<=0)g+=Array.from({length:8},(_,i)=>`<circle cx="${fr(10+((i*41)%160)+3*Math.sin(t+i))}" cy="${fr(20+((t*20+i*31)%100))}" r="2" fill="#fff" stroke="#93c5fd" stroke-width=".7"/>`).join('');
+  g+=`<path d="M136 150H176" stroke="#3b82f6" stroke-width="${(4+12*K.QU/s.Q).toFixed(1)}" opacity=".45" stroke-linecap="round"/>`+AR(140,150,42,0,'#2563eb','')}
+ else{g+=`<rect x="0" y="246" width="172" height="54" fill="#a47148"/>`+Array.from({length:22},(_,i)=>`<circle cx="${(i*37)%170}" cy="${252+(i*13)%44}" r="1.6" fill="#7c4a26" opacity=".7"/>`).join('')+`<rect x="0" y="240" width="172" height="6" fill="#65a30d"/>`;
+  if(s.q==2)g+=`<rect x="0" y="276" width="172" height="24" fill="#3b82f6" opacity=".55"/>`+WAVE(2,170,277,t,1.2);
+  const c1=s.q==1?'#14b8a6':'#38bdf8',c2=s.q==1?'#0f766e':'#0369a1';
+  g+=PIPE([[62,300],[62,160],[184,160]],c2,t,1,6)+PIPE([[184,184],[110,184],[110,300]],c1,t,1,6)
+   +TH(86,126,s.q==1?'Erdsonde, bis 100 m tief':'Förder- und Schluckbrunnen','t2','middle')+TH(86,142,s.q==1?'Sole ≈ 5 °C':'Grundwasser ≈ 10 °C','t1','middle')}
+ /* Kältemittelkreis */
+ g+=`<rect x="176" y="40" width="240" height="200" rx="12" fill="var(--bg)" opacity=".5" stroke="var(--mute)" stroke-dasharray="5 4"/>`;
+ g+=PIPE([[207,96],[207,72],[280,72]],'#60a5fa',t,1,6)+PIPE([[312,72],[383,72],[383,96]],'#ef4444',t,1,6)+PIPE([[383,206],[383,226],[312,226]],'#f59e0b',t,1,6)+PIPE([[278,226],[207,226],[207,206]],'#2563eb',t,1,6);
+ const HX=(x,col,top,side,coil,lab,sub)=>BOX3(x,98,34,106,10,col,top,side)+`<path d="M${x+6} 106${[...Array(9)].map((_,i)=>`L${x+(i%2?6:28)} ${106+(i+1)*10}`).join('')}" fill="none" stroke="${coil}" stroke-width="3" stroke-linejoin="round"/>`;
+ g+=HX(190,'#dbeafe','#eff6ff','#bfdbfe','#2563eb')+HX(366,'#fee2e2','#fff1f2','#fecaca','#dc2626');
+ if(s.q==0&&s.T<3)g+=[0,1,2,3,4,5].map(i=>`<circle cx="${194+(i*7)%28}" cy="${110+i*16}" r="2.2" fill="#fff" stroke="#bfdbfe"/>`).join('');
+ /* Verdichter mit Motor, Stromzähler */
+ g+=`<rect x="330" y="8" width="38" height="26" rx="3" fill="#f8fafc" stroke="var(--ink)" stroke-width="1.4"/><rect x="335" y="13" width="28" height="8" fill="#111827"/>`+SXT(349,20,'kWh',7,'middle','#fde047',700)+`<path d="M330 22H296V44" fill="none" stroke="#1f2937" stroke-width="2.4"/>`
+  +VES(280,44,32,54,'#64748b')+`<path d="M291 60l7 -10l-2 8h6l-8 11l2 -9z" fill="#facc15" stroke="var(--ink)" stroke-width=".8"/>`
+  +[0,1,2].map(i=>{const a=t*7+i*2*PI/3;return `<line x1="296" y1="82" x2="${fr(296+7*Math.cos(a))}" y2="${fr(82+7*Math.sin(a))}" stroke="#e2e8f0" stroke-width="1.6"/>`}).join('')+`<circle cx="296" cy="82" r="8" fill="none" stroke="#e2e8f0" stroke-width="1"/>`;
+ /* Expansionsventil */
+ g+=`<polygon points="278,218 312,234 312,218 278,234" fill="#cbd5e1" stroke="var(--ink)" stroke-width="1.4"/><line x1="295" y1="226" x2="295" y2="208" stroke="var(--ink)" stroke-width="2"/><ellipse cx="295" cy="207" rx="9" ry="3" fill="#94a3b8" stroke="var(--ink)"/>`;
+ g+=TH(296,122,'Verdichter','t2','middle')+TH(296,138,'braucht Strom','t2','middle')+TH(207,260,'Verdampfer','t2','middle')+TH(295,206,'Expansionsventil','t2','middle')+TH(390,260,'Verflüssiger','t2','middle')
+  +TH(240,64,'Niederdruck','t2','middle')+TH(352,64,'Hochdruck','t2','middle')
+  +TH(238,178,'nimmt Wärme auf','t2')+TH(360,158,'gibt Wärme ab','t2','end');
+ /* Haus mit Heizung */
+ g+=`<polygon points="424,126 530,64 636,126" fill="#9a3412" stroke="var(--ink)" stroke-width="1.4"/><polygon points="424,126 530,64 636,126" fill="url(#g-liqv)" opacity=".35"/><rect x="430" y="126" width="200" height="118" fill="#fdf2e3" stroke="var(--ink)" stroke-width="1.4"/><rect x="430" y="126" width="200" height="118" fill="#f97316" opacity="${(.05+.1*Math.min(1,(s.V-30)/40)).toFixed(2)}"/>`
+  +`<rect x="560" y="146" width="44" height="40" fill="#bfdbfe" stroke="var(--ink)" stroke-width="1.2"/><path d="M582 146V186M560 166H604" stroke="var(--ink)" stroke-width="1"/>`+TH(582,140,'Raum 20 °C','t2','middle');
+ if(fbh){g+=`<rect x="430" y="226" width="200" height="18" fill="#cbd5e1" stroke="var(--ink)" stroke-width="1"/>`+Array.from({length:11},(_,i)=>`<circle cx="${446+i*16}" cy="235" r="3.6" fill="${i%2?'#60a5fa':'#ef4444'}" stroke="var(--ink)" stroke-width=".8"/>`).join('')
+   +[0,1,2].map(i=>{const f=(t*.4+i/3)%1;return `<path d="M${470+i*50} ${fr(220-f*40)}q4 -6 0 -12" fill="none" stroke="#f97316" stroke-width="1.6" opacity="${(1-f).toFixed(2)}"/>`}).join('')
+   +PIPE([[404,112],[442,112],[442,222],[620,222]],'#ef4444',t,1,5)+PIPE([[620,240],[436,240],[436,190],[404,190]],'#3b82f6',t,1,5)+TH(500,214,'Fußbodenheizung','t2','middle')}
+ else{g+=[0,1,2,3,4,5].map(i=>`<rect x="${458+i*8}" y="170" width="6" height="44" rx="3" fill="#e5e7eb" stroke="var(--ink)" stroke-width="1"/>`).join('')
+   +[0,1,2].map(i=>{const f=(t*.4+i/3)%1;return `<path d="M${466+i*14} ${fr(164-f*36)}q4 -6 0 -12" fill="none" stroke="#f97316" stroke-width="1.6" opacity="${(1-f).toFixed(2)}"/>`}).join('')
+   +PIPE([[404,112],[480,112],[480,168]],'#ef4444',t,1,5)+PIPE([[480,216],[480,230],[436,230],[436,190],[404,190]],'#3b82f6',t,1,5)+TH(510,160,'Heizkörper','t2','start')}
+ g+=TH(436,104,'Vorlauf '+s.V+' °C','t1','start');
+ /* Energiepfeil Strom und Bilanzzeile */
+ g+=T(184,280,'ε = '+WDF(K.e,1)+': Aus 1 kWh Strom werden '+WDF(K.e,1)+' kWh Wärme.','t1');
+ g+=T(184,297,'Temperaturhub '+WDF(K.TQ,0)+' °C → '+s.V+' °C, also ΔT = '+K.dT+' K','t2');
+ return g}
+/* Ansicht Energiefluss: Strom + Umweltwärme = Heizwärme, Vergleich mit Gaskessel und Heizstab */
+function wpFluss(s,t,K){const fr=x=>x.toFixed(1),H=120,hW=Math.max(4,H/K.e),hU=H-hW,yA=70,nx=168;
+ const band=(x0,a0,a1,x1,b0,b1,col)=>{const xm=(x0+x1)/2;return `<path d="M${x0} ${fr(a0)}C${xm} ${fr(a0)} ${xm} ${fr(b0)} ${x1} ${fr(b0)}L${x1} ${fr(b1)}C${xm} ${fr(b1)} ${xm} ${fr(a1)} ${x0} ${fr(a1)}Z" fill="${col}" opacity=".85" stroke="var(--ink)" stroke-width="1"/>`};
+ let g=band(16,36,36+hW,nx,yA,yA+hW,'#facc15')+band(16,206-hU,206,nx,yA+hW,yA+H,'#60a5fa');
+ g+=`<rect x="${nx}" y="${yA-6}" width="26" height="${H+12}" rx="5" fill="#64748b" stroke="var(--ink)" stroke-width="1.4"/>`
+  +`<path d="M${nx+26} ${yA}H260L288 ${yA+H/2}L260 ${yA+H}H${nx+26}Z" fill="#ef4444" opacity=".85" stroke="var(--ink)" stroke-width="1"/>`
+  +[0,1,2,3].map(i=>{const x=nx+34+((t*30+i*20)%60);return `<path d="M${fr(x)} ${yA+H/2-10}l8 10l-8 10" fill="none" stroke="#fff" stroke-width="2" opacity=".7"/>`}).join('')
+  +HAUS(294,yA+H/2+30,44,36,12,'');
+ g+=TH(18,28,'Strom '+WDN(K.W)+' kWh','t1')+TH(18,234,'Umweltwärme '+WDN(K.QU)+' kWh','t1')+TH(nx+32,yA-10,'Wärme '+WDN(s.Q)+' kWh','t1')+TH(nx+13,yA+H+24,'Wärmepumpe','t2','middle')
+  +T(18,262,'Je dicker das Band, desto mehr Energie im Jahr.','t2');
+ const grp=(y,tit,vals,unit)=>{const mx=Math.max(...vals);return T(360,y,tit,'t1')+[['Wärmepumpe','var(--ok)'],['Gaskessel','var(--amber)'],['Heizstab','var(--red)']].map(([n,col],i)=>T(360,y+19+i*19,n,'t2')+BAR3(448,y+8+i*19,Math.max(2,vals[i]/mx*80),12,col,4,{sw:1})+T(448+Math.max(2,vals[i]/mx*80)+10,y+19+i*19,WDN(vals[i])+' '+unit,'t2')).join('')};
+ g+=grp(26,'Gekaufte Energie im Jahr',[K.W,K.G,s.Q],'kWh')+grp(114,'Kosten im Jahr',[K.K,K.KG,K.KH],'€')+grp(202,'CO₂ im Jahr',[K.CW,K.CG,K.CH],'kg');
+ return g}
+fm(FE,E5,'Wärmepumpe','Eine Wärmepumpe arbeitet wie ein Kühlschrank, nur umgekehrt: Sie holt Wärme aus Luft, Erde oder Grundwasser und hebt sie mit Strom auf Heiztemperatur. Aus 1 kWh Strom werden so etwa 3 bis 4 kWh Wärme. Wie gut das klappt, hängt vom Temperaturhub ab.',
+ [['v','Ansicht','sel',['Kreislauf','Energiefluss'],0],['q','Wärmequelle','sel',WPQ,0],['T','Außenluft ϑ_Q',-15,10,1,'°C',2],['V','Vorlauf ϑ_V',30,70,1,'°C',35],['Q','Wärmebedarf Q_a',5000,30000,500,'kWh',15000]],
+ (s,t=0)=>{const K=WPK(s),src=s.q==0?'Außenluft':s.q==1?'Sole aus der Erdsonde':'Grundwasser';
+  return{d:s.v==1?wpFluss(s,t,K):wpKreis(s,t,K),vb:'0 0 640 300',
+  res:[[WDF(K.e,1),'Leistungszahl ε'],[WDN(K.W)+' kWh','Strom im Jahr'],[WDN(K.K)+' €','Stromkosten im Jahr']],
+  rows:[['Wärmequelle',src+', '+WDF(K.TQ,0)+' °C'],['Umweltwärme im Jahr',WDN(K.QU)+' kWh'],['Gaskessel zum Vergleich',WDN(K.G)+' kWh Gas, '+WDN(K.KG)+' €'],['Heizstab zum Vergleich',WDN(s.Q)+' kWh Strom, '+WDN(K.KH)+' €'],['CO₂ im Jahr','Wärmepumpe '+WDN(K.CW)+' kg, Gas '+WDN(K.CG)+' kg'],['Hinweis',s.V>55?'Hoher Vorlauf: größere Heizkörper oder Dämmung senken ihn':s.q==0&&s.T<-7?'Starker Frost: ε sinkt, oft hilft ein Heizstab mit':K.e>=4?'Gute Bedingungen für die Wärmepumpe':'Mittlere Bedingungen'],['Vorteile','3- bis 4-mal so viel Wärme wie Strom, keine Abgase im Haus, mit Ökostrom fast CO₂-frei, kann im Sommer kühlen'],['Nachteile','teurer in der Anschaffung, Erdsonde braucht Bohrung und Genehmigung, schwächer bei Frost und hohem Vorlauf, Außeneinheit ist hörbar, Kältemittel ist Treibhausgas oder brennbar (Propan), mehr Last im Stromnetz im Winter']],
+  st:[['T_V = ϑ_V + 273 K',`${s.V} °C + 273 K = ${K.TV} K`],['T_Q = ϑ_Q + 273 K',`${WDF(K.TQ,0)} °C + 273 K = ${K.Tq} K`],['ΔT = T_V − T_Q',`${K.TV} K − ${K.Tq} K = ${K.dT} K`],
+   ['ε_C = T_V / ΔT',`${K.TV} K / ${K.dT} K = ${WDF(K.eC,1)}`],['ε = η_G · ε_C',`0,5 · ${WDF(K.eC,1)} = ${WDF(K.e,1)}`],
+   ['W_el = Q_a / ε',`${WDN(s.Q)} kWh / ${WDF(K.e,1)} = ${WDN(K.W)} kWh`],['Q_U = Q_a − W_el',`${WDN(s.Q)} kWh − ${WDN(K.W)} kWh = ${WDN(K.QU)} kWh`],
+   ['K = W_el · Strompreis',`${WDN(K.W)} kWh · 0,30 €/kWh = ${WDN(K.K)} €`]]}},
+ 'Ansicht Kreislauf: Der Verdampfer nimmt Umweltwärme auf, der Verdichter hebt sie mit Strom auf ein höheres Temperaturniveau, der Verflüssiger gibt sie an das Heizwasser ab, das Expansionsventil senkt den Druck wieder. Ansicht Energiefluss: Strom plus Umweltwärme ergibt die Heizwärme. Annahmen: Gütegrad 0,5 (Hälfte des Carnot-Werts), Strom 0,30 €/kWh und 0,36 kg CO₂/kWh, Erdgas 0,11 €/kWh und 0,20 kg CO₂/kWh, Gaskessel 95 %. Erdsonde: Sole etwa 5 °C, Grundwasser etwa 10 °C.',1);
+{const m=M[M.length-1];m.knb='v';m.vis=s=>s.q==0?['T','V','Q']:['V','Q']}
 fm(FE,E4,'Brennstoffzelle (Wasserstoff)','Die Brennstoffzelle wandelt die chemische Energie von Wasserstoff und Sauerstoff direkt in Strom um, ohne den Umweg über Wärme und Mechanik. Als Abfall entsteht Wasser. Sie ist ein Energiewandler, kein Speicher.',
  [['n','n',1,200,1,'Zellen',50],['I','I',1,200,1,'A',60],['U','U',.5,.95,.01,'V',.7]],
  (s,t=0)=>{const P=s.n*s.U*s.I,etav=s.U/1.25,nH=s.n*s.I/(2*96485),gH=nH*2.016*3600,gW=nH*18.015*3600,Q=s.n*s.I*(1.25-s.U),h2=[[60,120],[60,150],[150,150]],ox=[[500-60,120],[500-60,150]];
@@ -3707,6 +3878,18 @@ const BEW=[
 ['Brennstoffzelle (Wasserstoff)','b','Erkläre, warum eine Brennstoffzelle Wasserstoff mit höherem Wirkungsgrad in Strom umwandeln kann als ein Verbrennungsmotor mit Generator.',
  'In der Brennstoffzelle reagieren Wasserstoff und Sauerstoff direkt elektrochemisch, chemische Energie wird unmittelbar zu elektrischer Energie. Der Motor verbrennt den Wasserstoff, erzeugt Wärme, macht daraus mechanische Arbeit und erst im Generator Strom. Jede Umwandlung über Wärme ist durch den Carnot-Wirkungsgrad begrenzt und verliert viel Abwärme. Die Brennstoffzelle erreicht etwa 50 bis 60 %, ein Motor mit Generator etwa 30 bis 40 %.',
  ['Direkte Umwandlung chemisch → elektrisch','Motor über den Umweg Wärme und Mechanik','Wärmekraftmaschinen sind begrenzt (Carnot)','Grobe Wirkungsgrade genannt']],
+['Wärmepumpe','b','Erkläre, wie eine Wärmepumpe aus kalter Außenluft Wärme zum Heizen gewinnt. Verwende die Begriffe Verdampfer, Verdichter, Verflüssiger und Expansionsventil.',
+ 'Im Verdampfer siedet das Kältemittel bei niedrigem Druck schon unter 0 °C. Dafür braucht es Wärme, die es der etwas wärmeren Außenluft entzieht. Der Verdichter presst das Gas mit Strom zusammen, dabei steigen Druck und Temperatur. Im Verflüssiger gibt das heiße Gas seine Wärme an das Heizwasser ab und wird wieder flüssig. Das Expansionsventil senkt den Druck, das Kältemittel kühlt stark ab, und der Kreislauf beginnt von vorn. Aus 1 kWh Strom werden so etwa 3 bis 4 kWh Wärme.',
+ ['Verdampfen bei niedrigem Druck nimmt Umweltwärme auf','Verdichter hebt Druck und Temperatur, braucht Strom','Verflüssiger gibt Wärme an das Heizwasser ab','Expansionsventil senkt den Druck, der Kreislauf schließt sich']],
+['Wärmepumpe','b','Ein Kunde will in einem unsanierten Altbau mit kleinen Heizkörpern (Vorlauf 65 °C) den Gaskessel durch eine Luft-Wärmepumpe ersetzen. Beurteile das Vorhaben mit je zwei Vor- und Nachteilen und gib eine Empfehlung.',
+ 'Vorteile: Die Wärmepumpe braucht kein Gas und erzeugt keine Abgase im Haus. Mit Ökostrom oder eigener PV-Anlage heizt sie fast ohne CO₂. Nachteile: Bei 65 °C Vorlauf ist der Temperaturhub groß, die Leistungszahl sinkt auf etwa 2,5 bis 3, an Frosttagen noch tiefer. Dann braucht sie viel Strom und oft den Heizstab, die Kosten können höher sein als mit Gas. Die Anschaffung ist deutlich teurer. Empfehlung: Erst die Vorlauftemperatur senken, zum Beispiel durch Dämmung und größere Heizkörper. Bei höchstens 55 °C Vorlauf lohnt sich die Wärmepumpe meist auch im Altbau.',
+ ['Vorteile: kein Brennstoff, kaum CO₂ mit Ökostrom','Nachteil: hoher Vorlauf, kleine Leistungszahl, hohe Stromkosten','Nachteil: hohe Anschaffungskosten','Empfehlung: Vorlauf senken (Dämmung, größere Heizkörper)']],
+['Wärmedämmung','b','Erkläre, warum an einer ungedämmten Außenwand hinter einem Schrank zuerst Schimmel entsteht.',
+ 'Durch die ungedämmte Wand fließt viel Wärme nach außen, die Wand ist innen deutlich kälter als die Raumluft. Der Schrank hält die warme Raumluft von der Wand fern, dahinter wird sie noch kälter. Unter etwa 12,6 °C steigt die Luftfeuchte direkt an der Wand auf über 80 %, Schimmel kann wachsen. In Außenecken ist es noch schlimmer, weil die Außenfläche größer ist als die Innenfläche (Wärmebrücke). Abhilfe: Außenwand dämmen, Möbel mit etwa 5 cm Abstand aufstellen, gleichmäßig heizen und regelmäßig lüften.',
+ ['Ungedämmte Wand ist innen kalt','Schrank hält warme Luft fern','Kalte Oberfläche, hohe Feuchte, Schimmel','Abhilfe: dämmen, Abstand, heizen und lüften']],
+['Wärmedämmung','b','Erkläre, warum man eine Außenwand besser außen als innen dämmt.',
+ 'Bei der Außendämmung bleibt das Mauerwerk warm. Die Temperatur fällt fast nur in der Dämmschicht ab, und der kälteste Punkt liegt außen, wo kein Wasserdampf aus dem Raum hinkommt. Decken und Innenwände, die an die Außenwand stoßen, liegen hinter der Dämmung, die Wärmebrücken verschwinden. Die warme Wand speichert Wärme. Bei der Innendämmung wird die Wand dahinter kalt. Raumfeuchte kann dort zu Tauwasser werden, man braucht eine dichte Dampfbremse, und an jeder Decke bleibt eine Wärmebrücke.',
+ ['Außen: Mauerwerk bleibt warm, Wärme wird gespeichert','Außen: Wärmebrücken an Decken überdeckt','Innen: kalte Wand, Tauwasser, Dampfbremse nötig','Innen: Wärmebrücken bleiben']],
 ['Verbrennungsmotor (Viertakt)','b','Beschreibe die vier Takte eines Ottomotors. Gib jeweils an, ob Einlass- und Auslassventil offen oder geschlossen sind.',
  '1. Ansaugen: Der Kolben geht nach unten, das Einlassventil ist offen, Kraftstoff-Luft-Gemisch strömt ein. 2. Verdichten: Kolben nach oben, beide Ventile geschlossen, das Gemisch wird verdichtet und erwärmt sich. 3. Arbeitstakt: Die Zündkerze zündet kurz vor dem oberen Totpunkt, das Gas dehnt sich aus und drückt den Kolben nach unten, beide Ventile geschlossen. 4. Ausstoßen: Kolben nach oben, das Auslassventil ist offen, die Abgase werden ausgeschoben. Ein Arbeitsspiel dauert zwei Kurbelwellenumdrehungen.',
  ['Vier Takte in der richtigen Reihenfolge','Ventilstellungen richtig','Zündung im Arbeitstakt','Zwei Umdrehungen je Arbeitsspiel']],
@@ -3762,7 +3945,7 @@ const MR='Rechnen im Alltag',MFG='Formeln & Gleichungen',MGD='Geometrie & Diagra
 const XL={[FM]:{[MGD]:['Sinus & Kosinus']},[FC]:{[AN]:['Neutralisation & Titration']}};
 const inG=(m,f,g)=>(m.F===f&&m.g===g)||!!(XL[f]&&XL[f][g]&&XL[f][g].includes(m.name)),gIx=(f,g)=>{const a=M.map((m,i)=>m.F===f&&m.g===g?i:-1).filter(i=>i>=0);((XL[f]||{})[g]||[]).forEach(n=>{const i=M.findIndex(m=>m.name===n);if(i>=0&&!a.includes(i))a.push(i)});const o=GORD[g];if(o){const r=i=>{const k=o.indexOf(M[i].name);return k<0?o.length:k};a.sort((x,y)=>r(x)-r(y)||x-y)}return a};const GORD={'Elektrotechnik':['Grundlagen: Stromkreis','Ohmsches Gesetz','Reihe','Parallel']};const isGem=i=>i>=0&&/^Gemischt /.test(M[i].name);
 const FSI='Sicherheit',SXG1='Grundlagen & Kennzeichnung',SXG2='Elektrische Sicherheit',SXG3='Labor & Gefahrstoffe',SXG4='Brandschutz';
-const FA=[FP,FC,FE,FS,FM,FSI,FU],ORD={[FSI]:[SXG1,SXG2,SXG3,SXG4],[FM]:[MR,MFG,MGD,MDI],[FE]:[E1,E2,E3,E4],[FU]:[UE],[FP]:[WL,MF,AE,SR,HP,ET,ET2,KD,LQ],[FC]:[AP,CB,RS,OR,SB,EC,WH,AN],[FS]:[LM,SM,VT,QM]};
+const FA=[FP,FC,FE,FS,FM,FSI,FU],ORD={[FSI]:[SXG1,SXG2,SXG3,SXG4],[FM]:[MR,MFG,MGD,MDI],[FE]:[E1,E2,E3,E4,E5],[FU]:[UE],[FP]:[WL,MF,AE,SR,HP,ET,ET2,KD,LQ],[FC]:[AP,CB,RS,OR,SB,EC,WH,AN],[FS]:[LM,SM,VT,QM]};
 /* Reihenfolge der Themen je Fachgebiet wie im Kurs (Foliensätze), v117 */
 GORD[WL]=['Aggregatzustand','Wärmekapazität','Wärmeausdehnung','Schmelz- & Verdampfungswärme','Mischungstemperatur'];
 GORD[MF]=['Kräfteparallelogramm','Kräftezerlegung (Seilkräfte)','Gesetz von Hooke','Gleit-, Haft- & Rollreibung','Schiefe Ebene','Reibung (schiefe Ebene)','Drehmoment','Hebel','Rolle & Flaschenzug','Zug-/Druckspannung & Sicherheit','Scherung & Flächenpressung'];
@@ -3914,6 +4097,33 @@ Object.assign(FX,{
 'Brennstoffzelle (Wasserstoff)':['2 H₂ + O₂ → 2 H₂O','P = n · U · I','η ≈ U_Zelle / 1,23 V'],
 'Biogasanlage mit BHKW':['V_Biogas = Menge · Gasausbeute','E = V_CH₄ · H_i (≈ 9,97 kWh/m³)','η_ges = η_el + η_th'],
 'Verbrennungsmotor (Viertakt)':['P = M · 2π · n','P_zu = ṁ · H_i','η = P / P_zu']
+});
+/* ===== Übungen: Heizen & Dämmen (v268) ===== */
+Object.assign(GEN,{
+'Wärmedämmung':r=>{const v=rg(r,0,3);
+ if(v==0){const d=pk(r,[8,10,12,14,16,20]),l=pk(r,[.032,.035,.04]),R=d/100/l;return[`Eine Dämmplatte ist ${d} cm dick und hat die Wärmeleitfähigkeit λ = ${de(l)} W/(m·K). Wie groß ist ihr Wärmedurchlasswiderstand R?`,R,'m²·K/W',[`d = ${d} cm = ${de(d/100)} m`,`R = d / λ = ${de(d/100)} m / ${de(l)} W/(m·K) = ${nf(R,3)} m²·K/W`]]}
+ if(v==1){const RM=pk(r,[.25,.5,.8]),d=pk(r,[10,12,14,16]),RD=Math.round(d/100/.035*100)/100,R=.17+RM+RD,U=1/R;return[`Eine Wand hat R_M = ${de(RM)} m²·K/W. Dazu kommen ${d} cm Dämmung (λ = 0,035 W/(m·K)) und die Übergänge R_si + R_se = 0,17 m²·K/W. Wie groß ist der U-Wert?`,U,'W/(m²·K)',[`R_D = ${de(d/100)} m / 0,035 W/(m·K) = ${WDF(RD)} m²·K/W`,`R_ges = 0,17 m²·K/W + ${de(RM)} m²·K/W + ${WDF(RD)} m²·K/W = ${WDF(R)} m²·K/W`,`U = 1 / R_ges = 1 / ${WDF(R)} m²·K/W = ${nf(U,3)} W/(m²·K)`]]}
+ if(v==2){const U=pk(r,[.2,.24,.3,1,1.4]),A=rg(r,20,120,10),ta=pk(r,[-12,-10,-5,0]),dT=20-ta,P=U*A*dT;return[`Eine Wand mit ${A} m² hat U = ${de(U)} W/(m²·K). Innen sind es 20 °C, außen ${WDF(ta,0)} °C. Wie groß ist der Wärmestrom durch die Wand?`,P,'W',[`ΔT = 20 °C − (${WDF(ta,0)} °C) = ${dT} K`,`Φ = U · A · ΔT = ${de(U)} W/(m²·K) · ${A} m² · ${dT} K = ${nf(P)} W`]]}
+ const A=rg(r,60,150,10),U1=pk(r,[1,1.2,1.4]),U2=pk(r,[.2,.24]),dP=(U1-U2)*A*30;return[`Eine Fassade mit ${A} m² wird gedämmt, U sinkt von ${de(U1)} auf ${de(U2)} W/(m²·K). Wie viel Wärmestrom spart das bei ΔT = 30 K?`,dP,'W',[`ΔU = ${de(U1)} W/(m²·K) − ${de(U2)} W/(m²·K) = ${de(+(U1-U2).toFixed(2))} W/(m²·K)`,`ΔΦ = ΔU · A · ΔT = ${de(+(U1-U2).toFixed(2))} W/(m²·K) · ${A} m² · 30 K = ${nf(dP)} W`]]},
+'Wärmepumpe':r=>{const v=rg(r,0,3);
+ if(v==0){const P=pk(r,[2,2.5,3]),e=pk(r,[3,3.5,4,4.5]),Q=P*e;return[`Eine Wärmepumpe nimmt P_el = ${de(P)} kW elektrische Leistung auf und gibt P_H = ${de(Q)} kW Heizleistung ab. Wie groß ist die Leistungszahl ε?`,e,'',['ε = P_H / P_el',`ε = ${de(Q)} kW / ${de(P)} kW = ${de(e)}`]]}
+ if(v==1){const Q=rg(r,10000,24000,1000),e=pk(r,[3,3.5,4,5]),W=Q/e;return[`Ein Haus braucht im Jahr ${WDN(Q)} kWh Wärme. Die Wärmepumpe hat die Jahresarbeitszahl ${de(e)}. Wie viel Strom braucht sie im Jahr?`,W,'kWh',['W_el = Q / JAZ',`W_el = ${WDN(Q)} kWh / ${de(e)} = ${nf(W)} kWh`]]}
+ if(v==2){const Q=rg(r,12000,20000,1000),e=pk(r,[3,4,5]),W=Q/e,U=Q-W;return[`Eine Wärmepumpe liefert im Jahr ${WDN(Q)} kWh Wärme bei einer Jahresarbeitszahl von ${e}. Wie viel davon ist Umweltwärme?`,U,'kWh',[`W_el = Q / JAZ = ${WDN(Q)} kWh / ${e} = ${nf(W)} kWh`,`Q_U = Q − W_el = ${WDN(Q)} kWh − ${nf(W)} kWh = ${nf(U)} kWh`]]}
+ const q=pk(r,[-5,0,5,10]),V=pk(r,[35,45,55]),TV=V+273,TQ=q+273,eC=TV/(TV-TQ);return[`Die Wärmequelle hat ${WDF(q,0)} °C, der Vorlauf ${V} °C. Wie groß ist die Carnot-Leistungszahl ε_C?`,eC,'',[`T_V = ${V} °C + 273 K = ${TV} K, T_Q = ${WDF(q,0)} °C + 273 K = ${TQ} K`,`ΔT = ${TV} K − ${TQ} K = ${TV-TQ} K`,`ε_C = T_V / ΔT = ${TV} K / ${TV-TQ} K = ${nf(eC,3)}`]]}
+});
+MCQ.push(
+['Wärmedämmung','Was gibt der U-Wert an?',['Den Wärmestrom je m² Bauteil und je Kelvin Temperaturunterschied','Die Dicke der Wand','Die Temperatur der Wand','Wie viel Wasser die Wand aufnimmt'],'U in W/(m²·K): So viele Watt gehen durch 1 m² Wand, wenn innen und außen 1 K Unterschied herrscht. Kleiner U-Wert heißt gute Dämmung.'],
+['Wärmedämmung','Warum dämmen Dämmstoffe so gut?',['Sie halten viel ruhende Luft in kleinen Poren fest','Sie sind besonders schwer','Sie erzeugen selbst Wärme','Sie sind immer aus Metall'],'Stillstehende Luft leitet Wärme sehr schlecht (λ ≈ 0,026 W/(m·K)). In den kleinen Poren kann sie nicht strömen, Konvektion fällt weg.'],
+['Wärmedämmung','Was ist eine Wärmebrücke?',['Eine Stelle, an der Wärme besonders leicht nach außen fließt','Eine Brücke mit Fußbodenheizung','Ein besonders gut gedämmtes Fenster','Ein Heizkörper unter dem Fenster'],'Beispiele: durchlaufende Balkonplatte, Rollladenkasten, Fensteranschluss. Dort ist die Wand innen kälter, es droht Schimmel.'],
+['Wärmedämmung','Die Dämmung wird von 20 cm auf 30 cm verstärkt. Was passiert mit dem U-Wert?',['Er sinkt nur noch wenig','Er halbiert sich','Er wird null','Er steigt'],'U = 1 / R_ges. Ist R_ges schon groß, ändern weitere Zentimeter wenig. Ziegel mit Mineralwolle: von 0,15 auf 0,10 W/(m²·K).'],
+['Wärmepumpe','Welches Bauteil der Wärmepumpe braucht den Strom?',['Der Verdichter','Der Verdampfer','Das Expansionsventil','Der Verflüssiger'],'Nur der Verdichter wird elektrisch angetrieben. Er presst das Kältemittelgas zusammen und hebt so seine Temperatur.'],
+['Wärmepumpe','Wie ändert sich die Leistungszahl ε, wenn die Vorlauftemperatur steigt?',['Sie sinkt','Sie steigt','Sie bleibt gleich','Sie wird null'],'Der Temperaturhub ΔT wird größer, ε_C = T_V / ΔT wird kleiner. Niedriger Vorlauf, zum Beispiel mit Fußbodenheizung, ist günstig.'],
+['Wärmepumpe','Was bedeutet eine Jahresarbeitszahl von 3,5?',['Übers Jahr gibt sie 3,5-mal so viel Wärme ab, wie sie Strom braucht','Sie läuft 3,5 Stunden am Tag','Sie spart 3,5 % Energie','Sie braucht 3,5 kWh Strom je kWh Wärme'],'JAZ = Wärme im Jahr / Strom im Jahr. Aus 1 kWh Strom werden im Jahresmittel 3,5 kWh Wärme.'],
+['Wärmepumpe','Warum arbeitet eine Erdwärmepumpe im Winter meist besser als eine Luftwärmepumpe?',['Die Erde ist im Winter wärmer als die Außenluft','Erde leitet Strom besser','Sie braucht keinen Verdichter','Sie hat kein Kältemittel'],'In 100 m Tiefe ist es das ganze Jahr etwa 10 °C warm. Der Temperaturhub ist kleiner als bei Frost, also ist ε größer.']
+);
+Object.assign(FX,{
+'Wärmedämmung':['R = d / λ','R_ges = R_si + R_1 + R_2 + R_se','U = 1 / R_ges','Φ = U · A · ΔT'],
+'Wärmepumpe':['ε = P_H / P_el = Q / W_el','ε_C = T_V / (T_V − T_Q)','Q = W_el + Q_U']
 });
 ORAL.push(
 ['Energie','Erkläre den Aufbau und die Wirkungsweise eines Dampfkraftwerks.','Im Dampferzeuger wird die Primärenergie (Kohle, Gas, Kernbrennstoff) in Wärme umgesetzt und damit Wasser zu Frischdampf (ca. 550 °C, 250 bar) erhitzt. Der Dampf dehnt sich in der Turbine aus und versetzt sie in Rotation. Der Generator wandelt die Rotation in Strom. Im Kondensator wird der Abdampf wieder zu Wasser, die Speisewasserpumpe schließt den Kreislauf. Der Gesamtwirkungsgrad ist das Produkt der Teilwirkungsgrade (Wärmeübertragung, Kreisprozess, Turbine, Generator).'],
@@ -8075,6 +8285,14 @@ PRED[AEL]=['Person A braucht für die Treppe doppelt so lange wie Person B. Was 
 ERK[AEL]=['Energie ist der Vorrat, der in einem Körper steckt (Lage, Bewegung, Wärme, chemisch, elektrisch). Arbeit ist die Energie, die bei einem Vorgang übertragen wird: W = F · s = ΔE. Leistung sagt, wie schnell das geht: P = W / t. Energie und Arbeit haben dieselbe Einheit Joule, die Leistung hat Watt.',['Arbeit und Leistung verwechseln: Wer schneller ist, verrichtet nicht mehr Arbeit, sondern bringt mehr Leistung.','Das Formelzeichen W (Arbeit) mit der Einheit W (Watt) verwechseln.','kW und kWh verwechseln: kW ist eine Leistung, kWh eine Energie.']];
 BET[AEL]='Ein Mitarbeiter mit Hubwagen und ein Hallenkran heben dieselbe Gitterbox mit 300 kg um 2 m an. Die Arbeit ist mit rund 5,9 kJ gleich. Der Kran schafft es in 6 s mit rund 1 kW, der Mitarbeiter pumpt 60 s lang mit rund 100 W.';
 ['Arbeit & Leistung','Energieformen & Erhaltung','Elektrische Arbeit & Leistung'].forEach(n=>{if(ERK[n])ERK[n][0]+=' Den Unterschied zwischen Energie, Arbeit und Leistung zeigt die <a href="#thema/arbeit-energie-leistung-uebersicht" style="color:var(--acc);font-weight:600">Übersicht Arbeit, Energie & Leistung</a>.'});
+Object.assign(ERK,{
+'Wärmedämmung':['Wärme fließt immer von warm nach kalt. Durch eine Wand fließt der Wärmestrom Φ = U · A · ΔT. Jede Schicht hat den Wärmedurchlasswiderstand R = d / λ. Die Widerstände werden addiert, U = 1 / R_ges. Dämmstoffe dämmen gut, weil sie viel ruhende Luft enthalten.',['U-Wert und λ verwechseln: λ gehört zum Stoff, U zur ganzen Wand.','Die U-Werte der Schichten addieren statt der Widerstände R.','Zentimeter nicht in Meter umrechnen: 14 cm = 0,14 m.','Glauben, doppelte Dämmung halbiere immer den Wärmeverlust.']],
+'Wärmepumpe':['Eine Wärmepumpe hebt Umweltwärme mit Strom auf Heiztemperatur. Die Leistungszahl ε = Q / W_el sagt, wie viel Wärme je kWh Strom entsteht. Sie ist umso größer, je kleiner der Temperaturhub zwischen Quelle und Vorlauf ist: ε_C = T_V / ΔT, echte Geräte schaffen etwa die Hälfte.',['Meinen, die Wärmepumpe erzeuge Energie aus dem Nichts. Sie holt Umweltwärme.','Mit °C statt Kelvin rechnen: richtig ist ε_C = 308 K / 33 K, nicht 35 / 33.','Leistungszahl (Moment) und Jahresarbeitszahl (ganzes Jahr) verwechseln.','Strom und Wärme gleichsetzen: 1 kWh Strom ergibt 3 bis 4 kWh Wärme.']]
+});
+Object.assign(BET,{
+'Wärmedämmung':'Ein Rolltor mit 20 m² und U = 3 W/(m²·K) verliert bei 25 K Temperaturunterschied schon 1500 W, wenn es geschlossen ist. Steht es offen, strömt zusätzlich kalte Luft herein. Schnelllauftore und Luftschleier sparen in Werkhallen viel Heizenergie.',
+'Wärmepumpe':'Viele Betriebe nutzen die Abwärme von Druckluftkompressoren und Kälteanlagen. Eine Wärmepumpe hebt 30 °C warmes Kühlwasser auf 60 °C für die Hallenheizung. Weil die Quelle so warm ist, erreicht sie eine Leistungszahl von etwa 5.'
+});
 /* ===== Typische Fehler als Übungen: [Thema, fehlerhafte Lösung, Antworten (erste richtig), Erklärung] ===== */
 const FEH=[
 ["Grundlagen: Stromkreis", "Lena sagt: „In der Lampe werden Elektronen verbraucht. Deshalb kommen am Minuspol weniger zurück.“ Was ist daran falsch?", ["Es fließen genauso viele Elektronen zurück. Verbraucht wird nur Energie.", "Nichts, die Lampe wandelt einen Teil der Elektronen in Licht um.", "Die Elektronen werden nicht in der Lampe, sondern im Schalter verbraucht.", "Es kommen sogar mehr Elektronen zurück, weil die Lampe welche abgibt."], "Der Strom ist vor und hinter der Lampe gleich groß. Die Elektronen geben in der Lampe Energie ab, als Wärme und Licht. Ihre Anzahl bleibt gleich."],
@@ -8435,6 +8653,49 @@ Object.assign(EXTOP,{'Plattenwender mit Winkelhebel: Gewichtskraft, Zylinderkraf
 Object.assign(EXTOP,{'Transporter beladen: Federrate, Zuladung und Anfahren':'Gesetz von Hooke'});
 Object.assign(EXTOP,{'Anhängerkupplung: Stützlast, Querbolzen und Einfedern':'Scherung & Flächenpressung'});
 Object.assign(EXTOP,{'Pumpspeicherkraftwerk: Wie schnell trifft das Wasser die Turbine?':'Wasserkraftwerke'});
+/* Prüfungsaufgaben Heizen & Dämmen (v268), eigene Aufgaben */
+EXW.push(
+['Wärmepumpe im Einfamilienhaus: Leistungszahl und Umweltwärme',r=>{const PH=pk(r,[6,8,9,10,12]),Pe=pk(r,[1.6,2,2.4,2.5]),h=pk(r,[10,12,14,16]),pr=pk(r,[.28,.3,.32]),e=PH/Pe,PU=+(PH-Pe).toFixed(2),Qd=PH*h,Wd=+(Pe*h).toFixed(2),K=Wd*pr;
+ return{intro:`Eine Luft-Wasser-Wärmepumpe gibt an einem Wintertag die Heizleistung P_H = ${de(PH)} kW ab. Ihr Verdichter nimmt dabei P_el = ${de(Pe)} kW elektrische Leistung auf. Sie läuft an diesem Tag ${h} Stunden. Wärmepumpenstrom kostet ${de(pr)} €/kWh.`,
+ steps:[STP('Wie groß ist die Leistungszahl ε?',e,'',[`ε = P_H / P_el = ${de(PH)} kW / ${de(Pe)} kW = ${nf(e,3)}`],'Leistungszahl = abgegebene Wärmeleistung durch aufgenommene elektrische Leistung.'),
+ STP('Welche Leistung holt die Wärmepumpe aus der Außenluft?',PU,'kW',[`P_U = P_H − P_el = ${de(PH)} kW − ${de(Pe)} kW = ${de(PU)} kW`],'Energieerhaltung: Die Heizleistung setzt sich aus Strom und Umweltwärme zusammen.'),
+ STP('Wie viel Wärme gibt sie an diesem Tag ab?',Qd,'kWh',[`Q = P_H · t = ${de(PH)} kW · ${h} h = ${de(Qd)} kWh`],'Energie = Leistung mal Zeit, kW · h = kWh.'),
+ STP('Was kostet der Strom an diesem Tag?',K,'€',[`W_el = P_el · t = ${de(Pe)} kW · ${h} h = ${de(Wd)} kWh`,`K = W_el · Preis = ${de(Wd)} kWh · ${de(pr)} €/kWh = ${nf(K,3)} €`],'Erst die Strommenge, dann mal den Preis.')]}}],
+['Vorlauftemperatur: Fußbodenheizung oder Heizkörper',r=>{const tQ=pk(r,[0,2,3]),Q=pk(r,[12000,14000,16000,18000]),T1=308,T2=328,TQ=tQ+273,d1=T1-TQ,d2=T2-TQ,c1=Math.round(T1/d1*10)/10,c2=Math.round(T2/d2*10)/10,e1=Math.round(c1*5)/10,e2=Math.round(c2*5)/10,W1=Math.round(Q/e1),W2=Math.round(Q/e2),dK=+((W2-W1)*.3).toFixed(2);
+ return{intro:`Ein Haus braucht im Jahr Q = ${WDN(Q)} kWh Wärme. Die Luft-Wärmepumpe arbeitet im Mittel der Heizzeit mit einer Quelltemperatur von ϑ_Q = ${tQ} °C. Mit Fußbodenheizung reichen ϑ_V = 35 °C Vorlauf, mit den alten Heizkörpern wären 55 °C nötig. Echte Wärmepumpen erreichen etwa die Hälfte des Carnot-Werts (Gütegrad η_G = 0,5). Strom kostet 0,30 €/kWh.`,
+ steps:[STP('Wie groß ist die Carnot-Leistungszahl bei 35 °C Vorlauf?',c1,'',[`T_V = 35 °C + 273 K = ${T1} K, T_Q = ${tQ} °C + 273 K = ${TQ} K`,`ε_C = T_V / (T_V − T_Q) = ${T1} K / ${d1} K = ${WDF(c1,1)}`],'Im Carnot-Wert stehen absolute Temperaturen in Kelvin.',{abs:.06}),
+ STP('Welche Leistungszahl ε erreicht die Wärmepumpe damit real?',e1,'',[`ε = η_G · ε_C = 0,5 · ${WDF(c1,1)} = ${WDF(e1,1)}`],'Gütegrad mal Carnot-Wert.',{abs:.06}),
+ STP('Welche Leistungszahl erreicht sie bei 55 °C Vorlauf?',e2,'',[`T_V = 55 °C + 273 K = ${T2} K`,`ε_C = ${T2} K / ${d2} K = ${WDF(c2,1)}`,`ε = 0,5 · ${WDF(c2,1)} = ${WDF(e2,1)}`],'Größerer Temperaturhub, kleinere Leistungszahl.',{abs:.06}),
+ STP('Wie viel Strom braucht sie im Jahr mit 35 °C Vorlauf?',W1,'kWh',[`W_el = Q / ε = ${WDN(Q)} kWh / ${WDF(e1,1)} = ${WDN(W1)} kWh`],'Strom = Wärme durch Leistungszahl.'),
+ STP('Wie viel Euro im Jahr spart die Fußbodenheizung gegenüber den alten Heizkörpern?',dK,'€',[`W_el,55 = ${WDN(Q)} kWh / ${WDF(e2,1)} = ${WDN(W2)} kWh`,`ΔK = (${WDN(W2)} kWh − ${WDN(W1)} kWh) · 0,30 €/kWh = ${de(dK)} €`],'Erst den Strombedarf bei 55 °C, dann die Differenz mal den Preis.')]}}],
+['Heizungstausch: Gaskessel oder Wärmepumpe',r=>{const Q=pk(r,[12000,15000,18000,20000]),eg=pk(r,[.9,.95]),pg=pk(r,[.1,.11,.12]),j=pk(r,[3,3.5,4]),ps=pk(r,[.28,.3,.32]),G=Math.round(Q/eg),KG=Math.round(G*pg),W=Math.round(Q/j),KW=Math.round(W*ps),CG=Math.round(G*.2),CW=Math.round(W*.36);
+ return{intro:`Ein Einfamilienhaus braucht im Jahr Q = ${WDN(Q)} kWh Wärme. Bisher heizt ein Gas-Brennwertkessel mit η = ${Math.round(eg*100)} %, Erdgas kostet ${de(pg)} €/kWh. Geplant ist eine Wärmepumpe mit der Jahresarbeitszahl JAZ = ${de(j)}. Wärmepumpenstrom kostet ${de(ps)} €/kWh. CO₂ je kWh: Erdgas 0,20 kg, Strommix 0,36 kg. Runde auf ganze kWh, € und kg.`,
+ steps:[STP('Wie viel Erdgas braucht der Kessel im Jahr?',G,'kWh',[`Q_Gas = Q / η = ${WDN(Q)} kWh / ${de(eg)} = ${WDN(G)} kWh`],'Der Kessel braucht mehr Gas, als er Wärme abgibt.'),
+ STP('Was kostet das Gas im Jahr?',KG,'€',[`K_Gas = ${WDN(G)} kWh · ${de(pg)} €/kWh = ${WDN(KG)} €`],'Menge mal Preis.'),
+ STP('Wie viel Strom braucht die Wärmepumpe im Jahr?',W,'kWh',[`W_el = Q / JAZ = ${WDN(Q)} kWh / ${de(j)} = ${WDN(W)} kWh`],'Jahresarbeitszahl = Wärme im Jahr durch Strom im Jahr.'),
+ STP('Was kostet der Strom im Jahr?',KW,'€',[`K_WP = ${WDN(W)} kWh · ${de(ps)} €/kWh = ${WDN(KW)} €`],'Menge mal Preis.'),
+ STP('Wie viel CO₂ spart die Wärmepumpe im Jahr?',CG-CW,'kg',[`CO₂ Gas = ${WDN(G)} kWh · 0,20 kg/kWh = ${WDN(CG)} kg`,`CO₂ Wärmepumpe = ${WDN(W)} kWh · 0,36 kg/kWh = ${WDN(CW)} kg`,`Ersparnis = ${WDN(CG)} kg − ${WDN(CW)} kg = ${WDN(CG-CW)} kg`],'Mit Ökostrom oder eigener PV-Anlage wird die Ersparnis noch größer.')]}}],
+['Außenwand dämmen: U-Wert und Gebäudeenergiegesetz',r=>{const mw=pk(r,[0,1,2]),M_=WDM[mw],d=pk(r,[10,12,14,16]),l=pk(r,[.032,.035,.04]),RM=Math.round(M_[1]/M_[2]*100)/100,R0=Math.round((.17+RM)*100)/100,U0=Math.round(100/R0)/100,RD=Math.round(d/100/l*100)/100,R=Math.round((.17+RM+RD)*100)/100,U=Math.round(100/R)/100;
+ return{intro:`Eine Außenwand besteht aus ${['Ziegelmauerwerk','Kalksandstein','Beton'][mw]} mit d_M = ${de(M_[1])} m und λ_M = ${de(M_[2])} W/(m·K). Sie bekommt außen ${d} cm Dämmung mit λ_D = ${de(l)} W/(m·K). Die Wärmeübergänge innen und außen haben zusammen R_si + R_se = 0,17 m²·K/W. Nach dem Gebäudeenergiegesetz darf eine sanierte Außenwand höchstens U = 0,24 W/(m²·K) haben. Runde Widerstände und U-Werte auf zwei Nachkommastellen.`,
+ steps:[STP('Wie groß ist der Wärmedurchlasswiderstand des Mauerwerks?',RM,'m²·K/W',[`R_M = d_M / λ_M = ${de(M_[1])} m / ${de(M_[2])} W/(m·K) = ${WDF(RM)} m²·K/W`],'R = d / λ, die Dicke in Meter.',{abs:.011}),
+ STP('Wie groß ist der U-Wert der Wand ohne Dämmung?',U0,'W/(m²·K)',[`R_ges = 0,17 m²·K/W + ${WDF(RM)} m²·K/W = ${WDF(R0)} m²·K/W`,`U = 1 / R_ges = 1 / ${WDF(R0)} m²·K/W = ${WDF(U0)} W/(m²·K)`],'Ohne Dämmung zählen nur Mauerwerk und Wärmeübergänge.',{abs:.011}),
+ STP('Wie groß ist der Widerstand der Dämmschicht?',RD,'m²·K/W',[`R_D = d / λ_D = ${de(d/100)} m / ${de(l)} W/(m·K) = ${WDF(RD)} m²·K/W`],`${d} cm = ${de(d/100)} m.`,{abs:.011}),
+ STP('Wie groß ist der U-Wert mit Dämmung? Ist die Anforderung erfüllt?',U,'W/(m²·K)',[`R_ges = 0,17 m²·K/W + ${WDF(RM)} m²·K/W + ${WDF(RD)} m²·K/W = ${WDF(R)} m²·K/W`,`U = 1 / ${WDF(R)} m²·K/W = ${WDF(U)} W/(m²·K)`,U<=.24?'U ≤ 0,24 W/(m²·K): Die Anforderung ist erfüllt.':'U > 0,24 W/(m²·K): Die Dämmung reicht nicht.'],'Widerstände hintereinander werden addiert.',{abs:.011}),
+ STP('Um wie viel Prozent sinkt der Wärmeverlust durch die Wand?',(1-U/U0)*100,'%',[`(1 − U_neu / U_alt) · 100 % = (1 − ${WDF(U)} / ${WDF(U0)}) · 100 % = ${nf((1-U/U0)*100,3)} %`],'Bei gleicher Fläche und gleichem ΔT ist der Verlust proportional zu U.',{abs:1})]}}],
+['Fassade dämmen: Wärmeverlust und Heizkosten',r=>{const A=pk(r,[120,140,160,180]),U1=pk(r,[1,1.2,1.4]),U2=pk(r,[.2,.22,.24]),ta=pk(r,[-14,-12,-10]),dT=20-ta,P1=Math.round(U1*A*dT),P2=Math.round(U2*A*dT),Q1=Math.round(U1*A*84),Q2=Math.round(U2*A*84),dQ=Q1-Q2,G=Math.round(dQ/.95),K=Math.round(G*.11);
+ return{intro:`Ein Wohnhaus hat ${A} m² Außenwand (ohne Fenster) mit U = ${de(U1)} W/(m²·K). Nach der Dämmung beträgt der U-Wert ${de(U2)} W/(m²·K). Innen sind es 20 °C, an einem kalten Tag außen ${WDF(ta,0)} °C. Für das ganze Jahr rechnet man mit 84 000 K·h (3500 Kelvin-Tage mal 24 h/d). Der Gaskessel hat η = 95 %, Erdgas kostet 0,11 €/kWh.`,
+ steps:[STP('Wie groß ist der Wärmestrom durch die Wand vor der Dämmung?',P1,'W',[`ΔT = 20 °C − (${WDF(ta,0)} °C) = ${dT} K`,`Φ = U · A · ΔT = ${de(U1)} W/(m²·K) · ${A} m² · ${dT} K = ${WDN(P1)} W`],'Φ = U · A · ΔT.'),
+ STP('Wie groß ist er nach der Dämmung?',P2,'W',[`Φ = ${de(U2)} W/(m²·K) · ${A} m² · ${dT} K = ${WDN(P2)} W`],'Gleiche Fläche, gleiches ΔT, nur U ist kleiner.'),
+ STP('Wie viel Wärme spart die Dämmung im Jahr?',dQ,'kWh',[`Q_alt = U · A · 84 000 K·h = ${de(U1)} W/(m²·K) · ${A} m² · 84 000 K·h = ${WDN(Q1)} kWh`,`Q_neu = ${de(U2)} W/(m²·K) · ${A} m² · 84 000 K·h = ${WDN(Q2)} kWh`,`ΔQ = ${WDN(Q1)} kWh − ${WDN(Q2)} kWh = ${WDN(dQ)} kWh`],'W · h ergibt Wh, durch 1000 ergibt kWh.'),
+ STP('Wie viel Euro Gas spart das im Jahr?',K,'€',[`Q_Gas = ΔQ / η = ${WDN(dQ)} kWh / 0,95 = ${WDN(G)} kWh`,`K = ${WDN(G)} kWh · 0,11 €/kWh = ${WDN(K)} €`],'Für jede kWh Wärme braucht der Kessel 1 / 0,95 kWh Gas.')]}}],
+['Schimmel an der Außenwand: Oberflächentemperatur',r=>{const U1=pk(r,[1.4,1.6,1.8,2]),U2=pk(r,[.2,.25,.3]),ta=pk(r,[-15,-12,-10]),dT=20-ta,q=+(U1*dT).toFixed(2),dr=+(q*.13).toFixed(2),s1=+(20-dr).toFixed(2),s2=+(20-U2*.13*dT).toFixed(2);
+ return{intro:`Eine ungedämmte Außenwand hat U = ${de(U1)} W/(m²·K). Innen sind es 20 °C, außen ${WDF(ta,0)} °C. Der Wärmeübergangswiderstand innen beträgt R_si = 0,13 m²·K/W. Bei 20 °C und 50 % Luftfeuchte kann Schimmel wachsen, wenn die Wand innen kälter als etwa 12,6 °C ist.`,
+ steps:[STP('Wie groß ist der Wärmestrom je m² Wand?',q,'W/m²',[`q = U · ΔT = ${de(U1)} W/(m²·K) · ${dT} K = ${de(q)} W/m²`],'Wärmestrom je Quadratmeter: U mal Temperaturunterschied.'),
+ STP('Wie warm ist die Wand innen? Besteht Schimmelgefahr?',s1,'°C',[`Δϑ = q · R_si = ${de(q)} W/m² · 0,13 m²·K/W = ${de(dr)} K`,`ϑ_si = 20 °C − ${de(dr)} K = ${de(s1)} °C`,s1<12.6?'Unter 12,6 °C: Schimmelgefahr.':'Über 12,6 °C: an der ebenen Wand noch kein Schimmel, in Ecken ist es aber kälter.'],'Je mehr Wärme durch die Wand fließt, desto kälter ist sie innen.',{abs:.11}),
+ STP('Wie warm ist die Wand innen nach einer Dämmung auf U = '+de(U2)+' W/(m²·K)?',s2,'°C',[`ϑ_si = 20 °C − ${de(U2)} W/(m²·K) · 0,13 m²·K/W · ${dT} K = ${de(s2)} °C`],'Dämmung hält die Wand innen warm, Schimmel hat kaum eine Chance.',{abs:.11})]}}]
+);
+['Wärmepumpe im Einfamilienhaus: Leistungszahl und Umweltwärme','Vorlauftemperatur: Fußbodenheizung oder Heizkörper','Heizungstausch: Gaskessel oder Wärmepumpe'].forEach(n=>{EXC[n]='P';EXTOP[n]='Wärmepumpe'});
+['Außenwand dämmen: U-Wert und Gebäudeenergiegesetz','Fassade dämmen: Wärmeverlust und Heizkosten','Schimmel an der Außenwand: Oberflächentemperatur'].forEach(n=>{EXC[n]='P';EXTOP[n]='Wärmedämmung'});
 Object.assign(EXTOP,{'Pufferspeicher mit Rohr: Wasserstand und Gasbedarf':'Wärmeausdehnung','Elektrokarren auf der Rampe: Steigung, Hubarbeit, Energie':'Arbeit & Leistung','Hebebühne mit Drehstromantrieb: Stromaufnahme':'Wirkungsgrad','Vierzylindermotor: Hub und Verdichtungsenddruck':'Gasgesetze','Wechselstromzähler am Trockenofen: Leistung und Widerstände':'Parallel','Zwei Lampen am 24-V-Solarmodul':'Reihe','Warmwasserspeicher: Wärme, Aufheizzeit und Solarunterstützung':'Wärmekapazität','Notstromdiesel im Probelauf: Wirkungsgrad':'Wirkungsgrad','Schwerkraft-Rollenbahn für Getränkekisten':'Reibung (schiefe Ebene)','Kreiselpumpe an der Sole: Leistung und Fördervolumen':'Hydraulische Leistung & Volumenstrom','Gabelstapler: Hinterachse, Flächenpressung und Kippgrenze':'Drehmoment','Fässer auf Paletten: Flächennutzungsgrad':'Prozentrechnung','Hebegeschirr mit Druckstab: Seilkräfte und Zugspannung':'Kräftezerlegung (Seilkräfte)','Winkelprofil: Masse und Zugspannung mit Bohrung':'Zug-/Druckspannung & Sicherheit','Brückenkran mit Blechrolle: Seilspannung und Auflagerkräfte':'Drehmoment','Transportsystem holt Förderband ein: Treffpunkt':'Gleichförmige Bewegung','Drohne im Seitenwind: Geschwindigkeit und Abdrift':'Kräfteparallelogramm','Kurvenfahrt: Grenzgeschwindigkeit nass und trocken':'Kreisbewegung','Überholvorgang auf der Landstraße':'Gleichförmige Bewegung','Reklamationen je Woche: Median, Mittelwert und Zielüberschreitung':'Mittelwert, Median & Modalwert','Aufzug-Belastung: Massen von zehn Personen':'σ-Bereiche','Rohrmessung: Modalwert, Median, Mittelwert, Standardabweichung':'Spannweite, Varianz & Standardabweichung','Niederhalter: Spannweite und Grenzen um den Mittelwert':'σ-Bereiche'});
 const ERRN={u:'Einheit oder Zehnerpotenz (Faktor 10, 100, 1000 …)',r:'Rundung oder Zwischenwert',o:'Formel oder Rechenweg'};
 const pd=k=>{const a=k.split('-').map(Number);return new Date(a[0],a[1]-1,a[2])};
@@ -8992,6 +9253,12 @@ function dozCsv(){const all=dozAll(),L=Object.values(all).filter(o=>DOZK==='*'||
  const txt='﻿'+rows.map(r=>r.map(c).join(';')).join('\r\n');
  try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'text/csv'}));a.download='kursuebersicht-'+mToday()+'.csv';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},800);$('#dmsg').textContent='CSV gespeichert (öffnet in Excel).'}catch(e){$('#dmsg').textContent='Speichern ist hier nicht möglich.'}}
 /* ===== Hausaufgaben: je Unterrichtseinheit 3 Wiederholungsaufgaben (Rechnen + Verständnis) ===== */
+FEH.push(
+["Wärmedämmung", "Rechnung: R = d / λ = 14 / 0,035 = 400 m²·K/W. Was ist falsch?", ["Die Dicke muss in Meter stehen: R = 0,14 m / 0,035 W/(m·K) = 4,0 m²·K/W.", "Nichts, 400 m²·K/W ist richtig.", "λ muss in Zentimeter umgerechnet werden.", "Man muss d mit λ malnehmen."], "λ hat die Einheit W/(m·K), also muss d in Meter eingesetzt werden: 14 cm = 0,14 m."],
+["Wärmedämmung", "Notiz: „Die Wand hat R = 1,0 m²·K/W, also U = 1,0. Die Dämmung hat R = 4,0 m²·K/W, also U = 0,25. Zusammen: U = 1,0 + 0,25 = 1,25 W/(m²·K).“ Was ist falsch?", ["Nicht U, sondern R wird addiert: R = 5,0 m²·K/W, also U = 0,2 W/(m²·K).", "Nichts, U-Werte werden addiert.", "Man muss den Mittelwert der U-Werte bilden.", "Es zählt nur der kleinere U-Wert."], "Schichten liegen hintereinander wie Widerstände in Reihe. Mit Dämmung muss die Wand besser werden, U also sinken."],
+["Wärmepumpe", "Rechnung: ε_C = 35 °C / (35 °C − 2 °C) = 1,06. Was ist falsch?", ["Mit Kelvin rechnen: ε_C = 308 K / 33 K = 9,3.", "Nichts, 1,06 stimmt.", "Die Differenz muss 37 K sein.", "ε_C ist immer 4."], "Im Carnot-Wert steht die absolute Temperatur: T = ϑ + 273 K. Nur die Differenz ist in °C und K gleich."],
+["Wärmepumpe", "Notiz: „Die Wärmepumpe hat ε = 4, sie erzeugt also mehr Energie, als sie bekommt.“ Was ist falsch?", ["Sie holt 3 von 4 kWh als Umweltwärme. Energie entsteht nicht.", "Nichts, Wärmepumpen erzeugen Energie.", "ε = 4 heißt 4 % Wirkungsgrad.", "Sie braucht 4 kWh Strom je kWh Wärme."], "Energieerhaltung: Q = W_el + Q_U = 1 kWh + 3 kWh = 4 kWh."]
+);
 let HWV=false,HWN=false,HWU=null;
 const hR={i:(a,b)=>a+Math.floor(Math.random()*(b-a+1)),p:a=>a[Math.floor(Math.random()*a.length)],st:(a,b,s)=>a+s*Math.floor(Math.random()*((b-a)/s+1))};
 /* Ein Zahlenformat für Texte: Tausenderpunkt, Komma, echtes Minus */
@@ -9545,6 +9812,19 @@ const AUF_PC={
  q:'Warum reicht Abkochen nicht?',a:'Abkochen entfernt nur die Carbonathärte, Sulfate bleiben gelöst. Destillation entfernt alles, verdampft aber das Wasser und braucht viel Energie. Der Ionentauscher tauscht Ca²⁺ und Mg²⁺ gegen Na⁺ aus.'}
 };
 Object.assign(PRED,PRED_PC);Object.assign(AUF,AUF_PC);
+/* Heizen & Dämmen (v268): Vermuten und Auftrag */
+Object.assign(PRED,{
+'Wärmedämmung':['Eine Ziegelwand bekommt 14 cm Dämmung. Wie viel Wärme geht danach noch durch?',['Etwa ein Fünftel','Etwa die Hälfte','Gar keine mehr','Etwa 90 %'],'Ohne Dämmung ist U = 1,00 W/(m²·K), mit 14 cm Mineralwolle nur noch 0,20 W/(m²·K). Es geht noch etwa ein Fünftel durch. Ganz aufhalten lässt sich Wärme nie.'],
+'Wärmepumpe':['Eine Wärmepumpe gibt 4 kWh Wärme ab. Wie viel Strom braucht sie dafür ungefähr?',['Etwa 1 kWh','Genau 4 kWh','Mehr als 4 kWh','Gar keinen'],'Der Strom treibt nur den Verdichter an. Die übrigen 3 kWh holt die Wärmepumpe als Umweltwärme aus Luft, Erde oder Wasser: ε = 4 kWh / 1 kWh = 4.']
+});
+Object.assign(AUF,{
+'Wärmedämmung':{t:'Eine Ziegelwand (36,5 cm) wird saniert. Das Gebäudeenergiegesetz verlangt danach <b>U ≤ 0,24 W/(m²·K)</b>. Mit Mineralwolle: Finde eine Dämmstärke, die reicht, aber höchstens <b>16 cm</b> dick ist. Verändere nur d.',st:{v:0,w:0,s:0,d:0,ta:-10},fr:['d'],
+ ok:s=>WDU(s.w,s.s,s.d)<=.24&&s.d<=16,v:s=>'U = '+WDF(WDU(s.w,s.s,s.d))+' W/(m²·K) bei d = '+s.d+' cm',z:'U ≤ 0,24 W/(m²·K) und d ≤ 16 cm',h:s=>WDU(s.w,s.s,s.d)>.24?'U noch zu groß: d größer machen.':'Reicht, aber unnötig dick: d kleiner machen.',
+ q:'Warum bringt der erste Zentimeter Dämmung mehr als der zwanzigste?',a:'U = 1 / R_ges. Jeder Zentimeter Mineralwolle erhöht R_ges um 0,01 m / 0,035 W/(m·K) = 0,29 m²·K/W. Ist R_ges klein, sinkt U dadurch stark, ist R_ges groß, kaum noch. Mit 12 cm: R_ges = 0,17 m²·K/W + 0,83 m²·K/W + 3,43 m²·K/W = 4,43 m²·K/W, also U = 1 / 4,43 m²·K/W = 0,23 W/(m²·K).'},
+'Wärmepumpe':{t:'Die Fußbodenheizung braucht mindestens <b>35 °C</b> Vorlauf. Bei <b>0 °C Außenluft</b> soll die Wärmepumpe trotzdem mindestens <b>ε = 4</b> schaffen. Finde eine passende Vorlauftemperatur. Verändere nur ϑ_V.',st:{v:0,q:0,T:0,V:55,Q:15000},fr:['V'],
+ ok:s=>s.V>=35&&WPK(s).e>=4,v:s=>'ε = '+WDF(WPK(s).e,1)+' bei ϑ_V = '+s.V+' °C',z:'ε ≥ 4 und ϑ_V ≥ 35 °C',h:s=>s.V<35?'Zu kalt für die Fußbodenheizung: ϑ_V größer machen.':'ε noch zu klein: ϑ_V kleiner machen.',
+ q:'Warum sinkt ε, wenn das Heizwasser wärmer sein soll?',a:'Der Verdichter muss die Wärme über einen größeren Temperaturhub heben. Bei 0 °C Außenluft und 39 °C Vorlauf: ε_C = 312 K / 39 K = 8,0, also ε = 0,5 · 8,0 = 4,0. Bei 55 °C: ε_C = 328 K / 55 K = 6,0, also ε = 3,0. Jede kWh Wärme braucht dann ein Drittel mehr Strom.'}
+});
 /* Formeln in Erklärbildern (v1.11.): „a / b“ als Bruch mit Bruchstrich, „√(…)“ mit Wurzelstrich über dem ganzen Term. Breiten per Canvas gemessen, Boxen mit Zeilenhöhe; T in den Sequenzen heißt ET */
 const EQC=document.createElement('canvas').getContext('2d'),EMF='"Schibsted Grotesk",system-ui,sans-serif';
 const EQW=(s,fs,wt)=>{EQC.font=`${wt} ${fs}px ${EMF}`;return EQC.measureText(s.includes('&')?s.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&nbsp;/g,'\u00A0').replace(/&quot;/g,'"').replace(/&amp;/g,'&'):s).width};
@@ -12054,6 +12334,78 @@ Object.assign(EIN,{
   f:(k,t)=>EMRK(k,t,`<g transform="translate(-20 40) scale(.5)">`+ESTP(1)+`</g>`,'S → T → O → P','PSA zuletzt')}
 ]
 });
+/* „Kurz erklärt“: Wärmedämmung und Wärmepumpe (v268) */
+const WDKAF=(k,t)=>{/* Kaffeetasse: Leitung, Konvektion, Strahlung; rechts Thermoskanne */const a=EINL(0,1,(k-.5)*4),fr=x=>x.toFixed(1);
+ let g=`<rect x="20" y="226" width="230" height="8" rx="3" fill="#a16207" stroke="var(--ink)" stroke-width="1.5"/>`
+  +`<path d="M80 130H170L162 222H88Z" fill="#f8fafc" stroke="var(--ink)" stroke-width="2.5"/><ellipse cx="125" cy="134" rx="42" ry="7" fill="#7c4a26" stroke="var(--ink)" stroke-width="1.5"/><path d="M168 148q30 4 26 30q-3 20 -30 22" fill="none" stroke="var(--ink)" stroke-width="5"/><path d="M168 148q30 4 26 30q-3 20 -30 22" fill="none" stroke="#f8fafc" stroke-width="2.5"/>`
+  +[0,1,2].map(i=>{const f=(t*.45+i/3)%1;return `<path d="M${105+i*16} ${fr(122-f*60)}q6 -8 0 -16q-6 -8 0 -16" fill="none" stroke="#94a3b8" stroke-width="3" opacity="${fr(1-f)}"/>`}).join('')
+  +[0,1,2].map(i=>`<path d="M74 ${150+i*24}q-6 -5 -12 0t-12 0t-12 0" fill="none" stroke="#ef4444" stroke-width="2.5" opacity=".85"/>`).join('')
+  +AR(196,180,40,0,'#f97316','');
+ g+=EFT(125,52,'Konvektion','ein2','middle')+EFT(14,120,'Strahlung','ein2')+EFT(214,168,'Leitung','ein2');
+ g+=`<g opacity="${fr(a)}"><rect x="330" y="60" width="80" height="170" rx="16" fill="#cbd5e1" stroke="var(--ink)" stroke-width="2.5"/><rect x="342" y="74" width="56" height="146" rx="10" fill="#f1f5f9" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="4 3"/><rect x="350" y="84" width="40" height="128" rx="6" fill="#7c4a26" opacity=".85"/><rect x="338" y="44" width="64" height="20" rx="5" fill="#475569" stroke="var(--ink)" stroke-width="2"/>`
+  +EFT(370,256,'Thermoskanne','ein1','middle')+EFT(420,110,'Vakuum','ein2')+EFT(420,134,'Spiegel','ein2')+EFT(420,158,'Deckel','ein2')+'</g>';
+ return g};
+const WPFRI=(k,t)=>{/* Kühlschrank: innen kalt, hinten warm; rechts Garten → Wärmepumpe → Haus */const a=EINL(0,1,(k-.45)*4),fr=x=>x.toFixed(1);
+ let g=`<rect x="40" y="36" width="120" height="200" rx="8" fill="#f8fafc" stroke="var(--ink)" stroke-width="2.5"/><rect x="52" y="48" width="96" height="120" rx="4" fill="#bfdbfe" stroke="var(--ink)" stroke-width="1.5"/>`+EFT(100,114,'4 °C','ein1','middle')
+  +`<path d="M172 54${[...Array(9)].map((_,i)=>`L${i%2?188:172} ${70+i*18}`).join('')}" fill="none" stroke="#dc2626" stroke-width="3.5" stroke-linejoin="round"/>`
+  +[0,1,2].map(i=>{const f=(t*.5+i/3)%1;return `<path d="M${fr(198+f*26)} ${86+i*50}q6 -6 0 -12q-6 -6 0 -12" fill="none" stroke="#f97316" stroke-width="2.5" opacity="${fr(1-f)}"/>`}).join('')
+  +AR(118,196,50,0,'var(--red)','')+ETAG(110,258,'innen kalt, hinten warm','middle');
+ g+=`<g opacity="${fr(a)}"><rect x="262" y="176" width="8" height="40" fill="#78350f"/><circle cx="266" cy="160" r="26" fill="#4d7c0f" stroke="var(--ink)" stroke-width="1.5"/><line x1="240" x2="470" y1="216" y2="216" stroke="var(--ink)" stroke-width="2"/>`
+  +BOX3(306,170,46,46,10,'#e5e7eb','#f3f4f6','#cbd5e1')+`<circle cx="329" cy="193" r="15" fill="#1f2937"/>`+AR(286,150,22,24,'#2563eb','')+HAUS(392,216,70,52,14,'')+AR(360,188,36,0,'var(--red)','')
+  +ETAG(360,258,'Garten → Wärmepumpe → Haus','middle')+'</g>';
+ return g};
+const WDLAM=k=>{/* Gleiche Dämmwirkung wie 10 cm Dämmstoff: nötige Dicke anderer Stoffe (log. Skala) */const L=[['Dämmstoff','0,035','0,10 m'],['Holz','0,13','0,37 m'],['Ziegel','0,44','1,26 m'],['Beton','2,1','6,0 m'],['Stahl','50','143 m']];
+ return EFT(20,30,'So dick für die Wirkung von 10 cm Dämmstoff:','ein2')+L.map((q,i)=>{const d=parseFloat(q[2].replace(',','.')),w=Math.min(230,16+58*Math.log10(d/.1)),y=62+i*40,a=EINL(0,1,k*6-i*.6);
+  return EFT(20,y+16,q[0],'ein1')+EFT(132,y+16,'λ = '+q[1],'ein2')+`<g opacity="${a.toFixed(2)}">`+BAR3(230,y,w*EINQ(a),20,i?'var(--amber)':'var(--ok)',6,{sw:1.2})+EFT(240+w+10,y+16,q[2],'ein1')+'</g>'}).join('')
+  +EFT(20,262,'λ in W/(m·K)','ein2')};
+Object.assign(EIN,{
+'Wärmedämmung':[
+ {d:12,t:'Warum kühlt Kaffee ab? Auf drei Wegen: Die Tasse leitet Wärme (Leitung), warme Luft steigt auf (Konvektion), und die Oberfläche strahlt Wärme ab (Strahlung). Die Thermoskanne bremst alle drei.',
+  s:'Warum kühlt Kaffee ab? Auf drei Wegen: Die Tasse leitet Wärme, das ist Leitung. Warme Luft steigt auf, das ist Konvektion. Und die Oberfläche strahlt Wärme ab, das ist Strahlung. Die Thermoskanne bremst alle drei.',
+  f:(k,t)=>WDKAF(k,t)},
+ {d:11,t:'Wärme fließt immer von warm nach kalt. Durch eine Hauswand fließt der Wärmestrom Φ = U · A · ΔT: je größer die Fläche und je kälter es draußen ist, desto mehr.',
+  s:'Wärme fließt immer von warm nach kalt. Durch eine Hauswand fließt der Wärmestrom Phi gleich U mal A mal Delta T: je größer die Fläche und je kälter es draußen ist, desto mehr.',
+  f:(k,t)=>ESIM('Wärmedämmung',{v:0,w:0,s:0,d:0,ta:-10},t,'0 20 440 270',0,0,320,215)+ECARD(400,118,[['Φ = U · A · ΔT','ein1'],['mehr Fläche: mehr Verlust','ein2'],['kälter draußen: mehr Verlust','ein2']])},
+ {d:11,t:'Das Geheimnis guter Dämmung ist ruhende Luft. Luft leitet Wärme sehr schlecht, λ ≈ 0,026 W/(m·K). In den feinen Poren und Fasern kann sie nicht strömen. So wirken auch Daunenjacke und Doppelfenster.',
+  s:'Das Geheimnis guter Dämmung ist ruhende Luft. Luft leitet Wärme sehr schlecht. In den feinen Poren und Fasern kann sie nicht strömen. So wirken auch Daunenjacke und Doppelfenster.',
+  f:(k,t)=>WDPAT+`<rect x="40" y="50" width="200" height="170" rx="6" fill="url(#wdpM)" stroke="var(--ink)" stroke-width="2"/>`+[0,1,2,3,4,5,6,7,8].map(i=>`<circle cx="${62+(i%3)*68}" cy="${78+Math.floor(i/3)*52}" r="${(13+3*Math.sin(t*2+i)).toFixed(1)}" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.5" opacity=".85"/>`).join('')+EFT(140,248,'Dämmstoff, stark vergrößert','ein2','middle')+ECARD(380,130,[['eingesperrte Luft','ein1'],['strömt nicht','ein2'],['λ_Luft ≈ 0,026 W/(m·K)','ein2']])},
+ {d:12,t:'Wie gut ein Stoff dämmt, sagt die Wärmeleitfähigkeit λ. Für die gleiche Wirkung wie 10 cm Dämmstoff bräuchte man 1,26 m Ziegel, 6 m Beton oder 143 m Stahl.',
+  s:'Wie gut ein Stoff dämmt, sagt die Wärmeleitfähigkeit Lambda. Für die gleiche Wirkung wie 10 Zentimeter Dämmstoff bräuchte man 1,26 Meter Ziegel, 6 Meter Beton oder 143 Meter Stahl.',
+  f:k=>WDLAM(k)},
+ {d:12,t:'Ohne Dämmung ist die Ziegelwand innen nur 16,1 °C warm. Mit 14 cm Mineralwolle fällt die Temperatur fast nur in der Dämmschicht ab. Die Wand bleibt innen bei 19,2 °C, U sinkt von 1,00 auf 0,20 W/(m²·K).',
+  s:'Ohne Dämmung ist die Ziegelwand innen nur 16,1 Grad warm. Mit 14 Zentimetern Mineralwolle fällt die Temperatur fast nur in der Dämmschicht ab. Die Wand bleibt innen bei 19,2 Grad, U sinkt von 1 auf 0,2.',
+  f:(k,t)=>ESIM('Wärmedämmung',{v:0,w:0,s:0,d:k<.5?0:14,ta:-10},t,'0 0 640 300',0,0,480,225)+ETAG(240,256,k<.5?'ohne Dämmung: U = 1,00 W/(m²·K)':'mit 14 cm: U = 0,20 W/(m²·K)','middle','ein1')},
+ {d:12,t:'Die Wärmebildkamera zeigt die kritischen Punkte: Balkonplatte, Rollladenkasten, Fenster und Sockel. Dort fließt die Wärme an der Dämmung vorbei. Dazu kommen undichte Fugen und Feuchte in der Dämmung.',
+  s:'Die Wärmebildkamera zeigt die kritischen Punkte: Balkonplatte, Rollladenkasten, Fenster und Sockel. Dort fließt die Wärme an der Dämmung vorbei. Dazu kommen undichte Fugen und Feuchte in der Dämmung.',
+  f:(k,t)=>ESIM('Wärmedämmung',{v:1,w:0,s:0,d:14,ta:-10},t,'0 0 640 300',0,0,480,225)+ETAG(240,256,'Wärmebrücken leuchten hell','middle','ein1')},
+ {d:13,t:'Merke: U = 1 / R_ges. Die ersten Zentimeter bringen am meisten, 20 statt 30 cm ändert nur noch wenig. Ein gut gedämmtes Haus braucht wenig Vorlauftemperatur, ideal für die Wärmepumpe.',
+  s:'Merke: U gleich 1 durch R gesamt. Die ersten Zentimeter bringen am meisten, 20 statt 30 Zentimeter ändert nur noch wenig. Ein gut gedämmtes Haus braucht wenig Vorlauftemperatur, ideal für die Wärmepumpe.',
+  f:k=>EFX(k,[['U = 1 / R_ges','h'],['0 cm: U = 1,00 W/(m²·K)','m'],['10 cm: U = 0,26 W/(m²·K)','m'],['20 cm: U = 0,15 W/(m²·K)','m'],['30 cm: U = 0,10 W/(m²·K)','r']],['Ziegel 36,5 cm mit Mineralwolle'])}
+],
+'Wärmepumpe':[
+ {d:12,t:'Fass mal hinten an den Kühlschrank: Er ist warm. Er pumpt Wärme aus dem Innenraum nach draußen. Eine Wärmepumpe macht dasselbe, nur holt sie die Wärme aus dem Garten ins Haus.',
+  s:'Fass mal hinten an den Kühlschrank: Er ist warm. Er pumpt Wärme aus dem Innenraum nach draußen. Eine Wärmepumpe macht dasselbe, nur holt sie die Wärme aus dem Garten ins Haus.',
+  f:(k,t)=>WPFRI(k,t)},
+ {d:11,t:'Im Verdampfer siedet das Kältemittel bei niedrigem Druck schon deutlich unter 0 °C. Zum Verdampfen braucht es Wärme. Die holt es sich aus der Außenluft, auch wenn die nur 2 °C hat.',
+  s:'Im Verdampfer siedet das Kältemittel bei niedrigem Druck schon deutlich unter null Grad. Zum Verdampfen braucht es Wärme. Die holt es sich aus der Außenluft, auch wenn die nur 2 Grad hat.',
+  f:(k,t)=>ESIM('Wärmepumpe',{v:0,q:0,T:2,V:35},t,'0 40 260 220',0,10,290,245)+ECARD(390,130,[['Verdampfer','ein1'],['Kältemittel siedet','ein2'],['unter 0 °C','ein2']])},
+ {d:11,t:'Der Verdichter presst das kalte Gas zusammen. Wie bei der Fahrradpumpe wird es dabei heiß. Nur der Verdichter braucht Strom.',
+  s:'Der Verdichter presst das kalte Gas zusammen. Wie bei der Fahrradpumpe wird es dabei heiß. Nur der Verdichter braucht Strom.',
+  f:(k,t)=>ESIM('Wärmepumpe',{v:0,q:0,T:2,V:35},t,'190 0 220 150',0,10,290,200)+ECARD(390,130,[['Verdichter','ein1'],['Druck ↑, Temperatur ↑','ein2'],['braucht Strom','ein2']])},
+ {d:11,t:'Im Verflüssiger gibt das heiße Gas seine Wärme an das Heizwasser ab und wird wieder flüssig. Das Heizwasser fließt mit 35 °C in die Fußbodenheizung.',
+  s:'Im Verflüssiger gibt das heiße Gas seine Wärme an das Heizwasser ab und wird wieder flüssig. Das Heizwasser fließt mit 35 Grad in die Fußbodenheizung.',
+  f:(k,t)=>ESIM('Wärmepumpe',{v:0,q:0,T:2,V:35},t,'340 50 300 220',0,10,290,230)+ECARD(395,130,[['Verflüssiger','ein1'],['Wärme → Heizwasser','ein2'],['Gas wird flüssig','ein2']])},
+ {d:10,t:'Das Expansionsventil lässt den Druck ab. Das Kältemittel kühlt dabei stark ab und fließt wieder in den Verdampfer. Der Kreis beginnt von vorn.',
+  s:'Das Expansionsventil lässt den Druck ab. Das Kältemittel kühlt dabei stark ab und fließt wieder in den Verdampfer. Der Kreis beginnt von vorn.',
+  f:(k,t)=>ESIM('Wärmepumpe',{v:0,q:0,T:2,V:35},t,'176 30 240 220',0,10,290,240)+ECARD(395,130,[['Expansionsventil','ein1'],['Druck ↓, kalt','ein2'],['Kreis beginnt neu','ein2']])},
+ {d:13,t:'Die Bilanz: 3191 kWh Strom und 11809 kWh Umweltwärme ergeben 15 000 kWh Heizwärme, ε = 4,7. Ein Gaskessel braucht dafür 15789 kWh Gas, ein Heizstab 15 000 kWh Strom.',
+  s:'Die Bilanz: 3191 Kilowattstunden Strom und 11809 Kilowattstunden Umweltwärme ergeben 15000 Kilowattstunden Heizwärme. Ein Gaskessel braucht dafür 15789 Kilowattstunden Gas, ein Heizstab 15000 Kilowattstunden Strom.',
+  f:(k,t)=>ESIM('Wärmepumpe',{v:1,q:0,T:2,V:35,Q:15000},t,'0 0 640 300',0,0,480,225)+ETAG(240,256,'1 kWh Strom → 4,7 kWh Wärme','middle','ein1')},
+ {d:14,t:'Der Haken: Je größer der Temperaturhub, desto weniger Wärme je kWh Strom. Bei 35 °C Vorlauf ist ε = 4,7, bei 55 °C nur 3,1. Dazu kommen hohe Anschaffungskosten, Geräusch und der Strompreis.',
+  s:'Der Haken: Je größer der Temperaturhub, desto weniger Wärme je Kilowattstunde Strom. Bei 35 Grad Vorlauf ist Epsilon 4,7, bei 55 Grad nur 3,1. Dazu kommen hohe Anschaffungskosten, Geräusch und der Strompreis.',
+  f:k=>EFX(k,[['ε = 0,5 · T_V / ΔT','h'],['35 °C: ε = 0,5 · 308 K / 33 K = 4,7','m'],['55 °C: ε = 0,5 · 328 K / 53 K = 3,1','m'],['niedriger Vorlauf = weniger Strom','r']],['Dämmen und Fußbodenheizung helfen der Wärmepumpe'])}
+]
+});
 const EINU=[
  {d:11,t:'Vier Fragen aus der Prüfung: Wie viele Meter sind 2,5 km? Wie viele Minuten sind 1,5 h? Wie viele Pascal hat 1 bar? Wie viel ist 72 km/h in m/s? Das alles ist Umrechnen, und es folgt wenigen Regeln.',
   s:'Vier Fragen aus der Prüfung: Wie viele Meter sind 2,5 Kilometer? Wie viele Minuten sind 1,5 Stunden? Wie viele Pascal hat 1 bar? Wie viel ist 72 Kilometer pro Stunde in Meter pro Sekunde? Das alles ist Umrechnen, und es folgt wenigen Regeln.',
@@ -12131,6 +12483,12 @@ const GRZ={
 'Brennstoffzelle (Wasserstoff)':[['@n','Zahl der Zellen','-','So viele Zellen sind im Stack in Reihe geschaltet. Ihre Spannungen addieren sich.'],['@I','Stromstärke','A','Strom, der durch jede Zelle und den ganzen Stack fließt.'],['@U','Zellspannung','V','Spannung einer einzelnen Zelle im Betrieb, meist 0,6 bis 0,8 V.'],['#','Im Rechenweg'],['P','elektrische Leistung','W','Leistung des ganzen Stacks: P = n · U · I.'],['η','Wirkungsgrad','%','Zellspannung im Vergleich zur theoretischen Spannung von 1,23 V.'],['ṅ(H₂)','Wasserstoffverbrauch','mol/s','Stoffmenge Wasserstoff, die je Sekunde umgesetzt wird.'],['F','Faraday-Konstante','C/mol','Ladung von 1 mol Elektronen: F = 96485 C/mol. Je H₂-Molekül fließen 2 Elektronen.']],
 'Biogasanlage mit BHKW':[['@s','Substrat','','Futter für die Biogasanlage. Jedes Substrat hat eine eigene Gasausbeute und einen eigenen Methananteil.'],['@t','Substratmenge','t/Tag','So viel Substrat kommt jeden Tag in den Fermenter.'],['@ee','elektrischer Wirkungsgrad','%','Anteil der Methanenergie, den das BHKW als Strom abgibt.'],['@et','thermischer Wirkungsgrad','%','Anteil der Methanenergie, den das BHKW als nutzbare Wärme abgibt.'],['#','Im Rechenweg'],['Gasausbeute','Biogas je Tonne Substrat','m³/t','Gülle ca. 25 m³/t, Mais ca. 200 m³/t.'],['V_Biogas','Biogasmenge','m³/d','Biogas, das pro Tag entsteht.'],['V_CH₄','Methanmenge','m³/d','Methananteil im Biogas, nur er liefert Energie.'],['H_i','Heizwert von Methan','kWh/m³','H_i ≈ 9,97 kWh/m³.'],['E','Energie pro Tag','kWh/d','Energieinhalt des Methans eines Tages.'],['P_el','elektrische Leistung','kW','Strom aus dem BHKW: P_el = η_el · E / 24 h.']],
 'Verbrennungsmotor (Viertakt)':[['@a','Motorart','','Otto- oder Dieselmotor. Davon hängen Dichte und Heizwert des Kraftstoffs ab.'],['@n','Drehzahl','1/min','Umdrehungen der Kurbelwelle je Minute. Im Rechenweg in 1/s: 3000 1/min = 50 1/s.'],['@M','Drehmoment','N·m','Drehende Wirkung an der Kurbelwelle.'],['@V','Kraftstoffverbrauch','l/h','So viel Liter Kraftstoff verbraucht der Motor in einer Stunde.'],['#','Im Rechenweg'],['P','Leistung an der Welle','W','Mechanische Leistung: P = M · 2π · n.'],['ṁ','Kraftstoff-Massenstrom','kg/s','Verbrauch mal Dichte, z. B. Benzin 0,74 kg/l.'],['H_i','Heizwert','MJ/kg','Wärme, die 1 kg Kraftstoff beim Verbrennen abgibt.'],['P_zu','zugeführte Leistung','W','Wärmeleistung des Kraftstoffs: P_zu = ṁ · H_i.'],['η','Wirkungsgrad','%','Anteil der Kraftstoffenergie, der als Arbeit an der Welle ankommt.']]};
+Object.assign(GRZ,{
+'Wärmedämmung':[['@v','Ansicht','','Wand: Schnitt durch die Außenwand mit Temperaturverlauf. Wärmebild: die Fassade, wie eine Wärmebildkamera sie von außen sieht.'],['@w','Mauerwerk','','Ziegel, Kalksandstein oder Beton. Jedes hat seine Dicke d_M und seine Wärmeleitfähigkeit λ_M.'],['@s','Dämmstoff','','Mineralwolle, EPS, Holzfaser oder PUR. Je kleiner λ_D, desto besser dämmt der Stoff.'],['@d','Dämmstärke','cm','Dicke der Dämmschicht. Im Rechenweg in Meter: 14 cm = 0,14 m.'],['@ta','Außentemperatur','°C','Temperatur der Luft draußen. Innen sind es immer 20 °C.'],
+ ['#','Im Rechenweg'],['λ','Wärmeleitfähigkeit','W/(m·K)','Stoffwert: So gut leitet ein Stoff Wärme. Dämmstoff etwa 0,035, Ziegel 0,44, Beton 2,1.'],['R','Wärmedurchlasswiderstand','m²·K/W','R = d / λ. Je größer, desto stärker bremst die Schicht die Wärme. Die Widerstände aller Schichten werden addiert.'],['R_si + R_se','Wärmeübergang innen und außen','m²·K/W','Auch die Luftschicht direkt an der Wand bremst etwas: innen 0,13, außen 0,04, zusammen 0,17.'],['U','Wärmedurchgangskoeffizient (U-Wert)','W/(m²·K)','U = 1 / R_ges. So viele Watt gehen durch 1 m² Wand je Kelvin Temperaturunterschied.'],['Φ','Wärmestrom','W','Φ = U · A · ΔT: der Wärmeverlust der ganzen Wand, hier A = 100 m².'],['ΔT','Temperaturunterschied','K','ΔT = 20 °C − ϑ_a. Ein Unterschied von 1 °C ist 1 K.'],['ϑ_si','Oberflächentemperatur innen','°C','Unter etwa 12,6 °C wird es an der Wand so feucht, dass Schimmel wachsen kann.']],
+'Wärmepumpe':[['@v','Ansicht','','Kreislauf: die vier Bauteile und der Weg des Kältemittels. Energiefluss: Strom plus Umweltwärme ergibt Heizwärme, mit Vergleich zu Gaskessel und Heizstab.'],['@q','Wärmequelle','','Außenluft (Temperatur am Regler), Erdreich über eine Erdsonde (Sole etwa 5 °C) oder Grundwasser (etwa 10 °C).'],['@T','Außenluft','°C','Luft, aus der die Wärmepumpe Wärme holt. Für das ganze Jahr rechnet man mit dem Mittel der Heizzeit, etwa 2 bis 4 °C.'],['@V','Vorlauftemperatur','°C','So warm ist das Heizwasser, das ins Haus fließt. Fußbodenheizung etwa 35 °C, alte Heizkörper 55 bis 70 °C.'],['@Q','Wärmebedarf','kWh','So viel Wärme braucht das Haus im Jahr, ein Einfamilienhaus etwa 15 000 kWh.'],
+ ['#','Im Rechenweg'],['T','absolute Temperatur','K','T = ϑ + 273 K. Für den Carnot-Wert immer in Kelvin rechnen.'],['ΔT','Temperaturhub','K','Unterschied zwischen Vorlauf und Quelle. Je kleiner, desto besser.'],['ε_C','Carnot-Leistungszahl','-','Höchstwert einer idealen Wärmepumpe: ε_C = T_V / ΔT.'],['η_G','Gütegrad','-','Echte Geräte schaffen etwa die Hälfte des Carnot-Werts, hier η_G = 0,5.'],['ε','Leistungszahl (COP)','-','ε = Wärme / Strom in einem Betriebspunkt. Über das ganze Jahr heißt sie Jahresarbeitszahl (JAZ).'],['W_el','elektrische Arbeit','kWh','Strom, den der Verdichter im Jahr braucht.'],['Q_U','Umweltwärme','kWh','Wärme aus Luft, Erde oder Wasser. Sie kostet nichts.'],['K','Stromkosten','€','K = W_el · Strompreis, hier 0,30 €/kWh.']]
+});
 function grzShow(m){let d=$('#grz');const L=GRZ[m.name];if(!L){if(d)d.hidden=true;return}
  if(!d){d=document.createElement('details');d.id='grz';d.className='grz';$('#ctls').after(d)}
  const op=d.dataset.n===m.name&&d.open;d.dataset.n=m.name;d.hidden=false;
@@ -12402,9 +12760,10 @@ function mcView(){const box=$('#mc');if(!box)return;const a=mcAll(),run=store.ge
 function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="panel"><h2>🧮 Mathe-Check</h2><p class="sub">Noch nicht gemacht. Der Check zeigt Dir in 20 Minuten, wo Du in den Mathe-Grundlagen stehst.</p><div class="pb"><button type="button" class="sbtn2" data-mco="1">Zum Mathe-Check →</button></div></div>`;
  return`<div class="panel"><h2>🧮 Mathe-Check</h2>${mcTable(a)}<div class="pb"><button type="button" class="sbtn2" data-mco="1">Startplan und Lösungswege →</button></div></div>`}
 /* Pilot-Einstellungen: Version, Neuigkeit, Kontakt */
-const APPV=267,NEWS='Erklärvideo Normalverteilung: Φ wird jetzt erklärt. In allen Erklärvideos erscheint der graue Hinweis erst nach dem Ergebnis.';
+const APPV=268,NEWS='Energie: Neue Gruppe „Heizen & Dämmen“ mit den Themen Wärmedämmung (U-Wert, Temperaturverlauf in der Wand, Wärmebild) und Wärmepumpe (Kreislauf, Leistungszahl, Vergleich mit Gaskessel und Heizstab), je mit Erklärvideo, Auftrag und Prüfungsaufgaben.';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
+['08.11.2026',268,['Energie: Neue Gruppe „Heizen & Dämmen“ mit zwei Themen. Wärmedämmung: Wandschnitt mit Mauerwerk, Dämmstoff, Dämmstärke und Außentemperatur, Temperaturverlauf in der Wand, Schimmelgrenze, U-Wert über der Dämmstärke und Ansicht Wärmebild mit den kritischen Punkten. Wärmepumpe: Kältemittelkreis mit Verdampfer, Verdichter, Verflüssiger und Expansionsventil, Wärmequelle Luft, Erdreich oder Grundwasser, Leistungszahl aus dem Carnot-Wert und Ansicht Energiefluss mit Vergleich zu Gaskessel und Heizstab (Kosten und CO₂). Dazu je ein Erklärvideo mit 7 Szenen, Vermuten, Auftrag, „Was bedeuten die Größen?“, Üben, Fehler finden, Begründen, 6 Prüfungsaufgaben, Glossar und Formelkarten.']],
 ['08.11.2026',267,['Erklärvideo Normalverteilung: In der Szene zum z-Wert wird jetzt erklärt, was Φ(z) bedeutet, nämlich der Anteil aller Werte unterhalb von z, abgelesen in der Z-Tabelle.','Alle Erklärvideos: Die graue Hinweiszeile unter einer Rechnung erscheint erst, wenn das Ergebnis steht.']],
 ['08.11.2026',266,['Grundrechenregeln, Potenzen: Strecke, Quadrat und Würfel sind maßstäblich gezeichnet und werden bei jedem Schritt von a sichtbar größer (vorher ab a = 4 gleich groß). Der Regler a geht in dieser Regel bis 8, damit der Würfel ins Bild passt.']],
 ['08.11.2026',265,['Energie: In allen 11 Themen gibt es unter den Reglern den Kasten „Was bedeuten die Größen?“ (eingeklappt). Er erklärt jeden Regler und die übrigen Größen im Rechenweg mit Name, Einheit und Bedeutung, z. B. η_M, G, η_WR und H_Jahr bei Photovoltaik.']],
@@ -12605,6 +12964,16 @@ GL.push(
 ['W','Wahrscheinlichkeit','Wie oft ein Schaden eintreten kann, in der Gefährdungsbeurteilung z. B. auf einer Skala von 1 bis 5.','','X',['Gefährdungsbeurteilung']],
 ['S','Schwere','Wie schlimm die Folgen eines Schadens wären, z. B. auf einer Skala von 1 (gering) bis 5 (tödlich).','','X',['Gefährdungsbeurteilung']]
 );
+GL.push(
+['U','Wärmedurchgangskoeffizient (U-Wert)','Wärmestrom je m² Bauteil und je Kelvin Temperaturunterschied: U = 1 / R_ges. Klein heißt gut gedämmt.','W/(m²·K)','E',['Wärmedämmung']],
+['λ','Wärmeleitfähigkeit','Stoffwert: wie gut ein Stoff Wärme leitet. Dämmstoff etwa 0,035, Beton 2,1.','W/(m·K)','E',['Wärmedämmung']],
+['R','Wärmedurchlasswiderstand','Wie stark eine Schicht die Wärme bremst: R = d / λ.','m²·K/W','E',['Wärmedämmung']],
+['Φ','Wärmestrom','Wärme, die je Sekunde durch ein Bauteil fließt: Φ = U · A · ΔT.','W','E',['Wärmedämmung']],
+['ε','Leistungszahl (COP)','Abgegebene Wärme durch aufgenommenen Strom einer Wärmepumpe: ε = Q / W_el.','–','E',['Wärmepumpe']],
+['ε_C','Carnot-Leistungszahl','Höchstmögliche Leistungszahl: ε_C = T_V / (T_V − T_Q), Temperaturen in Kelvin.','–','E',['Wärmepumpe']],
+['JAZ','Jahresarbeitszahl','Wärme im Jahr durch Strom im Jahr. Gute Wärmepumpen erreichen 3 bis 5.','–','E',['Wärmepumpe']]
+);
+LVT.num['Wärmedämmung']=2;LVT.num['Wärmepumpe']=2;
 // Andere Schreibweisen: [Größe, im Lernlabor, auch üblich, Hinweis]. Gleiche Bedeutung, nur ein anderes Zeichen.
 const GLA=[
 ['Sicherheitszahl','ν','S, n','Zulässige Spannung σ_zul = R_e / ν.'],
@@ -12953,6 +13322,9 @@ const FSD=[
 ['Abschaltbedingung',['I_k = U_0 / Z_s','Z_s · I_a ≤ U_0','I_a = 5 · I_n'],'I_k~Kurzschlussstrom~A|U_0~Spannung gegen Erde~V|Z_s~Schleifenimpedanz~Ω|I_a~Abschaltstrom~A|I_n~Nennstrom~A','Zeile 3: Leitungsschutzschalter Typ B. Fehlerstrom-Schutzschalter (RCD) für den Personenschutz: 30 mA.','Schutzleiter & RCD']]],
 [FSI,SXG4,[
 ['Branddreieck',['Brennstoff + Sauerstoff + Zündtemperatur → Brand'],'','Fehlt eine Seite, erlischt der Brand. Unter etwa 15 % Sauerstoff erlischt er.','Branddreieck']]]];
+FSD.push([FE,E5,[
+['Wärmedurchgang',['R = d / λ','R_ges = R_si + R_1 + R_2 + R_se','U = 1 / R_ges','Φ = U · A · ΔT'],'R~Wärmedurchlasswiderstand~m²·K/W|d~Schichtdicke~m|λ~Wärmeleitfähigkeit~W/(m·K)|U~Wärmedurchgangskoeffizient~W/(m²·K)|Φ~Wärmestrom~W|A~Fläche~m²|ΔT~Temperaturunterschied~K','Wand: R_si + R_se ≈ 0,17 m²·K/W','Wärmedämmung'],
+['Wärmepumpe',['ε = Q / W_el','ε_C = T_V / (T_V − T_Q)','Q = W_el + Q_U'],'ε~Leistungszahl~–|Q~abgegebene Wärme~kWh|W_el~elektrische Arbeit~kWh|ε_C~Carnot-Leistungszahl~–|T_V~Vorlauftemperatur~K|T_Q~Quelltemperatur~K|Q_U~Umweltwärme~kWh','Echte Geräte: ε ≈ 0,5 · ε_C. Temperaturen in Kelvin.','Wärmepumpe']]]);
 // Einheiten: Tabellen [Überschrift, Kopfzeile, Zeilen, Hinweis]
 const FSU=[
 ['SI-Basiseinheiten',['Größe','Zeichen','Einheit'],[['Länge','l','m (Meter)'],['Masse','m','kg (Kilogramm)'],['Zeit','t','s (Sekunde)'],['Stromstärke','I','A (Ampere)'],['Temperatur','T','K (Kelvin)'],['Stoffmenge','n','mol (Mol)'],['Lichtstärke','I_v','cd (Candela)']],''],
