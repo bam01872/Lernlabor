@@ -22,6 +22,8 @@ const srv=http.createServer((q,r)=>{let p=decodeURIComponent(q.url.split('?')[0]
   for(const s of sn)for(const h of ['thema/'+s,'ueben/'+s]){errs.length=0;await p.evaluate(x=>location.hash=x,h);await p.waitForTimeout(60);
    if(errs.length)bad(`${vp.width}px #${h}: ${errs[0]}`)}
   {await p.evaluate(x=>location.hash=x,'thema/'+sn[0]);await p.waitForTimeout(200);const ok=await p.evaluate(()=>document.body.innerText.includes(M[0].name));if(!ok)bad('Thema 1 öffnet nicht per Adresse')}
+  // v258: kein Auftrag-Knopf oben neben „Kurz erklärt“, der Auftrag steht nur bei den Reglern
+  {await p.evaluate(x=>location.hash=x,'thema/hydraulik');await p.waitForTimeout(300);const r=await p.evaluate(()=>({g:!!document.querySelector('#uig'),a:!!document.querySelector('.panel>#auf+#ctls,.panel #auf.uia')}));if(r.g)bad(vp.width+'px: Auftrag-Knopf oben ist wieder da');if(!r.a)bad(vp.width+'px: Auftrag steht nicht bei den Reglern')}
   for(const h of ['ueben','pruefung','muendlich','']){errs.length=0;await p.evaluate(x=>location.hash=x,h);await p.waitForTimeout(150);if(errs.length)bad(`${vp.width}px #${h}: ${errs[0]}`)}
   console.log(`${vp.width}px: ${sn.length} Themen geprüft`);await p.close()}}
  catch(e){bad(e.stack)}await b.close();srv.close();
