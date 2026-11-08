@@ -1,0 +1,71 @@
+Originalstellen mit Faraday-Konstante aus index.html v257 (ersetzt in v259). Zum Wiederherstellen die Zeilen zurückkopieren.
+
+=== C3 Simulation Elektrolyse, Rechenweg (Zeile mit rows/st)
+ return{d:h,res:[[nf(Q)+' C','Ladung Q'],[amt(k,nk),'an der Kathode'],[amt(a,na),'an der Anode']],rows:[['n(e⁻)',nf(ne)+' mol'],['n('+k[0]+')',nf(nk)+' mol'],['n('+a[0]+')',nf(na)+' mol']],st:[['Q = I · t, n(e⁻) = Q / F',`F = 96485 C/mol, ${nf(Q)} C → ${nf(ne)} mol`],['Kathode (Reduktion)',E[3]],['Anode (Oxidation)',E[4]],['Masse m = M · n, Gas V = n · 24 l/mol','1. Faraday-Gesetz']]}},'',1);
+
+=== A1 Rechnen-Generator Elektrolyse
+'Elektrolyse':r=>{const I=rg(r,1,5),t=rg(r,10,60,10),m=63.55*I*t*60/(2*96485);return[`Aus CuSO₄-Lösung wird mit ${I} A über ${t} min Kupfer abgeschieden. Wie viel Kupfer scheidet sich ab? (M = 63,55 g/mol, F = 96485 C/mol)`,m,'g',[`Q = I · t = ${I} A · ${t*60} s = ${I*t*60} C`,`n(e⁻) = Q / F = ${I*t*60} C / 96485 C/mol = ${nf(I*t*60/96485)} mol`,`n(Cu) = n(e⁻) / 2 = ${nf(I*t*60/96485)} mol / 2 = ${nf(I*t*60/96485/2)} mol`,`m = n · M = ${nf(I*t*60/96485/2)} mol · 63,55 g/mol = ${nf(m)} g`]]},
+
+=== B3 Mündlich Fallgespräch Galvanik
+['Chemie','In der Galvanik soll eine Kupferschicht dicker werden. Der Schichtleiter schlägt vor, den Strom zu verdoppeln.','Was ändert sich nach Faraday, und was müssen Sie zusätzlich beachten?',['m = M · I · t / (z · F)','Doppelter Strom, doppelte Masse in gleicher Zeit','Stromdichte begrenzt die Qualität (Anbrennen, raue Schicht)','Alternative: längere Zeit'],'Nach Faraday ist die abgeschiedene Masse m = M · I · t / (z · F). Doppelter Strom bedeutet doppelte Masse in derselben Zeit. Zu hohe Stromdichte verschlechtert aber die Schicht, sie wird rau oder verbrennt. Oft ist es besser, die Zeit zu verlängern.','Welche Rolle spielt die Wertigkeit z?'],
+
+=== C4 Formelkarten Elektrolyse
+'Elektrolyse':['m = M · I · t / (z · F)','F = 96485 C/mol','Q = I · t','V(Gas) = n · V_m  (≈ 24 l/mol bei 20 °C)','Kathode (−): Reduktion, Anode (+): Oxidation'],
+
+=== A2 Prüfungsaufgabe Verkupfern: Faraday-Gesetz und Schichtdicke
+['Verkupfern: Faraday-Gesetz und Schichtdicke',r=>{const I=rg(r,2,10,1),t=rg(r,20,90,10),A=rg(r,50,200,10),Q=I*t*60,ne=Q/96485,m=ne/2*63.5,d=m/8.96/A*10000;return{intro:`Ein Werkstück mit ${A} cm² Oberfläche wird in einer Kupfersulfatlösung (Cu²⁺-Ionen) verkupfert. Der Strom beträgt ${I} A und fließt ${t} min lang. Faraday-Konstante F = 96485 C/mol, M(Cu) = 63,5 g/mol, Dichte von Kupfer ρ = 8,96 g/cm³. Der Strom wird vollständig zur Abscheidung genutzt.`,steps:[STP('Welche Ladung fließt insgesamt?',Q,'C',[`Q = I · t = ${I} A · ${t*60} s = ${nf(Q)} C`],'Zeit in Sekunden umrechnen.'),STP('Welche Stoffmenge Elektronen wird übertragen?',ne,'mol',[`n(e⁻) = Q / F = ${nf(Q)} C / 96485 C/mol = ${nf(ne)} mol`],'n(e⁻) = Q / F.'),STP('Welche Masse Kupfer wird abgeschieden? (Cu²⁺ + 2 e⁻ → Cu)',m,'g',[`n(Cu) = n(e⁻) / 2 = ${nf(ne)} mol / 2 = ${nf(ne/2)} mol`,`m = n · M = ${nf(ne/2)} mol · 63,5 g/mol = ${nf(m)} g`],'Pro Kupferatom werden 2 Elektronen benötigt.'),STP('Wie dick wird die Kupferschicht?',d,'µm',[`V = m / ρ = ${nf(m)} g / 8,96 g/cm³ = ${nf(m/8.96)} cm³`,`d = V / A = ${nf(m/8.96)} cm³ / ${A} cm² = ${nf(m/8.96/A)} cm = ${nf(d)} µm`],'Schichtdicke = Volumen / Fläche. 1 cm = 10 000 µm.')]}}],
+
+=== A3 Prüfungsaufgabe Galvanisches Element: Spannung und Metallabtrag
+['Galvanisches Element: Spannung und Metallabtrag',r=>{const pair=pk(r,[['Zn','Cu'],['Fe','Cu'],['Zn','Ag'],['Mg','Cu'],['Al','Cu']]),a=PSP[pair[0]],k=PSP[pair[1]],U=k[0]-a[0],Rl=pk(r,[5,10,20,50]),I=U/Rl,t=rg(r,2,12,2),Q=I*t*3600,m=Q/96485/a[2]*a[1];return{intro:`Ein galvanisches Element besteht aus den Halbzellen ${pair[0]}/${pair[0]}-Ion (E⁰ = ${de(a[0])} V) und ${pair[1]}/${pair[1]}-Ion (E⁰ = ${de(k[0])} V). Es speist einen Lastwiderstand von ${Rl} Ω. Faraday-Konstante F = 96485 C/mol. Die Zellspannung bleibt vereinfacht konstant.`,steps:[STP('Wie groß ist die Zellspannung?',U,'V',[`U = E⁰(Kathode) − E⁰(Anode) = ${de(k[0])} V − (${de(a[0])} V) = ${nf(U)} V`],'Pluspol-Potential minus Minuspol-Potential.'),STP('Welcher Strom fließt durch den Lastwiderstand?',I,'A',[`I = U / R = ${nf(U)} V / ${Rl} Ω = ${nf(I)} A`],'Ohmsches Gesetz.'),STP(`Wie viel ${pair[0]} wird in ${t} Stunden aufgelöst? (z = ${a[2]}, M = ${de(a[1])} g/mol)`,m,'g',[`Q = I · t = ${nf(I)} A · ${t*3600} s = ${nf(Q)} C`,`m = Q · M / (z · F) = ${nf(Q)} C · ${de(a[1])} g/mol / (${a[2]} · 96485 C/mol) = ${nf(m)} g`],'m = M · I · t / (z · F), Zeit in Sekunden.')]}}],
+
+=== A4 Praxisaufgabe Fabrikauftrag, Teil 3 (Zeilen 6864–6869)
+['Fabrikauftrag, Teil 3: Montageplatten galvanisch verzinken',r=>{const a=pk(r,[120,140,160]),b=pk(r,[80,90,100]),d=pk(r,[9,11,13]),N=pk(r,[20,30,40]),s=pk(r,[8,10,12]),j=pk(r,[1.5,2,2.5]),A1=2*(a*b-4*PI*d*d/4)/1e4,A=A1*N,m=A*100*s*1e-4*7.14,Q=m*2*96485/65.38,I=j*A,t=Q/I/60;return{intro:`Die gestanzten Montageplatten (${a} mm × ${b} mm, vier Löcher d = ${d} mm) werden gegen Korrosion galvanisch verzinkt. Ein Gestell trägt ${N} Platten. Beide Seiten erhalten eine Zinkschicht von ${s} µm, die Kanten bleiben unberücksichtigt. Zink: ρ = 7,14 g/cm³, M = 65,38 g/mol, z = 2. Faraday-Konstante F = 96485 C/mol. Die Stromdichte beträgt ${de(j)} A/dm², die Stromausbeute 100 %.`,fig:pxPlate({a,b,d}),steps:[
+ STP('Wie groß ist die zu verzinkende Fläche eines Gestells?',A,'dm²',[`Eine Platte, beide Seiten: A₁ = 2 · (${a} · ${b} − 4 · π · ${d}² / 4) mm² = ${nf(A1*1e4)} mm² = ${nf(A1)} dm²`,`Gestell: A = ${N} Platten · ${nf(A1)} dm² = ${nf(A)} dm²`],'1 dm² = 10 000 mm².'),
+ STP('Wie viel Zink wird abgeschieden?',m,'g',[`V = A · s = ${nf(A*100)} cm² · ${nf(s*1e-4)} cm = ${nf(A*100*s*1e-4)} cm³`,`m = ρ · V = 7,14 g/cm³ · ${nf(A*100*s*1e-4)} cm³ = ${nf(m)} g`],'Schichtdicke in cm umrechnen: 1 µm = 0,0001 cm.'),
+ STP('Welche elektrische Ladung ist dafür nötig?',Q/1000,'kC',[`Faraday: Q = m · z · F / M = ${nf(m)} g · 2 · 96485 C/mol / 65,38 g/mol = ${nf(Q)} C = ${nf(Q/1000)} kC`],'Je Zinkion werden zwei Elektronen gebraucht.'),
+ STP('Welcher Strom fließt?',I,'A',[`I = j · A = ${de(j)} A/dm² · ${nf(A)} dm² = ${nf(I)} A`],'Strom = Stromdichte · Fläche.'),
+ STP('Wie lange muss das Gestell im Bad bleiben?',t,'min',[`t = Q / I = ${nf(Q)} C / ${nf(I)} A = ${nf(Q/I)} s = ${nf(t)} min`],'Q = I · t.')]}}]);
+
+=== A5 Praxisaufgabe Offshore-Windpark, Teil 2 (Zeilen 6911–6916)
+['Offshore-Windpark, Teil 2: Opferanoden gegen Meerwasser-Korrosion',r=>{const D=pk(r,[6,7,8]),L=pk(r,[25,30,35]),j=pk(r,[.08,.1,.12]),y=pk(r,[20,25]),ea=pk(r,[.65,.7]),A=PI*D*L,I=j*A,Q=I*y*8760,Ct=3*96485/26.98/3.6,Ce=Ct*ea,m=Q/Ce;return{intro:`Das Fundament einer Windturbine ist ein Stahlrohr (Monopile) mit ${D} m Durchmesser, das ${L} m tief im Meerwasser und im Meeresboden steht. Gegen Korrosion wird es kathodisch mit Opferanoden aus Aluminium geschützt. Die nötige Schutzstromdichte beträgt ${de(j)} A/m², die Schutzdauer soll ${y} Jahre betragen. Aluminium: M = 26,98 g/mol, z = 3, F = 96485 C/mol. Die Anoden liefern nur ${nf(ea*100,3)} % ihrer theoretischen Ladung als Schutzstrom.`,steps:[
+ STP('Wie groß ist die zu schützende Mantelfläche?',A,'m²',[`A = π · D · L = π · ${D} m · ${L} m = ${nf(A)} m²`],'Mantelfläche eines Zylinders (Innenseite vernachlässigt).'),
+ STP('Welcher Schutzstrom ist nötig?',I,'A',[`I = j · A = ${de(j)} A/m² · ${nf(A)} m² = ${nf(I)} A`],'Strom = Stromdichte · Fläche.'),
+ STP(`Welche Ladung muss in ${y} Jahren fließen (in Ah)?`,Q,'Ah',[`t = ${y} a · 8760 h/a = ${nf(y*8760)} h`,`Q = I · t = ${nf(I)} A · ${nf(y*8760)} h = ${nf(Q)} Ah`],'Ein Jahr hat 8760 Stunden.'),
+ STP('Welche Ladung liefert 1 kg Aluminium theoretisch (in Ah/kg)?',Ct,'Ah/kg',[`Faraday: Q = m · z · F / M = 1000 g · 3 · 96485 C/mol / 26,98 g/mol = ${nf(Ct*3600,5)} C`,`1 Ah = 3600 C ⇒ ${nf(Ct)} Ah/kg`],'Jedes Aluminiumatom gibt drei Elektronen ab.'),
+ STP('Wie viel Aluminium müssen die Anoden mindestens wiegen?',m/1000,'t',[`Nutzbar: ${nf(Ct)} Ah/kg · ${de(ea)} = ${nf(Ce)} Ah/kg`,`m = ${nf(Q)} Ah / ${nf(Ce)} Ah/kg = ${nf(m)} kg = ${nf(m/1000)} t`],'Benötigte Ladung durch nutzbare Ladung je kg.')]}}]);
+
+=== C1 Erklärbox Elektrolyse
+'Elektrolyse':['Nach Faraday gilt m = M · I · t / (z · F) mit F = 96485 C/mol. Je Ion werden z Elektronen übertragen. Die Ladung ist Q = I · t.',['Die Zeit in Minuten oder Stunden einsetzen statt in Sekunden.','Die Ionenwertigkeit z (zum Beispiel 2 bei Cu²⁺) vergessen.',
+
+=== A6 Typischer Fehler Zeit in Minuten
+["Elektrolyse", "Kupfer wird mit I = 2 A für 10 min abgeschieden. Rechnung: m = 63,5 · 2 · 10 / (2 · 96485). Was ist falsch?", ["Die Zeit muss in Sekunden stehen: t = 600 s, m = 63,5 g/mol · 2 A · 600 s / (2 · 96485 A·s/mol) ≈ 0,40 g.", "Nichts, in der Faraday-Formel steht die Zeit in Minuten.", "Man muss die Zeit in Stunden einsetzen: t = 10/60 h.", "Die Zeit lässt man weg, sie steckt schon in F."], "F hat die Einheit C/mol und 1 C = 1 A · s. Mit Minuten kommt ein 60-mal zu kleines Ergebnis heraus."],
+
+=== A7 Typischer Fehler z = 1
+["Elektrolyse", "Abscheidung von Cu²⁺. Rechnung mit z = 1. Was ist falsch?", ["Cu²⁺ braucht zwei Elektronen: z = 2.", "Nichts, z ist bei allen Metallionen 1.", "z = 63,5, das ist die Molmasse von Kupfer.", "z = 4, weil Kupfer vier Außenelektronen hat."], "z ist die Zahl der Elektronen, die je Ion übertragen werden. Sie steht an der Ladung des Ions."],
+
+=== B1 Vermute zuerst Elektrolyse
+'m = M · I · t / (z · F): Die Masse wächst im gleichen Verhältnis wie die Ladung Q = I · t (Faradaysches Gesetz).'
+
+=== B2 Auftrag Elektrolyse
+q:'Wie groß muss die Stromstärke mindestens sein?',a:'m = M · I · t / (z · F), also I = m · z · F / (M · t) = 2 g · 2 · 96485 C/mol / (63,55 g/mol · 1800 s) = 3,37 A. Am Regler 3,4 A.'
+
+=== C2 Kurz erklärt Elektrolyse (Schritt 5 + Merke)
+ {d:13,t:'Alles zusammen mit Faraday: Q = I · t = 2 A · 1800 s = 3600 C. Je Cu-Atom 2 Elektronen: n = Q / (2 · 96485 C/mol) = 0,0187 mol. m = n · M = 0,0187 mol · 63,5 g/mol = 1,19 g Kupfer.',
+  s:'Alles zusammen mit Faraday: Q gleich I mal t gleich 2 Ampere mal 1800 Sekunden gleich 3600 Coulomb. Je Kupferatom 2 Elektronen: n gleich Q durch 2 mal 96485 Coulomb pro Mol gleich 0,0187 Mol. m gleich n mal M gleich 1,19 Gramm Kupfer.',
+  f:k=>EFX(k,[['Q = I · t = 2 A · 1800 s = 3600 C','m'],['n = Q / (z · F) = 3600 C / (2 · 96485 C/mol)','m'],['n = 0,0187 mol','r'],['m = 0,0187 mol · 63,5 g/mol = 1,19 g','r']],['F = 96485 C/mol: Ladung von 1 mol Elektronen'])},
+ {d:9,t:'Merke: Elektrolyse erzwingt mit Strom eine Redoxreaktion. Kathode (−): Reduktion. Anode (+): Oxidation. Menge nach Faraday: m = M · I · t / (z · F).',
+  s:'Merke: Elektrolyse erzwingt mit Strom eine Redoxreaktion. Kathode minus: Reduktion. Anode plus: Oxidation. Menge nach Faraday.',
+
+=== C2 Kurz erklärt Merke-Bild
+'m = M · I · t / (z · F)','K(−) Red. · A(+) Ox.')}
+
+=== C7 Glossar F
+['F','Faraday-Konstante','Ladung von 1 mol Elektronen: F = 96485 C/mol.','C/mol','C',['Elektrolyse']],
+
+
+=== C5 Formelsammlung Elektrolyse
+['Elektrolyse (Faraday)',['Q = I · t','n(e⁻) = Q / F','m = M · I · t / (z · F)'],'Q~Ladung~C|I~Stromstärke~A|t~Zeit~s|n(e⁻)~Stoffmenge der Elektronen~mol|F~Faraday-Konstante~C/mol|m~abgeschiedene Masse~g|M~molare Masse~g/mol|z~Ladungszahl des Ions~–','F = 96485 C/mol. Kathode (−): Reduktion, Anode (+): Oxidation.','Elektrolyse'],
+
+=== C5 Formelsammlung Brennstoffzelle
+,'ṅ(H₂) = n · I / (2 · F)'],'P~elektrische Leistung~W|n~Anzahl der Zellen~–|U~Spannung je Zelle~V|I~Stromstärke~A|η~Wirkungsgrad~–|ṅ(H₂)~Wasserstoffverbrauch~mol/s|F~Faraday-Konstante~C/mol'
+
