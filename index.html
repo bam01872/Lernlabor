@@ -8655,12 +8655,12 @@ Object.assign(EXTOP,{'Anhängerkupplung: Stützlast, Querbolzen und Einfedern':'
 Object.assign(EXTOP,{'Pumpspeicherkraftwerk: Wie schnell trifft das Wasser die Turbine?':'Wasserkraftwerke'});
 /* Prüfungsaufgaben Heizen & Dämmen (v268), eigene Aufgaben */
 EXW.push(
-['Wärmepumpe im Einfamilienhaus: Leistungszahl und Umweltwärme',r=>{const PH=pk(r,[6,8,9,10,12]),Pe=pk(r,[1.6,2,2.4,2.5]),h=pk(r,[10,12,14,16]),pr=pk(r,[.28,.3,.32]),e=PH/Pe,PU=+(PH-Pe).toFixed(2),Qd=PH*h,Wd=+(Pe*h).toFixed(2),K=Wd*pr;
+['Wärmepumpe im Einfamilienhaus: Leistungszahl und Umweltwärme',r=>{const Pe=pk(r,[2,2.4,2.5,3]),PH=+(Pe*pk(r,[3,3.2,3.5,4,4.5])).toFixed(2),h=pk(r,[10,12,14,16]),pr=pk(r,[.28,.3,.32]),e=PH/Pe,PU=+(PH-Pe).toFixed(2),Qd=PH*h,Wd=+(Pe*h).toFixed(2),K=Wd*pr;
  return{intro:`Eine Luft-Wasser-Wärmepumpe gibt an einem Wintertag die Heizleistung P_H = ${de(PH)} kW ab. Ihr Verdichter nimmt dabei P_el = ${de(Pe)} kW elektrische Leistung auf. Sie läuft an diesem Tag ${h} Stunden. Wärmepumpenstrom kostet ${de(pr)} €/kWh.`,
  steps:[STP('Wie groß ist die Leistungszahl ε?',e,'',[`ε = P_H / P_el = ${de(PH)} kW / ${de(Pe)} kW = ${nf(e,3)}`],'Leistungszahl = abgegebene Wärmeleistung durch aufgenommene elektrische Leistung.'),
  STP('Welche Leistung holt die Wärmepumpe aus der Außenluft?',PU,'kW',[`P_U = P_H − P_el = ${de(PH)} kW − ${de(Pe)} kW = ${de(PU)} kW`],'Energieerhaltung: Die Heizleistung setzt sich aus Strom und Umweltwärme zusammen.'),
  STP('Wie viel Wärme gibt sie an diesem Tag ab?',Qd,'kWh',[`Q = P_H · t = ${de(PH)} kW · ${h} h = ${de(Qd)} kWh`],'Energie = Leistung mal Zeit, kW · h = kWh.'),
- STP('Was kostet der Strom an diesem Tag?',K,'€',[`W_el = P_el · t = ${de(Pe)} kW · ${h} h = ${de(Wd)} kWh`,`K = W_el · Preis = ${de(Wd)} kWh · ${de(pr)} €/kWh = ${nf(K,3)} €`],'Erst die Strommenge, dann mal den Preis.')]}}],
+ STP('Was kostet der Strom an diesem Tag?',K,'€',[`W_el = P_el · t = ${de(Pe)} kW · ${h} h = ${de(Wd)} kWh`,`K = W_el · Preis = ${de(Wd)} kWh · ${de(pr)} €/kWh = ${WDF(K)} €`],'Erst die Strommenge, dann mal den Preis.')]}}],
 ['Vorlauftemperatur: Fußbodenheizung oder Heizkörper',r=>{const tQ=pk(r,[0,2,3]),Q=pk(r,[12000,14000,16000,18000]),T1=308,T2=328,TQ=tQ+273,d1=T1-TQ,d2=T2-TQ,c1=Math.round(T1/d1*10)/10,c2=Math.round(T2/d2*10)/10,e1=Math.round(c1*5)/10,e2=Math.round(c2*5)/10,W1=Math.round(Q/e1),W2=Math.round(Q/e2),dK=+((W2-W1)*.3).toFixed(2);
  return{intro:`Ein Haus braucht im Jahr Q = ${WDN(Q)} kWh Wärme. Die Luft-Wärmepumpe arbeitet im Mittel der Heizzeit mit einer Quelltemperatur von ϑ_Q = ${tQ} °C. Mit Fußbodenheizung reichen ϑ_V = 35 °C Vorlauf, mit den alten Heizkörpern wären 55 °C nötig. Echte Wärmepumpen erreichen etwa die Hälfte des Carnot-Werts (Gütegrad η_G = 0,5). Strom kostet 0,30 €/kWh.`,
  steps:[STP('Wie groß ist die Carnot-Leistungszahl bei 35 °C Vorlauf?',c1,'',[`T_V = 35 °C + 273 K = ${T1} K, T_Q = ${tQ} °C + 273 K = ${TQ} K`,`ε_C = T_V / (T_V − T_Q) = ${T1} K / ${d1} K = ${WDF(c1,1)}`],'Im Carnot-Wert stehen absolute Temperaturen in Kelvin.',{abs:.06}),
@@ -12355,9 +12355,9 @@ const WPFRI=(k,t)=>{/* Kühlschrank: innen kalt, hinten warm; rechts Garten → 
   +ETAG(360,258,'Garten → Wärmepumpe → Haus','middle')+'</g>';
  return g};
 const WDLAM=k=>{/* Gleiche Dämmwirkung wie 10 cm Dämmstoff: nötige Dicke anderer Stoffe (log. Skala) */const L=[['Dämmstoff','0,035','0,10 m'],['Holz','0,13','0,37 m'],['Ziegel','0,44','1,26 m'],['Beton','2,1','6,0 m'],['Stahl','50','143 m']];
- return EFT(20,30,'So dick für die Wirkung von 10 cm Dämmstoff:','ein2')+L.map((q,i)=>{const d=parseFloat(q[2].replace(',','.')),w=Math.min(230,16+58*Math.log10(d/.1)),y=62+i*40,a=EINL(0,1,k*6-i*.6);
+ return EFT(20,30,'So dick für die Wirkung von 10 cm Dämmstoff:','ein2')+L.map((q,i)=>{const d=parseFloat(q[2].replace(',','.')),w=Math.min(200,16+50*Math.log10(d/.1)),y=54+i*38,a=EINL(0,1,k*6-i*.6);
   return EFT(20,y+16,q[0],'ein1')+EFT(132,y+16,'λ = '+q[1],'ein2')+`<g opacity="${a.toFixed(2)}">`+BAR3(230,y,w*EINQ(a),20,i?'var(--amber)':'var(--ok)',6,{sw:1.2})+EFT(240+w+10,y+16,q[2],'ein1')+'</g>'}).join('')
-  +EFT(20,262,'λ in W/(m·K)','ein2')};
+  +EFT(20,256,'λ in W/(m·K)','ein2')};
 Object.assign(EIN,{
 'Wärmedämmung':[
  {d:12,t:'Warum kühlt Kaffee ab? Auf drei Wegen: Die Tasse leitet Wärme (Leitung), warme Luft steigt auf (Konvektion), und die Oberfläche strahlt Wärme ab (Strahlung). Die Thermoskanne bremst alle drei.',
@@ -12388,16 +12388,16 @@ Object.assign(EIN,{
   f:(k,t)=>WPFRI(k,t)},
  {d:11,t:'Im Verdampfer siedet das Kältemittel bei niedrigem Druck schon deutlich unter 0 °C. Zum Verdampfen braucht es Wärme. Die holt es sich aus der Außenluft, auch wenn die nur 2 °C hat.',
   s:'Im Verdampfer siedet das Kältemittel bei niedrigem Druck schon deutlich unter null Grad. Zum Verdampfen braucht es Wärme. Die holt es sich aus der Außenluft, auch wenn die nur 2 Grad hat.',
-  f:(k,t)=>ESIM('Wärmepumpe',{v:0,q:0,T:2,V:35},t,'0 40 260 220',0,10,290,245)+ECARD(390,130,[['Verdampfer','ein1'],['Kältemittel siedet','ein2'],['unter 0 °C','ein2']])},
+  f:(k,t)=>ESIM('Wärmepumpe',{v:0,q:0,T:2,V:35},t,'0 60 240 200',0,10,290,242)+ECARD(390,130,[['Verdampfer','ein1'],['Kältemittel siedet','ein2'],['unter 0 °C','ein2']])},
  {d:11,t:'Der Verdichter presst das kalte Gas zusammen. Wie bei der Fahrradpumpe wird es dabei heiß. Nur der Verdichter braucht Strom.',
   s:'Der Verdichter presst das kalte Gas zusammen. Wie bei der Fahrradpumpe wird es dabei heiß. Nur der Verdichter braucht Strom.',
-  f:(k,t)=>ESIM('Wärmepumpe',{v:0,q:0,T:2,V:35},t,'190 0 220 150',0,10,290,200)+ECARD(390,130,[['Verdichter','ein1'],['Druck ↑, Temperatur ↑','ein2'],['braucht Strom','ein2']])},
+  f:(k,t)=>ESIM('Wärmepumpe',{v:0,q:0,T:2,V:35},t,'190 0 220 145',0,10,290,192)+ECARD(390,130,[['Verdichter','ein1'],['Druck ↑, Temperatur ↑','ein2'],['braucht Strom','ein2']])},
  {d:11,t:'Im Verflüssiger gibt das heiße Gas seine Wärme an das Heizwasser ab und wird wieder flüssig. Das Heizwasser fließt mit 35 °C in die Fußbodenheizung.',
   s:'Im Verflüssiger gibt das heiße Gas seine Wärme an das Heizwasser ab und wird wieder flüssig. Das Heizwasser fließt mit 35 Grad in die Fußbodenheizung.',
-  f:(k,t)=>ESIM('Wärmepumpe',{v:0,q:0,T:2,V:35},t,'340 50 300 220',0,10,290,230)+ECARD(395,130,[['Verflüssiger','ein1'],['Wärme → Heizwasser','ein2'],['Gas wird flüssig','ein2']])},
+  f:(k,t)=>ESIM('Wärmepumpe',{v:0,q:0,T:2,V:35},t,'362 56 278 210',0,10,290,219)+ECARD(395,130,[['Verflüssiger','ein1'],['Wärme → Heizwasser','ein2'],['Gas wird flüssig','ein2']])},
  {d:10,t:'Das Expansionsventil lässt den Druck ab. Das Kältemittel kühlt dabei stark ab und fließt wieder in den Verdampfer. Der Kreis beginnt von vorn.',
   s:'Das Expansionsventil lässt den Druck ab. Das Kältemittel kühlt dabei stark ab und fließt wieder in den Verdampfer. Der Kreis beginnt von vorn.',
-  f:(k,t)=>ESIM('Wärmepumpe',{v:0,q:0,T:2,V:35},t,'176 30 240 220',0,10,290,240)+ECARD(395,130,[['Expansionsventil','ein1'],['Druck ↓, kalt','ein2'],['Kreis beginnt neu','ein2']])},
+  f:(k,t)=>ESIM('Wärmepumpe',{v:0,q:0,T:2,V:35},t,'178 40 236 228',0,10,290,250)+ECARD(395,130,[['Expansionsventil','ein1'],['Druck ↓, kalt','ein2'],['Kreis beginnt neu','ein2']])},
  {d:13,t:'Die Bilanz: 3191 kWh Strom und 11809 kWh Umweltwärme ergeben 15 000 kWh Heizwärme, ε = 4,7. Ein Gaskessel braucht dafür 15789 kWh Gas, ein Heizstab 15 000 kWh Strom.',
   s:'Die Bilanz: 3191 Kilowattstunden Strom und 11809 Kilowattstunden Umweltwärme ergeben 15000 Kilowattstunden Heizwärme. Ein Gaskessel braucht dafür 15789 Kilowattstunden Gas, ein Heizstab 15000 Kilowattstunden Strom.',
   f:(k,t)=>ESIM('Wärmepumpe',{v:1,q:0,T:2,V:35,Q:15000},t,'0 0 640 300',0,0,480,225)+ETAG(240,256,'1 kWh Strom → 4,7 kWh Wärme','middle','ein1')},
