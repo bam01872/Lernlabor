@@ -12289,7 +12289,7 @@ function agOk(c){return!!c&&(c.k==='num'||c.k==='steps')}
 function agShow(){if(agOk(PS.cur))$('#pag').hidden=false}
 function sameQ(){const c=PS.cur;if(!agOk(c))return newQ();const r=mk(Math.floor(Math.random()*1e9)+1);let d;
  if(c.k==='num')d={k:'num',n:c.n,q:GEN[c.n](r)};
- else{const x=c.xp||c.exam?EXW.find(e=>e[0]===(c.xp||c.n)):c.px?PXW.find(e=>e[0]===c.px):null,s=x?x[1](r):STEPS[c.n](r);d={k:'steps',n:c.n,xp:c.xp,px:c.px,exam:c.exam,intro:s.intro,fig:s.fig,steps:s.steps,i:0,log:[]}}
+ else{const x=c.xp||c.exam?(EXW.find(e=>e[0]===(c.xp||c.n))||(c.exam?PXW.find(e=>e[0]===c.n):null)):c.px?PXW.find(e=>e[0]===c.px):null,s=x?x[1](r):STEPS[c.n](r);d={k:'steps',n:c.n,xp:c.xp,px:c.px,exam:c.exam,intro:s.intro,fig:s.fig,steps:s.steps,i:0,log:[]}}
  d.again=true;d.tried=false;PS.cur=d;renderQ();seeMid($('#pq'))}
 /* untypischer Fehler: typische Fehler des Themas (ERK) zur Auswahl, gemerkt in ll_fw für Lernstand und Kursübersicht */
 function fwShow(c){const tp=topicOf(c.n),E=ERK[tp];if(!E||!E[1]||!E[1].length||$('#pfw'))return;const w=document.createElement('div');w.id='pfw';w.className='lvsug';
@@ -12378,7 +12378,7 @@ function mcView(){const box=$('#mc');if(!box)return;const a=mcAll(),run=store.ge
 function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="panel"><h2>🧮 Mathe-Check</h2><p class="sub">Noch nicht gemacht. Der Check zeigt Dir in 20 Minuten, wo Du in den Mathe-Grundlagen stehst.</p><div class="pb"><button type="button" class="sbtn2" data-mco="1">Zum Mathe-Check →</button></div></div>`;
  return`<div class="panel"><h2>🧮 Mathe-Check</h2>${mcTable(a)}<div class="pb"><button type="button" class="sbtn2" data-mco="1">Startplan und Lösungswege →</button></div></div>`}
 /* Pilot-Einstellungen: Version, Neuigkeit, Kontakt */
-const APPV=260,NEWS='Themenseite aufgeräumt: Der Auftrag steht nur noch bei den Reglern, „🎬 Kurz erklärt“ hat die ganze Breite.';
+const APPV=261,NEWS='Prüfungsaufgaben: Hast Du eine bestimmte Aufgabe gewählt, bringt „Nächste Aufgabe“ jetzt den nächsten Teil bzw. die nächste Aufgabe der Liste. Dieselbe Aufgabe mit neuen Zahlen gibt es über „Gleiche Art, neue Zahlen“.';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
 ['08.11.2026',260,['Themenseite: Der Knopf mit dem Auftragsziel neben „Kurz erklärt“ entfällt. Der Auftrag steht nur noch direkt über den Reglern, Auftrag und Regler sind beieinander. Am Handy hat „Kurz erklärt“ jetzt die ganze Breite.','„Kurz erklärt“ hat das Emoji 🎬, im Knopf und in der Kopfzeile des Erklärvideos.']],
@@ -13407,6 +13407,11 @@ $('#pprv').onclick=()=>{const L=PH[psKey()],st=L&&L.pop();if(!st)return phBtn();
  PS.cur=c;PS.sel=st.sel;PS.cat=st.cat;KIND=st.kind;LVSEL=st.lv;buildSel();renderQ();
  if(!$('#pin').hidden)$('#pin').value=st.inp;if($('#pbt'))$('#pbt').value=st.txt;if(st.pick>=0)pickOpt(st.pick);for(let k=0;k<st.hl;k++)$('#ptip').click();
  const p=$('#practice');if(p)p.scrollIntoView({block:'start'})};
+/* v258 Prüfungsaufgaben: Bei gezielt gewählter Aufgabe bringt „Nächste Aufgabe“ den nächsten Eintrag der Auswahlliste (nächster Teil der Reihe, danach die nächste Aufgabe); „Gleiche Art, neue Zahlen“ ist dort immer sichtbar */
+let EXADV=0;document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('#pnx,#pck');if(t&&(t.id==='pnx'||/^Nächste Aufgabe/.test(t.textContent))){EXADV=1;setTimeout(()=>{EXADV=0},0)}},true);
+const exPick=()=>PS.exam&&!PS.oral&&!FM&&PS.sel!=='W:*'&&!PS.sel.startsWith('O:');
+{const nq=newExamQ;newExamQ=function(){if(EXADV&&exPick()){EXADV=0;const o=[...$('#pf').options].map(x=>x.value).filter(v=>v!=='W:*'),i=o.indexOf(PS.sel);if(o.length>1&&i>=0){PS.sel=o[(i+1)%o.length];$('#pf').value=PS.sel}}return nq.apply(this,arguments)}}
+{const rq=renderQ;renderQ=function(){const r=rq.apply(this,arguments);if(exPick()&&agOk(PS.cur))$('#pag').hidden=false;return r}}
 const memView0=memView;memView=function(){memView0.apply(this,arguments);const L=fGet(),box=$('#mem');if(!box)return;const R=reife();
  let h='',h2='';if(L.length)h+=`<div class="panel"><h2>📌 Meine Fehler</h2><p>${L.length===1?'1 Aufgabe':L.length+' Aufgaben'} mit genau den Zahlen, bei denen Du danebenlagst. Zweimal richtig gelöst, dann verschwindet sie. <button type="button" class="chip pri" id="mfgo">Jetzt wiederholen →</button></p></div>`;
  const RN=Object.values(memGet().t||{}).reduce((x,y)=>x+(y.n||0),0);
