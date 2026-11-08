@@ -2311,7 +2311,7 @@ const AUFMESS=(fr,Gw,FA,sd)=>{const X=372,W=240,L=X+18,R=X+W-18,c=sd=='sinkt'?'v
  +tx(L,150,'F_G','start','font-size:18px;font-weight:700;fill:var(--ink)')+tx(R,150,fmt(Gw,'N'),'end','font-size:20px;font-weight:800;fill:var(--ink)')
  +tx(L,184,'F_A','start','font-size:18px;font-weight:700;fill:var(--flow)')+tx(R,184,fmt(FA,'N'),'end','font-size:20px;font-weight:800;fill:var(--flow)')
  +`<rect x="${L}" y="210" width="${R-L}" height="44" rx="10" fill="${c}" fill-opacity=".14" stroke="${c}" stroke-width="1.5"/>`
- +tx((L+R)/2,239,rel+' · '+sd,'middle',`font-size:18px;font-weight:800;fill:${c}`)};
+ +tx((L+R)/2,239,rel+' → '+sd,'middle',`font-size:18px;font-weight:800;fill:${c}`)};
 fm(FP,HP,'Auftrieb und Dichte','Auftrieb = Gewichtskraft der verdrängten Flüssigkeit: F_A = ρ_Fl · g · V_eingetaucht. Ist die Körperdichte kleiner als die der Flüssigkeit, schwimmt der Körper.',
  [['f','Stoff','sel',FN,0],ARK(0),['V','V',1,50,1,'dm³',10]],
  s=>{const rf=FL[s.f][1],fr=Math.min(1,s.rk/rf),V=s.V/1000,Gw=s.rk*V*G,FA=rf*V*fr*G,sd=Math.abs(s.rk-rf)<rf*.02?'schwebt':s.rk<rf?'schwimmt':'sinkt',q=60*Math.cbrt(s.V/10),x0=190-q/2,yb=sd=='sinkt'?252-q:sd=='schwebt'?130+(122-q)/2:130-(1-fr)*q;
