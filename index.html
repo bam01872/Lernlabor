@@ -14613,7 +14613,7 @@ document.addEventListener('keydown',e=>{const i=e.target;if(e.key==='Enter'&&i.m
 <!-- MOB-01 Skizzenschrift am Handy (Vorschau) -->
 <style>
 .skgb{float:right;margin:2px 0 4px 10px;min-height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:600 13px/1 system-ui,sans-serif;cursor:pointer;position:relative}
-.skgb::after{content:'';position:absolute;inset:-6px 0}
+.skgb{margin-top:6px}
 .skgb span{font-size:15px;margin-right:2px}
 @media(min-width:901px){.skgb{display:none}}
 #skbig{position:fixed;inset:0;z-index:300;background:var(--card,#fff);overflow:hidden}
@@ -14645,7 +14645,7 @@ function boost(){const s=document.getElementById('svg');if(!s||innerWidth>700&&!
  const fs0=T.map(t=>parseFloat(getComputedStyle(t).fontSize)||12);
  const sz=(t,v)=>{if(t.dataset.fb==null)t.dataset.fb=t.style.fontSize;t.style.fontSize=v};const un=t=>{if(t.dataset.fb!=null){t.style.fontSize=t.dataset.fb;delete t.dataset.fb}};
  const put=f=>T.forEach((t,i)=>{if(f[i]>1)sz(t,(fs0[i]*f[i])+'px')});
- if(C&&C.key===key&&M[cur].anim&&play&&performance.now()-C.t<600){put(C.f);return}
+ if(C&&C.key===key&&M[cur].anim&&play&&performance.now()-C.t<3000){put(C.f);return}
  let f=fs0.map((x,i)=>x*k<MIN&&!sym(T[i])?Math.min(MIN/k,x*CAP)/x:1);
  if(f.every(x=>x===1)){C={key,f,t:performance.now()};return}
  /* Gruppen: gleiche Schrift in einer Zeile oder Spalte (Achsenbeschriftung, Tabellen) bekommen dieselbe Größe */
@@ -14658,6 +14658,14 @@ function boost(){const s=document.getElementById('svg');if(!s||innerWidth>700&&!
  const A=S.width*S.height,B=[...s.querySelectorAll('rect,circle,ellipse,polygon,path,image,use')].map(e=>e.getBoundingClientRect()).filter(r=>r.width>2&&r.height>2&&r.width*r.height<A*.12&&r.width<S.width*.45&&r.height<S.height*.45);
  const ins=(r,b)=>r.left>=b.left-.5&&r.right<=b.right+.5&&r.top>=b.top-.5&&r.bottom<=b.bottom+.5;
  const box=R0.map(r=>{let m=null;for(const b of B)if(ins(r,b)&&(!m||b.width*b.height<m.width*m.height))m=b;return m});
+ /* Linien, Rohre, Umrisse: als Punktkette abtasten. Ein Text darf beim Wachsen keinen Punkt neu überdecken. */
+ const pts=[];for(const e of s.querySelectorAll('path,line,polyline,polygon,rect,circle,ellipse')){if(e.closest('defs,pattern,clipPath,mask,marker,symbol'))continue;const cs=getComputedStyle(e);if(cs.display==='none'||cs.visibility==='hidden'||parseFloat(cs.opacity)<.25)continue;
+  const st=cs.stroke&&cs.stroke!=='none'&&parseFloat(cs.strokeWidth)>0&&parseFloat(cs.strokeOpacity)>.25,fl=cs.fill&&cs.fill!=='none'&&parseFloat(cs.fillOpacity)>.25;if(!st&&!fl)continue;
+  const r=e.getBoundingClientRect();if(r.width>=S.width*.9&&r.height>=S.height*.9)continue;if(fl&&!st&&r.width*r.height<A*.12&&r.width<S.width*.45&&r.height<S.height*.45)continue;
+  let L=0;try{L=e.getTotalLength()}catch(x){continue}if(!L||!isFinite(L))continue;const cm=e.getScreenCTM();if(!cm)continue;const n=Math.min(400,Math.ceil(L*k/3));
+  for(let q=0;q<=n;q++){const P=e.getPointAtLength(L*q/n),X=cm.a*P.x+cm.c*P.y+cm.e,Y=cm.b*P.x+cm.d*P.y+cm.f;pts.push(X,Y)}}
+ const inR=(x,y,r,m)=>x>r.left-m&&x<r.right+m&&y>r.top-m&&y<r.bottom+m;
+ const lin=(r,i)=>{const o=R0[i];for(let q=0;q<pts.length;q+=2){const x=pts[q],y=pts[q+1];if(inR(x,y,r,.5)&&!inR(x,y,o,1.5))return true}return false};
  const pd=R0.map((r,i)=>{const b=box[i];return b?Math.max(0,Math.min(3,r.left-b.left,b.right-r.right)):0});
  const ia=(a,b)=>Math.max(0,Math.min(a.right,b.right)-Math.max(a.left,b.left))*Math.max(0,Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top));
  const ob=R0.map((r,i)=>B.filter(b=>b!==box[i]&&!ins(b,r)&&hit(r,b)).map(b=>[b,ia(r,b)]));
@@ -14665,11 +14673,30 @@ function boost(){const s=document.getElementById('svg');if(!s||innerWidth>700&&!
   for(let i=0;i<T.length;i++){if(f[i]===1)continue;const r=R[i];if(r.left<S.left-1||r.right>S.right+1||r.top<S.top-1||r.bottom>S.bottom+1){bad.add(i);continue}
    if(box[i]){const b=box[i],q=pd[i];if(r.left<b.left+q||r.right>b.right-q||r.top<b.top+q*.5||r.bottom>b.bottom-q*.5){bad.add(i);continue}}
    if(ob[i].some(([b,a])=>ia(r,b)>a*1.3+6)){bad.add(i);continue}
+   if(lin(r,i)){bad.add(i);continue}
    for(const b of B){if(b===box[i]||ob[i].some(x=>x[0]===b)||ins(b,R0[i]))continue;if(Math.min(r.right,b.right)-Math.max(r.left,b.left)>1&&Math.min(r.bottom,b.bottom)-Math.max(r.top,b.top)>1&&!ins(b,r)){bad.add(i);break}}}
   for(let i=0;i<T.length;i++)for(let j=i+1;j<T.length;j++){if(f[i]===1&&f[j]===1||old.has(i*4096+j))continue;if(hit(R[i],R[j])){bad.add(i);bad.add(j)}}
   if(!bad.size)break;bad.forEach(i=>{f[i]=it<3?1+(f[i]-1)/2:1;if(f[i]<1.04)f[i]=1});eq();if(it===3)T.forEach((t,i)=>{if(f[i]>1)sz(t,(fs0[i]*f[i])+'px');else un(t)})}
  C={key,f,t:performance.now()}}
-const r0=render;render=function(){const r=r0.apply(this,arguments);try{boost()}catch(e){}return r};
+/* Pause/Neustart im Bild: in die Ecke, in der sie keinen Text verdecken (oben rechts, oben links, unten rechts, unten links).
+   Verdecken sie überall etwas, wandern sie über das Bild und das Bild rückt etwas nach unten. */
+let PK='',RF=0;const EX={};
+/* Texte, die über den Bildrand ragen (z. B. Bruch-Einheiten an der Unterkante), bekommen etwas mehr Rand statt abgeschnitten zu werden */
+const vbx=()=>{const s=document.getElementById('svg'),e=EX[cur];if(!s||!e)return;const v=(s.getAttribute('viewBox')||'').split(/[\s,]+/).map(Number);if(v.length!==4)return;s.setAttribute('viewBox',[v[0]-e[0],v[1]-e[1],v[2]+e[0]+e[2],v[3]+e[1]+e[3]].join(' '))};
+function edge(){const s=document.getElementById('svg');if(!s)return false;const S=s.getBoundingClientRect(),m=s.getScreenCTM(),k=m?Math.hypot(m.a,m.b):0;if(!k||!S.width)return false;
+ let l=0,t=0,r=0,b=0;s.querySelectorAll('text').forEach(x=>{const R=x.getBoundingClientRect();if(!R.width)return;l=Math.max(l,S.left-R.left);t=Math.max(t,S.top-R.top);r=Math.max(r,R.right-S.right);b=Math.max(b,R.bottom-S.bottom)});
+ const d=[l,t,r,b].map(x=>x>.5?Math.ceil(x/k)+3:0);if(!d.some(Boolean))return false;const e=EX[cur]||[0,0,0,0];EX[cur]=e.map((x,i)=>x+d[i]);vbx();return true}
+function place(){const s=document.getElementById('svg');if(!s||document.body.classList.contains('skbig'))return;const pn=s.parentElement,c=pn&&pn.querySelector(':scope>.simc');if(!c)return;
+ s.style.marginTop='';c.style.top=c.style.left='';c.style.right='';const P=pn.getBoundingClientRect(),S=s.getBoundingClientRect(),bw=c.offsetWidth,bh=c.offsetHeight;if(!S.width||!bw)return;
+ const R=[...s.querySelectorAll('text')].filter(t=>t.textContent.trim()).map(t=>t.getBoundingClientRect()).filter(r=>r.width>0);
+ const cand=[[S.right-8-bw,S.top+8],[S.left+8,S.top+8],[S.right-8-bw,S.bottom-8-bh],[S.left+8,S.bottom-8-bh]];
+ const cnt=([x,y])=>R.filter(r=>r.right>x-8&&r.left<x+bw+8&&r.bottom>y-8&&r.top<y+bh+8).length;
+ let best=-1;for(let i=0;i<4;i++)if(!cnt(cand[i])){best=i;break}
+ if(best<0){s.style.marginTop=(bh+12)+'px';const S2=s.getBoundingClientRect();c.style.top=(S2.top-P.top-bh-8)+'px';c.style.left=(S2.right-P.left-bw)+'px';c.style.right='auto';return}
+ c.style.top=(cand[best][1]-P.top)+'px';c.style.left=(cand[best][0]-P.left)+'px';c.style.right='auto'}
+const r0=render;render=function(){const r=r0.apply(this,arguments);try{vbx();const fresh=!C||!(M[cur].anim&&play);boost();const k=cur+'|'+innerWidth;if(fresh||PK!==k){PK=k;place()}
+ /* Brüche in Beschriftungen werden erst nach dem Zeichnen gesetzt und machen Texte höher: danach noch einmal einpassen */
+ if(fresh){cancelAnimationFrame(RF);RF=requestAnimationFrame(()=>{RF=requestAnimationFrame(()=>{if(M[cur]&&M[cur].anim&&play)return;C=null;try{boost();if(edge()){C=null;boost()}place()}catch(e){}})})}}catch(e){}return r};
 document.addEventListener('input',()=>{C=null},true);addEventListener('resize',()=>{C=null});
 /* Bildbreite ändert sich (erstes Anzeigen, Drehen, Bild groß): neu einpassen, ohne neu zu zeichnen */
 let ro=null,rw=0,ra=0;const obs=()=>{const s=document.getElementById('svg');if(!s||!window.ResizeObserver||ro)return;ro=new ResizeObserver(e=>{const w=Math.round(e[0].contentRect.width);if(w===rw)return;rw=w;cancelAnimationFrame(ra);ra=requestAnimationFrame(()=>{C=null;try{boost()}catch(x){}})});ro.observe(s)};obs();
@@ -14695,8 +14722,9 @@ addEventListener('popstate',()=>close_(true));addEventListener('resize',()=>{if(
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&ov&&!ov.hidden){e.stopPropagation();close_()}},true);
 function addBtn(){document.querySelectorAll('.skgb').forEach(x=>x.remove());const L=document.getElementById('leg'),s=document.getElementById('svg');
  if(s&&L&&cur>=0){const b=document.createElement('button');b.type='button';b.className='skgb';b.innerHTML='<span aria-hidden="true">⤢</span> Bild groß';b.setAttribute('aria-label','Bild groß anzeigen');b.onclick=open_;L.before(b)}}
-const b0=build;build=function(){const r=b0.apply(this,arguments);try{addBtn()}catch(e){}return r};
-try{addBtn();C=null;boost()}catch(e){}
+const b0=build;build=function(){const r=b0.apply(this,arguments);try{addBtn();PK=''}catch(e){}return r};
+try{addBtn();C=null;boost();place()}catch(e){}
+addEventListener('resize',()=>{PK=''});
 })();</script>
 </body>
 </html>
