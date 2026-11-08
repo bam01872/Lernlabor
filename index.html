@@ -12074,7 +12074,7 @@ const EINU=[
 let einP=null;
 function einShow(n){const w=$('#ein'),S=EIN[n];if(einP)einP.stop();einP=null;if(!w)return;w.innerHTML='';w.hidden=!S;if(!S)return;
  const tot=S.reduce((a,x)=>a+x.d,0),mm=s=>Math.floor(s/60)+':'+String(Math.round(s%60)).padStart(2,'0');
- const b=document.createElement('button');b.type='button';b.className='einb';b.innerHTML='<span class="einpl" aria-hidden="true">▶</span>Kurz erklärt <span class="einz">'+mm(tot)+' min</span>';w.appendChild(b);
+ const b=document.createElement('button');b.type='button';b.className='einb';b.innerHTML='<span class="einpl" aria-hidden="true">▶</span><span aria-hidden="true">🎬</span> Kurz erklärt <span class="einz">'+mm(tot)+' min</span>';w.appendChild(b);
  b.onclick=()=>{b.remove();einP=einPlay(w,S,n)}}
 // Untertitel: erst Brüche/Wurzeln wie überall, dann Einheiten wie „m/s²“ als kleiner Bruch (v231)
 function einU(c){subify(c);
@@ -12091,7 +12091,7 @@ function einU(c){subify(c);
   f.append(v.slice(last));t.replaceWith(f)})}
 function einPlay(w,S,n){const RM=matchMedia('(prefers-reduced-motion:reduce)').matches,SPK=typeof speechSynthesis!=='undefined'&&typeof SpeechSynthesisUtterance!=='undefined';
  const p=document.createElement('div');p.className='panel einp';
- p.innerHTML=`<div class="einh"><b>Kurz erklärt: ${n}</b><span class="einn nofr"></span><button type="button" class="einx" aria-label="Schließen">✕</button></div><svg class="einsv" viewBox="0 0 480 270" role="img" aria-label="Erklärbild zu ${n}"></svg><div class="einbar">${S.map(()=>'<i><b></b></i>').join('')}</div><p class="einc" aria-live="polite"></p><div class="einctl"><button type="button" data-a="v" aria-label="Zurück">⏮</button><button type="button" class="einpp" data-a="p">⏸ Pause</button><button type="button" data-a="w" aria-label="Weiter">⏭</button>${SPK?'<button type="button" data-a="s" aria-pressed="false">🔇 Ton aus</button>':''}<button type="button" class="eingo" data-a="g" hidden>Selbst ausprobieren ↓</button></div>`;
+ p.innerHTML=`<div class="einh"><b><span aria-hidden="true">🎬</span> Kurz erklärt: ${n}</b><span class="einn nofr"></span><button type="button" class="einx" aria-label="Schließen">✕</button></div><svg class="einsv" viewBox="0 0 480 270" role="img" aria-label="Erklärbild zu ${n}"></svg><div class="einbar">${S.map(()=>'<i><b></b></i>').join('')}</div><p class="einc" aria-live="polite"></p><div class="einctl"><button type="button" data-a="v" aria-label="Zurück">⏮</button><button type="button" class="einpp" data-a="p">⏸ Pause</button><button type="button" data-a="w" aria-label="Weiter">⏭</button>${SPK?'<button type="button" data-a="s" aria-pressed="false">🔇 Ton aus</button>':''}<button type="button" class="eingo" data-a="g" hidden>Selbst ausprobieren ↓</button></div>`;
  w.appendChild(p);const sv=p.querySelector('.einsv'),cap=p.querySelector('.einc'),num=p.querySelector('.einn'),seg=[...p.querySelectorAll('.einbar b')],pp=p.querySelector('[data-a=p]'),go=p.querySelector('[data-a=g]');
  let i=0,el=0,run=!RM,snd=false,last=0,raf=0,end=false;
  const hush=()=>{if(SPK)try{speechSynthesis.cancel()}catch(e){}};
@@ -12378,9 +12378,10 @@ function mcView(){const box=$('#mc');if(!box)return;const a=mcAll(),run=store.ge
 function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="panel"><h2>🧮 Mathe-Check</h2><p class="sub">Noch nicht gemacht. Der Check zeigt Dir in 20 Minuten, wo Du in den Mathe-Grundlagen stehst.</p><div class="pb"><button type="button" class="sbtn2" data-mco="1">Zum Mathe-Check →</button></div></div>`;
  return`<div class="panel"><h2>🧮 Mathe-Check</h2>${mcTable(a)}<div class="pb"><button type="button" class="sbtn2" data-mco="1">Startplan und Lösungswege →</button></div></div>`}
 /* Pilot-Einstellungen: Version, Neuigkeit, Kontakt */
-const APPV=259,NEWS='Elektrolyse ohne Faraday-Konstante: Aufgaben rechnen jetzt mit Ladung in Amperestunden und Abscheiderate.';
+const APPV=260,NEWS='Themenseite aufgeräumt: Der Auftrag steht nur noch bei den Reglern, „🎬 Kurz erklärt“ hat die ganze Breite.';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
+['08.11.2026',260,['Themenseite: Der Knopf mit dem Auftragsziel neben „Kurz erklärt“ entfällt. Der Auftrag steht nur noch direkt über den Reglern, Auftrag und Regler sind beieinander. Am Handy hat „Kurz erklärt“ jetzt die ganze Breite.','„Kurz erklärt“ hat das Emoji 🎬, im Knopf und in der Kopfzeile des Erklärvideos.']],
 ['08.11.2026',259,['Elektrolyse ohne Faraday-Konstante (geht über den Kursstoff hinaus): Rechenaufgabe Elektrolyse, Prüfungsaufgabe „Verkupfern: Ladung und Schichtdicke“ und Praxisaufgabe „Fabrikauftrag, Teil 3“ rechnen mit der Abscheiderate (Kupfer 1,19 g/Ah, Zink 1,22 g/Ah). „Galvanisches Element: Spannung und Strom“ ohne Teilaufgabe Metallabtrag, „Offshore-Windpark, Teil 2“ ohne Teilaufgabe Ladung je kg Aluminium (2980 Ah/kg vorgegeben). Erklärbox, Kurz erklärt, Simulation, Formelkarten, Formelsammlung (Faraday-Konstante bleibt in der Konstanten-Tabelle), Glossar, zwei typische Fehler, Vermutung, Auftrag und Fallgespräch ohne F.']],
 ['30.10.2026',210,['Begründen & Skizzieren: 13 Aufgaben aus größeren Praxisaufgaben (Fabrikauftrag, Offshore-Windpark, Umzug mit Klavier, Eiskunstläuferin, Leuchte in der Werkshalle) tragen keine Teilnummer mehr, z. B. „Fabrikauftrag:“ statt „Fabrikauftrag, Teil 4:“. In zwei Musterlösungen zur Werkshallen-Leuchte fiel der Verweis auf andere Teile weg.']],
 ['27.10.2026',207,['Brüche mit Tausendergruppen: Bei Zahlen mit Tausender-Leerzeichen vor einem Bruch stand nur die letzte Dreiergruppe im Zähler (z. B. „100 J“ statt der ganzen Wärmemenge in Joule), das sah wie Faktor 100 aus. Jetzt steht die ganze Zahl im Zähler (auch bei 96485 C/mol, 12 000 N / 60 mm², 42 000 kJ/kg / 3600 s/h).','Wärmekapazität, Musterantwort zum Auftrag: Q = 1 kg · 4182 J/(kg·K) · 50 K = 209,1 kJ; P = 209,1 kJ / 60 s ≈ 3,5 kW (vorher gerundet „≈ 209 kJ“ und im Bruch in Joule).','Zahlen mit fünf Stellen, die nicht auf 000 enden, stehen ohne Leerzeichen (10310 N, 83800 kJ, 87600 MWh, 96485 C/mol), damit sie sich nicht wie zwei Zahlen lesen.']],
@@ -14071,18 +14072,18 @@ body.rfon #res .rfec{display:none!important}
 <style>/* N5: Nummern nur in der Schrittleiste; „Ausprobieren“ überall, wo es passt */
 #pred[data-rfn]>p:first-of-type b:first-child::before,#rf3 b.rfk::before,#ein .einb[data-n]::before,body.rfon #auf>details>summary>b:first-of-type::before,#pred[data-rfn] .rfzl .rfzn[data-n]::before{content:none!important;display:none!important}
 @media(min-width:360px){#rfs .tn{display:none!important}#rfs .tw{display:inline!important}}
-/* N1: Kurz erklärt und Auftragsziel in einer Zeile, Vermuten-Kasten kompakter */
+/* N1: Kurz erklärt in einer Zeile, Vermuten-Kasten kompakter */
 #uimore{display:none}#uimore[hidden]{display:none!important}
 #uir{display:flex;gap:8px;align-items:stretch;flex-wrap:nowrap}#uir>#ein{margin:0;flex:none}#uir>*:not([hidden]){margin-top:0}
 #uir:has(>:not([hidden])){margin:0 0 12px}
-#uig{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:0;flex:1 1 auto;min-height:44px;padding:6px 14px;border-radius:999px;border:1.5px solid color-mix(in srgb,var(--auf,#5b4bd6) 45%,transparent);background:color-mix(in srgb,var(--auf,#5b4bd6) 9%,var(--card));color:var(--ink);font:inherit;font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
-#uig[hidden]{display:none}#uig.ok{border-color:var(--ok);color:var(--ok)}
+/* v258: „Kurz erklärt“ am Handy in voller Breite (Auftrag-Knopf oben entfällt) */
+@media(max-width:899px){#uir>#ein{flex:1 1 100%;min-width:0}#uir>#ein>.einb{width:100%;box-sizing:border-box}#uir>#ein .einz{margin-left:auto}}
 @media(max-width:899px){#uir>#ein .einb{font-size:14px;white-space:nowrap;padding-top:6px;padding-bottom:6px}#uir>#ein .einz{font-size:13px}
  body.rfon #pred{padding-top:10px;padding-bottom:10px}body.rfon #pred .predx{min-height:40px;padding-top:4px;padding-bottom:4px;margin-top:4px}
  #rf3{display:none!important}
  #uimore{display:inline-block;background:none;border:0;padding:0 0 8px;margin:-2px 0 0;color:var(--acc);font:inherit;font-weight:700;cursor:pointer;min-height:32px}}
 /* v254: Handy – geöffnetes „Kurz erklärt“ bekommt die ganze Zeile, sonst wird die Seite überbreit und Safari zoomt heraus */
-@media(max-width:899px){#uir:has(>#ein .einp){flex-wrap:wrap}#uir>#ein:has(.einp){flex:1 1 100%;min-width:0;max-width:100%}#uir:has(>#ein .einp)>#uig{display:none!important}#ein .einp{max-width:100%;box-sizing:border-box;min-width:0}}
+@media(max-width:899px){#uir:has(>#ein .einp){flex-wrap:wrap}#uir>#ein:has(.einp){flex:1 1 100%;min-width:0;max-width:100%}#ein .einp{max-width:100%;box-sizing:border-box;min-width:0}}
 /* v254: Laptop – geöffnetes Video als breite Zeile unter „Vermute zuerst“: Bild links, Untertitel und Knöpfe rechts daneben */
 @media(min-width:900px){#uir:has(>#ein .einp){flex-wrap:wrap;align-items:stretch}#uir:has(>#ein .einp)>#pred{flex:1 1 100%}#uir>#ein:has(.einp){flex:1 1 100%;min-width:0}
  #ein .einp{max-width:none;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);column-gap:24px;grid-template-rows:auto auto auto 1fr;align-items:start;padding:14px 18px 16px}
@@ -14092,7 +14093,7 @@ body.rfon #res .rfec{display:none!important}
 /* N3: Laptop – Gruppenreiter hinter der Brotkrume, Vermuten und Kurz erklärt nebeneinander */
 @media(min-width:900px){body.rfnav:not(.uigr) .swr:has(#gs){display:none!important}body.rfnav:not(.uigr) .swr:has(#gs)+br{display:none}
  body.rfnav #thc{cursor:pointer}body.rfnav #thc::after{content:' ▾';font-size:.9em}body.rfnav.uigr #thc::after{content:' ▴'}body.rfnav #thc:hover{text-decoration:underline;text-underline-offset:3px}
- #uir{align-items:center}#uir>#pred{flex:1 1 auto;margin:0}#uir>#ein{flex:none}#uig{display:none!important}}
+ #uir{align-items:center}#uir>#pred{flex:1 1 auto;margin:0}#uir>#ein{flex:none}}
 /* N4: ein Themenkopf für alle Fächer – Brotkrumen und „Thema wechseln“ oben, Titel in voller Breite, Üben bei den Reglern */
 #tq{display:none!important}
 #uich{display:flex;align-items:center;justify-content:space-between;gap:10px}#uich>#thc{margin:0;min-width:0}
@@ -14124,13 +14125,10 @@ nav.glab{flex-wrap:wrap!important;overflow:visible!important;row-gap:2px}
 </style>
 <script>/* UI-Gutachten v248: N1–N5, N7, N10 (Markus 06.11.2026) */
 (()=>{const mq=matchMedia('(min-width:900px)'),q=s=>document.querySelector(s);
- /* ---------- N1/N3: Zeile mit Vermuten (Laptop), Kurz erklärt und Auftragsziel ---------- */
- const goal=()=>{let g=q('#uig');const a=q('#auf'),r=q('#uir');if(!r)return;if(!g){g=document.createElement('button');g.type='button';g.id='uig';g.onclick=()=>{const a_=q('#auf');if(!a_)return;const y=a_.getBoundingClientRect().top+scrollY-16;scrollTo({top:y,behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'})}}
-  if(g.parentElement!==r)r.append(g);const sm=a&&a.querySelector('.aufsm');const on=cur>=0&&a&&!a.hidden&&sm&&!q('#app').hidden;g.hidden=!on;if(!on)return;
-  const ok=sm.classList.contains('okt');g.classList.toggle('ok',ok);const tx=sm.textContent.replace(/^Ziel: mindestens\s/,'Ziel ≥ ').replace(/^Ziel: höchstens\s/,'Ziel ≤ ').replace(/^Ziel:\s/,'Ziel ');/* lange Ziele passen nicht neben „Kurz erklärt“: dann nur „Auftrag“ */g.innerHTML='🎯 '+(ok?'Auftrag ✓':tx.length>16?'Auftrag':sm.innerHTML.replace(/^Ziel: mindestens\s/,'Ziel ≥ ').replace(/^Ziel: höchstens\s/,'Ziel ≤ ').replace(/^Ziel:\s/,'Ziel '))+' <span aria-hidden="true">↓</span>';g.setAttribute('aria-label','Zum Auftrag: '+sm.textContent)};
+ /* ---------- N1/N3: Zeile mit Vermuten (Laptop) und Kurz erklärt; v258: kein Auftrag-Knopf mehr oben, der Auftrag steht nur bei den Reglern ---------- */
  function row(){const e=q('#ein'),p=q('#pred');if(!e||!p)return;let r=q('#uir');if(!r){r=document.createElement('div');r.id='uir'}
   if(mq.matches){if(p.parentElement!==r){r.before?0:0;p.before(r);r.append(p)}if(e.parentElement!==r||e.previousElementSibling!==p)p.after(e)}
-  else{if(p.parentElement===r)r.before(p);if(r.previousElementSibling!==p)p.after(r);if(e.parentElement!==r)r.prepend(e)}goal()}
+  else{if(p.parentElement===r)r.before(p);if(r.previousElementSibling!==p)p.after(r);if(e.parentElement!==r)r.prepend(e)}}
  /* ---------- N2: Auftrag über den Reglern ---------- */
  function auf(){const a=q('#auf'),c=q('#ctls');if(!a||!c)return;const rp=c.closest('.panel');if(!rp)return;if(a.nextElementSibling!==c)c.before(a);a.classList.add('uia')}
  /* ---------- N1: Einstiegstext am Handy zweizeilig mit „mehr“ ---------- */
@@ -14147,12 +14145,11 @@ nav.glab{flex-wrap:wrap!important;overflow:visible!important;row-gap:2px}
  /* ---------- N5: „✏️ Üben“ ohne Nummer ---------- */
  const ub=()=>document.querySelectorAll('#btns>button').forEach(b=>{if(/^\d+ · ✏️ Üben$/.test(b.textContent))b.textContent='✏️ Üben'});
  {const bt=q('#btns');if(bt&&typeof MutationObserver!=='undefined')new MutationObserver(ub).observe(bt,{childList:true,subtree:true,characterData:true})}
- function all(){try{head();crumb();crumbA11y();row();auf();desc();ub();goal()}catch(e){console.error(e)}}
+ function all(){try{head();crumb();crumbA11y();row();auf();desc();ub()}catch(e){console.error(e)}}
  const b0=build;build=function(){const r=b0.apply(this,arguments);all();return r};
  const n0=nav;nav=function(){const r=n0.apply(this,arguments);all();return r};
- const r0=render;render=function(){const r=r0.apply(this,arguments);try{auf();goal()}catch(e){}return r};
- const t0=aufTick;aufTick=function(){const r=t0.apply(this,arguments);try{goal()}catch(e){}return r};
- const s0=aufShow;aufShow=function(){const r=s0.apply(this,arguments);try{auf();goal()}catch(e){}return r};
+ const r0=render;render=function(){const r=r0.apply(this,arguments);try{auf()}catch(e){}return r};
+ const s0=aufShow;aufShow=function(){const r=s0.apply(this,arguments);try{auf()}catch(e){}return r};
  mq.addEventListener('change',()=>{if(!mq.matches)document.body.classList.remove('uigr');all()});
  document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('#hw .hwtp');if(t)t.classList.remove('uihl')},true);
  all();
