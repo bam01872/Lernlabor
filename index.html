@@ -4803,11 +4803,11 @@ fm(FM,MR,'Grundrechenregeln','Plus ergibt eine Summe, Minus eine Differenz, Mal 
    res=[[gq(a*a),'a² = a · a'],[String(a),'√(a²)'],[nf(sq,4),'√b']];
    rows=[['Quadratzahlen','1, 4, 9, 16, 25, 36, 49, 64, 81, 100, 121, 144'],['Wurzel','√ ist die Umkehrung von ² (für Zahlen ≥ 0)'],['Probe',`√${a*a} = ${a}, weil ${a}² = ${a*a}`],['Wurzel aus b',`√${b} = ${nf(sq,4)}`]];
    st=[['Quadrieren',`${a}² = ${a} · ${a} = ${a*a} (nicht ${a} · 2 = ${2*a})`],['Wurzelziehen',`√${a*a} = ${a}: Welche Zahl mal sich selbst ergibt ${a*a}?`],['Taschenrechner',`√${b} = ${nf(sq,4)}, Probe: ${nf(sq,4)} · ${nf(sq,4)} ≈ ${b}`],['Achtung','√(a² + b²) ist nicht a + b: √(9 + 16) = √25 = 5, nicht 3 + 4 = 7.']]}
-  else if(m==6){const k=Math.min(40,140/a),x1=30,yb=250,L=a*k;
+  else if(m==6){const A=Math.min(a,8),k=16,x1=30,yb=262,L=A*k;/* fester Maßstab: jeder Schritt sichtbar größer; Regler in dieser Regel bis 8 (größter Würfel passt unter die Überschrift) */
    const cube=(x,y,e)=>{const o=e*.45;return`<polygon points="${x},${y} ${x+e},${y} ${x+e},${y-e} ${x},${y-e}" fill="var(--ok)" fill-opacity=".5" stroke="var(--ink)" stroke-width="2"/><polygon points="${x},${y-e} ${x+o},${y-e-o} ${x+e+o},${y-e-o} ${x+e},${y-e}" fill="var(--ok)" fill-opacity=".3" stroke="var(--ink)" stroke-width="2"/><polygon points="${x+e},${y} ${x+e+o},${y-o} ${x+e+o},${y-e-o} ${x+e},${y-e}" fill="var(--ok)" fill-opacity=".7" stroke="var(--ink)" stroke-width="2"/>`};
    d=`<line x1="${x1}" x2="${x1+L}" y1="${yb}" y2="${yb}" stroke="var(--red)" stroke-width="6"/>`+T(x1,yb+26,'a¹ = '+a,'t1')+T(x1,yb+46,'Länge in m','t2')+
-    `<rect x="215" y="${yb-L}" width="${L}" height="${L}" fill="var(--flow)" fill-opacity=".45" stroke="var(--ink)" stroke-width="2"/>`+T(215,yb+26,`a² = ${a} · ${a} = ${gq(a*a)}`,'t1')+T(215,yb+46,'Fläche in m²','t2')+
-    cube(400,yb,L)+T(400,yb+26,`a³ = ${a} · ${a} · ${a} = ${gq(a**3)}`,'t1')+T(400,yb+46,'Volumen in m³','t2')+
+    `<rect x="200" y="${yb-L}" width="${L}" height="${L}" fill="var(--flow)" fill-opacity=".45" stroke="var(--ink)" stroke-width="2"/>`+T(200,yb+26,`a² = ${a} · ${a} = ${gq(a*a)}`,'t1')+T(200,yb+46,'Fläche in m²','t2')+
+    cube(380,yb,L)+T(380,yb+26,`a³ = ${a} · ${a} · ${a} = ${gq(a**3)}`,'t1')+T(380,yb+46,'Volumen in m³','t2')+
     GB(20,32,'aⁿ = a · a · … · a  (n Faktoren)',20)+T(20,56,'a heißt Basis, n heißt Exponent (Hochzahl)','t2');
    res=[[gq(a*a),'a²'],[gq(a**3),'a³'],[gq(a**4),'a⁴']];
    rows=[['a⁰','1 (immer)'],['a¹',String(a)],['a²',gq(a*a)],['a³',gq(a**3)],['10³','1000 (kilo)'],['10⁶','1 000 000 (Mega)'],['10⁻³','0,001 (milli)'],['aⁿ · aᵐ','aⁿ⁺ᵐ, z. B. 10² · 10³ = 10⁵']];
@@ -4834,6 +4834,8 @@ fm(FM,MR,'Grundrechenregeln','Plus ergibt eine Summe, Minus eine Differenz, Mal 
   return{vb,d,res,rows,st}},
  'Oben die Regel wählen. Mit den Reglern änderst Du die Zahlen im Bild. Es erscheinen nur die Regler, die in der Regel vorkommen.',0);
 FX['Grundrechenregeln']=['a + b = b + a, a · b = b · a','(a + b) + c = a + (b + c)','a · (b + c) = a · b + a · c','Klammer → Potenz → Punkt → Strich','aⁿ = a · a · … · a, √(a²) = a (für a ≥ 0)','logₐ b = n, weil aⁿ = b'];
+/* Potenzen (Regel 6): Regler a nur bis 8, sonst passt der Würfel bei festem Maßstab nicht mehr ins Bild; andere Regeln 1 bis 12 */
+{const m=M.find(x=>x.name==='Grundrechenregeln'),PA=(o,k,UI)=>{const mx=o.m==6?8:12;if(o.a>mx)o.a=mx;if(UI.a)UI.a.forEach(e=>{e.max=mx;e.value=o.a})};m.sync=PA;m.init=(o,UI)=>PA(o,'',UI)}
 M.find(m=>m.name==='Grundrechenregeln').vis=o=>[['a','b'],['a','b'],['a','b','c'],['a','b','c'],['a','b','c'],['a','b'],['a'],['a','b','c'],['a','b']][o.m]||['a','b','c'];
 Object.assign(GEN,{
 'Grundrechenregeln':r=>{const v=Math.floor(r()*9);
@@ -9302,7 +9304,7 @@ function ctl(o,q){
  UI[k]=[r,n];r.oninput=()=>{o[k]=+r.value;n.value=r.value;sy(o,k);if(!M[cur].anim||!play)render()};
  n.oninput=()=>{let v=parseFloat(n.value);if(isNaN(v))return;v=Math.min(Math.max(v,min),max);o[k]=v;r.value=v;sy(o,k);if(!M[cur].anim||!play)render()};
  /* nach Enter/Verlassen: Feld zeigt den Wert, mit dem gerechnet wird (Bereich min…max) */
- n.onchange=()=>{const v=parseFloat(n.value);if(!isNaN(v)&&v>=min&&v<=max)return;n.value=o[k];n.classList.add('nclamp');n.title=`Möglich: ${String(min).replace('.',',')} bis ${String(max).replace('.',',')}`;setTimeout(()=>n.classList.remove('nclamp'),1500)};
+ n.onchange=()=>{const v=parseFloat(n.value),mx=parseFloat(n.max);if(!isNaN(v)&&v>=min&&v<=mx&&v==o[k])return;n.value=o[k];n.classList.add('nclamp');n.title=`Möglich: ${String(min).replace('.',',')} bis ${String(mx).replace('.',',')}`;setTimeout(()=>n.classList.remove('nclamp'),1500)};
 }
 /* Gemischte Schaltungen: kleiner Regler „Art“ in eigenem Kasten zwischen Schaltbild und Werten statt Aufklappleiste; Werte (U, R₁…R₄) werden mitgenommen */
 function gemCtl(){
@@ -12399,9 +12401,10 @@ function mcView(){const box=$('#mc');if(!box)return;const a=mcAll(),run=store.ge
 function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="panel"><h2>🧮 Mathe-Check</h2><p class="sub">Noch nicht gemacht. Der Check zeigt Dir in 20 Minuten, wo Du in den Mathe-Grundlagen stehst.</p><div class="pb"><button type="button" class="sbtn2" data-mco="1">Zum Mathe-Check →</button></div></div>`;
  return`<div class="panel"><h2>🧮 Mathe-Check</h2>${mcTable(a)}<div class="pb"><button type="button" class="sbtn2" data-mco="1">Startplan und Lösungswege →</button></div></div>`}
 /* Pilot-Einstellungen: Version, Neuigkeit, Kontakt */
-const APPV=265,NEWS='Energie: Unter den Reglern erklärt „Was bedeuten die Größen?“ jedes Formelzeichen mit Name, Einheit und Bedeutung.';
+const APPV=266,NEWS='Potenzen: Strecke, Quadrat und Würfel wachsen jetzt bei jedem Reglerschritt mit, der Regler a geht dort bis 8.';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
+['08.11.2026',266,['Grundrechenregeln, Potenzen: Strecke, Quadrat und Würfel sind maßstäblich gezeichnet und werden bei jedem Schritt von a sichtbar größer (vorher ab a = 4 gleich groß). Der Regler a geht in dieser Regel bis 8, damit der Würfel ins Bild passt.']],
 ['08.11.2026',265,['Energie: In allen 11 Themen gibt es unter den Reglern den Kasten „Was bedeuten die Größen?“ (eingeklappt). Er erklärt jeden Regler und die übrigen Größen im Rechenweg mit Name, Einheit und Bedeutung, z. B. η_M, G, η_WR und H_Jahr bei Photovoltaik.']],
 ['08.11.2026',264,['Freier Fall: Beim Tempo „Automatisch“ läuft der Fall in Echtzeit. Sobald die schweren Körper unten sind, schaltet die Simulation in den Zeitraffer ×3 (Hinweis oben im Bild), bis auch die Feder landet. Die Zeitanzeige zeigt weiter die echte Fallzeit.']],
 ['08.11.2026',263,['Änderungsliste: In der App stehen nur noch die letzten 5 Änderungen. Alle älteren Einträge bleiben im Programmcode gespeichert.']],
