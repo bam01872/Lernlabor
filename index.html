@@ -12074,7 +12074,7 @@ const EINU=[
 let einP=null;
 function einShow(n){const w=$('#ein'),S=EIN[n];if(einP)einP.stop();einP=null;if(!w)return;w.innerHTML='';w.hidden=!S;if(!S)return;
  const tot=S.reduce((a,x)=>a+x.d,0),mm=s=>Math.floor(s/60)+':'+String(Math.round(s%60)).padStart(2,'0');
- const b=document.createElement('button');b.type='button';b.className='einb';b.innerHTML='<span class="einpl" aria-hidden="true">▶</span>Kurz erklärt <span class="einz">'+mm(tot)+' min</span>';w.appendChild(b);
+ const b=document.createElement('button');b.type='button';b.className='einb';b.innerHTML='<span class="einpl" aria-hidden="true">▶</span><span aria-hidden="true">🎬</span> Kurz erklärt <span class="einz">'+mm(tot)+' min</span>';w.appendChild(b);
  b.onclick=()=>{b.remove();einP=einPlay(w,S,n)}}
 // Untertitel: erst Brüche/Wurzeln wie überall, dann Einheiten wie „m/s²“ als kleiner Bruch (v231)
 function einU(c){subify(c);
@@ -12091,7 +12091,7 @@ function einU(c){subify(c);
   f.append(v.slice(last));t.replaceWith(f)})}
 function einPlay(w,S,n){const RM=matchMedia('(prefers-reduced-motion:reduce)').matches,SPK=typeof speechSynthesis!=='undefined'&&typeof SpeechSynthesisUtterance!=='undefined';
  const p=document.createElement('div');p.className='panel einp';
- p.innerHTML=`<div class="einh"><b>Kurz erklärt: ${n}</b><span class="einn nofr"></span><button type="button" class="einx" aria-label="Schließen">✕</button></div><svg class="einsv" viewBox="0 0 480 270" role="img" aria-label="Erklärbild zu ${n}"></svg><div class="einbar">${S.map(()=>'<i><b></b></i>').join('')}</div><p class="einc" aria-live="polite"></p><div class="einctl"><button type="button" data-a="v" aria-label="Zurück">⏮</button><button type="button" class="einpp" data-a="p">⏸ Pause</button><button type="button" data-a="w" aria-label="Weiter">⏭</button>${SPK?'<button type="button" data-a="s" aria-pressed="false">🔇 Ton aus</button>':''}<button type="button" class="eingo" data-a="g" hidden>Selbst ausprobieren ↓</button></div>`;
+ p.innerHTML=`<div class="einh"><b><span aria-hidden="true">🎬</span> Kurz erklärt: ${n}</b><span class="einn nofr"></span><button type="button" class="einx" aria-label="Schließen">✕</button></div><svg class="einsv" viewBox="0 0 480 270" role="img" aria-label="Erklärbild zu ${n}"></svg><div class="einbar">${S.map(()=>'<i><b></b></i>').join('')}</div><p class="einc" aria-live="polite"></p><div class="einctl"><button type="button" data-a="v" aria-label="Zurück">⏮</button><button type="button" class="einpp" data-a="p">⏸ Pause</button><button type="button" data-a="w" aria-label="Weiter">⏭</button>${SPK?'<button type="button" data-a="s" aria-pressed="false">🔇 Ton aus</button>':''}<button type="button" class="eingo" data-a="g" hidden>Selbst ausprobieren ↓</button></div>`;
  w.appendChild(p);const sv=p.querySelector('.einsv'),cap=p.querySelector('.einc'),num=p.querySelector('.einn'),seg=[...p.querySelectorAll('.einbar b')],pp=p.querySelector('[data-a=p]'),go=p.querySelector('[data-a=g]');
  let i=0,el=0,run=!RM,snd=false,last=0,raf=0,end=false;
  const hush=()=>{if(SPK)try{speechSynthesis.cancel()}catch(e){}};
