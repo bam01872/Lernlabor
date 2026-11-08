@@ -12704,9 +12704,10 @@ function mcView(){const box=$('#mc');if(!box)return;const a=mcAll(),run=store.ge
 function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="panel"><h2>🧮 Mathe-Check</h2><p class="sub">Noch nicht gemacht. Der Check zeigt Dir in 20 Minuten, wo Du in den Mathe-Grundlagen stehst.</p><div class="pb"><button type="button" class="sbtn2" data-mco="1">Zum Mathe-Check →</button></div></div>`;
  return`<div class="panel"><h2>🧮 Mathe-Check</h2>${mcTable(a)}<div class="pb"><button type="button" class="sbtn2" data-mco="1">Startplan und Lösungswege →</button></div></div>`}
 /* Pilot-Einstellungen: Version, Neuigkeit, Kontakt */
-const APPV=269,NEWS='Hydraulik-Erklärvideo: Der Text verdeckt die Kraft F₁ nicht mehr. Brennstoffzelle: Der Wirkungsgrad rechnet jetzt überall mit 1,23 V.';
+const APPV=270,NEWS='Bedienung verbessert: „Thema wechseln“ zeigt immer Dein aktuelles Gebiet, Prüfungsaufgaben zeigen die aktuelle Frage mit Schrittanzeige direkt über dem Antwortfeld, klarere Hinweise bei Eingaben und Reglern.';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
+['08.11.2026',270,['„Thema wechseln“: Das aktuelle Gebiet und Thema stehen beim Öffnen immer sichtbar in der Mitte, die Esc-Taste schließt die Leisten.','Prüfungsaufgaben: „Schritt 1 von 5“ steht als Marke über der Frage, die Frage fett direkt über dem Antwortfeld; nach dem Lösen heißt der Knopf „Weiter zu Schritt 2 ▶“. Feste Toleranzen stehen jetzt mit Einheit da.','Eingaben: Der Hinweis bei leerem Feld zeigt, was man tippt (3/4, 1,5e-5). Der Vorzeichen-Knopf heißt „+/−“. Regler melden, wenn ein Wert begrenzt wird („Höchstens 48 V möglich“).','Hausaufgaben: einheitliche Begriffe (Hausaufgabe je Kapitel, 8 Hausaufgaben mit 24 Aufgaben), „Hausaufgabe öffnen“ überall als gleicher blauer Knopf.','Suche mit Abstand zwischen Thema und Fach, bessere Kontraste im Dunkelmodus, Glossar auf sehr schmalen iPhones ohne Überbreite, Antwortauswahl für Screenreader.']],
 ['08.11.2026',269,['Kurz erklärt Hydraulik: Die Überschrift im Bild steht jetzt rechts oben und verdeckt die Kraft F₁ nicht mehr.','Brennstoffzelle: Die Simulation rechnet den Wirkungsgrad jetzt wie Text, Video und Formelsammlung mit der theoretischen Zellspannung 1,23 V (vorher 1,25 V). Rechenweg mit Einheiten: η ≈ 0,7 V / 1,23 V = 57 %.']],
 ['08.11.2026',268,['Energie: Neue Gruppe „Heizen & Dämmen“ mit zwei Themen. Wärmedämmung: Wandschnitt mit Mauerwerk, Dämmstoff, Dämmstärke und Außentemperatur, Temperaturverlauf in der Wand, Schimmelgrenze, U-Wert über der Dämmstärke und Ansicht Wärmebild mit den kritischen Punkten. Wärmepumpe: Kältemittelkreis mit Verdampfer, Verdichter, Verflüssiger und Expansionsventil, Wärmequelle Luft, Erdreich oder Grundwasser, Leistungszahl aus dem Carnot-Wert und Ansicht Energiefluss mit Vergleich zu Gaskessel und Heizstab (Kosten und CO₂). Dazu je ein Erklärvideo mit 7 Szenen, Vermuten, Auftrag, „Was bedeuten die Größen?“, Üben, Fehler finden, Glossar und Formelkarten. Rechenaufgaben nur einfach zur Leistungszahl der Wärmepumpe, keine Prüfungsaufgaben.']],
 ['08.11.2026',267,['Erklärvideo Normalverteilung: In der Szene zum z-Wert wird jetzt erklärt, was Φ(z) bedeutet, nämlich der Anteil aller Werte unterhalb von z, abgelesen in der Z-Tabelle.','Alle Erklärvideos: Die graue Hinweiszeile unter einer Rechnung erscheint erst, wenn das Ergebnis steht.']],
@@ -14568,7 +14569,7 @@ html body #pft>#gsw.gsw{position:static;order:0;margin:0 0 0 auto;padding:0;max-
  document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#pft .gsb button'))setTimeout(()=>{const s=$('#pft .pfts select'),bs=[...document.querySelectorAll('#pft .gsb button')];if(s)s.value=Math.max(0,bs.findIndex(b=>b.getAttribute('aria-pressed')==='true'))},0)});
  try{if(typeof cur!=='undefined'&&cur>=0)place()}catch(e){}
 })();</script>
-<!-- UI-Audit v269 (Vorschau) -->
+<!-- UI-Audit v269 (umgesetzt v270) -->
 <style>
 /* FN-01: Eingabebeispiele als Tastatur-Text */
 #pfb kbd{font:inherit;font-weight:700;padding:0 4px;border:1px solid currentColor;border-radius:4px;white-space:nowrap}
