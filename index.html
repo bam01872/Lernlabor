@@ -8829,11 +8829,13 @@ function ffClose(u,a,t){return Math.abs(u-a)<=(t.abs!=null?t.abs:(t.rel||.02)*Ma
 const EHU=[[/^(m|k|µ)?A$/,'A ↔ mA'],[/^(m|k|M)?V$/,'V ↔ kV ↔ mV'],[/^(m|k|M)?W$/,'W ↔ kW ↔ MW'],[/Ω$/,'Ω ↔ kΩ'],[/^(k|M)?Wh$|^(k|M)?J$/,'J ↔ kJ, Wh ↔ kWh, 1 kWh = 3600 kJ'],[/^(mm|cm|dm|m)²$/,'mm² ↔ cm² ↔ m² (Faktor 100 je Stufe)'],[/^(mm|cm|dm|m)³$|^(m)?l$|^L$/,'cm³ ↔ l ↔ m³ (1 l = 1 dm³)'],[/^(µm|mm|cm|dm|m|km)$/,'mm ↔ cm ↔ m ↔ km'],[/^(m|k)?g$|^t$/,'g ↔ kg ↔ t'],[/Pa$|bar$/,'Pa ↔ kPa ↔ bar (1 bar = 100 000 Pa)'],[/^(k|M)?N$/,'N ↔ kN'],[/^(s|min|h)$/,'s ↔ min ↔ h'],[/^(mol|mmol)/,'mol ↔ mmol, g ↔ kg']];
 const ehu=u=>{u=String(u||'').trim();const x=EHU.find(([r])=>r.test(u));return x?x[1]:'m ↔ mm, W ↔ kW, cm² ↔ m², l ↔ m³'};
 const DSTR=/Drehstrom|Stern|Dreieck|Dreiphasen|Wechselstrom|Generator|Netz/;
-function errHint(u,a,ctx){if(!isFinite(u)||!isFinite(a)||a===0)return null;ctx=ctx||(PS&&PS.cur?{n:PS.cur.n,u:(()=>{try{return item().u}catch(e){return''}})()}:{});const tn=String(ctx.n||''),un=String(ctx.u||'');
+function errHint(u,a,ctx){const ctxGiven=!!ctx;if(!isFinite(u)||!isFinite(a)||a===0)return null;ctx=ctx||(PS&&PS.cur?{n:PS.cur.n,u:(()=>{try{return item().u}catch(e){return''}})()}:{});const tn=String(ctx.n||''),un=String(ctx.u||'');
  if(u===0)return 'Du hast 0 eingegeben. Prüfe, ob das Ergebnis wirklich null sein kann.';
  if(Math.abs(u+a)<=.02*Math.abs(a))return 'Das Vorzeichen ist falsch (Richtung, Zu- oder Abnahme prüfen).';
  if(/K$|°C$/.test(un)&&Math.abs(Math.abs(u-a)-273.15)<1)return'°C und K verwechselt? T in K = ϑ in °C + 273,15.';
  const r=Math.abs(u/a),lg=Math.log10(r),k=Math.round(lg);
+ /* LZ-09: g = 9,81 liegt nur 2 % neben 10. Vor der Zehnerpotenz-Regel prüfen, wenn die Aufgabe mit g rechnet */
+ if(Math.abs(r/9.81-1)<.01||Math.abs(r*9.81-1)<.01){const gIn=(()=>{if(ctxGiven)return /Kraft|Gewicht|Auftrieb|Druck|Hub|Arbeit|Energie|Hydraulik|Hebel|Drehmoment|Reibung|Flaschenzug|Ebene|Fall|Pumpe|Wasserkraft/i.test(tn);try{return /9,81/.test(JSON.stringify(item().s||''))}catch(e){return false}})();if(gIn)return'Faktor 9,81: Masse und Gewichtskraft verwechselt (F = m · g)?'}
  if(k!==0&&Math.abs(lg-k)<.03){const w=Math.pow(10,Math.abs(k));return`Dein Wert ist etwa um den Faktor ${w.toLocaleString('de-DE')} ${k>0?'zu groß':'zu klein'}. Prüfe die Einheit (${ehu(un)}).`}
  const near=(x)=>Math.abs(r/x-1)<.03,ds=DSTR.test(tn);
  if(near(2)||near(.5))return/Fläche|Kreis|Kolben|Rohr|Welle|Rad|Seil|Draht|Querschnitt|Durchmesser|Radius|Zylinder|Hydraulik|Pneumatik|Kreisbewegung|Drehzahl/.test(tn)||/²|³/.test(un)?'Faktor 2: Radius und Durchmesser verwechselt oder ein Faktor ½ vergessen?':'Faktor 2: Hast Du einen Wert doppelt oder nur halb gerechnet? Prüfe jeden Faktor in der Formel.';
@@ -9135,10 +9137,10 @@ function dozView(msg){const box=$('#doz');if(!box)return;const all=dozAll(),kurs
  if(!Object.keys(all).length){box.innerHTML=h+`<div class="panel"><p>Noch keine Daten. So geht es:</p><ol><li>Teilnehmer öffnen im Lernlabor <b>📈 Lernstand</b> und tippen auf <b>Lernfortschritt senden</b>.</li><li>Sie schicken Dir die Datei oder den Text, zum Beispiel per Mail.</li><li>Du lädst die Dateien hier. Neuere Stände ersetzen ältere automatisch.</li></ol><p class="fnote">Datenschutz: Informiere die Teilnehmer, wofür Du die Daten nutzt und wer sie sieht. Kürzel statt voller Namen sind möglich. Lösche die Daten nach dem Kurs.</p></div>`;dozBind();return}
  h+=`<div class="panel"><div class="pb"><label>Kurs <select id="dku"><option value="*">Alle Kurse</option>${kurse.map(k=>`<option value="${rEsc(k)}"${k===DOZK?' selected':''}>${rEsc(k||'(ohne Kurs)')}</option>`).join('')}</select></label></div>
  <div class="smix"><div><span>Teilnehmer</span><b>${L.length}</b></div><div><span>Ø Quote</span><b>${qAvg==null?'–':qAvg+' %'}</b></div><div><span>Aktiv letzte 7 Tage</span><b>${act7}</b></div><div><span>Ø letzte Simulation</span><b>${simAvg==null?'–':simAvg+' P.'}</b></div></div>${inact?`<p class="hint">⚠️ ${inact} ${inact===1?'Teilnehmer ist':'Teilnehmer sind'} seit mindestens 14 Tagen nicht aktiv oder ohne Daten.</p>`:''}</div>`;
- h+=`<div class="panel"><h3>Teilnehmer</h3><div class="dtw"><table class="dtab"><thead><tr><th>Name</th><th>Kurs</th><th>Stand</th><th>Zuletzt aktiv</th><th>Aufgaben</th><th>Quote</th><th>Themen sicher / unsicher</th><th>Stufen</th><th>Letzte Simulation</th><th>Hausaufgaben</th><th>Mathe-Check</th><th>Schwächste Themen</th><th></th></tr></thead><tbody>${S.map(({o,s})=>`<tr${s.ago==null||s.ago>=14?' class="dwarn"':''}><td><button type="button" class="chip" data-dd="${rEsc(dozKey(o))}">${rEsc(o.name)}</button></td><td>${rEsc(o.kurs||'')}</td><td>${o.datum?dshow(o.datum):''}</td><td>${s.ago==null?'–':s.ago===0?'heute':'vor '+s.ago+' T.'}</td><td>${s.n}</td><td>${s.q==null?'–':bar(s.q)+' '+s.q+' %'}</td><td>${s.sicher} / ${s.unsicher}</td><td>${s.lv?dozLvTxt(s.lv):'–'}</td><td>${s.sim?(pN(s.sim.p)+' P. '+(s.sim.p>=50?'✓':'✗')):'–'}</td><td>${s.hwd} von ${HW.length} Einheiten</td><td>${mcShort(o)||'–'}</td><td>${s.weak.map(([k,t])=>rEsc(k)+' ('+t.r+' %)').join(', ')||'–'}</td><td><button type="button" class="dx" data-dx="${rEsc(dozKey(o))}" aria-label="${rEsc(o.name)} entfernen">✕</button></td></tr>`).join('')}</tbody></table></div><p class="fnote">Stufen: Anteil der geübten Themen, die auf 🟢 Grundlagen, 🟡 Anwenden und 🔴 Prüfungsniveau sicher sind (2 der letzten 3 richtig). Quote: richtige Antworten aller Aufgaben. Schwächste Themen: mindestens 3 Versuche, Quote der letzten 10 Versuche. Simulation: bestanden ab 50 Punkten.</p></div>`;
+ h+=`<div class="panel"><h3>Teilnehmer</h3><div class="dtw"><table class="dtab"><thead><tr><th>Name</th><th>Kurs</th><th>Stand</th><th>Zuletzt aktiv</th><th>Aufgaben</th><th>Quote</th><th>Themen sicher / unsicher</th><th>Stufen</th><th>Letzte Simulation</th><th>Hausaufgaben vor dem Kurstag</th><th>Mathe-Check</th><th>Schwächste Themen</th><th></th></tr></thead><tbody>${S.map(({o,s})=>`<tr${s.ago==null||s.ago>=14?' class="dwarn"':''}><td><button type="button" class="chip" data-dd="${rEsc(dozKey(o))}">${rEsc(o.name)}</button></td><td>${rEsc(o.kurs||'')}</td><td>${o.datum?dshow(o.datum):''}</td><td>${s.ago==null?'–':s.ago===0?'heute':'vor '+s.ago+' T.'}</td><td>${s.n}</td><td>${s.q==null?'–':bar(s.q)+' '+s.q+' %'}</td><td>${s.sicher} / ${s.unsicher}</td><td>${s.lv?dozLvTxt(s.lv):'–'}</td><td>${s.sim?(pN(s.sim.p)+' P. '+(s.sim.p>=50?'✓':'✗')):'–'}</td><td>${dozHwTxt(o,s)}</td><td>${mcShort(o)||'–'}</td><td>${s.weak.map(([k,t])=>rEsc(k)+' ('+t.r+' %)').join(', ')||'–'}</td><td><button type="button" class="dx" data-dx="${rEsc(dozKey(o))}" aria-label="${rEsc(o.name)} entfernen">✕</button></td></tr>`).join('')}</tbody></table></div><p class="fnote">Stufen: Anteil der geübten Themen, die auf 🟢 Grundlagen, 🟡 Anwenden und 🔴 Prüfungsniveau sicher sind (2 der letzten 3 richtig). Quote: richtige Antworten aller Aufgaben. Schwächste Themen: mindestens 3 Versuche, Quote der letzten 10 Versuche. Simulation: bestanden ab 50 Punkten.</p></div>`;
  {const V=S.map(x=>x.s.lv).filter(Boolean);if(V.length){const av=i=>{const a=V.map(v=>v.p[i]).filter(x=>x!=null);return a.length?Math.round(a.reduce((x,y)=>x+y,0)/a.length):null},cnt=l=>V.filter(v=>v.best===l).length;
   h+=`<div class="panel"><h3>🪜 Stufen im Kurs</h3><p class="sub">Durchschnitt über ${V.length} Teilnehmer mit Stufendaten: Anteil der geübten Themen, die auf der Stufe sicher sind.</p><ul class="mweak">${[1,2,3].map(l=>{const a=av(l-1);return`<li><span><b>${LVI[l]} ${LVN[l]}</b> <small>${cnt(l)} TN ${cnt(l)===1?'arbeitet':'arbeiten'} sicher auf dieser Stufe</small></span><span>${a==null?'–':bar(a)+' '+a+' %'}</span></li>`}).join('')}</ul>${cnt(0)?`<p class="fnote">${cnt(0)} TN noch ohne sichere Stufe.</p>`:''}</div>`}}
- h+=`<div class="panel"><h3>Was dem Kurs am schwersten fällt</h3>${weakC.length?`<ul class="mweak">${weakC.map(a=>`<li><span><b>${rEsc(a.k)}</b> <small>${rEsc(a.f)}</small></span><span>${bar(a.r)} ${a.r} % · ${a.c} TN, davon ${a.u} unsicher</span></li>`).join('')}</ul>`:'<p>Noch keine auffälligen Themen (mindestens 3 Versuche je Teilnehmer nötig).</p>'}
+ h+=`<div class="panel"><h3>Was dem Kurs am schwersten fällt</h3>${weakC.length?(()=>{const li=a=>`<li><span><b>${rEsc(a.k)}</b> <small>${rEsc(a.f)}</small></span><span>${bar(a.r)} ${a.r} % · ${a.c} TN, davon ${a.u} unsicher</span></li>`,A=weakC.filter(a=>a.c>=3),B=weakC.filter(a=>a.c<3);return A.length&&B.length?`<ul class="mweak">${A.map(li).join('')}</ul><p class="fnote dzfew">Nur 1 oder 2 TN geübt, wenig aussagekräftig:</p><ul class="mweak dzdim">${B.map(li).join('')}</ul>`:`<ul class="mweak">${weakC.map(li).join('')}</ul>`})():'<p>Noch keine auffälligen Themen (mindestens 3 Versuche je Teilnehmer nötig).</p>'}
  <h3>Quote je Fach</h3><ul class="mweak">${Object.entries(fa).filter(([f,x])=>x.n).sort((a,b)=>a[1].ok/a[1].n-b[1].ok/b[1].n).map(([f,x])=>{const r=Math.round(x.ok/x.n*100);return`<li><span><b>${rEsc(f)}</b> <small>${x.n} Aufgaben</small></span><span>${bar(r)} ${r} %</span></li>`}).join('')}</ul></div>`;
  h+=dozMcHTML(S,bar);
  if(DOZD&&all[DOZD]){const o=all[DOZD],T=Object.entries(o.topics).sort((a,b)=>a[1].f.localeCompare(b[1].f)||a[1].r-b[1].r);
@@ -12534,9 +12536,12 @@ function lvSug(){const b=$('#plvs');if(!b)return;const g=LVSUG;b.hidden=!g;if(!g
 function lvSum(){const X=store.get('ll_lv',{}),r={1:[0,0],2:[0,0],3:[0,0]};Object.values(X).forEach(t=>[1,2,3].forEach(l=>{if(t[l]&&t[l].length){r[l][1]++;if(lvOk(t[l]))r[l][0]++}}));return r}
 const lvVec=n=>{const t=store.get('ll_lv',{})[n];return t?[1,2,3].map(l=>lvOk(t[l])?1:0).join(''):''};
 const lvDots=n=>{const t=store.get('ll_lv',{})[n];return t?` <span class="lvd" title="Geschaffte Stufen">${[1,2,3].map(l=>lvOk(t[l])?LVI[l]:'⚪').join('')}</span>`:''};
+/* LZ-07: „sicher auf Prüfungsniveau“ erst ab 50 % Prüfungsreife; liefert sonst die Reife als Text */
+const lvReifeLow=()=>{try{const R=window.llReife();if(!R.any)return'';const p=Math.round(R.p*100);return p<50?p+'\u00a0%':''}catch(e){return''}};
 function lvMemHTML(){const r=lvSum(),best=[3,2,1].find(l=>r[l][1]>=3&&r[l][0]/r[l][1]>=.6),nx=best?Math.min(3,best+1):1;
- return`<div class="panel" id="lvpan"><h2>🪜 Dein Niveau</h2><p class="sub">Anteil der geübten Themen, die Du auf dieser Stufe sicher kannst (2 der letzten 3 Aufgaben richtig).</p>`+[1,2,3].map(l=>{const [a,n]=r[l],p=n?Math.round(a/n*100):0;return`<div class="lvrow"><span>${LVI[l]} ${LVN[l]}</span><i class="lvbar"><u class="lvc${l}" style="width:${p}%"></u></i><b>${n?p+' %':'–'}</b></div>`}).join('')+
- `<p>${best?`Du arbeitest sicher auf Stufe <b>${LVI[best]} ${LVN[best]}</b>.`+(best<3?` Nächstes Ziel: ${LVI[nx]} ${LVN[nx]}.`:' Weiter mit Prüfungsaufgaben und der Prüfungssimulation.'):'Noch zu wenig geübt für eine Einschätzung. Starte mit 🟢 Grundlagen.'}</p><p><button type="button" class="chip pri" id="lvue">${LVI[nx]} ${LVN[nx]} üben →</button></p></div>`}
+ return`<div class="panel" id="lvpan"><h2>🪜 Dein Niveau</h2><p class="sub">Anteil der geübten Themen, die Du auf dieser Stufe sicher kannst (2 der letzten 3 Aufgaben richtig).</p>`+[1,2,3].map(l=>{const [a,n]=r[l],p=n>=3?Math.round(a/n*100):0;return`<div class="lvrow"><span>${LVI[l]} ${LVN[l]}</span><i class="lvbar"><u class="lvc${l}" style="width:${p}%"></u></i><b>${n>=3?p+' %':'–'}</b></div>`}).join('')+
+ [1,2,3].filter(l=>r[l][1]>0&&r[l][1]<3).map(l=>`<p class="sub lvfew">Auf ${LVI[l]} ${LVN[l]} hast Du erst ${r[l][1]===1?'1 Thema':r[l][1]+' Themen'} geübt. Eine Prozentzahl gibt es ab 3 Themen.</p>`).join('')+
+ `<p>${best===3&&lvReifeLow()?`Du löst schon Aufgaben auf Stufe <b>${LVI[3]} ${LVN[3]}</b>. Für die ganze Prüfung fehlt noch viel: Prüfungsreife ${lvReifeLow()}. Weiter mit Deinem Kursstoff und den Hausaufgaben.`:best?`Du arbeitest sicher auf Stufe <b>${LVI[best]} ${LVN[best]}</b>.`+(best<3?` Nächstes Ziel: ${LVI[nx]} ${LVN[nx]}.`:' Weiter mit Prüfungsaufgaben und der Prüfungssimulation.'):'Noch zu wenig geübt für eine Einschätzung. Starte mit 🟢 Grundlagen.'}</p><p><button type="button" class="chip pri" id="lvue">${LVI[nx]} ${LVN[nx]} üben →</button></p></div>`}
 const KT=[['all','Gemischt, vor allem Rechnen'],['eq','Gemischt, alle Typen gleich oft'],['num','Rechnen'],['steps','Mehrschritt'],['mc','Ankreuzen'],['und','Verständnis'],['fehl','Typische Fehler'],['bew','Begründen & Skizzieren']];
 // Prüfungsaufgaben-Auswahl: Fach-Filter (PS.ef); mehrteilige Aufträge (Titel „…, Teil n: …“) mit allen Teilen untereinander, Teile unter Prüfungsniveau als 'X:'+PXW-Index (nicht in der Zufallsauswahl); übrige nach Fach, alphabetisch
 const EXCN={P:'Physik',E:'Elektrotechnik',C:'Chemie',M:'Mathematik',S:'Statistik'};
@@ -13506,11 +13511,14 @@ const kursE=()=>{const e={};KURS0.d.forEach((d,i)=>e[d]={t:'NTG, Einheit '+(i+1)
 const kursDays=()=>[...KURS0.d,...Object.keys(KURS0.p),...Object.keys(KURS0.x)].sort();
 /* Kapitel zu einer Kennung aus dem Kursplan */
 const kapName=k=>k==='w'?'Wiederholung und Probeprüfung':k==='p'?'Prüfungsvorbereitung':(()=>{const u=HW.find(x=>x.id===k);return u?u.k+': '+u.t:''})();
-(()=>{const V=KURS0.id+'.'+KURS0.v,s=store.get('ll_kurs0',null);if(s===V)return;const k=store.get('ll_kurs',null)||{},e=k.e||{},del=new Set();if(k.n&&k.n!==KURS0.n){store.set('ll_kurs0',V);return}
+/* LZ-02: Auf einem neuen Gerät fragt die Startseite erst, ob man im Kurs ist (ll_kursq). Bestehende Lernstände und die Dozentenversion bekommen den Kurs wie bisher. */
+function kurs0Install(force){const V=KURS0.id+'.'+KURS0.v,s=store.get('ll_kurs0',null);if((s===V||s==='nein')&&!force)return;const k=store.get('ll_kurs',null)||{},e=k.e||{},del=new Set();if(k.n&&k.n!==KURS0.n){store.set('ll_kurs0',V);return}
+ if(!s&&!k.n&&!force&&!DOZENT){if(!store.get('ll_kursq',null))store.set('ll_kursq',1);return}store.set('ll_kursq',null)
  // Version 1 hatte zehn gezählte Einheiten: diese Einträge ersetzen, eigene Termine bleiben
  if(s===KURS0.id)Object.keys(e).forEach(d=>{if(!e[d].own&&/^NTG, Einheit \d+ von \d+$/.test(e[d].t||'')){delete e[d];del.add(d)}});
  Object.entries(kursE()).forEach(([d,v])=>{if(!e[d])e[d]=v});
- store.set('ll_kurs',{n:KURS0.n,d:[...new Set([...(k.d||[]).filter(d=>!del.has(d)),...kursDays()])].sort(),e});const f=store.get('ll_ident',{name:'',kurs:''});if(!f.kurs)store.set('ll_ident',Object.assign({},f,{kurs:KURS0.n}));store.set('ll_kurs0',V)})();
+ store.set('ll_kurs',{n:KURS0.n,d:[...new Set([...(k.d||[]).filter(d=>!del.has(d)),...kursDays()])].sort(),e});const f=store.get('ll_ident',{name:'',kurs:''});if(!f.kurs)store.set('ll_ident',Object.assign({},f,{kurs:KURS0.n}));store.set('ll_kurs0',V)}
+kurs0Install();
 nav();requestAnimationFrame(loop);
 </script>
 <script>/* QR-Code-Generator: qrcode-generator 1.4.4, Copyright (c) 2009 Kazuhiko Arase, MIT-Lizenz */
@@ -13622,6 +13630,7 @@ function probeCheck(){if(!PROBE||M[cur].name!=='Hydraulik')return;const s=S[cur]
 const W={Physik:.6,Chemie:.2,Statistik:.1,Mathematik:.1};
 function reife(){const M_=memGet(),U=memUniv(),st=n=>memState(M_.t[n],n),o={};let any=0;FA.forEach(f=>{const L=U.filter(n=>gfach(n)===f);let s=0,w=0;L.forEach(n=>{const x=st(n);if(x==='sicher')s++;else if(x==='weg')w++;if(x!=='neu')any++});o[f]={n:L.length,s,w,p:L.length?(s+w*.5)/L.length:0}});
  let tot=0,ws=0;Object.keys(W).forEach(f=>{if(o[f]&&o[f].n){tot+=W[f]*o[f].p;ws+=W[f]}});return{o,any,p:ws?tot/ws:0}}
+window.llReife=reife;
 const homeView0=homeView;homeView=function(){homeView0.apply(this,arguments);const H=$('#home'),hg=H.querySelector('.hg');
  const nx=H.querySelector('.nxk');if(nx){const c=nx.querySelector('.chip:not(.sec)');if(c)c.classList.add('pri')}
  const pc=probeCard();if(pc){(H.querySelector('.nxk')||H.firstChild).insertAdjacentHTML(H.querySelector('.nxk')?'afterend':'beforebegin',pc);$('#prgo').onclick=()=>{PROBE=true;go(byName('Hydraulik'))};$('#prsk').onclick=()=>{store.set('ll_probe','skip');homeView()}}
@@ -13729,7 +13738,7 @@ const score0=score;score=function(ok,err){score0.apply(this,arguments);SS.n++;if
  const L=fGet();if(!L.some(y=>y.q===x.q))fSet([...L,x])};
 function fehlerOpen(){if(!fGet().length){memOpen();const mb=$('#mem');if(mb)mb.insertAdjacentHTML('afterbegin','<div class="panel" role="status"><p><b class="okt">✓ Keine offenen Fehler. Gut gemacht!</b> Falsch gelöste Aufgaben landen automatisch in „Meine Fehler“ und kommen dort mit denselben Zahlen wieder.</p></div>');try{history.replaceState({y:0},'','#lernstand')}catch(e){}return}prac=true;cur=-1;PS.exam=false;PS.oral=false;PS.sel='Alle';FM=true;resetS();$('#ph2').textContent='📌 Meine Fehler';buildSel();nav();newQ()}
 window.fehlerOpen=fehlerOpen;window.llFehlerAdd=x=>{const L=fGet();if(!L.some(y=>y.q===x.q))fSet([...L,Object.assign({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),r:0,d:mToday()},x)])};
-const newQ0=newQ;newQ=function(){if(!FM)return newQ0.apply(this,arguments);const L=fGet();if(!L.length){FM=false;toast('Alle Fehler wiederholt. Stark!');openPractice('Alle');return}
+const newQ0=newQ;newQ=function(){if(!FM)return newQ0.apply(this,arguments);const L=fGet();if(!L.length){FM=false;if(typeof fmEnd==='function')fmEnd();else{toast('Alle Fehler wiederholt. Stark!');openPractice('Alle')}return}
  const x=L[Math.floor(Math.random()*Math.min(3,L.length))];PS.cur={k:'num',n:x.n,q:[x.q,x.a,x.u,x.s,x.t],fid:x.id,tried:false};renderQ()};$('#pnx').onclick=()=>newQ();
 /* Angefangene Aufgabe behalten: Wer zum Nachschlagen in Fächer wechselt und über das Menü zurückkommt, sieht dieselbe Aufgabe samt Eingabe.
    Eine neue Aufgabe gibt es nur über „Nächste Aufgabe“ oder eine andere Auswahl. Je Modus (Üben, Begründen, Prüfungsaufgaben, Mündlich) eine gemerkte Aufgabe. */
@@ -14390,8 +14399,8 @@ body.rfon #res .rfec{display:none!important}
  try{if(cur>=0)predShow(nm());sync()}catch(e){}
 })();</script>
 <script>/* M4: Startseite mit genau einem Hauptknopf; M9: Fach mit Hausaufgabe im Lernen-Menü markieren */
-(()=>{const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])),agoTxt=ts=>{const m=Math.round((Date.now()-ts)/6e4);return m<2?'gerade eben':m<60?'vor '+m+' Minuten':m<1440?'vor '+Math.round(m/60)+' Stunden':'vor '+Math.round(m/1440)+' Tagen'};
- const unit=()=>{try{return(typeof hwPlanUnit==='function'&&hwPlanUnit())||hwNext()}catch(e){return null}};
+(()=>{const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])),agoTxt=ts=>{const m=Math.round((Date.now()-ts)/6e4),h=Math.round(m/60),d=Math.round(m/1440);return m<2?'gerade eben':m<60?'vor '+m+' Minuten':m<1440?(h===1?'vor 1 Stunde':'vor '+h+' Stunden'):d===1?'gestern':'vor '+d+' Tagen'};
+ const unit=()=>{try{if(!DOZENT&&!(store.get('ll_kurs',null)||{}).n&&(store.get('ll_kurs0',null)==='nein'||store.get('ll_kursq',null)))return null;return(typeof hwPlanUnit==='function'&&hwPlanUnit())||hwNext()}catch(e){return null}};
  const hv=homeView;homeView=function(){const r=hv.apply(this,arguments);try{one()}catch(e){console.error(e)}return r};
  function one(){const H=$('#home');if(!H)return;H.querySelectorAll('.rfmain,.rfkl').forEach(e=>e.remove());
   const nx=H.querySelector('.nxk'),hwk=H.querySelector('.hwk'),ku=H.querySelector('.kurs'),pr=H.querySelector('#prgo'),mcard=H.querySelector('#mcard'),hl=H.querySelector('.hlast');
@@ -14609,6 +14618,114 @@ const chk=i=>{const row=i.closest('.ctl');if(!row)return;const raw=i.value.trim(
  let h=row.nextElementSibling;if(!(h&&h.classList.contains('ctlh'))){if(!t)return;h=document.createElement('p');h.className='ctlh';h.setAttribute('role','status');row.after(h)}h.textContent=t;clearTimeout(h._t);if(t)h._t=setTimeout(()=>h.remove(),4000);else h.remove()};
 document.addEventListener('change',e=>{const i=e.target;if(i.matches&&i.matches('.ctl .n input'))chk(i)},true);
 document.addEventListener('keydown',e=>{const i=e.target;if(e.key==='Enter'&&i.matches&&i.matches('.ctl .n input'))chk(i)},true);
+})();</script>
+<!-- Langzeit-Gutachten (Aufgabenliste LZ, Ja-Nummern 1, 2, 4–8, 10–14) -->
+<style>/* LZ-04 Abschluss „Meine Fehler“ */
+body.fmend #practice .panel>*:not(.ph):not(#fmend){display:none!important}body.fmend #practice .ph>:not(h2){display:none!important}
+#fmend{padding:16px;border-radius:12px;background:color-mix(in srgb,var(--ok,#22a06b) 12%,transparent);margin:6px 0}#fmend h3{margin:0 0 6px}#fmend p{margin:0 0 12px}
+.lzq{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.lzgo2{display:block;margin-top:10px}
+/* LZ-06 Wiederholung: heute höchstens 3 Themen */
+.lzrest{margin-top:10px}.lzrest summary{cursor:pointer;font-weight:700;color:var(--acc);min-height:32px}.lzrest .mplan{opacity:.7}.lzrest p{margin:8px 0 4px}
+/* LZ-08 Kursstoff */
+.lzkurs{margin:4px 0 12px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--ok,#22a06b) 10%,transparent)}.lzkurs b.big{display:block;font-size:1.5em;line-height:1.2}
+/* LZ-12 Dozent */
+.dzdim{opacity:.55}.dzhw{white-space:nowrap}
+/* LZ-13 Termin */
+.lzdue{font-weight:700}.lzdue.bald{color:var(--red,#c92a2a)}
+/* LZ-14 Willkommen zurück */
+.lzwl{margin:8px 0;padding:0 0 0 1.4em}.lzwl li{margin:4px 0}</style>
+<script>(()=>{
+/* ---------- Kursstoff: Themen je Kapitel des NTG-Kurses (Vorschlag, Zuordnung zum Kursplan KURS0.k) ---------- */
+const KAPT={k11:['Atommodell','Periodensystem','Bindungstypen','Reaktionsgleichungen & Mol','Oxidationszahlen','Korrosion','Galvanische Zelle & Spannungsreihe','Elektrolyse','Blei-Batterie (Akkumulator)'],
+ k12:['Säuren & Basen','Neutralisation & Titration','Wasserhärte'],
+ k13:['Wärmeausdehnung','Mischungstemperatur','Wärmekapazität','Schmelz- & Verdampfungswärme','Aggregatzustand','Gasgesetze','Gasdichte (Normzustand → Betrieb)'],
+ k14:['Hebel','Drehmoment','Kräfteparallelogramm','Kräftezerlegung (Seilkräfte)','Gleit-, Haft- & Rollreibung','Reibung (schiefe Ebene)','Schiefe Ebene','Rolle & Flaschenzug','Arbeit & Leistung','Arbeit, Energie & Leistung (Übersicht)','Energieformen & Erhaltung','Wirkungsgrad','Sinus & Kosinus'],
+ k15:['Druck','Hydraulik','Hydraulische Leistung & Volumenstrom','Pneumatik: Luftverbrauch','Grundlagen: Stromkreis','Leitungswiderstand','Ohmsches Gesetz','Reihe','Parallel','Gemischt R₁+(R₂∥R₃)','Gemischt (R₁+R₂)∥R₃','Gemischt R₁+(R₂∥R₃)+R₄','Gemischt (R₁+R₂)∥(R₃+R₄)','Elektrische Arbeit & Leistung','Gleich- & Wechselstrom','Drehstrom (Stern & Dreieck)','Steuerung oder Regelung (Heizung)'],
+ k2:['Kraftwerke im Überblick','Dampfkraftwerk (Wärmekraftwerk)','Kernkraftwerk (Druckwasserreaktor)','Wasserkraftwerke','Windkraftanlage','Photovoltaik','Solarthermie','Geothermie','Brennstoffzelle (Wasserstoff)','Biogasanlage mit BHKW','Verbrennungsmotor (Viertakt)','Wärmepumpe','Wärmedämmung'],
+ k3:['Gesetz von Hooke','Zug-/Druckspannung & Sicherheit','Scherung & Flächenpressung','Gleichförmige Bewegung','Beschleunigung & Bremsen','Kraftgesetz F = m · a','Freier Fall (mit Luftwiderstand)','Kreisbewegung','Schwingung','Auftrieb und Dichte'],
+ k4:['Mittelwert, Median & Modalwert','Spannweite, Varianz & Standardabweichung','Normalverteilung','σ-Bereiche','Prozess- & Maschinenfähigkeit','Qualitätsregelkarte (x̄-Karte)','Histogramm','Wahrscheinlichkeitsnetz','Von der Glocke zum Netz']};
+window.LZKAPT=KAPT;
+const kursE_=()=>{const k=store.get('ll_kurs',null);return k&&k.e?k:null};
+/* Kapitel, die bis heute (einschließlich) im Kurs dran waren */
+const kursKap=()=>{const k=kursE_();if(!k)return[];const T0=mToday();return[...new Set((k.d||[]).filter(d=>d<=T0&&k.e[d]&&KAPT[k.e[d].k]).map(d=>k.e[d].k))]};
+const kursTop=()=>{const c=kursKap();return c.length?new Set(c.flatMap(x=>KAPT[x])):null};
+/* nächster Kurstag ab heute (Kurstage mit Kapitel) */
+const kursNext=()=>{const k=kursE_();if(!k)return null;const T0=mToday();return(k.d||[]).find(d=>d>=T0&&k.e[d]&&k.e[d].k&&!k.e[d].own)||null};
+const WD=['So.','Mo.','Di.','Mi.','Do.','Fr.','Sa.'];const dLong=d=>WD[new Date(d+'T12:00:00').getDay()]+', '+dshow(d);
+const grund=n=>{try{return['Mathematik','Umrechnen'].includes(gfach(n))}catch(e){return false}};
+
+/* ---------- LZ-06: höchstens 3 fällige Themen am Tag, Kursstoff zuerst; die Auswahl gilt den ganzen Tag ---------- */
+function memToday(){const T0=mToday(),due=memDue(),ks=kursTop(),pr=n=>ks?(ks.has(n)?0:grund(n)?1:2):0;let s=store.get('ll_memday',null);
+ if(!s||s.d!==T0){const o=due.map((n,i)=>[n,i]).sort((a,b)=>pr(a[0])-pr(b[0])||a[1]-b[1]).map(x=>x[0]);s={d:T0,L:o.filter(n=>pr(n)<2).slice(0,3)};store.set('ll_memday',s)}
+ const today=s.L.filter(n=>due.includes(n));return{due,today,planned:s.L,rest:due.filter(n=>!s.L.includes(n)),pr}}
+window.memToday=memToday;
+memDueCount=function(){try{return memToday().today.length}catch(e){return 0}};
+const startDue=L=>{PS.due=L.slice();openPractice('D:');scrollTo(0,0)};
+
+/* ---------- Lernstand: Wiederholung (LZ-06), Kursstoff über der Prüfungsreife (LZ-08) ---------- */
+const mv=memView;memView=function(){const r=mv.apply(this,arguments);const box=$('#mem');if(!box)return r;
+ try{const P=[...box.querySelectorAll('.panel')].find(p=>/Wiederholung/.test((p.querySelector('h2')||{}).textContent||''));const ul=P&&P.querySelector('ul.mplan');
+  if(ul){const T=memToday(),li=n=>[...ul.children].find(x=>(x.querySelector('b')||{}).textContent===n);
+   const head=document.createElement('p');head.className='lzhead';
+   const items=T.today.map(li).filter(Boolean),rest=T.rest.map(n=>[n,li(n)]).filter(x=>x[1]);
+   head.innerHTML=T.today.length?`<b>Heute: ${T.today.length===1?'1 Thema':T.today.length+' Themen'}</b> · etwa ${T.today.length*4} Minuten${kursTop()?' · aus Deinem Kursstoff zuerst':''}`:T.planned.length?'<b class="okt">✓ Für heute geschafft.</b> Morgen geht es weiter.':'<b>Heute ist aus Deinem Kursstoff nichts fällig.</b>';
+   ul.before(head);ul.innerHTML='';items.forEach(x=>ul.append(x));if(!items.length)ul.hidden=true;
+   if(rest.length){const later=rest.filter(([n])=>T.pr(n)<2),other=rest.filter(([n])=>T.pr(n)>=2),d=document.createElement('details');d.className='lzrest';
+    d.innerHTML=`<summary>Weitere fällige Themen (${rest.length})</summary>`+(later.length?'<p class="sub">Kommen an den nächsten Tagen dran:</p><ul class="mplan lzl"></ul>':'')+(other.length?'<p class="sub">Nicht aus Deinem bisherigen Kursstoff. Übe sie nur, wenn Du willst:</p><ul class="mplan lzo"></ul>':'');
+    later.forEach(([,e])=>d.querySelector('.lzl').append(e));other.forEach(([,e])=>d.querySelector('.lzo').append(e));ul.after(d)}
+   const b=P.querySelector('#mdue');if(b){if(T.today.length>1){b.textContent=`Die ${T.today.length} Themen von heute üben`;b.onclick=()=>startDue(T.today)}else b.closest('.pb').remove()}}}catch(e){console.error(e)}
+ try{const R=box.querySelector('.reife'),ks=kursTop(),kap=kursKap();if(R&&ks&&!R.textContent.includes('Noch keine')){const M_=memGet(),U=memUniv(),L=[...ks].filter(n=>U.includes(n)),s=L.filter(n=>memState(M_.t[n],n)==='sicher').length;
+   const kn=kap.map(k=>(HW.find(u=>u.id===k)||{k:''}).k.replace('Kapitel ','')).filter(Boolean),kt=kn.length===1?'Kapitel '+kn[0]:kn.length===2?'Kapitel '+kn[0]+' und '+kn[1]:'Kapitel '+kn[0]+' bis '+kn[kn.length-1];
+   R.insertAdjacentHTML('beforebegin',`<div class="lzkurs"><b>Kursstoff bis heute</b> (${kt})<b class="big">${s} von ${L.length} Themen sicher</b><small class="sub">Der Stoff aus den bisherigen Kurstagen.</small></div>`);
+   const sm=R.querySelector('small');if(sm)sm.textContent='für die ganze Prüfung · wächst mit jedem Kapitel · '+sm.textContent}}catch(e){console.error(e)}
+ return r};
+
+/* ---------- LZ-04: „Meine Fehler“ endet mit einer Karte ---------- */
+window.fmEnd=function(){prac=true;cur=-1;nav();document.body.classList.add('fmend');const ph=$('#ph2');if(ph)ph.textContent='📌 Meine Fehler';const pn=$('#practice .panel');let c=$('#fmend');if(!c){c=document.createElement('div');c.id='fmend';c.setAttribute('role','status');pn.append(c)}
+ const T=memToday().today;c.innerHTML=`<h3>✓ Alle Fehler geübt</h3><p>Du hast jede Aufgabe aus „Meine Fehler“ zweimal richtig gelöst. Die Liste ist leer.</p>${T.length?`<button type="button" class="sbtn" id="fmd">📈 Weiter mit den fälligen Themen (${T.length}) →</button>`:''}<div class="lzq"><button type="button" class="chip" id="fml">Zum Lernstand</button><button type="button" class="chip" id="fmh">Zur Startseite</button></div>`;
+ const off=()=>{document.body.classList.remove('fmend');c.remove()};
+ if($('#fmd'))$('#fmd').onclick=()=>{off();startDue(T)};$('#fml').onclick=()=>{off();memOpen();scrollTo(0,0)};$('#fmh').onclick=()=>{off();prac=false;cur=-1;nav();scrollTo(0,0)};scrollTo(0,0)};
+{const rq=renderQ;renderQ=function(){if(document.body.classList.contains('fmend')){document.body.classList.remove('fmend');const c=$('#fmend');if(c)c.remove()}return rq.apply(this,arguments)}}
+
+/* ---------- LZ-11: „Weiter mit …“ beim Bearbeiten jeder Übungsaufgabe merken, egal über welchen Weg ---------- */
+{const sc=score;score=function(){const r=sc.apply(this,arguments);try{if(prac&&!PS.exam&&!PS.oral&&PS.cur){const n=FM?PS.cur.n:(typeof PS.sel==='string'&&PS.sel.startsWith('M:')?PS.sel.slice(2):'');store.set('ll_last',{k:'u',n:n||'',ts:Date.now()})}}catch(e){}return r}}
+
+/* ---------- LZ-03: iPhone/iPad im Browser: Karte bleibt, bis die App vom Home-Bildschirm läuft ---------- */
+const IOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+{const a0=a2hCard;a2hCard=function(){const sa=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone;if(!IOS||sa)return a0.apply(this,arguments);const v=store.get('ll_a2h','');if(v&&v<'9999'&&v>=mToday())return'';
+ return`<div class="hc qk a2h"><h2>📲 Wichtig auf dem iPhone: als App speichern</h2><p>Safari löscht Deinen Lernstand, wenn Du die Seite <strong>7 Tage nicht öffnest</strong>. Als App auf dem Home-Bildschirm passiert das nicht.</p><p>① Unten auf <strong>Teilen</strong> tippen (Quadrat mit Pfeil)<br>② <strong>„Zum Home-Bildschirm“</strong> wählen<br>③ Ab jetzt nur über das neue Symbol öffnen</p><p><button type="button" class="chip" data-a2h="3">In 3 Tagen erinnern</button></p><p class="sub">Die Karte verschwindet erst, wenn Du die App vom Home-Bildschirm aus öffnest.</p></div>`}}
+
+/* ---------- Startseite: Kursfrage (LZ-02), Termin (LZ-13), Willkommen zurück (LZ-14), Sicherung vor dem Kurstag (LZ-03) ---------- */
+const lastDay=()=>{const d=memGet().d||{};return Object.keys(d).filter(k=>d[k]>0).sort().pop()||null};
+const hv=homeView;homeView=function(){const r=hv.apply(this,arguments);const H=$('#home');if(!H)return r;const c=H.querySelector('.rfmain');
+ const keep=()=>{if(window.kolStart)try{kolStart()}catch(e){}};
+ try{if(c&&store.get('ll_kursq',null)===1&&!DOZENT){const k=H.querySelector('.rfkl');if(k)k.remove();
+   c.innerHTML=`<h2>👋 Kurze Frage vorab</h2><p class="big">Bist Du im Kurs <strong>${esc(KURS0.n)}</strong> (Industriemeister, Samstagskurs)?</p><p class="sub">Dann zeigt Dir die App Kurstage und Hausaufgaben. Sonst übst Du frei, ohne Kurs.</p><button type="button" class="rfgo" id="kqy">Ja, ich bin im Kurs →</button><div class="rfsec"><button type="button" id="kqn">Nein, ich lerne ohne Kurs</button></div>`;
+   $('#kqy').onclick=()=>{kurs0Install(true);homeView()};$('#kqn').onclick=()=>{store.set('ll_kursq',null);store.set('ll_kurs0','nein');homeView()};keep();return r}
+  if(c&&store.get('ll_kurs0',null)==='nein'&&!kursE_()){const s=c.querySelector('.rfsec');if(s&&!s.querySelector('#kqj')){s.insertAdjacentHTML('beforeend','<button type="button" id="kqj">🎓 Ich bin doch im Kurs</button>');$('#kqj').onclick=()=>{kurs0Install(true);homeView()}}}}catch(e){console.error(e)}
+ /* LZ-14: ab 10 Tagen ohne Üben */
+ try{const ld=lastDay(),T0=mToday(),gap=ld?dayDiff(ld,T0):0,T=gap>=10?memToday().today:[];if(c&&T.length){const u=typeof hwPlanUnit==='function'?hwPlanUnit():null,nd=kursNext(),w=gap>=14?Math.round(gap/7)+' Wochen':gap+' Tage';
+   c.innerHTML=`<h2>👋 Willkommen zurück</h2><p class="big">Deine letzte Übung ist <strong>${w}</strong> her. Kein Problem. Starte mit ${T.length===1?'diesem Thema':'diesen '+T.length+' Themen'}, etwa ${T.length*4} Minuten:</p><ol class="lzwl">${T.map(n=>`<li>${esc(n)}</li>`).join('')}</ol><button type="button" class="rfgo" id="lzwb">Los geht’s →</button><div class="rfsec">${u?`<button type="button" id="lzwh">📝 Danach: Hausaufgabe ${esc(u.k.replace('Kapitel ',''))}${nd?' · bis '+dLong(nd):''}</button>`:''}<button type="button" id="lzwa">📝 Alle Hausaufgaben</button></div>`;
+   $('#lzwb').onclick=()=>startDue(T);if($('#lzwh'))$('#lzwh').onclick=()=>{hwOpen(u.id);scrollTo(0,0)};$('#lzwa').onclick=()=>{hwOpen('');scrollTo(0,0)};keep()}}catch(e){console.error(e)}
+ /* LZ-13: Termin der Hausaufgabe */
+ try{const sm=c&&c.querySelector('p.big small'),nd=kursNext();if(sm&&nd&&/erledigt/.test(sm.textContent)&&/Hausaufgabe/.test(c.textContent)&&!sm.querySelector('.lzdue')){const n=dayDiff(mToday(),nd);
+   sm.insertAdjacentHTML('afterbegin',`<span class="lzdue${n<=7?' bald':''}">bis ${n===0?'heute':n===1?'morgen, '+dLong(nd):dLong(nd)+' (noch '+n+' Tage)'}</span> · `)}}catch(e){console.error(e)}
+ /* LZ-03: Sicherung am Tag vor dem Kurstag und vor den Feiertagen */
+ try{const k=H.querySelector('.rfkl'),T0=mToday(),nd=kursNext(),le=store.get('ll_lastexp',''),xmas=T0.slice(5)>='12-18'&&T0.slice(5)<='12-23',any=Object.keys(memGet().t||{}).length;
+  if(k&&any&&(le<T0)&&((nd&&dayDiff(T0,nd)===1)||xmas)&&!k.querySelector('.lzbk')){k.insertAdjacentHTML('beforeend',`<div class="lzbk" style="flex-basis:100%;margin-top:10px"><div>💾 <b>${xmas&&!(nd&&dayDiff(T0,nd)===1)?'Vor den Feiertagen:':'Morgen ist Kurstag.'}</b> Sichere heute Deinen Lernstand${nd&&dayDiff(T0,nd)===1?' und schick ihn Deinem Dozenten':''}.</div><div class="lzq"><button type="button" class="chip pri" id="lzbs">💾 Lernstand sichern</button></div><small class="sub">${le?'Letzte Sicherung: '+dshow(le):'Noch keine Sicherung'}</small></div>`);
+   $('#lzbs').onclick=()=>{memExport();homeView()}}}catch(e){console.error(e)}
+ return r};
+const esc=s=>String(s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+
+/* ---------- LZ-12 Dozent: Hausaufgabe je Einheit mit Datum, gemessen am Kurstag ---------- */
+window.dozHwTxt=function(o,s){const hw=o.hw||{},inK=o.kurs===KURS0.n;const due=id=>{const i=KURS0.k.indexOf(id);return i>=0&&KURS0.d[i+1]?KURS0.d[i+1]:null};
+ const L=HW.map(u=>{const x=hw[u.id],dd=inK?due(u.id):null,past=dd&&o.datum&&dd<=o.datum;if(!x&&!past)return'';const kk=u.k.replace('Kapitel ','');
+  if(!x)return`<span class="dzhw">${kk} ✗</span>`;const full=x.d>=x.n;if(!x.last)return`<span class="dzhw">${kk} ${full?'✓':x.d+'/'+x.n}</span>`;
+  const late=dd&&x.last>dd;return`<span class="dzhw">${kk} ${full?(late?'⏰':'✓'):x.d+'/'+x.n} <small>${dshow(x.last)}</small></span>`}).filter(Boolean);
+ return L.length?L.join('<br>'):'–'};
+
+/* Menü-Abzeichen und Startseite mit den neuen Regeln neu aufbauen */
+try{nav()}catch(e){if($('#home')&&!$('#home').hidden)homeView()}
 })();</script>
 </body>
 </html>
