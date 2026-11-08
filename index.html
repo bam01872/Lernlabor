@@ -14610,24 +14610,7 @@ const chk=i=>{const row=i.closest('.ctl');if(!row)return;const raw=i.value.trim(
 document.addEventListener('change',e=>{const i=e.target;if(i.matches&&i.matches('.ctl .n input'))chk(i)},true);
 document.addEventListener('keydown',e=>{const i=e.target;if(e.key==='Enter'&&i.matches&&i.matches('.ctl .n input'))chk(i)},true);
 })();</script>
-<!-- MOB-01 Skizzenschrift am Handy (Vorschau) -->
-<style>
-.skgb{float:right;margin:2px 0 4px 10px;min-height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:600 13px/1 system-ui,sans-serif;cursor:pointer;position:relative}
-.skgb{margin-top:6px}
-.skgb span{font-size:15px;margin-right:2px}
-@media(min-width:901px){.skgb{display:none}}
-#skbig{position:fixed;inset:0;z-index:300;background:var(--card,#fff);overflow:hidden}
-#skbig[hidden]{display:none}
-#skbig .skbin{position:absolute;left:0;top:0;display:flex;flex-direction:column;transform-origin:0 0}
-#skbig .skbh{flex:none;display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line);font:600 14px/1.3 system-ui,sans-serif;color:var(--ink)}
-#skbig .skbh span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#skbig .skbh button{min-height:40px;min-width:40px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:600 15px system-ui,sans-serif;cursor:pointer}
-#skbig .skbh button:disabled{opacity:.4;cursor:default}
-#skbig .skbb{flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch}
-#skbig .skbr{margin:auto;padding:8px;box-sizing:content-box}
-#skbig .skbr svg{display:block;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;margin:0!important}
-body.skbig{overflow:hidden}
-</style>
+<!-- MOB-01 Skizzenschrift am Handy -->
 <script>(function(){
 /* MOB-01 Teil 1: Mindestschrift im Bild. Am Handy werden Beschriftungen, die wirksam kleiner als 10 px wären,
    bis höchstens 1,6-fach vergrößert. Kollidiert ein vergrößerter Text mit einem anderen oder ragt er aus dem Bild,
@@ -14637,7 +14620,7 @@ const G=2,hit=(a,b)=>Math.min(a.right,b.right)-Math.max(a.left,b.left)>-G&&Math.
 const hit0=(a,b)=>Math.min(a.right,b.right)-Math.max(a.left,b.left)>.5&&Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)>.5;
 /* Zeichen in Symbolen (Ladung „2+“, Pol „−“) bleiben, wie sie sind */
 const sym=t=>{const x=t.textContent.trim();return x.length<=2&&!/[A-Za-zÄÖÜäöü]/.test(x)};
-function boost(){const s=document.getElementById('svg');if(!s||innerWidth>700&&!document.body.classList.contains('skbig'))return;const vb=s.viewBox.baseVal;if(!vb||!vb.width)return;
+function boost(){const s=document.getElementById('svg');if(!s||innerWidth>700)return;const vb=s.viewBox.baseVal;if(!vb||!vb.width)return;
  const S=s.getBoundingClientRect(),m=s.getScreenCTM(),k=m?Math.hypot(m.a,m.b):0;if(!k||!S.width)return;
  const T=[...s.querySelectorAll('text')].filter(t=>t.textContent.trim());if(!T.length||T.length>150)return;
  T.forEach(t=>{if(t.dataset.fb!=null){t.style.fontSize=t.dataset.fb;delete t.dataset.fb}});
@@ -14686,7 +14669,7 @@ const vbx=()=>{const s=document.getElementById('svg'),e=EX[cur];if(!s||!e)return
 function edge(){const s=document.getElementById('svg');if(!s)return false;const S=s.getBoundingClientRect(),m=s.getScreenCTM(),k=m?Math.hypot(m.a,m.b):0;if(!k||!S.width)return false;
  let l=0,t=0,r=0,b=0;s.querySelectorAll('text').forEach(x=>{const R=x.getBoundingClientRect();if(!R.width)return;l=Math.max(l,S.left-R.left);t=Math.max(t,S.top-R.top);r=Math.max(r,R.right-S.right);b=Math.max(b,R.bottom-S.bottom)});
  const d=[l,t,r,b].map(x=>x>.5?Math.ceil(x/k)+3:0);if(!d.some(Boolean))return false;const e=EX[cur]||[0,0,0,0];EX[cur]=e.map((x,i)=>x+d[i]);vbx();return true}
-function place(){const s=document.getElementById('svg');if(!s||document.body.classList.contains('skbig'))return;const pn=s.parentElement,c=pn&&pn.querySelector(':scope>.simc');if(!c)return;
+function place(){const s=document.getElementById('svg');if(!s)return;const pn=s.parentElement,c=pn&&pn.querySelector(':scope>.simc');if(!c)return;
  s.style.marginTop='';c.style.top=c.style.left='';c.style.right='';const P=pn.getBoundingClientRect(),S=s.getBoundingClientRect(),bw=c.offsetWidth,bh=c.offsetHeight;if(!S.width||!bw)return;
  const R=[...s.querySelectorAll('text')].filter(t=>t.textContent.trim()).map(t=>t.getBoundingClientRect()).filter(r=>r.width>0);
  const cand=[[S.right-8-bw,S.top+8],[S.left+8,S.top+8],[S.right-8-bw,S.bottom-8-bh],[S.left+8,S.bottom-8-bh]];
@@ -14698,32 +14681,11 @@ const r0=render;render=function(){const r=r0.apply(this,arguments);try{vbx();con
  /* Brüche in Beschriftungen werden erst nach dem Zeichnen gesetzt und machen Texte höher: danach noch einmal einpassen */
  if(fresh){cancelAnimationFrame(RF);RF=requestAnimationFrame(()=>{RF=requestAnimationFrame(()=>{if(M[cur]&&M[cur].anim&&play)return;C=null;try{boost();if(edge()){C=null;boost()}place()}catch(e){}})})}}catch(e){}return r};
 document.addEventListener('input',()=>{C=null},true);addEventListener('resize',()=>{C=null});
-/* Bildbreite ändert sich (erstes Anzeigen, Drehen, Bild groß): neu einpassen, ohne neu zu zeichnen */
+/* Bildbreite ändert sich (erstes Anzeigen, Drehen): neu einpassen, ohne neu zu zeichnen */
 let ro=null,rw=0,ra=0;const obs=()=>{const s=document.getElementById('svg');if(!s||!window.ResizeObserver||ro)return;ro=new ResizeObserver(e=>{const w=Math.round(e[0].contentRect.width);if(w===rw)return;rw=w;cancelAnimationFrame(ra);ra=requestAnimationFrame(()=>{C=null;try{boost()}catch(x){}})});ro.observe(s)};obs();
 
-/* MOB-01 Teil 2: „Bild groß“ – Skizze bildschirmfüllend. Breite Bilder werden am Handy hochkant samt Kopfzeile quer gedreht,
-   mit − / + lässt sich weiter vergrößern und verschieben. Die Skizze bleibt live (Regler, Animation laufen weiter). */
-let ov=null,home=null,z=1;const Z=[1,1.5,2,3];
-function lay(){if(!ov)return;const s=document.getElementById('svg'),vb=s&&s.viewBox.baseVal;if(!vb||!vb.width)return;const ar=vb.width/vb.height,vw=innerWidth,vh=innerHeight,rot=vh>vw*1.1&&ar>1.25;
- const inn=ov.querySelector('.skbin'),W=rot?vh:vw,H=rot?vw:vh;inn.style.width=W+'px';inn.style.height=H+'px';inn.style.transform=rot?`translate(${vw}px,0) rotate(90deg)`:'';
- const bb=ov.querySelector('.skbb'),aw=bb.clientWidth-16,ah=bb.clientHeight-16,w=Math.max(50,Math.min(aw,ah*ar))*z;const r=ov.querySelector('.skbr');r.style.width=w+'px';r.style.height=(w/ar)+'px';
- ov.querySelector('.skzm').disabled=z===Z[0];ov.querySelector('.skzp').disabled=z===Z[Z.length-1]}
-function zoom(d){const i=Math.max(0,Math.min(Z.length-1,Z.indexOf(z)+d));if(Z[i]===z)return;const bb=ov.querySelector('.skbb'),fx=(bb.scrollLeft+bb.clientWidth/2)/bb.scrollWidth,fy=(bb.scrollTop+bb.clientHeight/2)/bb.scrollHeight;z=Z[i];lay();C=null;render();bb.scrollLeft=fx*bb.scrollWidth-bb.clientWidth/2;bb.scrollTop=fy*bb.scrollHeight-bb.clientHeight/2}
-function open_(){const s=document.getElementById('svg');if(!s||ov&&!ov.hidden)return;
- if(!ov){ov=document.createElement('div');ov.id='skbig';ov.setAttribute('role','dialog');ov.setAttribute('aria-modal','true');ov.setAttribute('aria-label','Bild groß');
-  ov.innerHTML='<div class="skbin"><div class="skbh"><span></span><button type="button" class="skzm" aria-label="Verkleinern">−</button><button type="button" class="skzp" aria-label="Vergrößern">+</button><button type="button" class="skbx">✕ Schließen</button></div><div class="skbb"><div class="skbr"></div></div></div>';document.body.appendChild(ov);
-  ov.querySelector('.skbx').onclick=close_;ov.querySelector('.skzm').onclick=()=>zoom(-1);ov.querySelector('.skzp').onclick=()=>zoom(1)}
- ov.querySelector('.skbh span').textContent=M[cur]?M[cur].name:'';z=1;
- home={p:s.parentElement,n:s.nextSibling};ov.querySelector('.skbr').appendChild(s);ov.hidden=false;document.body.classList.add('skbig');lay();C=null;render();ov.querySelector('.skbx').focus();
- history.pushState({skbig:1},'')}
-function close_(fromPop){if(!ov||ov.hidden)return;const s=document.getElementById('svg');if(home&&s)home.p.insertBefore(s,home.n);ov.hidden=true;document.body.classList.remove('skbig');C=null;render();
- const b=document.querySelector('.skgb');if(b)b.focus({preventScroll:true});if(fromPop!==true&&history.state&&history.state.skbig)history.back()}
-addEventListener('popstate',()=>close_(true));addEventListener('resize',()=>{if(ov&&!ov.hidden){lay();C=null;render()}});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&ov&&!ov.hidden){e.stopPropagation();close_()}},true);
-function addBtn(){document.querySelectorAll('.skgb').forEach(x=>x.remove());const L=document.getElementById('leg'),s=document.getElementById('svg');
- if(s&&L&&cur>=0){const b=document.createElement('button');b.type='button';b.className='skgb';b.innerHTML='<span aria-hidden="true">⤢</span> Bild groß';b.setAttribute('aria-label','Bild groß anzeigen');b.onclick=open_;L.before(b)}}
-const b0=build;build=function(){const r=b0.apply(this,arguments);try{addBtn();PK=''}catch(e){}return r};
-try{addBtn();C=null;boost();place()}catch(e){}
+const b0=build;build=function(){const r=b0.apply(this,arguments);PK='';return r};
+try{C=null;boost();place()}catch(e){}
 addEventListener('resize',()=>{PK=''});
 })();</script>
 </body>
