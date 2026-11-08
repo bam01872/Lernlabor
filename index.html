@@ -14610,5 +14610,93 @@ const chk=i=>{const row=i.closest('.ctl');if(!row)return;const raw=i.value.trim(
 document.addEventListener('change',e=>{const i=e.target;if(i.matches&&i.matches('.ctl .n input'))chk(i)},true);
 document.addEventListener('keydown',e=>{const i=e.target;if(e.key==='Enter'&&i.matches&&i.matches('.ctl .n input'))chk(i)},true);
 })();</script>
+<!-- MOB-01 Skizzenschrift am Handy (Vorschau) -->
+<style>
+.skgb{float:right;margin:2px 0 4px 10px;min-height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:600 13px/1 system-ui,sans-serif;cursor:pointer;position:relative}
+.skgb::after{content:'';position:absolute;inset:-6px 0}
+.skgb span{font-size:15px;margin-right:2px}
+@media(min-width:901px){.skgb{display:none}}
+#skbig{position:fixed;inset:0;z-index:300;background:var(--card,#fff);overflow:hidden}
+#skbig[hidden]{display:none}
+#skbig .skbin{position:absolute;left:0;top:0;display:flex;flex-direction:column;transform-origin:0 0}
+#skbig .skbh{flex:none;display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line);font:600 14px/1.3 system-ui,sans-serif;color:var(--ink)}
+#skbig .skbh span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#skbig .skbh button{min-height:40px;min-width:40px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:600 15px system-ui,sans-serif;cursor:pointer}
+#skbig .skbh button:disabled{opacity:.4;cursor:default}
+#skbig .skbb{flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch}
+#skbig .skbr{margin:auto;padding:8px;box-sizing:content-box}
+#skbig .skbr svg{display:block;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;margin:0!important}
+body.skbig{overflow:hidden}
+</style>
+<script>(function(){
+/* MOB-01 Teil 1: Mindestschrift im Bild. Am Handy werden Beschriftungen, die wirksam kleiner als 10 px wären,
+   bis höchstens 1,6-fach vergrößert. Kollidiert ein vergrößerter Text mit einem anderen oder ragt er aus dem Bild,
+   wird er schrittweise wieder kleiner (notfalls Originalgröße). Laufende Animationen nutzen die Werte bis zu 0,6 s weiter. */
+const MIN=10,CAP=1.6;let C=null;
+const G=2,hit=(a,b)=>Math.min(a.right,b.right)-Math.max(a.left,b.left)>-G&&Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)>-G;
+const hit0=(a,b)=>Math.min(a.right,b.right)-Math.max(a.left,b.left)>.5&&Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)>.5;
+/* Zeichen in Symbolen (Ladung „2+“, Pol „−“) bleiben, wie sie sind */
+const sym=t=>{const x=t.textContent.trim();return x.length<=2&&!/[A-Za-zÄÖÜäöü]/.test(x)};
+function boost(){const s=document.getElementById('svg');if(!s||innerWidth>700&&!document.body.classList.contains('skbig'))return;const vb=s.viewBox.baseVal;if(!vb||!vb.width)return;
+ const S=s.getBoundingClientRect(),m=s.getScreenCTM(),k=m?Math.hypot(m.a,m.b):0;if(!k||!S.width)return;
+ const T=[...s.querySelectorAll('text')].filter(t=>t.textContent.trim());if(!T.length||T.length>150)return;
+ T.forEach(t=>{if(t.dataset.fb!=null){t.style.fontSize=t.dataset.fb;delete t.dataset.fb}});
+ const key=cur+'|'+T.length+'|'+Math.round(S.width);
+ const fs0=T.map(t=>parseFloat(getComputedStyle(t).fontSize)||12);
+ const sz=(t,v)=>{if(t.dataset.fb==null)t.dataset.fb=t.style.fontSize;t.style.fontSize=v};const un=t=>{if(t.dataset.fb!=null){t.style.fontSize=t.dataset.fb;delete t.dataset.fb}};
+ const put=f=>T.forEach((t,i)=>{if(f[i]>1)sz(t,(fs0[i]*f[i])+'px')});
+ if(C&&C.key===key&&M[cur].anim&&play&&performance.now()-C.t<600){put(C.f);return}
+ let f=fs0.map((x,i)=>x*k<MIN&&!sym(T[i])?Math.min(MIN/k,x*CAP)/x:1);
+ if(f.every(x=>x===1)){C={key,f,t:performance.now()};return}
+ /* Gruppen: gleiche Schrift in einer Zeile oder Spalte (Achsenbeschriftung, Tabellen) bekommen dieselbe Größe */
+ const P=T.map((_,i)=>i),fd=i=>P[i]===i?i:(P[i]=fd(P[i])),fw=T.map(t=>getComputedStyle(t).fontWeight),ax=T.map(t=>parseFloat(t.getAttribute('x'))),ay=T.map(t=>parseFloat(t.getAttribute('y')));
+ for(let i=0;i<T.length;i++)for(let j=i+1;j<T.length;j++)if(fs0[i]===fs0[j]&&fw[i]===fw[j]&&(Math.abs(ay[i]-ay[j])<1||Math.abs(ax[i]-ax[j])<1))P[fd(i)]=fd(j);
+ const eq=()=>{const m={};f.forEach((x,i)=>{const r=fd(i);m[r]=Math.min(m[r]??9,x)});f=f.map((_,i)=>m[fd(i)])};eq();
+ const rc=()=>T.map(t=>t.getBoundingClientRect());const R0=rc(),old=new Set();
+ for(let i=0;i<T.length;i++)for(let j=i+1;j<T.length;j++)if(hit0(R0[i],R0[j]))old.add(i*4096+j);
+ /* Kästen, Symbole, Bauteile: ein Text darf nicht neu in sie hineinwachsen bzw. nicht aus seinem Kasten heraus */
+ const A=S.width*S.height,B=[...s.querySelectorAll('rect,circle,ellipse,polygon,path,image,use')].map(e=>e.getBoundingClientRect()).filter(r=>r.width>2&&r.height>2&&r.width*r.height<A*.12&&r.width<S.width*.45&&r.height<S.height*.45);
+ const ins=(r,b)=>r.left>=b.left-.5&&r.right<=b.right+.5&&r.top>=b.top-.5&&r.bottom<=b.bottom+.5;
+ const box=R0.map(r=>{let m=null;for(const b of B)if(ins(r,b)&&(!m||b.width*b.height<m.width*m.height))m=b;return m});
+ const pd=R0.map((r,i)=>{const b=box[i];return b?Math.max(0,Math.min(3,r.left-b.left,b.right-r.right)):0});
+ const ia=(a,b)=>Math.max(0,Math.min(a.right,b.right)-Math.max(a.left,b.left))*Math.max(0,Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top));
+ const ob=R0.map((r,i)=>B.filter(b=>b!==box[i]&&!ins(b,r)&&hit(r,b)).map(b=>[b,ia(r,b)]));
+ for(let it=0;it<4;it++){T.forEach((t,i)=>{if(f[i]>1)sz(t,(fs0[i]*f[i])+'px');else un(t)});const R=rc(),bad=new Set();
+  for(let i=0;i<T.length;i++){if(f[i]===1)continue;const r=R[i];if(r.left<S.left-1||r.right>S.right+1||r.top<S.top-1||r.bottom>S.bottom+1){bad.add(i);continue}
+   if(box[i]){const b=box[i],q=pd[i];if(r.left<b.left+q||r.right>b.right-q||r.top<b.top+q*.5||r.bottom>b.bottom-q*.5){bad.add(i);continue}}
+   if(ob[i].some(([b,a])=>ia(r,b)>a*1.3+6)){bad.add(i);continue}
+   for(const b of B){if(b===box[i]||ob[i].some(x=>x[0]===b)||ins(b,R0[i]))continue;if(Math.min(r.right,b.right)-Math.max(r.left,b.left)>1&&Math.min(r.bottom,b.bottom)-Math.max(r.top,b.top)>1&&!ins(b,r)){bad.add(i);break}}}
+  for(let i=0;i<T.length;i++)for(let j=i+1;j<T.length;j++){if(f[i]===1&&f[j]===1||old.has(i*4096+j))continue;if(hit(R[i],R[j])){bad.add(i);bad.add(j)}}
+  if(!bad.size)break;bad.forEach(i=>{f[i]=it<3?1+(f[i]-1)/2:1;if(f[i]<1.04)f[i]=1});eq();if(it===3)T.forEach((t,i)=>{if(f[i]>1)sz(t,(fs0[i]*f[i])+'px');else un(t)})}
+ C={key,f,t:performance.now()}}
+const r0=render;render=function(){const r=r0.apply(this,arguments);try{boost()}catch(e){}return r};
+document.addEventListener('input',()=>{C=null},true);addEventListener('resize',()=>{C=null});
+/* Bildbreite ändert sich (erstes Anzeigen, Drehen, Bild groß): neu einpassen, ohne neu zu zeichnen */
+let ro=null,rw=0,ra=0;const obs=()=>{const s=document.getElementById('svg');if(!s||!window.ResizeObserver||ro)return;ro=new ResizeObserver(e=>{const w=Math.round(e[0].contentRect.width);if(w===rw)return;rw=w;cancelAnimationFrame(ra);ra=requestAnimationFrame(()=>{C=null;try{boost()}catch(x){}})});ro.observe(s)};obs();
+
+/* MOB-01 Teil 2: „Bild groß“ – Skizze bildschirmfüllend. Breite Bilder werden am Handy hochkant samt Kopfzeile quer gedreht,
+   mit − / + lässt sich weiter vergrößern und verschieben. Die Skizze bleibt live (Regler, Animation laufen weiter). */
+let ov=null,home=null,z=1;const Z=[1,1.5,2,3];
+function lay(){if(!ov)return;const s=document.getElementById('svg'),vb=s&&s.viewBox.baseVal;if(!vb||!vb.width)return;const ar=vb.width/vb.height,vw=innerWidth,vh=innerHeight,rot=vh>vw*1.1&&ar>1.25;
+ const inn=ov.querySelector('.skbin'),W=rot?vh:vw,H=rot?vw:vh;inn.style.width=W+'px';inn.style.height=H+'px';inn.style.transform=rot?`translate(${vw}px,0) rotate(90deg)`:'';
+ const bb=ov.querySelector('.skbb'),aw=bb.clientWidth-16,ah=bb.clientHeight-16,w=Math.max(50,Math.min(aw,ah*ar))*z;const r=ov.querySelector('.skbr');r.style.width=w+'px';r.style.height=(w/ar)+'px';
+ ov.querySelector('.skzm').disabled=z===Z[0];ov.querySelector('.skzp').disabled=z===Z[Z.length-1]}
+function zoom(d){const i=Math.max(0,Math.min(Z.length-1,Z.indexOf(z)+d));if(Z[i]===z)return;const bb=ov.querySelector('.skbb'),fx=(bb.scrollLeft+bb.clientWidth/2)/bb.scrollWidth,fy=(bb.scrollTop+bb.clientHeight/2)/bb.scrollHeight;z=Z[i];lay();C=null;render();bb.scrollLeft=fx*bb.scrollWidth-bb.clientWidth/2;bb.scrollTop=fy*bb.scrollHeight-bb.clientHeight/2}
+function open_(){const s=document.getElementById('svg');if(!s||ov&&!ov.hidden)return;
+ if(!ov){ov=document.createElement('div');ov.id='skbig';ov.setAttribute('role','dialog');ov.setAttribute('aria-modal','true');ov.setAttribute('aria-label','Bild groß');
+  ov.innerHTML='<div class="skbin"><div class="skbh"><span></span><button type="button" class="skzm" aria-label="Verkleinern">−</button><button type="button" class="skzp" aria-label="Vergrößern">+</button><button type="button" class="skbx">✕ Schließen</button></div><div class="skbb"><div class="skbr"></div></div></div>';document.body.appendChild(ov);
+  ov.querySelector('.skbx').onclick=close_;ov.querySelector('.skzm').onclick=()=>zoom(-1);ov.querySelector('.skzp').onclick=()=>zoom(1)}
+ ov.querySelector('.skbh span').textContent=M[cur]?M[cur].name:'';z=1;
+ home={p:s.parentElement,n:s.nextSibling};ov.querySelector('.skbr').appendChild(s);ov.hidden=false;document.body.classList.add('skbig');lay();C=null;render();ov.querySelector('.skbx').focus();
+ history.pushState({skbig:1},'')}
+function close_(fromPop){if(!ov||ov.hidden)return;const s=document.getElementById('svg');if(home&&s)home.p.insertBefore(s,home.n);ov.hidden=true;document.body.classList.remove('skbig');C=null;render();
+ const b=document.querySelector('.skgb');if(b)b.focus({preventScroll:true});if(fromPop!==true&&history.state&&history.state.skbig)history.back()}
+addEventListener('popstate',()=>close_(true));addEventListener('resize',()=>{if(ov&&!ov.hidden){lay();C=null;render()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&ov&&!ov.hidden){e.stopPropagation();close_()}},true);
+function addBtn(){document.querySelectorAll('.skgb').forEach(x=>x.remove());const L=document.getElementById('leg'),s=document.getElementById('svg');
+ if(s&&L&&cur>=0){const b=document.createElement('button');b.type='button';b.className='skgb';b.innerHTML='<span aria-hidden="true">⤢</span> Bild groß';b.setAttribute('aria-label','Bild groß anzeigen');b.onclick=open_;L.before(b)}}
+const b0=build;build=function(){const r=b0.apply(this,arguments);try{addBtn()}catch(e){}return r};
+try{addBtn();C=null;boost()}catch(e){}
+})();</script>
 </body>
 </html>
