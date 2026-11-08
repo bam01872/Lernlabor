@@ -14071,18 +14071,18 @@ body.rfon #res .rfec{display:none!important}
 <style>/* N5: Nummern nur in der Schrittleiste; „Ausprobieren“ überall, wo es passt */
 #pred[data-rfn]>p:first-of-type b:first-child::before,#rf3 b.rfk::before,#ein .einb[data-n]::before,body.rfon #auf>details>summary>b:first-of-type::before,#pred[data-rfn] .rfzl .rfzn[data-n]::before{content:none!important;display:none!important}
 @media(min-width:360px){#rfs .tn{display:none!important}#rfs .tw{display:inline!important}}
-/* N1: Kurz erklärt und Auftragsziel in einer Zeile, Vermuten-Kasten kompakter */
+/* N1: Kurz erklärt in einer Zeile, Vermuten-Kasten kompakter */
 #uimore{display:none}#uimore[hidden]{display:none!important}
 #uir{display:flex;gap:8px;align-items:stretch;flex-wrap:nowrap}#uir>#ein{margin:0;flex:none}#uir>*:not([hidden]){margin-top:0}
 #uir:has(>:not([hidden])){margin:0 0 12px}
-#uig{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:0;flex:1 1 auto;min-height:44px;padding:6px 14px;border-radius:999px;border:1.5px solid color-mix(in srgb,var(--auf,#5b4bd6) 45%,transparent);background:color-mix(in srgb,var(--auf,#5b4bd6) 9%,var(--card));color:var(--ink);font:inherit;font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
-#uig[hidden]{display:none}#uig.ok{border-color:var(--ok);color:var(--ok)}
+/* v258: „Kurz erklärt“ am Handy in voller Breite (Auftrag-Knopf oben entfällt) */
+@media(max-width:899px){#uir>#ein{flex:1 1 100%;min-width:0}#uir>#ein>.einb{width:100%;box-sizing:border-box}#uir>#ein .einz{margin-left:auto}}
 @media(max-width:899px){#uir>#ein .einb{font-size:14px;white-space:nowrap;padding-top:6px;padding-bottom:6px}#uir>#ein .einz{font-size:13px}
  body.rfon #pred{padding-top:10px;padding-bottom:10px}body.rfon #pred .predx{min-height:40px;padding-top:4px;padding-bottom:4px;margin-top:4px}
  #rf3{display:none!important}
  #uimore{display:inline-block;background:none;border:0;padding:0 0 8px;margin:-2px 0 0;color:var(--acc);font:inherit;font-weight:700;cursor:pointer;min-height:32px}}
 /* v254: Handy – geöffnetes „Kurz erklärt“ bekommt die ganze Zeile, sonst wird die Seite überbreit und Safari zoomt heraus */
-@media(max-width:899px){#uir:has(>#ein .einp){flex-wrap:wrap}#uir>#ein:has(.einp){flex:1 1 100%;min-width:0;max-width:100%}#uir:has(>#ein .einp)>#uig{display:none!important}#ein .einp{max-width:100%;box-sizing:border-box;min-width:0}}
+@media(max-width:899px){#uir:has(>#ein .einp){flex-wrap:wrap}#uir>#ein:has(.einp){flex:1 1 100%;min-width:0;max-width:100%}#ein .einp{max-width:100%;box-sizing:border-box;min-width:0}}
 /* v254: Laptop – geöffnetes Video als breite Zeile unter „Vermute zuerst“: Bild links, Untertitel und Knöpfe rechts daneben */
 @media(min-width:900px){#uir:has(>#ein .einp){flex-wrap:wrap;align-items:stretch}#uir:has(>#ein .einp)>#pred{flex:1 1 100%}#uir>#ein:has(.einp){flex:1 1 100%;min-width:0}
  #ein .einp{max-width:none;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);column-gap:24px;grid-template-rows:auto auto auto 1fr;align-items:start;padding:14px 18px 16px}
@@ -14092,7 +14092,7 @@ body.rfon #res .rfec{display:none!important}
 /* N3: Laptop – Gruppenreiter hinter der Brotkrume, Vermuten und Kurz erklärt nebeneinander */
 @media(min-width:900px){body.rfnav:not(.uigr) .swr:has(#gs){display:none!important}body.rfnav:not(.uigr) .swr:has(#gs)+br{display:none}
  body.rfnav #thc{cursor:pointer}body.rfnav #thc::after{content:' ▾';font-size:.9em}body.rfnav.uigr #thc::after{content:' ▴'}body.rfnav #thc:hover{text-decoration:underline;text-underline-offset:3px}
- #uir{align-items:center}#uir>#pred{flex:1 1 auto;margin:0}#uir>#ein{flex:none}#uig{display:none!important}}
+ #uir{align-items:center}#uir>#pred{flex:1 1 auto;margin:0}#uir>#ein{flex:none}}
 /* N4: ein Themenkopf für alle Fächer – Brotkrumen und „Thema wechseln“ oben, Titel in voller Breite, Üben bei den Reglern */
 #tq{display:none!important}
 #uich{display:flex;align-items:center;justify-content:space-between;gap:10px}#uich>#thc{margin:0;min-width:0}
@@ -14124,13 +14124,10 @@ nav.glab{flex-wrap:wrap!important;overflow:visible!important;row-gap:2px}
 </style>
 <script>/* UI-Gutachten v248: N1–N5, N7, N10 (Markus 06.11.2026) */
 (()=>{const mq=matchMedia('(min-width:900px)'),q=s=>document.querySelector(s);
- /* ---------- N1/N3: Zeile mit Vermuten (Laptop), Kurz erklärt und Auftragsziel ---------- */
- const goal=()=>{let g=q('#uig');const a=q('#auf'),r=q('#uir');if(!r)return;if(!g){g=document.createElement('button');g.type='button';g.id='uig';g.onclick=()=>{const a_=q('#auf');if(!a_)return;const y=a_.getBoundingClientRect().top+scrollY-16;scrollTo({top:y,behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'})}}
-  if(g.parentElement!==r)r.append(g);const sm=a&&a.querySelector('.aufsm');const on=cur>=0&&a&&!a.hidden&&sm&&!q('#app').hidden;g.hidden=!on;if(!on)return;
-  const ok=sm.classList.contains('okt');g.classList.toggle('ok',ok);const tx=sm.textContent.replace(/^Ziel: mindestens\s/,'Ziel ≥ ').replace(/^Ziel: höchstens\s/,'Ziel ≤ ').replace(/^Ziel:\s/,'Ziel ');/* lange Ziele passen nicht neben „Kurz erklärt“: dann nur „Auftrag“ */g.innerHTML='🎯 '+(ok?'Auftrag ✓':tx.length>16?'Auftrag':sm.innerHTML.replace(/^Ziel: mindestens\s/,'Ziel ≥ ').replace(/^Ziel: höchstens\s/,'Ziel ≤ ').replace(/^Ziel:\s/,'Ziel '))+' <span aria-hidden="true">↓</span>';g.setAttribute('aria-label','Zum Auftrag: '+sm.textContent)};
+ /* ---------- N1/N3: Zeile mit Vermuten (Laptop) und Kurz erklärt; v258: kein Auftrag-Knopf mehr oben, der Auftrag steht nur bei den Reglern ---------- */
  function row(){const e=q('#ein'),p=q('#pred');if(!e||!p)return;let r=q('#uir');if(!r){r=document.createElement('div');r.id='uir'}
   if(mq.matches){if(p.parentElement!==r){r.before?0:0;p.before(r);r.append(p)}if(e.parentElement!==r||e.previousElementSibling!==p)p.after(e)}
-  else{if(p.parentElement===r)r.before(p);if(r.previousElementSibling!==p)p.after(r);if(e.parentElement!==r)r.prepend(e)}goal()}
+  else{if(p.parentElement===r)r.before(p);if(r.previousElementSibling!==p)p.after(r);if(e.parentElement!==r)r.prepend(e)}}
  /* ---------- N2: Auftrag über den Reglern ---------- */
  function auf(){const a=q('#auf'),c=q('#ctls');if(!a||!c)return;const rp=c.closest('.panel');if(!rp)return;if(a.nextElementSibling!==c)c.before(a);a.classList.add('uia')}
  /* ---------- N1: Einstiegstext am Handy zweizeilig mit „mehr“ ---------- */
@@ -14147,12 +14144,11 @@ nav.glab{flex-wrap:wrap!important;overflow:visible!important;row-gap:2px}
  /* ---------- N5: „✏️ Üben“ ohne Nummer ---------- */
  const ub=()=>document.querySelectorAll('#btns>button').forEach(b=>{if(/^\d+ · ✏️ Üben$/.test(b.textContent))b.textContent='✏️ Üben'});
  {const bt=q('#btns');if(bt&&typeof MutationObserver!=='undefined')new MutationObserver(ub).observe(bt,{childList:true,subtree:true,characterData:true})}
- function all(){try{head();crumb();crumbA11y();row();auf();desc();ub();goal()}catch(e){console.error(e)}}
+ function all(){try{head();crumb();crumbA11y();row();auf();desc();ub()}catch(e){console.error(e)}}
  const b0=build;build=function(){const r=b0.apply(this,arguments);all();return r};
  const n0=nav;nav=function(){const r=n0.apply(this,arguments);all();return r};
- const r0=render;render=function(){const r=r0.apply(this,arguments);try{auf();goal()}catch(e){}return r};
- const t0=aufTick;aufTick=function(){const r=t0.apply(this,arguments);try{goal()}catch(e){}return r};
- const s0=aufShow;aufShow=function(){const r=s0.apply(this,arguments);try{auf();goal()}catch(e){}return r};
+ const r0=render;render=function(){const r=r0.apply(this,arguments);try{auf()}catch(e){}return r};
+ const s0=aufShow;aufShow=function(){const r=s0.apply(this,arguments);try{auf()}catch(e){}return r};
  mq.addEventListener('change',()=>{if(!mq.matches)document.body.classList.remove('uigr');all()});
  document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('#hw .hwtp');if(t)t.classList.remove('uihl')},true);
  all();
