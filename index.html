@@ -3181,7 +3181,7 @@ fm(FE,E1,'Kernkraftwerk (Druckwasserreaktor)','Im Reaktor spalten langsame Neutr
  (s,t=0)=>{const Pe=s.P*s.l/100,Pth=Pe/(s.e/100),m=Pth*1e6*86400/8.2e13,dm=Pth*1e6*86400/9e16*1000,kohle=Pth*1e6/32e6*86.4;
  /* räumlich: Sicherheitsbehälter als Betonkuppel, Reaktordruckbehälter mit Brenn- und Regelstäben, Dampferzeuger als stehender Behälter, Turbine, Generator, Kondensator liegend, Kühlturm */
  const rod=(100-s.l)/100*80,prim=[[96,86],[150,86]],prim2=[[150,150],[96,150]],steam=[[172,56],[172,32],[246,32],[246,50]],wat=[[262,174],[262,240],[172,240],[172,166]];
- return{d:`<path d="M18 182V110A96 72 0 0 1 210 110V182Z" fill="#c8d0da" stroke="var(--ink)" stroke-width="1.6"/><path d="M18 182V110A96 72 0 0 1 210 110V182Z" fill="url(#g-cyl)" opacity=".7"/><path d="M26 182V112A88 64 0 0 1 202 112V182" fill="none" stroke="var(--ink)" stroke-width=".8" opacity=".4"/>`+T(30,246,'Sicherheitsbehälter','t2')+VES(34,56,62,118,'#b45309')+[0,1,2,3].map(i=>`<rect x="${44+i*12}" y="${72}" width="5" height="${84}" fill="#fbbf24" stroke="var(--ink)" stroke-width=".6"/><rect x="${47+i*12-1}" y="60" width="3" height="${rod}" fill="#111827"/>`).join('')+`<rect x="58" y="44" width="14" height="12" fill="#6b7280" stroke="var(--ink)" stroke-width="1"/>`+T(30,200,'Reaktor','t1')+T(30,216,'gelb: Brennstäbe','t2')+T(30,230,'schwarz: Regelstäbe','t2')+
+ return{d:`<path d="M18 182V110A96 72 0 0 1 210 110V182Z" fill="#c8d0da" stroke="var(--ink)" stroke-width="1.6"/><path d="M18 182V110A96 72 0 0 1 210 110V182Z" fill="url(#g-cyl)" opacity=".7"/><path d="M26 182V112A88 64 0 0 1 202 112V182" fill="none" stroke="var(--ink)" stroke-width=".8" opacity=".4"/>`+T(22,246,'Sicherheitsbehälter','t2')+VES(34,56,62,118,'#b45309')+[0,1,2,3].map(i=>`<rect x="${44+i*12}" y="${72}" width="5" height="${84}" fill="#fbbf24" stroke="var(--ink)" stroke-width=".6"/><rect x="${47+i*12-1}" y="60" width="3" height="${rod}" fill="#111827"/>`).join('')+`<rect x="58" y="44" width="14" height="12" fill="#6b7280" stroke="var(--ink)" stroke-width="1"/>`+T(22,200,'Reaktor','t1')+T(22,216,'gelb: Brennstäbe','t2')+T(22,230,'schwarz: Regelstäbe','t2')+
  VES(150,52,44,114,'#8fa0b3')+[0,1,2].map(i=>`<path d="M158 ${100+i*12}q7 -6 14 0t14 0" fill="none" stroke="#dc2626" stroke-width="1.4" opacity=".8"/>`).join('')+TH(172,104,'Dampf-','t2','middle')+TH(172,118,'erzeuger','t2','middle')+PIPE(prim,'#dc2626',t,1,5)+PIPE(prim2,'#2563eb',t,1,5)+T(104,80,'heiß','t2')+T(104,164,'kalt','t2')+PIPE(steam,'#dc2626',t,1,6)+PIPE(wat,'#2563eb',t,1,6)+TURB3(246,34,58,48)+GEN3(326,46,42,24)+AR(382,58,26,0,'var(--ok)','')+PYL(412,36,1.05)+HCYL(222,140,90,34,'#cbd5e1')+[0,1,2].map(i=>`<line x1="238" y1="${150+i*7}" x2="292" y2="${150+i*7}" stroke="#2563eb" stroke-width="1" opacity=".6"/>`).join('')+TH(267,162,'Kondensator','t2','middle')+PIPE([[312,158],[346,158]],'#60a5fa',t,1,5)+COOL3(372,232,70,t)+T(14,284,'Kernenergie → Wärme → Dampf → Rotation → Strom','t2')+
  `<g transform="translate(440 20)">`+T(0,0,'Kernspaltung','t1')+`<circle cx="10" cy="48" r="5" fill="var(--flow)"/>`+AR(18,48,28,0,'var(--flow)','')+`<circle cx="75" cy="48" r="22" fill="var(--amber)" opacity=".8"/>`+T(75,52,'U-235','t2','middle')+AR(100,48,22,0,'var(--mute)','')+`<circle cx="150" cy="22" r="14" fill="var(--red)" opacity=".7"/><circle cx="150" cy="76" r="17" fill="var(--red)" opacity=".7"/>`+T(150,26,'Ba','t2','middle')+T(150,80,'Kr','t2','middle')+[[185,10],[190,48],[185,90]].map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="4.5" fill="var(--flow)"/>`).join('')+T(0,108,'+ 2–3 Neutronen','t2')+T(0,126,'→ Kettenreaktion','t2')+T(0,144,'≈ 200 MeV je Spaltung','t2')+T(0,162,'ΔE = Δm · c²','t2')+`</g>`,
  res:[[nf(Pth)+' MW','thermische Leistung'],[nf(m)+' kg/d','gespaltenes U-235'],[nf(dm)+' g/d','umgesetzte Masse Δm']],rows:[['Elektrische Leistung',nf(Pe)+' MW'],['Steinkohle für gleiche Wärme',nf(kohle)+' t/d'],['Energie je kg U-235','8,2 · 10¹³ J ≈ 22,8 GWh']],st:[['P_th = P_el / η',`${nf(Pe)} MW / ${nf(s.e/100)} = ${nf(Pth)} MW`],['m = P_th · t / E_kg',`${nf(Pth)} MW · 86400 s / 8,2·10¹³ J/kg = ${nf(m)} kg`],['Δm = ΔE / c²',`ΔE = P_th · t, c = 3·10⁸ m/s ⇒ ${nf(dm)} g`]]}},
@@ -3338,7 +3338,7 @@ function wdWand(s,t,K){const x0=128,y0=80,y1=248,dz=28,dy=16,wM=Math.round(K.Mw[
  g+=[118,162,206].map((y,j)=>Array.from({length:7},(_,k)=>{const x=40+((t*38+k*L/7+j*19)%L);return `<path d="M${fr(x-7)} ${y-7}L${fr(x)} ${y}L${fr(x-7)} ${y+7}" fill="none" stroke="#f97316" stroke-width="${ww.toFixed(1)}" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/>`}).join('')).join('');
  /* Schimmelgrenze und Schimmel */
  const mold=K.tsi<12.6;
- g+=`<line x1="10" x2="${x0}" y1="${Y(12.6)}" y2="${Y(12.6)}" stroke="var(--amber)" stroke-width="1.4" stroke-dasharray="5 4"/>`+TH(10,Y(12.6)+16,'Schimmelgrenze 12,6 °C','t2');
+ g+=`<line x1="10" x2="${x0}" y1="${Y(12.6)}" y2="${Y(12.6)}" stroke="var(--amber)" stroke-width="1.4" stroke-dasharray="5 4"/>`+TH(10,Y(12.6)+14,'Schimmelgrenze','t2')+TH(10,Y(12.6)+27,'12,6 °C','t2');
  if(mold)g+=[[x0+2,228,7,5],[x0+4,214,5,4],[x0+3,240,6,3],[x0+5,201,4,3]].map(([x,y,a,b])=>`<ellipse cx="${x}" cy="${y}" rx="${a}" ry="${b}" fill="#1f3d2b" opacity=".75"/>`).join('')+LBL(x0-114,198,'Schimmelgefahr!');
  /* Temperaturkurve */
  const P=[[10,Y(20)],[x0-14,Y(20)],[x0,Y(K.tsi)],[x1,Y(K.tsi)],[x2,Y(K.t2)],[x3,Y(K.tse)],[x4,Y(K.tse)],[x4+14,Y(s.ta)],[436,Y(s.ta)]].map(p=>p.map(fr).join(',')).join(' ');
@@ -12816,9 +12816,10 @@ function mcView(){const box=$('#mc');if(!box)return;const a=mcAll(),run=store.ge
 function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="panel"><h2>🧮 Mathe-Check</h2><p class="sub">Noch nicht gemacht. Der Check zeigt Dir in 20 Minuten, wo Du in den Mathe-Grundlagen stehst.</p><div class="pb"><button type="button" class="sbtn2" data-mco="1">Zum Mathe-Check →</button></div></div>`;
  return`<div class="panel"><h2>🧮 Mathe-Check</h2>${mcTable(a)}<div class="pb"><button type="button" class="sbtn2" data-mco="1">Startplan und Lösungswege →</button></div></div>`}
 /* Pilot-Einstellungen: Version, Neuigkeit, Kontakt */
-const APPV=273,NEWS='Fehlerkorrektur: Links direkt auf eine Seite, etwa zur Prüfungssimulation, zu den Hausaufgaben oder zur Formelsammlung, öffnen wieder diese Seite statt der Startseite.';
+const APPV=274,NEWS='Bilder am Handy besser lesbar: Beschriftungen werden größer, wo Platz ist, und nichts wird mehr verdeckt oder abgeschnitten.';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
+['08.11.2026',274,['Bilder am Handy: Beschriftungen werden größer, wo Platz ist (bis 10 px), ohne andere Texte, Kästen, Linien oder den Bildrand zu berühren.','Pause und Neustart im Bild weichen in eine freie Ecke aus, sonst über das Bild. Kein Text wird mehr verdeckt.','Beschriftungen am Bildrand werden nicht mehr abgeschnitten. Wärmedämmung: „Schimmelgrenze 12,6 °C“ zweizeilig. Kernkraftwerk: Reaktor-Beschriftung mit Abstand zur Leitung.']],
 ['08.11.2026',273,['Fehlerkorrektur: Direktlinks und QR-Codes auf eine Seite (zum Beispiel Prüfungssimulation, Hausaufgaben, Lernstand, Formelsammlung) öffnen wieder diese Seite. Seit v271 landeten sie auf der Startseite.']],
 ['08.11.2026',272,['Prüfungsaufgaben: Alle 12 Chemie- und 8 Energieaufgaben haben einen letzten Schritt in Worten. Danach siehst Du die Musterlösung und hakst die Prüfpunkte selbst ab. Mit „Ohne Zwischenschritte“ gibst Du nur das Endergebnis ein, Teilschritte einblenden kostet 2 von 10 Punkten. Dazu „📖 Begriffe“ und „🔊 Vorlesen“.','Probeprüfung: „mit Zeitlimit“ statt „unter Prüfungsbedingungen“. Standard 70/15/15 nach eigener Auswertung zurückliegender NTG-Prüfungen, neue Variante „Aufbau wie NTG-Prüfung“ mit 7 Aufgaben von 12 bis 18 Punkten.','Nach einer falschen Antwort: kurzer Ablauf „Was jetzt?“, der Lösungsweg öffnet sich nach dem zweiten Versuch. Aufgaben mit mehr als zwei Teilschritten zeigen den Hinweis auf Zettel und Taschenrechner. Bei der Gewichtskraft prüft „Passt das?“ mit 10 N je kg.','Hausaufgaben: neue Einheit 0 „Umrechnen und Formeln umstellen“ vor dem ersten Kurstag. Kurstag-Karte mit Abgabetermin am Donnerstag und „💾 Lernstand sichern“.','30 neue Verständnisfragen zu Drehmoment, Gesetz von Hooke, gleichförmiger Bewegung, Mischungstemperatur, elektrischer Arbeit und Leistung und Normalverteilung. „Schwächen“ zeigt zuerst die Themen mit den meisten Fehlern.']],
 ['08.11.2026',271,['Startseite: Auf einem neuen Gerät fragt die App zuerst, ob Du im Kurs bist. Die Hausaufgabe zeigt ihren Termin, zum Beispiel „bis Sa., 27.02. (noch 34 Tage)“. Nach 10 Tagen Pause startest Du mit „Willkommen zurück“ und 3 Themen.','Wiederholung: Höchstens 3 fällige Themen am Tag, Themen aus Deinem bisherigen Kursstoff zuerst. Im Lernstand steht „Kursstoff bis heute: x von y Themen sicher“.','„Meine Fehler“ endet mit „✓ Alle Fehler geübt“ statt mit gemischten Aufgaben. Stufen zeigen erst ab 3 Themen eine Prozentzahl.','iPhone: deutlichere Karte „Als App speichern“, am Tag vor dem Kurstag ein Hinweis zum Sichern. Wer bei einer Kraft g vergisst, bekommt den Hinweis „Faktor 9,81“.']],
@@ -14728,6 +14729,84 @@ const chk=i=>{const row=i.closest('.ctl');if(!row)return;const raw=i.value.trim(
  let h=row.nextElementSibling;if(!(h&&h.classList.contains('ctlh'))){if(!t)return;h=document.createElement('p');h.className='ctlh';h.setAttribute('role','status');row.after(h)}h.textContent=t;clearTimeout(h._t);if(t)h._t=setTimeout(()=>h.remove(),4000);else h.remove()};
 document.addEventListener('change',e=>{const i=e.target;if(i.matches&&i.matches('.ctl .n input'))chk(i)},true);
 document.addEventListener('keydown',e=>{const i=e.target;if(e.key==='Enter'&&i.matches&&i.matches('.ctl .n input'))chk(i)},true);
+})();</script>
+<!-- MOB-01 Skizzenschrift am Handy -->
+<script>(function(){
+/* MOB-01 Teil 1: Mindestschrift im Bild. Am Handy werden Beschriftungen, die wirksam kleiner als 10 px wären,
+   bis höchstens 1,6-fach vergrößert. Kollidiert ein vergrößerter Text mit einem anderen oder ragt er aus dem Bild,
+   wird er schrittweise wieder kleiner (notfalls Originalgröße). Laufende Animationen nutzen die Werte bis zu 0,6 s weiter. */
+const MIN=10,CAP=1.6;let C=null;
+const G=2,hit=(a,b)=>Math.min(a.right,b.right)-Math.max(a.left,b.left)>-G&&Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)>-G;
+const hit0=(a,b)=>Math.min(a.right,b.right)-Math.max(a.left,b.left)>.5&&Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)>.5;
+/* Zeichen in Symbolen (Ladung „2+“, Pol „−“) bleiben, wie sie sind */
+const sym=t=>{const x=t.textContent.trim();return x.length<=2&&!/[A-Za-zÄÖÜäöü]/.test(x)};
+function boost(){const s=document.getElementById('svg');if(!s||innerWidth>700)return;const vb=s.viewBox.baseVal;if(!vb||!vb.width)return;
+ const S=s.getBoundingClientRect(),m=s.getScreenCTM(),k=m?Math.hypot(m.a,m.b):0;if(!k||!S.width)return;
+ const T=[...s.querySelectorAll('text')].filter(t=>t.textContent.trim());if(!T.length||T.length>150)return;
+ T.forEach(t=>{if(t.dataset.fb!=null){t.style.fontSize=t.dataset.fb;delete t.dataset.fb}});
+ const key=cur+'|'+T.length+'|'+Math.round(S.width);
+ const fs0=T.map(t=>parseFloat(getComputedStyle(t).fontSize)||12);
+ const sz=(t,v)=>{if(t.dataset.fb==null)t.dataset.fb=t.style.fontSize;t.style.fontSize=v};const un=t=>{if(t.dataset.fb!=null){t.style.fontSize=t.dataset.fb;delete t.dataset.fb}};
+ const put=f=>T.forEach((t,i)=>{if(f[i]>1)sz(t,(fs0[i]*f[i])+'px')});
+ if(C&&C.key===key&&M[cur].anim&&play&&performance.now()-C.t<3000){put(C.f);return}
+ let f=fs0.map((x,i)=>x*k<MIN&&!sym(T[i])?Math.min(MIN/k,x*CAP)/x:1);
+ if(f.every(x=>x===1)){C={key,f,t:performance.now()};return}
+ /* Gruppen: gleiche Schrift in einer Zeile oder Spalte (Achsenbeschriftung, Tabellen) bekommen dieselbe Größe */
+ const P=T.map((_,i)=>i),fd=i=>P[i]===i?i:(P[i]=fd(P[i])),fw=T.map(t=>getComputedStyle(t).fontWeight),ax=T.map(t=>parseFloat(t.getAttribute('x'))),ay=T.map(t=>parseFloat(t.getAttribute('y')));
+ for(let i=0;i<T.length;i++)for(let j=i+1;j<T.length;j++)if(fs0[i]===fs0[j]&&fw[i]===fw[j]&&(Math.abs(ay[i]-ay[j])<1||Math.abs(ax[i]-ax[j])<1))P[fd(i)]=fd(j);
+ const eq=()=>{const m={};f.forEach((x,i)=>{const r=fd(i);m[r]=Math.min(m[r]??9,x)});f=f.map((_,i)=>m[fd(i)])};eq();
+ const rc=()=>T.map(t=>t.getBoundingClientRect());const R0=rc(),old=new Set();
+ for(let i=0;i<T.length;i++)for(let j=i+1;j<T.length;j++)if(hit0(R0[i],R0[j]))old.add(i*4096+j);
+ /* Kästen, Symbole, Bauteile: ein Text darf nicht neu in sie hineinwachsen bzw. nicht aus seinem Kasten heraus */
+ const A=S.width*S.height,B=[...s.querySelectorAll('rect,circle,ellipse,polygon,path,image,use')].map(e=>e.getBoundingClientRect()).filter(r=>r.width>2&&r.height>2&&r.width*r.height<A*.12&&r.width<S.width*.45&&r.height<S.height*.45);
+ const ins=(r,b)=>r.left>=b.left-.5&&r.right<=b.right+.5&&r.top>=b.top-.5&&r.bottom<=b.bottom+.5;
+ const box=R0.map(r=>{let m=null;for(const b of B)if(ins(r,b)&&(!m||b.width*b.height<m.width*m.height))m=b;return m});
+ /* Linien, Rohre, Umrisse: als Punktkette abtasten. Ein Text darf beim Wachsen keinen Punkt neu überdecken. */
+ const pts=[];for(const e of s.querySelectorAll('path,line,polyline,polygon,rect,circle,ellipse')){if(e.closest('defs,pattern,clipPath,mask,marker,symbol'))continue;const cs=getComputedStyle(e);if(cs.display==='none'||cs.visibility==='hidden'||parseFloat(cs.opacity)<.25)continue;
+  const st=cs.stroke&&cs.stroke!=='none'&&parseFloat(cs.strokeWidth)>0&&parseFloat(cs.strokeOpacity)>.25,fl=cs.fill&&cs.fill!=='none'&&parseFloat(cs.fillOpacity)>.25;if(!st&&!fl)continue;
+  const r=e.getBoundingClientRect();if(r.width>=S.width*.9&&r.height>=S.height*.9)continue;if(fl&&!st&&r.width*r.height<A*.12&&r.width<S.width*.45&&r.height<S.height*.45)continue;
+  let L=0;try{L=e.getTotalLength()}catch(x){continue}if(!L||!isFinite(L))continue;const cm=e.getScreenCTM();if(!cm)continue;const n=Math.min(400,Math.ceil(L*k/3)),hw=st?parseFloat(cs.strokeWidth)*k/2:0;
+  for(let q=0;q<=n;q++){const P=e.getPointAtLength(L*q/n),X=cm.a*P.x+cm.c*P.y+cm.e,Y=cm.b*P.x+cm.d*P.y+cm.f;pts.push(X,Y,hw)}}
+ const inR=(x,y,r,m)=>x>r.left-m&&x<r.right+m&&y>r.top-m&&y<r.bottom+m;
+ const lin=(r,i)=>{const o=R0[i];for(let q=0;q<pts.length;q+=3){const x=pts[q],y=pts[q+1],h=pts[q+2];if(inR(x,y,r,.5+h)&&!inR(x,y,o,1.5+h))return true}return false};
+ const pd=R0.map((r,i)=>{const b=box[i];return b?Math.max(0,Math.min(3,r.left-b.left,b.right-r.right)):0});
+ const ia=(a,b)=>Math.max(0,Math.min(a.right,b.right)-Math.max(a.left,b.left))*Math.max(0,Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top));
+ const ob=R0.map((r,i)=>B.filter(b=>b!==box[i]&&!ins(b,r)&&hit(r,b)).map(b=>[b,ia(r,b)]));
+ for(let it=0;it<4;it++){T.forEach((t,i)=>{if(f[i]>1)sz(t,(fs0[i]*f[i])+'px');else un(t)});const R=rc(),bad=new Set();
+  for(let i=0;i<T.length;i++){if(f[i]===1)continue;const r=R[i];if(r.left<S.left-1||r.right>S.right+1||r.top<S.top-1||r.bottom>S.bottom+1){bad.add(i);continue}
+   if(box[i]){const b=box[i],q=pd[i];if(r.left<b.left+q||r.right>b.right-q||r.top<b.top+q*.5||r.bottom>b.bottom-q*.5){bad.add(i);continue}}
+   if(ob[i].some(([b,a])=>ia(r,b)>a*1.3+6)){bad.add(i);continue}
+   if(lin(r,i)){bad.add(i);continue}
+   for(const b of B){if(b===box[i]||ob[i].some(x=>x[0]===b)||ins(b,R0[i]))continue;if(Math.min(r.right,b.right)-Math.max(r.left,b.left)>1&&Math.min(r.bottom,b.bottom)-Math.max(r.top,b.top)>1&&!ins(b,r)){bad.add(i);break}}}
+  for(let i=0;i<T.length;i++)for(let j=i+1;j<T.length;j++){if(f[i]===1&&f[j]===1||old.has(i*4096+j))continue;if(hit(R[i],R[j])){bad.add(i);bad.add(j)}}
+  if(!bad.size)break;bad.forEach(i=>{f[i]=it<3?1+(f[i]-1)/2:1;if(f[i]<1.04)f[i]=1});eq();if(it===3)T.forEach((t,i)=>{if(f[i]>1)sz(t,(fs0[i]*f[i])+'px');else un(t)})}
+ C={key,f,t:performance.now()}}
+/* Pause/Neustart im Bild: in die Ecke, in der sie keinen Text verdecken (oben rechts, oben links, unten rechts, unten links).
+   Verdecken sie überall etwas, wandern sie über das Bild und das Bild rückt etwas nach unten. */
+let PK='',RF=0;const EX={};
+/* Texte, die über den Bildrand ragen (z. B. Bruch-Einheiten an der Unterkante), bekommen etwas mehr Rand statt abgeschnitten zu werden */
+const vbx=()=>{const s=document.getElementById('svg'),e=EX[cur];if(!s||!e)return;const v=(s.getAttribute('viewBox')||'').split(/[\s,]+/).map(Number);if(v.length!==4)return;s.setAttribute('viewBox',[v[0]-e[0],v[1]-e[1],v[2]+e[0]+e[2],v[3]+e[1]+e[3]].join(' '))};
+function edge(){const s=document.getElementById('svg');if(!s)return false;const S=s.getBoundingClientRect(),m=s.getScreenCTM(),k=m?Math.hypot(m.a,m.b):0;if(!k||!S.width)return false;
+ let l=0,t=0,r=0,b=0;s.querySelectorAll('text').forEach(x=>{const R=x.getBoundingClientRect();if(!R.width)return;l=Math.max(l,S.left-R.left);t=Math.max(t,S.top-R.top);r=Math.max(r,R.right-S.right);b=Math.max(b,R.bottom-S.bottom)});
+ const d=[l,t,r,b].map(x=>x>.5?Math.ceil(x/k)+3:0);if(!d.some(Boolean))return false;const e=EX[cur]||[0,0,0,0];EX[cur]=e.map((x,i)=>x+d[i]);vbx();return true}
+function place(){const s=document.getElementById('svg');if(!s)return;const pn=s.parentElement,c=pn&&pn.querySelector(':scope>.simc');if(!c)return;
+ s.style.marginTop='';c.style.top=c.style.left='';c.style.right='';const P=pn.getBoundingClientRect(),S=s.getBoundingClientRect(),bw=c.offsetWidth,bh=c.offsetHeight;if(!S.width||!bw)return;
+ const R=[...s.querySelectorAll('text')].filter(t=>t.textContent.trim()).map(t=>t.getBoundingClientRect()).filter(r=>r.width>0);
+ const cand=[[S.right-8-bw,S.top+8],[S.left+8,S.top+8],[S.right-8-bw,S.bottom-8-bh],[S.left+8,S.bottom-8-bh]];
+ const cnt=([x,y])=>R.filter(r=>r.right>x-8&&r.left<x+bw+8&&r.bottom>y-8&&r.top<y+bh+8).length;
+ let best=-1;for(let i=0;i<4;i++)if(!cnt(cand[i])){best=i;break}
+ if(best<0){s.style.marginTop=(bh+12)+'px';const S2=s.getBoundingClientRect();c.style.top=(S2.top-P.top-bh-8)+'px';c.style.left=(S2.right-P.left-bw)+'px';c.style.right='auto';return}
+ c.style.top=(cand[best][1]-P.top)+'px';c.style.left=(cand[best][0]-P.left)+'px';c.style.right='auto'}
+const r0=render;render=function(){const r=r0.apply(this,arguments);try{vbx();const fresh=!C||!(M[cur].anim&&play);boost();const k=cur+'|'+innerWidth;if(fresh||PK!==k){PK=k;place()}
+ /* Brüche in Beschriftungen werden erst nach dem Zeichnen gesetzt und machen Texte höher: danach noch einmal einpassen */
+ if(fresh){cancelAnimationFrame(RF);RF=requestAnimationFrame(()=>{RF=requestAnimationFrame(()=>{if(M[cur]&&M[cur].anim&&play)return;C=null;try{boost();if(edge()){C=null;boost()}place()}catch(e){}})})}}catch(e){}return r};
+document.addEventListener('input',()=>{C=null},true);addEventListener('resize',()=>{C=null});
+/* Bildbreite ändert sich (erstes Anzeigen, Drehen): neu einpassen, ohne neu zu zeichnen */
+let ro=null,rw=0,ra=0;const obs=()=>{const s=document.getElementById('svg');if(!s||!window.ResizeObserver||ro)return;ro=new ResizeObserver(e=>{const w=Math.round(e[0].contentRect.width);if(w===rw)return;rw=w;cancelAnimationFrame(ra);ra=requestAnimationFrame(()=>{C=null;try{boost()}catch(x){}})});ro.observe(s)};obs();
+
+const b0=build;build=function(){const r=b0.apply(this,arguments);PK='';return r};
+try{C=null;boost();place()}catch(e){}
+addEventListener('resize',()=>{PK=''});
 })();</script>
 <!-- Langzeit-Gutachten (Aufgabenliste LZ, Ja-Nummern 1, 2, 4–8, 10–14) -->
 <style>/* LZ-04 Abschluss „Meine Fehler“ */
