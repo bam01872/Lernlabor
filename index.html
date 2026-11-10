@@ -3755,28 +3755,151 @@ fm(FE,E2,'Windkraftanlage','Die Windleistung wächst mit der dritten Potenz der 
  `<line x1="330" x2="610" y1="270" y2="270" stroke="var(--wire)"/><line x1="330" x2="330" y1="70" y2="270" stroke="var(--wire)"/><polyline fill="none" stroke="var(--flow)" stroke-width="3" points="${Array.from({length:61},(_,i)=>{const v=i*.5;return `${330+v/30*280},${270-fn(v)/Pn*190}`}).join(' ')}"/><circle cx="${330+s.v/30*280}" cy="${270-fn(s.v)/Pn*190}" r="6" fill="var(--red)"/>`+T(470,290,'Windgeschwindigkeit v in m/s','t2','middle')+T(336,64,'P (Nennleistung '+nf(Pn)+' MW)','t2'),
  res:[[nf(P)+' kW','elektrische Leistung'],[nf(Pw/1000)+' kW','Leistung im Wind (ohne c_p)'],[nf(Pb)+' kW','Betz-Maximum (59,3 %)']],rows:[['Rotorfläche A',nf(A)+' m²'],['Nennleistung (bei 12 m/s)',nf(Pn)+' MW'],s.v>=3&&s.v<12?['Verdopplung von v','Leistung × 8 (nur unterhalb der Nennleistung)']:['Betriebsbereich',s.v<3?'unter 3 m/s: Anlage steht':s.v>25?'über 25 m/s: Sturmabschaltung':'Nennbetrieb: Die Anlage begrenzt auf die Nennleistung (Blätter werden aus dem Wind gedreht)']],st:[['A = π · D² / 4',nf(A)+' m²'],['P = ½ · ρ · A · v³ · c_p',`½ · 1,225 kg/m³ · ${nf(A)} m² · (${nf(s.v)} m/s)³ · ${nf(cpv)} = ${nf(Pw*cpv/1000)} kW`],...(s.v<3||s.v>25?[['Abschaltung',s.v<3?'Zu wenig Wind: P = 0':'Sturm: Die Anlage schaltet ab, P = 0']]:s.v>12?[['Begrenzung',`Mehr als die Nennleistung ${nf(Pn*1000)} kW gibt die Anlage nicht ab: P = ${nf(P)} kW`]]:[]),['Betz: c_p,max',(16/27*100).toFixed(1).replace('.',',')+' %']]}},
  'Halbe Windgeschwindigkeit = nur ein Achtel der Leistung. Deshalb stehen Windräder hoch (mehr Wind) und haben große Rotoren (A ~ D²). Bei Sturm werden Anlagen vorsorglich abgeschaltet.',1);
-fm(FE,E3,'Photovoltaik','Photonen schlagen in der Solarzelle Elektronen los. Am p-n-Übergang entsteht ein elektrisches Feld, das die Ladungen trennt: Es fließt Gleichstrom. Der Wechselrichter macht daraus Wechselstrom für das Netz.',
- [['A','A',1,100,1,'m²',20],['e','η_M',8,24,1,'%',16],['G','G',0,1000,10,'W/m²',800],['w','η_WR',90,99,1,'%',96],['H','H_Jahr',800,1300,10,'kWh/m²',1000]],
- (s,t=0)=>{const Pdc=s.A*s.G*s.e/100,Pac=Pdc*s.w/100,Y=s.A*s.H*s.e/100*s.w/100,Pm=s.A*1000*s.e/100*s.w/100/1000,fn=h=>h<6||h>18?0:Math.sin(PI*(h-6)/12)**1.3*s.A*s.G*s.e/100*s.w/100/1000;
- /* Modul räumlich (Zellraster, Rahmen, Glasglanz, Aufständerung), Sonne mit Lichtbündel, Solarzelle im Schnitt als Block, Leuchtdichte der Lampe ~ G */
- const C=[[30,40],[160,24],[184,78],[54,94]],bi=(u,v)=>[C[0][0]+(C[1][0]-C[0][0])*u+(C[3][0]-C[0][0])*v+(C[2][0]-C[1][0]-C[3][0]+C[0][0])*u*v,C[0][1]+(C[1][1]-C[0][1])*u+(C[3][1]-C[0][1])*v+(C[2][1]-C[1][1]-C[3][1]+C[0][1])*u*v],pq=a=>a.map(q=>q.map(v=>v.toFixed(1)).join(',')).join(' ');
- let cells='';for(let i=0;i<6;i++)for(let j=0;j<4;j++){const g=.06,u0=i/6+g/6,u1=(i+1)/6-g/6,v0=j/4+g/4,v1=(j+1)/4-g/4;cells+=`<polygon points="${pq([bi(u0,v0),bi(u1,v0),bi(u1,v1),bi(u0,v1)])}" fill="url(#g-pvc)"/>`+[.35,.65].map(f=>{const u=u0+(u1-u0)*f;return `<line x1="${bi(u,v0)[0].toFixed(1)}" y1="${bi(u,v0)[1].toFixed(1)}" x2="${bi(u,v1)[0].toFixed(1)}" y2="${bi(u,v1)[1].toFixed(1)}" stroke="#cbd5e1" stroke-width=".7" opacity=".8"/>`}).join('')}
- const lum=s.G/1000,top=[[24,162],[40,151],[186,151],[170,162]];
- const fing=[0,1,2,3,4,5,6,7].map(i=>{const x=30+i*18;return `<line x1="${x}" y1="161" x2="${x+15}" y2="152" stroke="#e2e8f0" stroke-width="1.2"/>`}).join('');
- const phot=lum>0?[0,1,2].map(i=>{const f=(t*.6+i/3)%1;return `<circle cx="${60+i*40-f*6}" cy="${136+f*16}" r="2.6" fill="#fff7cc" stroke="#f59e0b" opacity="${(1-f*.6).toFixed(2)}"/>`}).join(''):'';
- return{d:`<defs><linearGradient id="g-pvc" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2b4fa8"/><stop offset=".5" stop-color="#1e3a8a"/><stop offset="1" stop-color="#172554"/></linearGradient></defs>`
- +`<line x1="8" x2="214" y1="130" y2="130" stroke="var(--ink)" stroke-width="2"/>`+(()=>{/* Aufständerung: zwei Dreiecksböcke aus Stahlprofil (hinterer Pfosten hoch, vorderer niedrig, Diagonale), Querriegel, Betonfüße */const F=[bi(.2,.88),bi(.8,.88)],R=[bi(.2,.12),bi(.8,.12)],post=(q,h)=>`<rect x="${(q[0]-2.5).toFixed(1)}" y="${q[1].toFixed(1)}" width="5" height="${(130-q[1]-h).toFixed(1)}" fill="#6b7684" stroke="var(--ink)" stroke-width=".9"/>`,foot=q=>`<rect x="${(q[0]-7).toFixed(1)}" y="124" width="14" height="6" fill="#9ca3af" stroke="var(--ink)" stroke-width=".9"/>`;let g='';[0,1].forEach(i=>{g+=foot(F[i])+foot(R[i])+post(R[i],6)+post(F[i],6)+`<line x1="${F[i][0].toFixed(1)}" y1="${(F[i][1]+4).toFixed(1)}" x2="${R[i][0].toFixed(1)}" y2="${(R[i][1]+6).toFixed(1)}" stroke="#6b7684" stroke-width="3.5"/><line x1="${F[i][0].toFixed(1)}" y1="${(F[i][1]+4).toFixed(1)}" x2="${R[i][0].toFixed(1)}" y2="${(R[i][1]+6).toFixed(1)}" stroke="var(--ink)" stroke-width=".7" opacity=".6"/><line x1="${(F[i][0]).toFixed(1)}" y1="${(F[i][1]+16).toFixed(1)}" x2="${(R[i][0]).toFixed(1)}" y2="${(R[i][1]+34).toFixed(1)}" stroke="#6b7684" stroke-width="2.5"/>`});g+=`<line x1="${F[0][0].toFixed(1)}" y1="118" x2="${F[1][0].toFixed(1)}" y2="118" stroke="#6b7684" stroke-width="3"/><line x1="${R[0][0].toFixed(1)}" y1="${(R[0][1]+8).toFixed(1)}" x2="${R[1][0].toFixed(1)}" y2="${(R[1][1]+8).toFixed(1)}" stroke="#6b7684" stroke-width="3"/>`;return g})()
- +`<polygon points="${pq([C[3],C[2],[C[2][0],C[2][1]+5],[C[3][0],C[3][1]+5]])}" fill="#64748b" stroke="var(--ink)" stroke-width="1.2"/><polygon points="${pq(C)}" fill="#cbd5e1" stroke="var(--ink)" stroke-width="1.6"/>`+cells+`<polygon points="${pq([bi(.05,0),bi(.32,0),bi(.12,1),bi(-.0,1)])}" fill="#fff" opacity=".16"/>`
- +(lum>0?BEAM(236,22,112,60,10,74,t,3,'pv'):'')+SUN(240,20,11,t)+T(194,72,'Solarmodul','t2')
- +T(194,148,'Solarzelle im Schnitt','t2')+(lum>0?phot:'')
- +`<polygon points="${pq(top)}" fill="#1e3a8a" stroke="var(--ink)" stroke-width="1.3"/>`+fing+`<rect x="24" y="162" width="146" height="10" fill="#93c5fd"/><rect x="24" y="172" width="146" height="32" fill="#fca5a5"/><rect x="24" y="204" width="146" height="6" fill="#94a3b8"/><polygon points="170,162 186,151 186,199 170,210" fill="#7d93b0"/><rect x="24" y="162" width="146" height="48" fill="none" stroke="var(--ink)" stroke-width="1.5"/><polygon points="170,162 186,151 186,199 170,210" fill="none" stroke="var(--ink)" stroke-width="1.3"/><line x1="24" x2="170" y1="172" y2="172" stroke="var(--ink)" stroke-dasharray="4 3"/>`
- +T(194,168,'n-Schicht (P)','t2')+T(194,190,'p-Schicht (B)','t2')+T(194,212,'Rückkontakt','t2')+TH(97,188,'p-n-Übergang = Feld','t2','middle')
- +PL([[24,166],[12,166],[12,250],[68,250]],'var(--ink)',2.5)+PL([[86,250],[140,250],[140,210]],'var(--ink)',2.5)+`<circle cx="77" cy="246" r="${(10+8*lum).toFixed(1)}" fill="#fde047" opacity="${(.55*lum).toFixed(2)}"/><circle cx="77" cy="244" r="9" fill="#fef9c3" stroke="var(--ink)" stroke-width="1.6"/><path d="M73 246q4 -6 8 0" fill="none" stroke="#b45309" stroke-width="1.4"/><rect x="72" y="252" width="10" height="7" fill="#94a3b8" stroke="var(--ink)" stroke-width="1.2"/>`
- +(lum>0?FLO([[24,166],[12,166],[12,250],[68,250],[86,250],[140,250],[140,210]],t,7,'var(--flow)',3,30):'')+T(150,240,'e⁻','t2')+T(10,282,'Elektronen fließen als Gleichstrom (DC)','t2')+
- EB(290,14,100,40,'Solarmodule|Gleichstrom')+EB(412,14,100,40,'Wechsel-|richter DC→AC')+EB(534,14,96,40,'Zähler|Haus / Netz')+AR(390,34,18,0,'var(--mute)','')+AR(512,34,18,0,'var(--mute)','')+
- `<line x1="330" x2="610" y1="270" y2="270" stroke="var(--wire)"/><line x1="330" x2="330" y1="80" y2="270" stroke="var(--wire)"/><polyline fill="none" stroke="var(--amber)" stroke-width="3" points="${Array.from({length:49},(_,i)=>{const h=i*.5;return `${330+h/24*280},${270-fn(h)/Math.max(Pm*0+s.A*s.G*s.e/100*s.w/100/1000,.001)*170}`}).join(' ')}"/>`+T(470,290,'Uhrzeit (Tagesverlauf bei klarem Himmel)','t2','middle')+T(336,76,'P_AC in kW','t2'),
- res:[[nf(Pac/1000)+' kW','Leistung ins Netz (AC)'],[nf(Pdc/1000)+' kW','Leistung Modul (DC)'],[nf(Y)+' kWh/a','Jahresertrag (ideal)']],rows:[['Wirkungsgrad Anlage',nf(s.e*s.w/100)+' %'],['Verluste bis zum Netz',nf((1-s.e/100*s.w/100)*100)+' % der Einstrahlung'],['Typisch laut Folie','11–16 % (neue Module bis ≈ 22 %)']],st:[['P_DC = A · G · η_Modul',`${s.A} m² · ${s.G} W/m² · ${nf(s.e/100)} = ${nf(Pdc)} W`],['P_AC = P_DC · η_WR',nf(Pac)+' W'],['E = A · H_Jahr · η_Modul · η_WR',nf(Y)+' kWh/a']]}},
- 'Nachts liefert PV keinen Strom: Ohne Speicher keine konstante Versorgung. Die Sonne strahlt jährlich ca. 10.000-mal mehr Energie ein, als die Menschheit benötigt, aber die Energiedichte ist gering (viel Fläche).',1);
+/* Photovoltaik (neu, 10.11.2026): Ansicht „Anlage“ = Hausdach mit Modulen (Anzahl nach A, 1 Modul ≈ 2 m²), Sonnenstand nach G
+   (klarer Sommertag: G bestimmt die Uhrzeit am Nachmittag), Energiefluss als Balken (η_M, η_WR) und Tagesverlauf mit Punkt „jetzt“.
+   Ansicht „Teilchen-Lupe“ = Ausschnitt der Solarzelle am p-n-Übergang: Licht löst ein Elektron, das Feld trennt Elektron und Loch,
+   das Elektron läuft über die Lampe zum Rückkontakt und füllt dort das Loch. Helfer mit Präfix PV. */
+const PVMX=(a,b,f)=>{const h=s=>[1,3,5].map(i=>parseInt(s.slice(i,i+2),16)),A=h(a),B=h(b);return'#'+A.map((v,i)=>Math.round(v+(B[i]-v)*f).toString(16).padStart(2,'0')).join('')};
+const PVH=G=>G<=0?18:18-12/PI*Math.asin(Math.min(1,(G/1000)**(1/1.3)));
+const PVUHR=h=>{const m=Math.round(h*6)*10;return Math.floor(m/60)+':'+String(m%60).padStart(2,'0')+' Uhr'};
+const PVT=(x,y,s,c,a='start')=>`<text class="t2" x="${x}" y="${y}" text-anchor="${a}" style="fill:#14283a;paint-order:stroke;stroke:#f8fbfa;stroke-width:4px;stroke-linejoin:round">${s}</text>`;
+const PVNM=p=>{const e=10**Math.floor(Math.log10(Math.max(p,1e-3)));for(const k of [1,2,2.5,5,10])if(k*e>=p*1.02)return k*e;return 10*e};
+function PVANL(s,t){
+ const g=Math.max(0,Math.min(1,s.G/1000)),night=s.G<=0,h=PVH(s.G),ph=.35+(PI/2-.35)*(18-h)/6,sx=178-165*Math.cos(ph),sy=250-205*Math.sin(ph),
+  e=s.e/100,w=s.w/100,Pin=s.A*s.G/1000,Pdc=Pin*e,Pac=Pdc*w,pk=s.A*e*w,n=Math.max(1,Math.min(50,Math.ceil(s.A/2))),fl=Pdc/(100*.24),
+  k=Math.min(1,s.G/300),R=(u,v)=>[30+180*u+28*v,208-62*v],pq=a=>a.map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ');
+ let d=`<defs><clipPath id="pvsc"><rect x="0" y="0" width="334" height="300" rx="12"/></clipPath><linearGradient id="g-pvsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${PVMX('#0d1830','#4a9be0',k)}"/><stop offset="1" stop-color="${PVMX('#26385f','#d3ecfb',k)}"/></linearGradient>`
+  +`<linearGradient id="g-pvm" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3a63c4"/><stop offset=".55" stop-color="#1e3a8a"/><stop offset="1" stop-color="#14245c"/></linearGradient>`
+  +`<linearGradient id="g-pvgr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fbf6a"/><stop offset="1" stop-color="#5e8a45"/></linearGradient></defs><g clip-path="url(#pvsc)">`
+  +`<rect x="0" y="0" width="334" height="300" fill="url(#g-pvsky)"/>`;
+ /* Abendrot bei tiefer Sonne, Sterne in der Nacht */
+ if(!night&&s.G<300)d+=`<ellipse cx="${sx.toFixed(1)}" cy="262" rx="170" ry="60" fill="#ffb36b" opacity="${(.5*(1-s.G/300)).toFixed(2)}"/>`;
+ if(night)d+=[[40,80],[92,40],[150,70],[205,28],[250,90],[300,50],[120,118],[280,130],[60,150],[230,60]].map(([x,y],i)=>`<circle cx="${x}" cy="${y}" r="${i%3?1.2:1.8}" fill="#fff" opacity="${(.55+.4*Math.sin(t*2+i)).toFixed(2)}"/>`).join('');
+ /* Sonnenbahn und Sonne am Nachmittag (Westen links, Blick von Süden auf die Dachfläche) */
+ d+=`<path d="M343 250A165 205 0 0 0 13 250" fill="none" stroke="#fff" stroke-width="1.2" stroke-dasharray="3 6" opacity="${night?.25:.6}"/>`;
+ if(!night)d+=SUN(f2(sx),f2(sy),12,t);
+ /* Boden */
+ d+=`<rect x="0" y="262" width="334" height="38" fill="url(#g-pvgr)"/><line x1="0" x2="334" y1="262" y2="262" stroke="var(--ink)" stroke-width="1.2" opacity=".5"/>`;
+ /* Haus in Schrägansicht: Längswand vorn (Süden), Giebel rechts, Dachfläche nach Süden mit Ziegelreihen */
+ d+=`<polygon points="30,208 210,208 210,262 30,262" fill="#efe3cf" stroke="var(--ink)" stroke-width="1.4"/>`
+  +`<polygon points="210,262 266,222 266,168 238,146 210,208" fill="#d6c2a0" stroke="var(--ink)" stroke-width="1.4"/>`
+  +`<polygon points="${pq([R(0,0),R(1,0),R(1,1),R(0,1)])}" fill="#a3402c" stroke="var(--ink)" stroke-width="1.4"/>`
+  +[.2,.4,.6,.8].map(v=>{const a=R(0,v),b=R(1,v);return `<line x1="${f2(a[0])}" y1="${f2(a[1])}" x2="${f2(b[0])}" y2="${f2(b[1])}" stroke="#7a2e20" stroke-width="1" opacity=".7"/>`}).join('')
+  +`<polyline points="208,211 238,143 269,170" fill="none" stroke="#7a2e20" stroke-width="4.5" stroke-linejoin="round"/><polyline points="208,211 238,143 269,170" fill="none" stroke="var(--ink)" stroke-width="1" stroke-linejoin="round"/>`
+  +`<line x1="27" x2="212" y1="209.5" y2="209.5" stroke="#64748b" stroke-width="3"/>`
+  +`<rect x="160" y="220" width="22" height="20" fill="#bfdbfe" stroke="var(--ink)" stroke-width="1.2"/><line x1="171" x2="171" y1="220" y2="240" stroke="var(--ink)" stroke-width="1"/>`
+  +`<rect x="189" y="228" width="15" height="34" fill="#8b5e3c" stroke="var(--ink)" stroke-width="1.2"/><circle cx="200" cy="246" r="1.3" fill="var(--ink)"/>`;
+ /* Module: 10 Spalten × 5 Reihen, von der Traufe her belegt; je Modul Rahmen, Zellraster, Glasglanz */
+ for(let i=0;i<n;i++){const c=i%10,r=Math.floor(i/10),u0=.03+c*.095,u1=u0+.088,v0=.05+r*.18,v1=v0+.165;
+  d+=`<polygon points="${pq([R(u0,v0),R(u1,v0),R(u1,v1),R(u0,v1)])}" fill="url(#g-pvm)" stroke="#dbe3ec" stroke-width="1"/>`
+   +[1/3,2/3].map(f=>{const a=R(u0+(u1-u0)*f,v0),b=R(u0+(u1-u0)*f,v1);return `<line x1="${f2(a[0])}" y1="${f2(a[1])}" x2="${f2(b[0])}" y2="${f2(b[1])}" stroke="#93a8d4" stroke-width=".6"/>`}).join('')
+   +(()=>{const a=R(u0,(v0+v1)/2),b=R(u1,(v0+v1)/2);return `<line x1="${f2(a[0])}" y1="${f2(a[1])}" x2="${f2(b[0])}" y2="${f2(b[1])}" stroke="#93a8d4" stroke-width=".6"/>`})()}
+ const nc=Math.min(n,10),nr=Math.ceil(n/10),fc=R(.03+nc*.095/2,.05+nr*.18/2),fw=Math.max(16,180*nc*.095);
+ d+=`<polygon points="${pq([R(.03,.05),R(.03+nc*.095*.35,.05),R(.03+nc*.095*.15,.05+nr*.18),R(.03,.05+nr*.18)])}" fill="#fff" opacity="${(.06+.14*g).toFixed(2)}"/>`;
+ /* Licht von der Sonne auf die Module: Breite und Zahl der Lichtpunkte wachsen mit G */
+ if(!night)d+=`<clipPath id="pvbc"><rect x="0" y="0" width="334" height="209"/></clipPath><g clip-path="url(#pvbc)" opacity="${(.35+.65*g).toFixed(2)}">${BEAM(f2(sx),f2(sy),f2(fc[0]),f2(fc[1]),12,fw,t,Math.round(2+8*g),'pv')}</g>`;
+ /* Wechselrichter (DC/AC-Symbol), Zähler, Leitungen: DC fließt gleichmäßig, AC pendelt hin und her */
+ const osc=(5*Math.sin(t*9)).toFixed(1),dc=(-t*(10+60*fl)).toFixed(1),lw=(1.4+3*Math.min(1,fl*3)).toFixed(1);
+ d+=`<path d="M54 205V220" stroke="var(--ink)" stroke-width="3.4"/>`+(Pdc>0?`<path d="M54 205V220" stroke="var(--amber)" stroke-width="${lw}" stroke-dasharray="3 4" stroke-dashoffset="${dc}"/>`:'')
+  +`<path d="M68 236H128M139 248V276H326" fill="none" stroke="var(--ink)" stroke-width="3.4"/>`+(Pac>0?`<path d="M68 236H128M139 248V276H326" fill="none" stroke="var(--amber)" stroke-width="${lw}" stroke-dasharray="3 4" stroke-dashoffset="${osc}"/>`:'')
+  +`<polygon points="326,270 334,276 326,282" fill="var(--ink)"/>`
+  +`<rect x="40" y="220" width="28" height="28" rx="3" fill="#e2e8f0" stroke="var(--ink)" stroke-width="1.4"/><line x1="41" y1="247" x2="67" y2="221" stroke="#334155" stroke-width="1.1"/><path d="M44 226h8M44 229.5h8" stroke="#334155" stroke-width="1.3"/><path d="M55 241q2.5 -4 5 0t5 0" fill="none" stroke="#334155" stroke-width="1.3"/>`
+  +`<rect x="128" y="220" width="22" height="28" rx="2" fill="#f8fafc" stroke="var(--ink)" stroke-width="1.4"/><rect x="131" y="224" width="16" height="7" fill="#1e293b"/><rect x="132" y="236" width="14" height="3" fill="#94a3b8"/><circle cx="${(139+5*Math.sin(t*(Pac>0?2+6*fl:0))).toFixed(1)}" cy="237.5" r="1.4" fill="var(--red)"/>`;
+ d+='</g>'+`<rect x="0.5" y="0.5" width="333" height="299" rx="12" fill="none" stroke="var(--wire)" stroke-width="1"/>`;
+ /* Beschriftungen */
+ const gl='G = '+nf(s.G)+' W/m²',ul=night?'Nacht':'≈ '+PVUHR(h);
+ if(night)d+=PVT(178,60,'Nacht: kein Licht, kein Strom','t2','middle');
+ else if(sy<=150){d+=PVT(f2(sx+20),f2(sy-2),gl,'t2')+PVT(f2(sx+20),f2(sy+15),ul,'t2')}
+ else d+=PVT(326,40,gl,'t2','end')+PVT(326,57,ul,'t2','end');
+ d+=PVT(328,118,'A = '+nf(s.A)+' m²','t2','end')+PVT(328,135,s.A>100?'Ausschnitt':n+(n>1?' Module':' Modul'),'t2','end')
+  +PVT(54,288,'Wechselrichter','t2','middle')+PVT(139,288,'Zähler','t2','middle')+PVT(326,294,'Netz','t2','end');
+ /* Energiefluss als Balken: Anteil der Lichtleistung, die als Strom ankommt */
+ const BW=268,B=(y,f,c,lab,val,loss)=>{const wv=Math.max(2,BW*f);return T(350,y-6,lab,'t2')+`<rect x="350" y="${y}" width="${BW}" height="15" rx="3" fill="none" stroke="var(--wire)" stroke-dasharray="3 3"/><rect x="350" y="${y}" width="${wv.toFixed(1)}" height="15" rx="3" fill="${c}" stroke="var(--ink)" stroke-width="1"/>`
+  +(f>.6?SXT(350+wv-6,y+12,val,12,'end','#5b3a00',700):SXT(f2(350+wv+6),y+12,val,12,'start','var(--ink)',700))+(loss?SXT(350+BW-4,y+12,loss,12,'end','var(--mute)',500):'')};
+ d+=B(22,1,'#fcd34d','Sonnenlicht auf die Module',nf(Pin)+' kW (100 %)','')
+  +B(64,e,'#3b82f6','Gleichstrom aus den Modulen',nf(Pdc)+' kW ('+nf(s.e)+' %)','Wärme '+nf(100-s.e)+' %')
+  +B(106,e*w,'#22a06b','Wechselstrom ins Netz',nf(Pac)+' kW ('+nf(s.e*w)+' %)','');
+ /* Tagesverlauf (klarer Sommertag) mit Punkt „jetzt“ */
+ const ym=PVNM(pk),X=hh=>380+hh/24*240,Y=p=>276-p/ym*104,fn=hh=>hh<6||hh>18?0:Math.sin(PI*(hh-6)/12)**1.3*pk,pts=Array.from({length:97},(_,i)=>`${X(i/4).toFixed(1)},${Y(fn(i/4)).toFixed(1)}`);
+ d+=`<line x1="380" x2="622" y1="276" y2="276" stroke="var(--wire)"/><line x1="380" x2="380" y1="166" y2="276" stroke="var(--wire)"/><line x1="376" x2="622" y1="${Y(ym)}" y2="${Y(ym)}" stroke="var(--wire)" stroke-dasharray="2 4"/>`
+  +`<polygon points="380,276 ${pts.join(' ')} 620,276" fill="var(--amber)" opacity=".18"/><polyline fill="none" stroke="var(--amber)" stroke-width="3" points="${pts.join(' ')}"/>`
+  +T(374,Y(ym)+5,nf(ym),'t2','end')+T(374,280,'0','t2','end')+[6,12,18].map(hh=>T(X(hh),294,hh+' Uhr','t2','middle')).join('')
+  +T(350,154,'P_AC in kW','t2')+T(622,154,'Jahr: ≈ '+nf(s.A*s.H*e*w)+' kWh','t2','end');
+ const mx=X(h),my=Y(Pac);
+ d+=`<line x1="${mx.toFixed(1)}" x2="${mx.toFixed(1)}" y1="${my.toFixed(1)}" y2="276" stroke="var(--red)" stroke-dasharray="3 3"/><circle cx="${mx.toFixed(1)}" cy="${my.toFixed(1)}" r="6" fill="var(--red)" stroke="var(--card)" stroke-width="1.5"/>`+(h>12.8?TH(f2(mx+10),f2(Math.max(178,my-6)),'jetzt','t2'):TH(f2(mx-10),f2(Math.max(178,my-8)),'jetzt','t2','end'));
+ return d;
+}
+/* Teilchen-Lupe: Kreis = stark vergrößerter Ausschnitt der Zelle. Schichten von oben: Frontkontakt (Finger), n-Schicht (Si mit Phosphor),
+   Grenzschicht (feste Ionen P⁺ und B⁻ = Feld), p-Schicht (Si mit Bor, Löcher), Rückkontakt (Aluminium). */
+function PVLUPE(s,t){
+ const C=[180,160],RR=130,g=Math.max(0,Math.min(1,s.G/1000)),Q=5,ne=s.G<=0?0:Math.max(1,Math.round(5*g)),
+  EC='var(--flow)',HC='#e11d48',PC='#f59e0b',BC='#8b5cf6',yN=[57,126],yJ=148,yP=[170,262],
+  hole=(x,y,o=1)=>`<g opacity="${o.toFixed(2)}"><circle cx="${f2(x)}" cy="${f2(y)}" r="4.6" fill="var(--card)" stroke="${HC}" stroke-width="1.8"/><path d="M${f2(x-2.2)} ${f2(y)}h4.4M${f2(x)} ${f2(y-2.2)}v4.4" stroke="${HC}" stroke-width="1.2"/></g>`,
+  el=(x,y,o=1)=>`<circle cx="${f2(x)}" cy="${f2(y)}" r="4" fill="${EC}" stroke="var(--ink)" stroke-width=".8" opacity="${o.toFixed(2)}"/>`,
+  free=(x,y,r)=>!(x<r[0]||x>r[1]||y<r[2]||y>r[3]);
+ let d=`<defs><clipPath id="pvlc"><circle cx="${C[0]}" cy="${C[1]}" r="${RR}"/></clipPath></defs><g clip-path="url(#pvlc)">`
+  +`<rect x="40" y="20" width="280" height="300" fill="var(--card)"/>`
+  +`<rect x="40" y="20" width="280" height="37" fill="#bfe0ff" opacity=".35"/>`
+  +`<rect x="40" y="53" width="280" height="4" fill="#1e3a8a" opacity=".85"/>`
+  +`<rect x="40" y="57" width="280" height="69" fill="#60a5fa" opacity=".22"/>`
+  +`<rect x="40" y="126" width="280" height="44" fill="#cbd5e1" opacity=".35"/>`
+  +`<rect x="40" y="170" width="280" height="92" fill="#f87171" opacity=".18"/>`
+  +`<rect x="40" y="262" width="280" height="60" fill="#aab4c0"/><line x1="40" x2="320" y1="262" y2="262" stroke="var(--ink)" stroke-width="1.2"/>`
+  +`<line x1="40" x2="320" y1="126" y2="126" stroke="var(--mute)" stroke-dasharray="4 3"/><line x1="40" x2="320" y1="170" y2="170" stroke="var(--mute)" stroke-dasharray="4 3"/><line x1="40" x2="320" y1="148" y2="148" stroke="var(--ink)" stroke-width="1.2" opacity=".6"/>`;
+ /* Siliziumgitter (zittert leicht), ausgespart: Beschriftungen und Dotieratome */
+ const NO=[[70,150,82,102],[50,152,138,160],[66,146,208,228],[246,300,135,162]];
+ for(let r=0;r<10;r++)for(let c=0;c<14;c++){const x=52+c*20+(r%2)*10,y=68+r*20;if(y>254||Math.hypot(x-C[0],y-C[1])>RR-4||NO.some(b=>free(x,y,b)))continue;
+  const j=GZJ(r*14+c,t,.7);d+=`<circle cx="${f2(x+j[0])}" cy="${f2(y+j[1])}" r="3.2" fill="#94a3b8" opacity=".55"/>`}
+ /* n-Schicht: Phosphor mit frei beweglichem Elektron; p-Schicht: Bor mit Loch; Grenzschicht: feste Ionen ohne freie Ladungen */
+ const PN=[[110,78],[236,74],[150,110],[268,104],[200,92],[96,112]],BP=[[100,190],[160,200],[230,186],[280,212],[120,244],[200,240],[250,250]],
+  PI_=[[160,137],[200,137],[240,137]],BI=[[164,159],[204,159],[240,159]];
+ PN.forEach(([x,y],i)=>{d+=ION(x,y,8,PC,'P');const j=GZJ(i+3,t*1.4,9);d+=el(x+12+j[0],y-4+j[1])});
+ BP.forEach(([x,y],i)=>{d+=ION(x,y,8,BC,'B');const j=GZJ(i+11,t*1.2,8);d+=hole(x+13+j[0],y-3+j[1])});
+ PI_.forEach(([x,y])=>{d+=ION(x,y,8.5,PC,'P⁺')});BI.forEach(([x,y])=>{d+=ION(x,y,8.5,BC,'B⁻')});
+ /* Feld in der Grenzschicht: von + (n-Seite) nach − (p-Seite) */
+ d+=ARW(288,128,288,168,'var(--red)',2.6);
+ /* Frontkontakt (Finger) */
+ d+=`<rect x="168" y="38" width="24" height="19" rx="2" fill="#d6dde6" stroke="var(--ink)" stroke-width="1.3"/><rect x="170" y="40" width="20" height="5" fill="#fff" opacity=".6"/>`;
+ /* Ereignisse: Photon → Elektron-Loch-Paar → Trennung im Feld → Elektron über die Lampe → füllt am Rückkontakt das Loch */
+ const XS=[112,250,140,272,96,226,128,262],WP=[[180,44],[180,12],[338,12],[338,310],[180,310],[180,266]];let ext='',st0=0;
+ for(let i=0;i<ne;i++){const z=t/Q+i/ne,ph=z%1,cy=Math.floor(z),xa=XS[(i*3+cy*5)%XS.length],ya=180+((i+cy)%3)*9,hx=180+(i-(ne-1)/2)*17;
+  if(i==0)st0=ph<.17?1:ph<.45?2:ph<.9?3:4;
+  if(ph<.15){const u=ph/.15,x0=xa-34,y0=24,px=x0+(xa-x0)*u,py=y0+(ya-y0)*u,a=Math.atan2(ya-y0,xa-x0);let p='';for(let k=0;k<=14;k++){const q=k/14,L=-26*q,ox=Math.cos(a)*L-Math.sin(a)*3.5*Math.sin(q*12+t*20),oy=Math.sin(a)*L+Math.cos(a)*3.5*Math.sin(q*12+t*20);p+=(k?'L':'M')+f2(px+ox)+' '+f2(py+oy)}
+   d+=`<path d="${p}" fill="none" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round"/><circle cx="${f2(px)}" cy="${f2(py)}" r="4" fill="#fde047" stroke="#b45309" stroke-width="1"/>`}
+  if(ph>=.15&&ph<.24){const u=(ph-.15)/.09;d+=`<circle cx="${xa}" cy="${ya}" r="${f2(5+14*u)}" fill="none" stroke="#f59e0b" stroke-width="2" opacity="${(1-u).toFixed(2)}"/>`}
+  if(ph>=.17&&ph<.95){/* Loch: nach unten zum Rückkontakt, wartet dort */const u=GZE((ph-.17)/.25),hp=PW([[xa,ya],[xa,236],[hx,257]],u);d+=hole(hp[0],hp[1],ph>.9?(.95-ph)/.05:1)}
+  if(ph>=.17&&ph<.45){/* Elektron: im Feld nach oben, dann durch die n-Schicht zum Finger */const u=GZE((ph-.17)/.28),ep=PW([[xa,ya],[xa,120],[xa+(180-xa)*.6,72],[180,58],[180,46]],u);d+=el(ep[0],ep[1])+(i==0?TH(f2(ep[0]+7),f2(ep[1]-6),'e⁻','t2'):'')}
+  if(ph>=.45&&ph<.95){const u=(ph-.45)/.45,ep=PW([...WP,[hx,259]],Math.min(1,u));ext+=el(ep[0],ep[1],ph>.9?(.95-ph)/.05:1)}
+ }
+ d+='</g>'+`<circle cx="${C[0]}" cy="${C[1]}" r="${RR}" fill="none" stroke="var(--ink)" stroke-width="3"/>`;
+ /* äußerer Stromkreis mit Lampe; Elektronen laufen vom Minuspol (Frontkontakt) zum Pluspol (Rückkontakt) */
+ const lum=g;d+=PL([[180,38],[180,12],[338,12],[338,146]],'var(--ink)',2.6)+PL([[338,174],[338,310],[180,310],[180,290]],'var(--ink)',2.6)
+  +(lum>0?`<circle cx="338" cy="158" r="${(14+12*lum).toFixed(1)}" fill="#fde047" opacity="${(.2+.45*lum).toFixed(2)}"/>`:'')
+  +`<circle cx="338" cy="156" r="11" fill="${lum>0?'#fef08a':'#e5e7eb'}" stroke="var(--ink)" stroke-width="1.6"/><path d="M333 158q5 -8 10 0" fill="none" stroke="#b45309" stroke-width="1.4"/><rect x="332" y="166" width="12" height="8" fill="#94a3b8" stroke="var(--ink)" stroke-width="1.2"/>`
+  +ext;
+ d+=TH(188,27,'Frontkontakt (−)','t2')+TH(188,304,'Rückkontakt (+)','t2')+TH(352,140,'Lampe','t2')
+  +TH(76,96,'n-Schicht','t2')+TH(56,153,'p-n-Übergang','t2')+TH(72,222,'p-Schicht','t2')+TH(282,153,'Feld','t2','end')+TH(6,316,'stark vergrößert','t2');
+ /* Erklärfeld rechts */
+ const L=(y,ic,tx)=>ic+SXT(424,y+4,tx,12,'start','var(--ink)',500);
+ d+=SXT(400,26,'In der Solarzelle',15,'start','var(--ink)',800)
+  +L(46,el(410,46),'Elektron e⁻, frei beweglich')+L(66,hole(410,66),'Loch: hier fehlt ein Elektron')
+  +L(86,ION(410,86,7,PC,'P'),'Phosphor: gibt ein e⁻ ab (n)')+L(106,ION(410,106,7,BC,'B'),'Bor: ein e⁻ zu wenig (p)')
+  +L(126,ION(410,126,7,PC,'+')+'',"P⁺ und B⁻: feste Ladungen")
+  +L(146,`<path d="M402 150l4 -6 4 6 4 -6" fill="none" stroke="#f59e0b" stroke-width="2"/>`,'Licht (Photon)');
+ const S=['1 Licht löst ein e⁻ (ein Loch bleibt)','2 Feld trennt: e⁻ hoch, Loch runter','3 e⁻ fließen durch die Lampe (− → +)','4 Am Rückkontakt füllt e⁻ das Loch'];
+ d+=SXT(400,176,'So entsteht Strom:',13,'start','var(--ink)',800)+S.map((x,i)=>{const on=ne&&st0==i+1;return(on?`<rect x="396" y="${185+i*20}" width="238" height="18" rx="5" fill="var(--amber)" opacity=".25"/>`:'')+SXT(400,198+i*20,x,12,'start',on?'var(--ink)':'var(--mute)',on?800:500)}).join('')
+  +(ne?SXT(400,282,'Mehr Licht (G) → mehr e⁻ pro Sekunde',12,'start','var(--ink)',600)+SXT(400,300,`Nur ${nf(s.e)} % der Lichtenergie wird Strom`,12,'start','var(--mute)',500)
+   :SXT(400,282,'Kein Licht: keine Paare, kein Strom',12,'start','var(--red)',700));
+ return d;
+}
+fm(FE,E3,'Photovoltaik','Photonen schlagen in der Solarzelle Elektronen los. Am p-n-Übergang entsteht ein elektrisches Feld, das die Ladungen trennt: Es fließt Gleichstrom. Der Wechselrichter macht daraus Wechselstrom für das Netz. In der Teilchen-Lupe siehst Du, was in der Zelle passiert.',
+ [['v','Ansicht','sel',['Anlage','Teilchen-Lupe'],0],['A','A',1,100,1,'m²',20],['e','η_M',8,24,1,'%',16],['G','G',0,1000,10,'W/m²',800],['w','η_WR',90,99,1,'%',96],['H','H_Jahr',800,1300,10,'kWh/m²',1000]],
+ (s,t=0)=>{const Pdc=s.A*s.G*s.e/100,Pac=Pdc*s.w/100,Y=s.A*s.H*s.e/100*s.w/100,h=PVH(s.G);
+ return{vb:s.v==1?'0 0 640 320':'0 0 640 300',d:s.v==1?PVLUPE(s,t):PVANL(s,t),
+ res:[[nf(Pac/1000)+' kW','Leistung ins Netz (AC)'],[nf(Pdc/1000)+' kW','Leistung Modul (DC)'],[nf(Y)+' kWh/a','Jahresertrag (ideal)']],
+ rows:[['Sonnenstand',s.G<=0?'Nacht, kein Licht':'wie um '+PVUHR(h)+' an einem klaren Sommertag'],['Wirkungsgrad Anlage',nf(s.e*s.w/100)+' %'],['Verluste bis zum Netz',nf((1-s.e/100*s.w/100)*100)+' % der Einstrahlung'],['Typisch laut Folie','11–16 % (neue Module bis ≈ 22 %)']],
+ st:[['P_DC = A · G · η_Modul',`${s.A} m² · ${s.G} W/m² · ${nf(s.e/100)} = ${nf(Pdc)} W`],['P_AC = P_DC · η_WR',`${nf(Pdc)} W · ${nf(s.w/100)} = ${nf(Pac)} W`],['E = A · H_Jahr · η_Modul · η_WR',`${s.A} m² · ${s.H} kWh/m² · ${nf(s.e/100)} · ${nf(s.w/100)} = ${nf(Y)} kWh`]]}},
+ 'Nachts liefert PV keinen Strom: Ohne Speicher keine konstante Versorgung. Im Bild bestimmt G den Sonnenstand: Steht die Sonne tief, verteilt sich das Licht auf mehr Fläche und muss mehr Luft durchqueren, Wolken senken G zusätzlich. Die Sonne strahlt jährlich ca. 10.000-mal mehr Energie ein, als die Menschheit benötigt, aber die Energiedichte ist gering (viel Fläche).',1);
 const SO=[['Flachkollektor (Warmwasser)',.55],['Vakuumröhrenkollektor',.68],['Parabolrinnen-Kraftwerk',.60]];
 fm(FE,E3,'Solarthermie','Kollektoren fangen Sonnenwärme ein und erwärmen Wasser oder Thermoöl: Q = m · c · ΔT. Im Kraftwerk bündeln Spiegel die direkte Strahlung so stark, dass Dampf für eine Turbine entsteht.',
  [['a','Anlage','sel',SO.map(x=>x[0]),0],['A','A',1,500,1,'m²',8],['G','G',100,1000,10,'W/m²',700],['m','m',100,3000,50,'kg',300],['T','ϑ_Ziel',40,90,1,'°C',60]],
@@ -10855,33 +10978,27 @@ Object.assign(EIN,{
   f:(k,t)=>EMRK(k,t,EMOL(110,110,20,'#e05a4f','O')+EMOL(90,145,13,'#ffffff','H')+EMOL(130,145,13,'#ffffff','H')+EFT(110,200,'H₂O: 18 g/mol','ein1','middle'),'n = m / M','Masse links = Masse rechts')}
 ],
 'Korrosion':[
- {d:11,t:'Ein Stahlblech an feuchter Luft rostet. Korrosion ist eine Redoxreaktion zwischen Metall, Wasser und Sauerstoff.',
-  s:'Ein Stahlblech an feuchter Luft rostet. Korrosion ist eine Redoxreaktion zwischen Metall, Wasser und Sauerstoff.',
-  f:(k,t)=>{const a=EINQ(k/.9);let h=BAR3(60,150,360,40,'#8a96a1',12);for(let i=0;i<9;i++){const o=Math.min(1,Math.max(0,(a*9-i)));h+=`<ellipse cx="${90+i*40}" cy="${150+(i%3)*8}" rx="${14*o}" ry="${7*o}" fill="#b5651d" opacity=".85"/>`}
-   h+=`<path d="M150 100q10 -20 20 0q-10 20 -20 0" fill="var(--flow)" opacity=".6"/>`+EFT(185,100,'H₂O','ein2')+EMOL(300,95,10,'#e05a4f','')+EMOL(318,95,10,'#e05a4f','')+EFT(335,100,'O₂','ein2');return h+EFT(240,240,'Stahl + Wasser + Sauerstoff → Rost','ein1','middle')}},
- {d:11,t:'Oxidation: Das Eisen gibt Elektronen ab und geht als Fe²⁺ in Lösung. Diese Stelle ist die Anode.',
-  s:'Oxidation: Das Eisen gibt Elektronen ab und geht als Eisen zwei plus in Lösung. Diese Stelle ist die Anode.',
-  f:k=>{const a=EINQ((k-.2)/.5);let h=BAR3(40,170,400,40,'#8a96a1',12)+`<path d="M120 170q60 -70 160 0z" fill="var(--flow)" opacity=".3"/>`;
-   h+=EMOL(200,170-40*a,14,'var(--amber)','Fe')+(a>.1?EFT(222,146-40*a,'Fe²⁺','ein1'):'')+EMOL(150-30*a,185,7,'var(--flow)','',1)+EMOL(250+30*a,185,7,'var(--flow)','',1)+EFT(240,235,'2 e⁻ bleiben im Metall','ein2','middle');
-   return h+EFT(240,50,'Fe → Fe²⁺ + 2 e⁻','ein1','middle')+EFT(240,76,'Oxidation an der Anode','ein2','middle')}},
- {d:11,t:'Reduktion: Sauerstoff und Wasser nehmen die Elektronen auf und bilden OH⁻. Mit Fe²⁺ entsteht daraus Rost.',
-  s:'Reduktion: Sauerstoff und Wasser nehmen die Elektronen auf und bilden Hydroxid-Ionen. Mit Eisen zwei plus entsteht daraus Rost.',
-  f:k=>{const a=EINQ((k-.2)/.5);let h=BAR3(40,170,400,40,'#8a96a1',12)+`<path d="M120 170q60 -70 160 0z" fill="var(--flow)" opacity=".3"/>`;
-   h+=EMOL(300,120,10,'#e05a4f','')+EMOL(318,120,10,'#e05a4f','')+EFT(336,126,'O₂','ein2')+EMOL(260-60*a,185,7,'var(--flow)','',1)+EMOL(280-40*a,185,7,'var(--flow)','',1);
-   if(a>.9)h+=EFT(170,150,'OH⁻','ein1')+EFT(230,150,'OH⁻','ein1')+`<ellipse cx="200" cy="166" rx="40" ry="10" fill="#b5651d"/>`+EFT(200,245,'Rost: Fe₂O₃ · n H₂O','ein1','middle');
-   return h+EFT(240,50,'O₂ + 2 H₂O + 4 e⁻ → 4 OH⁻','ein1','middle')+EFT(240,76,'Reduktion an der Kathode','ein2','middle')}},
- {d:11,t:'Das unedlere Metall opfert sich: Zink auf Stahl korrodiert zuerst und schützt das Eisen, auch an Kratzern.',
-  s:'Das unedlere Metall opfert sich. Zink auf Stahl korrodiert zuerst und schützt das Eisen, auch an Kratzern.',
-  f:k=>{const a=EINQ(k/.7);let h=BAR3(60,170,360,40,'#8a96a1',12)+BAR3(60,154,150,16,'#c9d1d9',6)+BAR3(270,154,150,16,'#c9d1d9',6)+EFT(135,146,'Zink','ein2','middle')+EFT(345,146,'Zink','ein2','middle')+EFT(240,200,'Stahl','ein1','middle');
-   h+=EFT(240,146,'Kratzer','ein2','middle')+`<path d="M210 170h60" stroke="var(--red)" stroke-width="3"/>`;
-   if(a>.3)h+=AR(200,130,-40*a,-30*a,'var(--amber)')+EFT(150,90,'Zn → Zn²⁺ + 2 e⁻','ein1','middle')+EFT(240,245,'Fe bleibt geschützt (Opferanode)','ein1','middle');
-   return h+EFT(240,40,'unedel  Mg Al Zn Fe Ni Sn Cu Ag Au  edel','ein2','middle')}},
+ {d:12,t:'Ein Wassertropfen auf Stahl: Nach einiger Zeit bildet sich ein Rostring am Rand des Tropfens, in der Mitte wird das Eisen abgetragen. Korrosion ist eine Redoxreaktion zwischen Metall, Wasser und Sauerstoff.',
+  s:'Ein Wassertropfen auf Stahl: Nach einiger Zeit bildet sich ein Rostring am Rand des Tropfens, in der Mitte wird das Eisen abgetragen. Korrosion ist eine Redoxreaktion zwischen Metall, Wasser und Sauerstoff.',
+  f:(k,t)=>ESIM('Korrosion',{v:1,z:0,lu:1,ind:0},t,'30 90 590 210',0,20,480,171)+ETAG(240,248,'Stahl + Wasser + Sauerstoff → Rost','middle','ein1')},
+ {d:12,t:'Oxidation in der Tropfenmitte, wo wenig Sauerstoff hinkommt: Ein Eisenatom gibt 2 Elektronen ab und geht als Fe²⁺ in Lösung. Diese Stelle ist die Anode.',
+  s:'Oxidation in der Tropfenmitte, wo wenig Sauerstoff hinkommt: Ein Eisenatom gibt 2 Elektronen ab und geht als Eisen 2 plus in Lösung. Diese Stelle ist die Anode.',
+  f:(k,t)=>ESIM('Korrosion',{v:1,z:1,lu:1},t,'20 55 280 280',0,20,220,220)+EFT(350,70,'Anode: Tropfenmitte','ein1','middle')+EFT(350,104,'wenig O₂','ein2','middle')+EFT(350,150,'Fe → Fe²⁺ + 2 e⁻','ein1','middle')+EFT(350,196,'Oxidation','ein2','middle')+EFT(350,224,'e⁻ wandern im Stahl','ein2','middle')},
+ {d:12,t:'Reduktion am Tropfenrand, wo viel Sauerstoff ist: O₂ und Wasser nehmen die Elektronen auf und bilden OH⁻. Wo Fe²⁺ und OH⁻ sich treffen, entsteht der Rostring.',
+  s:'Reduktion am Tropfenrand, wo viel Sauerstoff ist: Sauerstoff und Wasser nehmen die Elektronen auf und bilden Hydroxid-Ionen. Wo Eisen 2 plus und Hydroxid sich treffen, entsteht der Rostring.',
+  f:(k,t)=>ESIM('Korrosion',{v:1,z:1,lu:1},t,'340 55 280 280',260,20,220,220)+EFT(130,70,'Kathode: Tropfenrand','ein1','middle')+EFT(130,104,'viel O₂','ein2','middle')+EFT(130,150,'O₂ + 2 H₂O + 4 e⁻ → 4 OH⁻','ein1','middle')+EFT(130,196,'Reduktion','ein2','middle')+EFT(130,224,'Rost: Fe₂O₃ · n H₂O','ein2','middle')},
+ {d:12,t:'Kontaktkorrosion: Berühren sich zwei verschiedene Metalle unter einem Wasserfilm, löst sich das unedlere auf. Eisen an Kupfer: Das Eisen ist die Anode, die Elektronen fließen über die Berührstelle zum Kupfer.',
+  s:'Kontaktkorrosion: Berühren sich zwei verschiedene Metalle unter einem Wasserfilm, löst sich das unedlere auf. Eisen an Kupfer: Das Eisen ist die Anode, die Elektronen fließen über die Berührstelle zum Kupfer.',
+  f:(k,t)=>ESIM('Korrosion',{v:0,z:0,a:3,b:7,el:0},t,'20 60 620 255',0,15,480,197)+ETAG(240,256,'Das unedlere Metall löst sich auf','middle','ein1')},
+ {d:11,t:'Das unedlere Metall opfert sich: Bei verzinktem Stahl löst sich am Kratzer das Zink auf und schützt das Eisen. Das ist eine Opferanode.',
+  s:'Das unedlere Metall opfert sich: Bei verzinktem Stahl löst sich am Kratzer das Zink auf und schützt das Eisen. Das ist eine Opferanode.',
+  f:(k,t)=>ESIM('Korrosion',{v:2,sch:2},t,'20 105 600 150',0,55,480,124)+ETAG(240,256,'Zink opfert sich, Stahl bleibt geschützt','middle','ein1')},
  {d:13,t:'Alles zusammen: Fe → Fe²⁺ + 2 e⁻ (Oxidation) und O₂ + 2 H₂O + 4 e⁻ → 4 OH⁻ (Reduktion). Gesamt: 4 Fe + 3 O₂ + 2n H₂O → 2 Fe₂O₃ · n H₂O.',
   s:'Alles zusammen: Eisen wird oxidiert, Sauerstoff mit Wasser reduziert. Gesamt: 4 Fe plus 3 O 2 plus Wasser ergibt Rost.',
   f:k=>EFX(k,[['Oxidation: Fe → Fe²⁺ + 2 e⁻','m'],['Reduktion: O₂ + 2 H₂O + 4 e⁻ → 4 OH⁻','m'],['4 Fe + 3 O₂ + 2n H₂O → 2 Fe₂O₃ · n H₂O','r']],['Rost braucht Wasser UND Sauerstoff','Salz beschleunigt (leitfähig)'])},
- {d:9,t:'Merke: Rost braucht Wasser und Sauerstoff. Schutz: Lack, Fett, Verzinken oder eine Opferanode aus unedlerem Metall.',
-  s:'Merke: Rost braucht Wasser und Sauerstoff. Schutz: Lack, Fett, Verzinken oder eine Opferanode aus unedlerem Metall.',
-  f:(k,t)=>EMRK(k,t,BAR3(20,120,180,34,'#8a96a1',10)+BAR3(20,108,180,12,'#c9d1d9',6)+EFT(110,100,'Zinkschicht','ein2','middle')+EFT(110,190,'Stahl geschützt','ein1','middle'),'Me → Meⁿ⁺ + n e⁻','unedler rostet zuerst')}
+ {d:9,t:'Merke: Rost braucht Wasser und Sauerstoff. Das unedlere Metall löst sich auf. Schutz: Lack, Fett, Verzinken oder eine Opferanode aus unedlerem Metall.',
+  s:'Merke: Rost braucht Wasser und Sauerstoff. Das unedlere Metall löst sich auf. Schutz: Lack, Fett, Verzinken oder eine Opferanode aus unedlerem Metall.',
+  f:(k,t)=>EMRK(k,t,ESIM('Korrosion',{v:1,z:0,lu:1,ind:0},t,'30 90 590 210',0,100,230,82),'Me → Meⁿ⁺ + n e⁻','unedler löst sich zuerst')}
 ],
 'Dreisatz (proportional & umgekehrt)':[
  {d:11,t:'3 Paletten Material kosten 240 €. Was kosten 7 Paletten? Das ist ein Dreisatz.',
@@ -11638,24 +11755,24 @@ Object.assign(EIN,{
   f:(k,t)=>EMRK(k,t,AR(60,180,0,-90,'var(--red)')+EFT(60,210,'Oxidation','ein2','middle')+EFT(60,70,'Zahl ↑','ein2','middle')+AR(170,90,0,90,'var(--flow)')+EFT(170,210,'Reduktion','ein2','middle')+EFT(170,70,'Zahl ↓','ein2','middle'),'Σ OZ = Ladung','O: −II, H: +I')}
 ],
 'Galvanische Zelle & Spannungsreihe':[
- {d:11,t:'Ein Zinkblech in Zinksulfatlösung, ein Kupferblech in Kupfersulfatlösung, dazwischen eine Salzbrücke. Verbindet man beide mit einem Draht, fließt Strom: eine Batterie.',
-  s:'Ein Zinkblech in Zinksulfatlösung, ein Kupferblech in Kupfersulfatlösung, dazwischen eine Salzbrücke. Verbindet man beide mit einem Draht, fließt Strom: eine Batterie.',
-  f:(k,t)=>{const a=k>.5;return ECEL(60,90,150,130,{cl:'#8a96a1',cr:'#c8743a',ll:'Zn',lr:'Cu'})+`<path d="M93 70V40H177V70" fill="none" stroke="var(--ink)" stroke-width="3"/>`+(a?EDOT(t,[[93,70,93,40,.5],[93,40,177,40,.5],[177,40,177,70,.5]]):'')+`<path d="M110 130h50" stroke="var(--line)" stroke-width="10" stroke-linecap="round"/>`+EFT(135,118,'Salzbrücke','ein2','middle')+EFT(135,266,'ZnSO₄ · CuSO₄','ein2','middle')+EFT(350,110,a?'Strom fließt!':'Draht verbinden','ein1','middle')+EFT(350,146,'U ≈ 1,1 V','ein1','middle')}},
- {d:11,t:'Die Spannungsreihe ordnet Metalle nach ihrem Drang, Elektronen abzugeben. Unedle wie Zink stehen bei negativen Potentialen, edle wie Kupfer bei positiven.',
-  s:'Die Spannungsreihe ordnet Metalle nach ihrem Drang, Elektronen abzugeben. Unedle wie Zink stehen bei negativen Potentialen, edle wie Kupfer bei positiven.',
-  f:k=>{const a=EINQ(k/.9),x0=60,W=360,sc=W/4;let h=`<path d="M${x0} 150H${x0+W}" stroke="var(--ink)" stroke-width="2"/>`;[['Mg',-2.37,'−2,37'],['Zn',-.76,'−0,76'],['Fe',-.44,'−0,44'],['H',0,'0'],['Cu',.34,'+0,34'],['Ag',.8,'+0,80'],['Au',1.5,'+1,50']].forEach(([n,E,L],i)=>{const x=x0+(E+2.5)*sc,g=EINQ((a*7-i)/1);h+=`<g opacity="${g.toFixed(2)}"><path d="M${x.toFixed(1)} 144v12" stroke="var(--ink)" stroke-width="2"/>`+EFT(x,i%2?130:184,n,'ein1','middle')+EFT(x,i%2?110:206,L+' V','ein2','middle')+'</g>'});return h+EFT(x0,250,'unedel','ein2')+EFT(x0+W,250,'edel','ein2','end')+AR(200,236,80,0,'var(--ink)')}},
- {d:11,t:'Am Zink: Oxidation. Zn → Zn²⁺ + 2 e⁻. Die Elektronen bleiben im Blech zurück, es wird zum Minuspol. Über den Draht wandern sie zum Kupfer.',
-  s:'Am Zink: Oxidation. Zink wird zu Zink 2 plus und 2 Elektronen. Die Elektronen bleiben im Blech zurück, es wird zum Minuspol. Über den Draht wandern sie zum Kupfer.',
-  f:(k,t)=>{const a=EINQ(k/.8);return ECEL(60,90,150,130,{cl:'#8a96a1',cr:'#c8743a',ll:'Zn: −',lr:'Cu: +'})+`<path d="M93 70V40H177V70" fill="none" stroke="var(--ink)" stroke-width="3"/>`+EDOT(t,[[93,70,93,40,.5],[93,40,177,40,.5],[177,40,177,70,.5]])+`<path d="M110 130h50" stroke="var(--line)" stroke-width="10" stroke-linecap="round"/>`+(a>.3?EION(93+40*a,170,'Zn²⁺','var(--flow)',16):'')+EFT(350,80,'Oxidation am Zn','ein1','middle')+EFT(350,112,'Zn → Zn²⁺ + 2 e⁻','ein2','middle')+EFT(350,160,'Zn löst sich auf','ein2','middle')+EFT(350,200,'e⁻ über den Draht','ein1','middle')+EFT(350,226,'zum Cu','ein2','middle')}},
- {d:11,t:'Am Kupfer: Reduktion. Cu²⁺ + 2 e⁻ → Cu. Kupfer-Ionen aus der Lösung holen sich die Elektronen und scheiden sich als Metall ab. Die Salzbrücke gleicht die Ladungen aus.',
-  s:'Am Kupfer: Reduktion. Kupfer 2 plus und 2 Elektronen werden zu Kupfer. Kupfer Ionen aus der Lösung holen sich die Elektronen und scheiden sich als Metall ab. Die Salzbrücke gleicht die Ladungen aus.',
-  f:(k,t)=>{const a=EINQ(k/.8);return ECEL(60,90,150,130,{cl:'#8a96a1',cr:'#c8743a',ll:'Zn: −',lr:'Cu: +'})+`<path d="M93 70V40H177V70" fill="none" stroke="var(--ink)" stroke-width="3"/>`+EDOT(t,[[93,70,93,40,.5],[93,40,177,40,.5],[177,40,177,70,.5]])+`<path d="M110 130h50" stroke="var(--line)" stroke-width="10" stroke-linecap="round"/>`+EION(205-30*a,170,'Cu²⁺','#c8743a',16)+EFT(350,80,'Reduktion am Cu','ein1','middle')+EFT(350,112,'Cu²⁺ + 2 e⁻ → Cu','ein2','middle')+EFT(350,160,'Cu scheidet sich ab','ein2','middle')+EFT(350,200,'Salzbrücke:','ein1','middle')+EFT(350,226,'Ionen gleichen aus','ein2','middle')}},
+ {d:12,t:'Ein Zinkblech in Zinknitratlösung, ein Kupferblech in Kupfernitratlösung, dazwischen eine Salzbrücke. Das Voltmeter liegt parallel zur Zelle und zeigt 1,10 V. Schließt man den Schalter, fließen Elektronen durch den Draht: eine Batterie.',
+  s:'Ein Zinkblech in Zinknitratlösung, ein Kupferblech in Kupfernitratlösung, dazwischen eine Salzbrücke. Das Voltmeter liegt parallel zur Zelle und zeigt 1,10 Volt. Schließt man den Schalter, fließen Elektronen durch den Draht: eine Batterie.',
+  f:(k,t)=>{const z=k<.45?1:0;return ESIM('Galvanische Zelle & Spannungsreihe',{v:0,a:2,b:7,sw:z},t,'0 0 640 395',0,0,480,240)+ETAG(240,262,z?'Schalter offen: Voltmeter zeigt 1,10 V':'Schalter zu: Elektronen fließen','middle','ein1')}},
+ {d:11,t:'Die Spannungsreihe ordnet Metalle nach ihrem Drang, Elektronen abzugeben. Unedle wie Zink stehen bei negativen Potentialen, edle wie Kupfer bei positiven. Der Abstand zwischen beiden ist die Zellspannung.',
+  s:'Die Spannungsreihe ordnet Metalle nach ihrem Drang, Elektronen abzugeben. Unedle wie Zink stehen bei negativen Potentialen, edle wie Kupfer bei positiven. Der Abstand zwischen beiden ist die Zellspannung.',
+  f:(k,t)=>ESIM('Galvanische Zelle & Spannungsreihe',{v:0,a:2,b:7,sw:0},t,'20 480 620 140',0,50,480,108)+EFT(30,240,'unedel: gibt Elektronen ab','ein2')+EFT(450,240,'edel: nimmt auf','ein2','end')+AR(200,258,80,0,'var(--ink)')},
+ {d:12,t:'Am Zink: Oxidation. Ein Zinkatom gibt 2 Elektronen an das Metall ab und geht als Zn²⁺-Ion in die Lösung, Wasser umhüllt es. Die Elektronen bleiben im Blech zurück, es wird zum Minuspol, der Anode.',
+  s:'Am Zink: Oxidation. Ein Zinkatom gibt 2 Elektronen an das Metall ab und geht als Zink 2 plus Ion in die Lösung, Wasser umhüllt es. Die Elektronen bleiben im Blech zurück, es wird zum Minuspol, der Anode.',
+  f:(k,t)=>ESIM('Galvanische Zelle & Spannungsreihe',{v:1,a:2,b:7,sw:0},t,'15 55 300 320',0,14,220,235)+EFT(350,70,'Anode (−): Zink','ein1','middle')+EFT(350,104,'Oxidation','ein2','middle')+EFT(350,150,'Zn → Zn²⁺ + 2 e⁻','ein1','middle')+EFT(350,196,'Zink löst sich auf','ein2','middle')+EFT(350,224,'e⁻ über den Draht','ein2','middle')},
+ {d:12,t:'Am Kupfer: Reduktion. Ein Cu²⁺-Ion mit Wasserhülle kommt an die Oberfläche, holt sich 2 Elektronen und wird ein Atom im Metallgitter. Das Kupferblech ist der Pluspol, die Kathode. Die Salzbrücke gleicht die Ladungen aus.',
+  s:'Am Kupfer: Reduktion. Ein Kupfer 2 plus Ion mit Wasserhülle kommt an die Oberfläche, holt sich 2 Elektronen und wird ein Atom im Metallgitter. Das Kupferblech ist der Pluspol, die Kathode. Die Salzbrücke gleicht die Ladungen aus.',
+  f:(k,t)=>ESIM('Galvanische Zelle & Spannungsreihe',{v:1,a:2,b:7,sw:0},t,'325 55 300 320',260,14,220,235)+EFT(130,70,'Kathode (+): Kupfer','ein1','middle')+EFT(130,104,'Reduktion','ein2','middle')+EFT(130,150,'Cu²⁺ + 2 e⁻ → Cu','ein1','middle')+EFT(130,196,'Kupfer scheidet sich ab','ein2','middle')+EFT(130,224,'Salzbrücke: NO₃⁻ und Na⁺','ein2','middle')},
  {d:13,t:'Alles zusammen: Die Zellspannung ist die Differenz der Standardpotentiale: U = E(Cu) − E(Zn) = 0,34 V − (−0,76 V) = 1,10 V. Das edlere Metall ist immer der Pluspol.',
   s:'Alles zusammen: Die Zellspannung ist die Differenz der Standardpotentiale: U gleich E Kupfer minus E Zink gleich 0,34 Volt minus minus 0,76 Volt gleich 1,10 Volt. Das edlere Metall ist immer der Pluspol.',
-  f:k=>EFX(k,[['E°(Zn) = −0,76 V, E°(Cu) = +0,34 V','m'],['U = E°(edel) − E°(unedel)','h'],['U = 0,34 V − (−0,76 V)','m'],['U = 1,10 V','r']],['Minuspol: unedel, Oxidation · Pluspol: edel, Reduktion'])},
- {d:9,t:'Merke: Unedel gibt ab (Minuspol, Oxidation), edel nimmt auf (Pluspol, Reduktion). U = Differenz der Potentiale.',
-  s:'Merke: Unedel gibt ab, Minuspol, Oxidation. Edel nimmt auf, Pluspol, Reduktion. U gleich Differenz der Potentiale.',
-  f:(k,t)=>EMRK(k,t,`<g transform="translate(-20 30) scale(.75)">${ECEL(60,90,150,130,{ll:'Zn −',lr:'Cu +'})}<path d="M93 70V40H177V70" fill="none" stroke="var(--ink)" stroke-width="3"/>${EDOT(t,[[93,70,93,40,.5],[93,40,177,40,.5],[177,40,177,70,.5]])}</g>`,'U = E°(+) − E°(−)','Zn/Cu: 1,10 V')}
+  f:k=>EFX(k,[['E°(Zn) = −0,76 V, E°(Cu) = +0,34 V','m'],['U = E°(edel) − E°(unedel)','h'],['U = 0,34 V − (−0,76 V)','m'],['U = 1,10 V','r']],['Minuspol: unedel, Oxidation','Pluspol: edel, Reduktion'])},
+ {d:9,t:'Merke: Unedel gibt ab (Minuspol, Oxidation), edel nimmt auf (Pluspol, Reduktion). U = Differenz der Potentiale, gemessen mit dem Voltmeter parallel zur Zelle.',
+  s:'Merke: Unedel gibt ab, Minuspol, Oxidation. Edel nimmt auf, Pluspol, Reduktion. U gleich Differenz der Potentiale, gemessen mit dem Voltmeter parallel zur Zelle.',
+  f:(k,t)=>EMRK(k,t,ESIM('Galvanische Zelle & Spannungsreihe',{v:0,a:2,b:7,sw:0},t,'0 0 640 395',0,60,230,142),'U = E°(+) − E°(−)','Zn und Cu: 1,10 V')}
 ],
 'Elektrolyse':[
  {d:11,t:'Verkupfern: Ein Werkstück hängt in Kupfersulfatlösung, eine Gleichspannung liegt an. Nach einer halben Stunde ist es mit einer dünnen Kupferschicht überzogen. Strom erzwingt hier eine Reaktion.',
@@ -12068,22 +12185,22 @@ Object.assign(EIN,{
 'Wasserkraftwerke':[
  {d:11,t:'Ein Stausee liegt 50 m über der Turbine. Durch die Rohrleitung fließen 20 m³ Wasser je Sekunde. Welche elektrische Leistung liefert das Kraftwerk?',
   s:'Ein Stausee liegt 50 Meter über der Turbine. Durch die Rohrleitung fließen 20 Kubikmeter Wasser je Sekunde. Welche elektrische Leistung liefert das Kraftwerk?',
-  f:(k,t)=>ESIM('Wasserkraftwerke',{w:1,H:50,Q:20,e:90,V:5},t,'0 0 640 300',0,0,480,225)+ETAG(240,252,'H = 50 m, Q = 20 m³/s','middle','ein1')},
+  f:(k,t)=>ESIM('Wasserkraftwerke',{w:1,H:50,Q:20,e:90,V:5},t,'0 0 422 300',85,0,309,220)+ETAG(240,252,'H = 50 m, Q = 20 m³/s','middle','ein1')},
  {d:11,t:'Die Leistung ist Dichte mal Erdbeschleunigung mal Fallhöhe mal Volumenstrom mal Wirkungsgrad: P = ρ · g · H · Q · η. Jede Sekunde fallen 20 000 kg Wasser 50 m tief.',
   s:'Die Leistung ist Dichte mal Erdbeschleunigung mal Fallhöhe mal Volumenstrom mal Wirkungsgrad: P gleich Rho mal g mal H mal Q mal Eta. Jede Sekunde fallen 20000 Kilogramm Wasser 50 Meter tief.',
   f:k=>EFX(k,[['P = ρ · g · H · Q · η','h'],['P = 1 000 kg/m³ · 9,81 m/s² · 50 m · 20 m³/s · 0,9','m'],['P = 8 829 000 W ≈ 8,8 MW','r']],['kg·m²/s³ = W'])},
- {d:11,t:'Drei Bauarten: Laufwasser am Fluss hat wenig Gefälle und viel Wasser. Speicherkraftwerke im Gebirge haben viel Gefälle und wenig Wasser. Laufwasser liefert Grundlast rund um die Uhr, Speicher decken auf Abruf die Spitzenlast.',
-  s:'Drei Bauarten: Laufwasser am Fluss hat wenig Gefälle und viel Wasser. Speicherkraftwerke im Gebirge haben viel Gefälle und wenig Wasser. Laufwasser liefert Grundlast rund um die Uhr, Speicher decken auf Abruf die Spitzenlast.',
-  f:(k,t)=>{const w=k<.5?0:1;return ESIM('Wasserkraftwerke',{w,H:w?400:8,Q:w?5:200,e:90,V:5},t,'0 0 640 300',0,0,480,225)+ETAG(240,252,w?'Speicher: viel Höhe, wenig Wasser':'Laufwasser: wenig Höhe, viel Wasser','middle','ein1')}},
+ {d:14,t:'Drei Bauarten: Das Laufwasserkraftwerk am Fluss hat wenig Gefälle und viel Wasser und liefert Grundlast rund um die Uhr. Das Speicherkraftwerk im Gebirge hat viel Gefälle und wenig Wasser und deckt auf Abruf die Spitzenlast. Das Pumpspeicherkraftwerk hat ein Ober- und ein Unterbecken.',
+  s:'Drei Bauarten: Das Laufwasserkraftwerk am Fluss hat wenig Gefälle und viel Wasser und liefert Grundlast rund um die Uhr. Das Speicherkraftwerk im Gebirge hat viel Gefälle und wenig Wasser und deckt auf Abruf die Spitzenlast. Das Pumpspeicherkraftwerk hat ein Ober- und ein Unterbecken.',
+  f:(k,t)=>{const w=k<.36?0:k<.72?1:2;return ESIM('Wasserkraftwerke',[{w:0,H:8,Q:200,e:90},{w:1,H:400,Q:5,e:90,V:5},{w:2,b:0,H:300,Q:100,e:90,V:5}][w],t,'0 0 422 300',85,0,309,220)+ETAG(240,252,['Laufwasser: wenig Höhe, viel Wasser','Speicher: viel Höhe, wenig Wasser','Pumpspeicher: Ober- und Unterbecken'][w],'middle','ein1')}},
  {d:11,t:'Das Pumpspeicherwerk ist ein Speicher, kein Erzeuger: Bei Stromüberschuss pumpt es Wasser nach oben, bei Bedarf lässt es das Wasser wieder durch die Turbine. Hin und zurück bleiben etwa 75 % übrig: η = η_Pumpe · η_Turbine.',
   s:'Das Pumpspeicherwerk ist ein Speicher, kein Erzeuger: Bei Stromüberschuss pumpt es Wasser nach oben, bei Bedarf lässt es das Wasser wieder durch die Turbine. Hin und zurück bleiben etwa 75 Prozent übrig: Eta gleich Eta Pumpe mal Eta Turbine.',
-  f:(k,t)=>{const b=k<.5?1:0;return ESIM('Wasserkraftwerke',{w:2,b,H:50,Q:20,e:90,V:5},t,'0 0 640 300',0,0,480,225)+ETAG(240,252,b?'Überschuss: Wasser hochpumpen':'Bedarf: Wasser durch die Turbine','middle','ein1')}},
+  f:(k,t)=>{const b=k<.5?1:0;return ESIM('Wasserkraftwerke',{w:2,b,H:300,Q:100,e:90,V:5},t,'0 0 422 300',85,0,309,220)+ETAG(240,252,b?'Überschuss: Wasser hochpumpen':'Bedarf: Wasser durch die Turbine','middle','ein1')}},
  {d:13,t:'Alles zusammen: P = ρ · g · H · Q · η = 1 000 · 9,81 · 50 · 20 · 0,9 W = 8,8 MW. Gleiche Leistung bei 500 m Fallhöhe braucht nur 2 m³/s. Pumpspeicher: 75 % hin und zurück.',
   s:'Alles zusammen: P gleich Rho mal g mal H mal Q mal Eta gleich 8,8 Megawatt. Gleiche Leistung bei 500 Meter Fallhöhe braucht nur 2 Kubikmeter je Sekunde. Pumpspeicher: 75 Prozent hin und zurück.',
   f:k=>EFX(k,[['P = ρ · g · H · Q · η','h'],['P = 1 000 kg/m³ · 9,81 m/s² · 50 m · 20 m³/s · 0,9','m'],['P = 8,8 MW','r'],['500 m und 2 m³/s: ebenfalls 8,8 MW','m']],['H und Q sind austauschbar, ihr Produkt zählt'])},
  {d:9,t:'Merke: P = ρ · g · H · Q · η. Laufwasser: wenig Höhe, viel Wasser. Speicher: viel Höhe, wenig Wasser. Pumpspeicher speichert, erzeugt aber nichts.',
   s:'Merke: P gleich Rho mal g mal H mal Q mal Eta. Laufwasser: wenig Höhe, viel Wasser. Speicher: viel Höhe, wenig Wasser. Pumpspeicher speichert, erzeugt aber nichts.',
-  f:(k,t)=>EMRK(k,t,ESIM('Wasserkraftwerke',{w:1,H:50,Q:20,e:90,V:5},t,'0 60 480 240',0,50,230,140),'P = ρ · g · H · Q · η','Pumpspeicher: η ≈ 75 %')}
+  f:(k,t)=>EMRK(k,t,ESIM('Wasserkraftwerke',{w:1,H:50,Q:20,e:90,V:5},t,'0 0 422 300',10,60,197,140),'P = ρ · g · H · Q · η','Pumpspeicher: η ≈ 75 %')}
 ],
 'Windkraftanlage':[
  {d:11,t:'Eine Windkraftanlage mit 100 m Rotordurchmesser steht im Wind mit 10 m/s. Wie viel Leistung holt sie aus dem Wind? Der Rotor überstreicht eine Kreisfläche von 7854 m².',
@@ -12108,10 +12225,10 @@ Object.assign(EIN,{
 'Photovoltaik':[
  {d:11,t:'Auf dem Hallendach liegen 600 m² Solarmodule. Die Sonne liefert 1 000 W je Quadratmeter, die Module wandeln 20 % davon um. Wie viel Strom kommt vom Dach?',
   s:'Auf dem Hallendach liegen 600 Quadratmeter Solarmodule. Die Sonne liefert 1000 Watt je Quadratmeter, die Module wandeln 20 Prozent davon um. Wie viel Strom kommt vom Dach?',
-  f:(k,t)=>ESIM('Photovoltaik',{},t,'0 0 300 280',0,0,290,270)+ECARD(390,120,[['A = 600 m²','ein1'],['G = 1 000 W/m²','ein2'],['η = 0,20','ein2']])},
+  f:(k,t)=>ESIM('Photovoltaik',{v:0,A:600,G:1000,e:20},t,'0 0 334 300',0,0,300,270)+ECARD(390,120,[['A = 600 m²','ein1'],['G = 1 000 W/m²','ein2'],['η = 0,20','ein2']])},
  {d:11,t:'In der Solarzelle schlagen Lichtteilchen, Photonen, Elektronen los. Am Übergang zwischen n- und p-Schicht herrscht ein elektrisches Feld, das die Ladungen trennt. Es fließt Gleichstrom, ohne Drehung, ohne Wärme.',
   s:'In der Solarzelle schlagen Lichtteilchen, Photonen, Elektronen los. Am Übergang zwischen n- und p-Schicht herrscht ein elektrisches Feld, das die Ladungen trennt. Es fließt Gleichstrom, ohne Drehung, ohne Wärme.',
-  f:(k,t)=>ESIM('Photovoltaik',{},t,'0 125 330 160',0,20,480,230)},
+  f:(k,t)=>ESIM('Photovoltaik',{v:1,G:1000,e:20},t,'0 0 640 320',0,0,480,270)},
  {d:11,t:'Die Leistung: P = A · G · η = 600 m² · 1 000 W/m² · 0,20 = 120 000 W = 120 kW. Diese Spitzenleistung nennt man 120 kWp, p für peak.',
   s:'Die Leistung: P gleich A mal G mal Eta gleich 600 Quadratmeter mal 1000 Watt je Quadratmeter mal 0,20 gleich 120 Kilowatt. Diese Spitzenleistung nennt man 120 Kilowatt peak.',
   f:k=>EFX(k,[['P = A · G · η','h'],['P = 600 m² · 1 000 W/m² · 0,20','m'],['P = 120 000 W = 120 kW (120 kWp)','r']],['kWp: Leistung bei voller Sonne'])},
@@ -12123,7 +12240,7 @@ Object.assign(EIN,{
   f:k=>EFX(k,[['P = 600 m² · 1 000 W/m² · 0,20 = 120 kWp','m'],['E = 600 m² · 1 000 kWh/m² · 0,20 = 120 000 kWh','m'],['Faustregel: 1 000 kWh je kWp','r'],['Gleichstrom → Wechselrichter → Netz','m']],['Eigenverbrauch tagsüber lohnt am meisten'])},
  {d:9,t:'Merke: Solarzelle gleich Licht direkt zu Gleichstrom. P = A · G · η, Jahresertrag E = A · H · η, rund 1 000 kWh je kWp.',
   s:'Merke: Solarzelle gleich Licht direkt zu Gleichstrom. P gleich A G Eta, Jahresertrag E gleich A H Eta, rund 1000 Kilowattstunden je Kilowatt peak.',
-  f:(k,t)=>EMRK(k,t,ESIM('Photovoltaik',{},t,'0 0 330 280',0,30,220,190),'P = A · G · η','E = A · H · η')}
+  f:(k,t)=>EMRK(k,t,ESIM('Photovoltaik',{v:0,A:600,G:1000,e:20},t,'0 0 334 300',0,30,220,198),'P = A · G · η','E = A · H · η')}
 ],
 'Solarthermie':[
  {d:11,t:'Auf dem Werksdach liegen 20 m² Sonnenkollektoren. Sie sollen 300 Liter Wasser für die Duschen von 20 auf 40 °C erwärmen. Hier entsteht Wärme, kein Strom.',
@@ -13000,7 +13117,7 @@ const GRZ={
 'Kernkraftwerk (Druckwasserreaktor)':[['@P','elektrische Nennleistung','MW','Größte elektrische Leistung des Kraftwerks bei Volllast.'],['@e','Wirkungsgrad','%','Anteil der Reaktorwärme, der als Strom herauskommt. Der Rest ist Abwärme.'],['@l','Auslastung','%','Wie weit das Kraftwerk hochgefahren ist. 100 % heißt Volllast.'],['#','Im Rechenweg'],['P_th','thermische Leistung','MW','Wärmeleistung des Reaktors: P_th = P_el / η.'],['E_kg','Energie je kg Uran-235','J/kg','Bei vollständiger Spaltung rund 8,2 · 10¹³ J/kg.'],['m','Masse Uran-235','kg','So viel Uran-235 wird an einem Tag gespalten.'],['t','Zeit','s','Hier ein Tag: 86400 s.'],['Δm','Massendefekt','g','Masse, die bei der Spaltung in Energie umgewandelt wird.'],['c','Lichtgeschwindigkeit','m/s','c = 3 · 10⁸ m/s.']],
 'Wasserkraftwerke':[['@w','Kraftwerkstyp','','Laufwasser (Fluss), Speicher (Stausee mit Zufluss) oder Pumpspeicher (zwei Becken, ohne Zufluss).'],['@b','Betrieb','','Nur beim Pumpspeicher: Turbinenbetrieb (Wasser fließt nach unten, Strom ins Netz) oder Pumpbetrieb (Wasser wird hochgepumpt, Strom aus dem Netz).'],['@H','Fallhöhe','m','Höhenunterschied zwischen oberem Wasserspiegel und Turbine. Gezählt wird die nutzbare Fallhöhe, nicht die Höhe der Staumauer.'],['@Q','Volumenstrom','m³/s','So viel Wasser fließt in jeder Sekunde durch die Turbine.'],['@e','Wirkungsgrad','%','Anteil der Wasserleistung, der als Strom herauskommt. Im Pumpbetrieb ist es der Wirkungsgrad der Pumpe.'],['@V','Speichervolumen','Mio m³','Nutzbare Wassermenge im oberen Becken. Im Bild: mehr Volumen, tieferer See. Beim Laufwasserkraftwerk gibt es keinen Speicher.'],['#','Im Rechenweg'],['ρ','Dichte von Wasser','kg/m³','ρ = 1000 kg/m³.'],['g','Fallbeschleunigung','m/s²','g = 9,81 m/s².'],['P','Leistung','MW','Elektrische Leistung der Turbine, im Pumpbetrieb die Leistung, die die Pumpe braucht.'],['E','Energie im Speicher','MWh','Strom, den das volle Becken beim Ablassen liefert.'],['t','Laufzeit','h','So lange reicht der Speicher bei vollem Volumenstrom.']],
 'Windkraftanlage':[['@v','Windgeschwindigkeit','m/s','Geschwindigkeit des Winds auf Nabenhöhe.'],['@D','Rotordurchmesser','m','Durchmesser des Kreises, den die Rotorblätter überstreichen.'],['@cp','Leistungsbeiwert','%','Anteil der Windleistung, den der Rotor nutzt. Höchstens 59,3 % (Betz-Grenze).'],['#','Im Rechenweg'],['A','Rotorfläche','m²','Kreisfläche des Rotors: A = π · D² / 4.'],['ρ','Dichte der Luft','kg/m³','ρ = 1,225 kg/m³ auf Meereshöhe.'],['P','elektrische Leistung','kW','Leistung, die die Anlage abgibt.']],
-'Photovoltaik':[['@A','Modulfläche','m²','Gesamtfläche aller Solarmodule.'],['@e','Modulwirkungsgrad','%','Anteil der Sonnenstrahlung, den die Module in Gleichstrom umwandeln. Im Rechenweg heißt er η_Modul.'],['@G','Bestrahlungsstärke','W/m²','Sonnenleistung, die gerade auf 1 m² trifft. Klarer Mittag ca. 1000 W/m², bedeckter Himmel ca. 100 bis 300 W/m².'],['@w','Wirkungsgrad des Wechselrichters','%','Anteil des Gleichstroms, der als Wechselstrom ins Netz geht.'],['@H','Jahreseinstrahlung','kWh/m²','Sonnenenergie, die in einem Jahr auf 1 m² fällt. In Deutschland ca. 950 bis 1250 kWh/m².'],['#','Im Rechenweg'],['P_DC','Gleichstromleistung','W','Leistung, die die Module abgeben.'],['P_AC','Wechselstromleistung','W','Leistung nach dem Wechselrichter, die ins Netz geht.'],['E','Jahresertrag','kWh/a','Strom, den die Anlage in einem Jahr liefert.']],
+'Photovoltaik':[['@v','Ansicht','','Anlage: Hausdach mit Modulen, Sonne, Energiefluss und Tagesverlauf. Teilchen-Lupe: stark vergrößerter Blick in die Solarzelle am p-n-Übergang.'],['@A','Modulfläche','m²','Gesamtfläche aller Solarmodule. Im Bild steht ein Modul für etwa 2 m².'],['@e','Modulwirkungsgrad','%','Anteil der Sonnenstrahlung, den die Module in Gleichstrom umwandeln. Im Rechenweg heißt er η_Modul.'],['@G','Bestrahlungsstärke','W/m²','Sonnenleistung, die gerade auf 1 m² trifft. Klarer Mittag ca. 1000 W/m², bedeckter Himmel ca. 100 bis 300 W/m². Im Bild steht die Sonne so hoch wie an einem klaren Sommertag bei diesem G.'],['@w','Wirkungsgrad des Wechselrichters','%','Anteil des Gleichstroms, der als Wechselstrom ins Netz geht.'],['@H','Jahreseinstrahlung','kWh/m²','Sonnenenergie, die in einem Jahr auf 1 m² fällt. In Deutschland ca. 950 bis 1250 kWh/m².'],['#','Im Rechenweg'],['P_DC','Gleichstromleistung','W','Leistung, die die Module abgeben.'],['P_AC','Wechselstromleistung','W','Leistung nach dem Wechselrichter, die ins Netz geht.'],['E','Jahresertrag','kWh/a','Strom, den die Anlage in einem Jahr liefert.']],
 'Solarthermie':[['@a','Anlagenart','','Flachkollektor, Vakuumröhrenkollektor oder Parabolrinne. Jede Art hat einen eigenen Wirkungsgrad η.'],['@A','Kollektorfläche','m²','Fläche der Kollektoren oder Spiegel.'],['@G','Bestrahlungsstärke','W/m²','Sonnenleistung, die gerade auf 1 m² trifft.'],['@m','Wassermasse im Speicher','kg','1 l Wasser hat etwa 1 kg.'],['@T','Zieltemperatur','°C','Auf diese Temperatur soll das Wasser im Speicher steigen. Es startet bei 10 °C.'],['#','Im Rechenweg'],['η','Kollektorwirkungsgrad','%','Anteil der Strahlung, der als Wärme im Wasser ankommt. Er hängt von der Anlagenart ab.'],['P','Wärmeleistung','W','Wärme, die die Kollektoren je Sekunde liefern.'],['c','spezifische Wärmekapazität','J/(kg·K)','Wasser: c = 4190 J/(kg·K).'],['ΔT','Temperaturerhöhung','K','Zieltemperatur minus 10 °C Starttemperatur.'],['Q','Wärmemenge','J','Wärme, die das Wasser bis zur Zieltemperatur braucht.'],['t','Aufheizzeit','h','So lange dauert das Aufheizen bei gleichbleibender Sonne.']],
 'Geothermie':[['@z','Bohrtiefe','m','So tief reicht die Bohrung in die Erde.'],['@g','geothermischer Gradient','K/100 m','So viel wärmer wird es je 100 m Tiefe. In Deutschland im Mittel ca. 3 K.'],['@m','Massenstrom','kg/s','So viel Thermalwasser wird in jeder Sekunde gefördert.'],['@R','Rücklauftemperatur','°C','Temperatur des abgekühlten Wassers, das zurück in die Tiefe gepumpt wird.'],['@e','elektrischer Wirkungsgrad','%','Anteil der geförderten Wärme, der als Strom herauskommt. Strom gibt es erst ab ca. 100 °C.'],['#','Im Rechenweg'],['ϑ₀','Temperatur an der Oberfläche','°C','ϑ₀ = 10 °C.'],['ϑ','Temperatur in der Tiefe','°C','So heiß ist das Gestein in der Bohrtiefe.'],['c','spezifische Wärmekapazität','kJ/(kg·K)','Wasser: c = 4,19 kJ/(kg·K).'],['ΔT','Temperaturdifferenz','K','Temperatur in der Tiefe minus Rücklauftemperatur.'],['P_th','Wärmeleistung','kW','Wärme, die das Wasser je Sekunde nach oben bringt.'],['P_el','elektrische Leistung','kW','Strom aus der Wärme: P_el = η · P_th.']],
 'Brennstoffzelle (Wasserstoff)':[['@n','Zahl der Zellen','-','So viele Zellen sind im Stack in Reihe geschaltet. Ihre Spannungen addieren sich.'],['@I','Stromstärke','A','Strom, der durch jede Zelle und den ganzen Stack fließt.'],['@U','Zellspannung','V','Spannung einer einzelnen Zelle im Betrieb, meist 0,6 bis 0,8 V.'],['#','Im Rechenweg'],['P','elektrische Leistung','W','Leistung des ganzen Stacks: P = n · U · I.'],['η','Wirkungsgrad','%','Zellspannung im Vergleich zur theoretischen Spannung von 1,23 V.'],['ṅ(H₂)','Wasserstoffverbrauch','mol/s','Stoffmenge Wasserstoff, die je Sekunde umgesetzt wird.'],['F','Faraday-Konstante','C/mol','Ladung von 1 mol Elektronen: F = 96485 C/mol. Je H₂-Molekül fließen 2 Elektronen.']],
@@ -13339,9 +13456,11 @@ function mcView(){const box=$('#mc');if(!box)return;const a=mcAll(),run=store.ge
 function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="panel"><h2>🧮 Mathe-Check</h2><p class="sub">Noch nicht gemacht. Der Check zeigt Dir in 20 Minuten, wo Du in den Mathe-Grundlagen stehst.</p><div class="pb"><button type="button" class="sbtn2" data-mco="1">Zum Mathe-Check →</button></div></div>`;
  return`<div class="panel"><h2>🧮 Mathe-Check</h2>${mcTable(a)}<div class="pb"><button type="button" class="sbtn2" data-mco="1">Startplan und Lösungswege →</button></div></div>`}
 /* Pilot-Einstellungen: Version, Neuigkeit, Kontakt */
-const APPV=278,NEWS='Wasserkraftwerke neu: Laufwasser, Speicher und Pumpspeicher mit eigenem Bild, Fallhöhe, Volumenstrom und Speichervolumen sichtbar.';
+const APPV=280,NEWS='Photovoltaik neu: Die Regler verändern das Bild (Module, Sonnenstand, Energiefluss), dazu eine Teilchen-Lupe am p-n-Übergang.';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
+['10.11.2026',280,['Photovoltaik neu: Haus mit Solarmodulen, die Zahl der Module folgt der Fläche A (1 Modul ≈ 2 m²). G bestimmt den Sonnenstand wie an einem klaren Sommertag, ein Punkt „jetzt“ läuft auf der Tageskurve mit. Balken zeigen, wie viel vom Licht als Gleichstrom und als Wechselstrom ankommt (η_M, η_WR).','Neue Ansicht Teilchen-Lupe: n-Schicht mit Phosphor, p-Schicht mit Bor, feste Ionen P⁺ und B⁻ am p-n-Übergang. Licht löst ein Elektron, das Feld trennt Elektron und Loch, das Elektron läuft vom Frontkontakt (−) über die Lampe zum Rückkontakt (+).','Kurz erklärt zur Photovoltaik zeigt dieselben Bilder wie die Simulation.']],
+['10.11.2026',279,['Kurz erklärt zur galvanischen Zelle zeigt den Aufbau der Simulation mit Voltmeter parallel, Schalter und Teilchen-Lupe an Zink und Kupfer.','Kurz erklärt zur Korrosion zeigt den Tropfenversuch mit Rostring, die Teilchen-Lupe an Tropfenmitte und Tropfenrand und neu die Kontaktkorrosion zweier Bleche.','Kurz erklärt zu Wasserkraftwerken zeigt alle drei Bauarten mit den Bildern der Simulation.']],
 ['10.11.2026',278,['Wasserkraftwerke neu: drei Bauarten mit eigenem Bild. Laufwasser nutzt den Fluss selbst, das Speicherkraftwerk einen Stausee mit Zufluss aus den Bergen, das Pumpspeicherkraftwerk pumpt dasselbe Wasser zwischen zwei Becken hin und her (Regler „Betrieb“: Turbine oder Pumpe).','Die Fallhöhe H verändert nur den oberen Teil, das Unterwasser liegt immer unter dem Hallenboden. Mehr Volumenstrom Q lässt das Wasser schneller fließen, das Speichervolumen V macht den See tiefer.']],
 ['10.11.2026',277,['Kontaktkorrosion neu: Zwei Bleche berühren sich unter einem Wasserfilm. Die Elektronen laufen im Metall über die Berührstelle, das unedlere Metall löst sich nahe der Berührstelle auf. Ionen zittern und wandern, Kationen zur Kathode, Anionen zur Anode.','Rosten neu als Tropfenversuch nach Evans: Fe²⁺ wandert nach außen, OH⁻ nach innen, dazwischen entsteht der Rostring. Neuer Regler „Indikator“ (Ferroxyl: blau an der Anode, rosa an der Kathode).','Neuer Regler „Darstellung“ mit der Teilchen-Lupe für Kontaktkorrosion und Rosten. Unter „Rechenweg und Hintergrund“ steht die Mengenbilanz, zum Beispiel 2 Fe → 2 Fe²⁺ + 4 e⁻ und O₂ + 2 H₂O + 4 e⁻ → 4 OH⁻.']],
 ['10.11.2026',276,['Galvanische Zelle neu: Elektronen laufen von der Anodenoberfläche durch Elektrode, Draht und Schalter bis an die Kathode. Ionen zittern (Wärmebewegung), lösen sich an der Anode und scheiden sich an der Kathode ab. Ein Zähler zeigt, dass die Mengen stimmen.','Neue Ansicht „Teilchen-Lupe“: Metallgitter, Wassermoleküle und Ionen mit Wasserhülle in maßstäblicher Größe, mit den vier Schritten an jeder Elektrode.','Fachliche Korrektur: Das Voltmeter ist parallel zur Zelle geschaltet und zeigt die Spannung auch bei offenem Schalter.']],
