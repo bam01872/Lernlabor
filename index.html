@@ -746,25 +746,161 @@ const KST=[['Rosten von Eisen (gesamt)','4 Fe + 3 O₂ + 2n H₂O → 2 Fe₂O�
  ['Warum ein großes Problem?','Korrosion kostet weltweit rund 2,5 Billionen US-Dollar pro Jahr, etwa 3,4 % der Weltwirtschaftsleistung (NACE-Studie IMPACT, 2016). Folgen: geringere Tragfähigkeit (Brücken, Stahlbau), Leckagen an Rohren und Tanks (Umweltschäden), Anlagenstillstand, Sicherheitsrisiken, verunreinigte Produkte. Mit bekannten Schutzmaßnahmen ließen sich 15 bis 35 % dieser Kosten sparen.'],
  ['Schutz 1: Planen','Passende Werkstoffe wählen, keine edlen und unedlen Metalle direkt verbinden (sonst isolieren), Wasser ablaufen lassen, Spalten und Wassersäcke vermeiden'],['Schutz 2: Passiv (Schicht)','Lacke, Pulverbeschichtung, Kunststoff, Öl und Fett; metallische Überzüge (Feuerverzinken, Vernickeln, Verchromen); Phosphatieren, Brünieren, Eloxieren (Al)'],['Schutz 3: Aktiv (elektrochemisch)','Opferanode aus Zn, Mg oder Al; Fremdstromschutz: eine Gleichspannung macht das Bauteil zur Kathode'],['Schutz 4: Umgebung und Werkstoff','Inhibitoren im Kühlwasser, Entfeuchten, Sauerstoff entfernen; Edelstahl mit mindestens 10,5 % Chrom bildet eine selbstheilende Passivschicht']];
 const RUST='#8b4513',RUST2='#b5651d',TW=(x,y,txt,a='middle')=>`<text x="${x}" y="${y}" text-anchor="${a}" font-size="15" font-weight="700" style="fill:#fff">${txt}</text>`,WRAP=(txt,n)=>{const w=txt.split(' '),L=[''];w.forEach(x=>{if((L[L.length-1]+' '+x).trim().length>n)L.push(x);else L[L.length-1]=(L[L.length-1]+' '+x).trim()});return L};
+/* ---- Korrosion realistisch: Teilchen mit Wärmebewegung, Elektronen im Metall, Mengenbilanz, Teilchen-Lupe (Helfer mit Präfix KO, Farben wie bei der galvanischen Zelle) ---- */
+/* Metallradius (KZ 12) und Ionenradius (Shannon, KZ 6) in pm. Maßstab der Lupe: 0,1 px pro pm */
+const KOR={Mg:[160,72],Al:[143,54],Zn:[134,74],Fe:[126,78],Ni:[124,69],Sn:[140,118],Pb:[175,119],Cu:[128,73],Ag:[144,115],Au:[144,85]};
+const KOO='#e5534b',KOHC='#f4f6f8',KONA='#8b5cf6',KOCL='#2f9e44',KOKI='#0ea5b7',KONI='#4c6ef5';
+/* Korrosionsprodukt bei Sauerstoff-Korrosion: Formel und Farbe */
+const KOPR={Mg:['Mg(OH)₂','#eceee8'],Al:['Al(OH)₃','#eef0ea'],Zn:['Zn(OH)₂ (Weißrost)','#e6e9e2'],Fe:['Rost (Fe₂O₃ · n H₂O)','#8b4513'],Ni:['Ni(OH)₂','#8cc58a'],Sn:['Sn(OH)₂','#eceee8'],Pb:['Pb(OH)₂','#e6e6e0'],Cu:['Cu(OH)₂','#57b3c9'],Ag:['Ag₂O','#4a403a'],Au:['–','#e8b923']};
+const KOZ=n=>{const x=Math.sin(n*127.1+311.7)*43758.5453;return x-Math.floor(x)},
+ KOS=u=>u<=0?0:u>=1?1:u*u*(3-2*u),
+ KOL=(a,b,u)=>a+(b-a)*u,
+ KOG=(a,b)=>b?KOG(b,a%b):a,
+ KOJ=(i,t,a)=>[a*(Math.sin(t*3.1+i*1.7)+.6*Math.sin(t*5.3+i*2.9))/1.6,a*(Math.cos(t*2.7+i*2.3)+.6*Math.sin(t*4.7+i*1.3))/1.6],
+ KOP=(P,u)=>{/* Punkt auf einer Punktkette beim Anteil u, gleichmäßige Geschwindigkeit */const d=[];let L=0;for(let i=1;i<P.length;i++){const l=Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]);d.push(l);L+=l}
+  let s=Math.max(0,Math.min(1,u))*L;for(let i=0;i<d.length;i++){if(s<=d[i]||i==d.length-1){const f=d[i]?Math.min(1,s/d[i]):0;return[KOL(P[i][0],P[i+1][0],f),KOL(P[i][1],P[i+1][1],f)]}s-=d[i]}return P[P.length-1]},
+ KOA=o=>o<1?` opacity="${Math.max(0,o).toFixed(2)}"`:'',
+ KOQ=(x,y,s,fs,c='#fff')=>`<text x="${x.toFixed(1)}" y="${(y+fs*.36).toFixed(1)}" text-anchor="middle" style="font-size:${fs}px;font-weight:800;fill:${c}">${s}</text>`;
+/* Teilchen: Wasser (a zeigt zu den H), OH⁻, O₂, H₃O⁺, Nitrat, Elektron, Ion mit Wasserhülle */
+const KOW=(x,y,a,o=1)=>{let h=BALL(x,y,9,KOO,.8);[a-.91,a+.91].forEach(b=>h+=BALL(x+8*Math.cos(b),y+8*Math.sin(b),5.2,KOHC,.7));return `<g${KOA(o)}>${h}</g>`},
+ KOOH=(x,y,a,o=1,q=1)=>`<g${KOA(o)}>${BALL(x,y,9,KOO,.8)}${BALL(x+8*Math.cos(a),y+8*Math.sin(a),5.2,KOHC,.7)}${q?KOQ(x-1.5*Math.cos(a),y-1.5*Math.sin(a),'−',12):''}</g>`,
+ KOO2=(x,y,a,o=1)=>`<g${KOA(o)}>${BALL(x-6*Math.cos(a),y-6*Math.sin(a),10,KOO,.8)}${BALL(x+6*Math.cos(a),y+6*Math.sin(a),10,KOO,.8)}</g>`,
+ KOH3=(x,y,a,o=1)=>{let h=BALL(x,y,9,KOO,.8);[a,a+2.09,a-2.09].forEach(b=>h+=BALL(x+8*Math.cos(b),y+8*Math.sin(b),5.2,KOHC,.7));return `<g${KOA(o)}>${h}${KOQ(x,y,'+',12)}</g>`},
+ KONO=(x,y,a,o=1)=>{let h='';[a,a+2.09,a-2.09].forEach(b=>h+=BALL(x+8.5*Math.cos(b),y+8.5*Math.sin(b),7,KOO,.7));return `<g${KOA(o)}>${BALL(x,y,6.5,KONI,.8)}${h}${KOQ(x,y,'−',10)}</g>`},
+ KOE1=(x,y,o=1,r=3.4)=>BALL(x,y,r,'var(--flow)',.6,KOA(o)),
+ KOI=(x,y,r,c,lab,o=1,rot=0,sh=1,an=0,lc='#111')=>{/* Ion mit 6 H₂O: beim Kation zeigt O zum Ion, beim Anion zeigen die H zum Ion. sh: Zahl oder i=>[Deckkraft, Abstandsfaktor] */let h='';
+  for(let i=0;i<6;i++){const g=typeof sh=='function'?sh(i):[sh,1];if(g[0]<=.02)continue;const b=rot+i*PI/3,d=(r+(an?13:10))*g[1];h+=KOW(x+d*Math.cos(b),y+d*Math.sin(b),an?b+PI:b,g[0])}
+  return `<g${KOA(o)}>${h}${BALL(x,y,r,c,1)}${lab?KOQ(x,y,lab,Math.max(9,Math.min(13,r*.95)),lc):''}</g>`};
+/* Kleine Teilchen für die Übersicht */
+const KOsO2=(x,y,a,o=1)=>`<g${KOA(o)}>${BALL(x-3.6*Math.cos(a),y-3.6*Math.sin(a),4.4,KOO,.8)}${BALL(x+3.6*Math.cos(a),y+3.6*Math.sin(a),4.4,KOO,.8)}</g>`,
+ KOsOH=(x,y,a,o=1)=>`<g${KOA(o)}>${BALL(x,y,4.4,KOO,.8)}${BALL(x+4.6*Math.cos(a),y+4.6*Math.sin(a),2.8,KOHC,.6)}</g>`,
+ KOsH3=(x,y,a,o=1)=>{let h=BALL(x,y,4.4,KOO,.8);[a,a+2.09,a-2.09].forEach(b=>h+=BALL(x+4.6*Math.cos(b),y+4.6*Math.sin(b),2.8,KOHC,.6));return `<g${KOA(o)}>${h}</g>`},
+ KOsNO=(x,y,a,o=1)=>{let h='';[a,a+2.09,a-2.09].forEach(b=>h+=BALL(x+4.4*Math.cos(b),y+4.4*Math.sin(b),3.3,KOO,.6));return `<g${KOA(o)}>${BALL(x,y,3.4,KONI,.6)}${h}</g>`};
+/* Legendenzeile: Einträge [Zeichnung(x,y), Text] werden zentriert nebeneinander gesetzt */
+const KOLEG=(y,E)=>{const w=E.map(e=>26+e[1].length*7.6),W=w.reduce((a,b)=>a+b,0)-12;let x=320-W/2,h='';E.forEach((e,i)=>{h+=e[0](x+7,y-5)+TH(x+18,y,e[1],'t3','start');x+=w[i]});return h};
+
+/* Teilchen-Lupe: links die Anode, rechts die Kathode, unten das Metall als Weg der Elektronen.
+   c={an,n,ka,mode:'O2'|'H'|'DEP',m,sal,anion:'Cl'|'NO3',hA,eqA,hK,eqK,brk (Berührstelle zweier Metalle)} */
+function KOLUPE(c,t){
+ const R=132,cy=196,XA=162,XK=478,ys=cy+18,yb=cy+86,hx=Math.sqrt(R*R-86*86),n=c.n,PA=1.2*n,need=c.mode=='O2'?4:c.mode=='H'?2:c.m,ARR=3.4;
+ const ra=KOR[c.an][0]/10,ri=KOR[c.an][1]/10,rk=KOR[c.ka][0]/10,rki=KOR[c.ka][1]/10,dyA=ra*1.732,dyK=rk*1.732,
+  NA=Math.round(2*(R-6)/(2*ra))+1,NK=Math.round(2*(R-6)/(2*rk))+1,
+  ORD=N=>[...Array(N).keys()].sort((a,b)=>(Math.abs(a-(N-1)/2)*.6+4*KOZ(a*3.7+N))-(Math.abs(b-(N-1)/2)*.6+4*KOZ(b*3.7+N))),oA=ORD(NA),oK=ORD(NK),
+  GX=(cx,r,N,i,par)=>cx+(i-(N-1)/2)*2*r+(par?r/2:-r/2);
+ /* Zeitplan: Anoden-Ereignis k bei A(k), Elektron m startet bei rel(m), Kathoden-Reaktion j bei Tj(j), wenn ihre need Elektronen da sind */
+ const A=k=>1+k*PA,rel=m=>A(Math.floor(m/n))+.4*(m%n),Tj=j=>rel((j+1)*need-1)+ARR+.3;
+ const kA=t<1?-1:Math.floor((t-1)/PA),PrA=kA<0?0:kA+KOS((t-A(kA))/.3),sA=Math.floor(PrA/NA),scA=dyA*(PrA/NA-sA);
+ let jK=-1;while(Tj(jK+1)<=t)jK++;
+ const PrK=c.mode=='DEP'&&jK>=0?jK+KOS((t-Tj(jK))/.3):0,sK=Math.floor(PrK/NK),scK=c.mode=='DEP'?dyK*(PrK/NK-sK):0;
+ const siteA=k=>{const s=Math.floor(k/NA),q=k%NA;return[GX(XA,ra,NA,oA[q],s%2),ys+ra-dyA*q/NA]},
+  siteK=j=>{if(c.mode!='DEP'){const o=[-46,34,-12,56,-70,12][j%6];return[XK+o,ys]}const s=Math.floor(j/NK),q=j%NK;return[GX(XK,rk,NK,oK[q],((s-1)%2+2)%2),ys+rk-dyK+dyK*q/NK]};
+ let h=`<defs><clipPath id="kocA"><circle cx="${XA}" cy="${cy}" r="${R}"/></clipPath><clipPath id="kocK"><circle cx="${XK}" cy="${cy}" r="${R}"/></clipPath></defs>`;
+ /* Metallband zwischen den Lupen */
+ const bc=c.brk?MC[c.ka]:MC[c.an];
+ h+=`<rect x="${XA}" y="${yb-15}" width="${XK-XA}" height="30" fill="${MC[c.an]}"/>`+(c.brk?`<rect x="320" y="${yb-15}" width="${XK-320}" height="30" fill="${bc}"/>`:'')+`<rect x="${XA}" y="${yb-15}" width="${XK-XA}" height="30" fill="url(#g-cyl)" opacity=".5"/><rect x="${XA}" y="${yb-15}" width="${XK-XA}" height="30" fill="none" stroke="var(--ink)" stroke-width="1.6"/>`;
+ if(c.brk)h+=`<path d="M320 ${yb-15}V${yb+15}" stroke="var(--ink)" stroke-width="2.2"/>`;
+ for(let i=0;i<14;i++){const x=XA+hx+((KOZ(i+.3)*(XK-XA-2*hx)+t*6)%(XK-XA-2*hx)),j=KOJ(i,t,1.4);h+=`<circle cx="${(x+j[0]).toFixed(1)}" cy="${(yb-11+KOZ(i+7)*22+j[1]).toFixed(1)}" r="1.9" fill="var(--flow)" opacity=".6"/>`}
+ /* Inhalt einer Lupe: Wasser oben, Metallgitter unten, Elektronengas */
+ const lens=(cx,id,metal,r,dy,N,rows)=>{let g=`<g clip-path="url(#${id})"><rect x="${cx-R}" y="${cy-R}" width="${2*R}" height="${2*R}" fill="var(--card)"/><rect x="${cx-R}" y="${cy-R}" width="${2*R}" height="${ys-cy+R}" fill="var(--flow)" opacity=".14"/><rect x="${cx-R}" y="${ys}" width="${2*R}" height="${R}" fill="${MC[metal]}" opacity=".3"/>`;
+  rows.forEach(([y,par,list])=>list.forEach(([i,amp])=>{const x=GX(cx,r,N,i,par),j=KOJ(i*7+y,t*1.6,amp);g+=BALL(x+j[0],y+j[1],r,MC[metal],1)}));
+  for(let i=0;i<26;i++){const x=cx-R+((KOZ(i+.7)*2*R+t*9)%(2*R)),j=KOJ(i+50,t*1.3,2);g+=`<circle cx="${(x+j[0]).toFixed(1)}" cy="${(ys+6+KOZ(i+9)*(R+cy-ys-10)+j[1]).toFixed(1)}" r="1.9" fill="var(--flow)" opacity=".7"/>`}
+  for(let i=0;i<15;i++){const x0=cx+(KOZ(i*2.1+cx)*2-1)*(R-14),y0=cy-R+18+KOZ(i*3.3+cx)*(ys-cy+R-46);if(Math.hypot(x0-cx,y0-cy)>R-12)continue;const j=KOJ(i+cx,t,3.2);g+=KOW(x0+j[0],y0+j[1],KOZ(i+cx*.1)*6.28+t*(.5+KOZ(i+3))*(i%2?1:-1))}
+  return g+'</g>'};
+ /* Anode: Gitter, oberste Reihe verliert Atome, das Gitter rückt nach */
+ const rowsA=[],top=[];for(let q=0;q<NA;q++){const k=sA*NA+q;if(k>kA)top.push([oA[q],.7+(k==kA+1?2.4*KOS(1-(A(k)-t)/1.2):0)])}
+ rowsA.push([ys+ra-scA,sA%2,top]);for(let r=1;r<7;r++){const L=[];for(let i=-2;i<NA+2;i++)L.push([i,.7]);rowsA.push([ys+ra+r*dyA-scA,(r+sA)%2,L])}
+ h+=lens(XA,'kocA',c.an,ra,dyA,NA,rowsA);
+ /* Anoden-Ereignisse: Wasserhülle bildet sich, Atom gibt n e⁻ ab und geht als Ion in Lösung */
+ let lab='';h+='<g clip-path="url(#kocA)">';
+ for(let k=Math.max(0,kA-3);k<=kA+1;k++){const u=t-A(k);if(u<-1.2||u>3.4)continue;const [px,py]=siteA(k);
+  if(u<0){const g=KOS(1+u/1.2);h+=KOI(px,py,ra,MC[c.an],'',1,PI/6,i=>i>=3?[g,1+1.6*(1-g)]:[0,1])}
+  else{const w=KOS(u/.45),lf=KOS((u-.15)/3.1),jj=KOJ(k,t,2.2*lf),x=px+(c.dx||1)*58*lf+jj[0],y=py-150*lf+jj[1],r=KOL(ra,ri,w),g=KOS((u-.3)/.6),o=1-KOS((u-2.8)/.6);
+   h+=KOI(x,y,r,'var(--amber)',w>.5?n+'+':'',o,PI/6,i=>i>=3?[1,1]:[g,1+1.3*(1-g)]);if(w<1)h+=BALL(x,y,r,MC[c.an],1,KOA((1-w)*o));
+   if(k==kA&&u>.4&&u<2.9)lab+=TH(x+(c.dx||1)*(r+30),y-r-14,c.an+chg(n),'t2','middle')}}
+ h+='</g>';
+ /* Kathode */
+ const rowsK=[];if(c.mode=='DEP'){const L=[];for(let q=0;q<NK;q++){const j=sK*NK+q;if(j<=jK&&t>=Tj(j)+.3)L.push([oK[q],.7])}rowsK.push([ys+rk-dyK+scK,((sK-1)%2+2)%2,L])}
+ for(let r=0;r<7;r++){const L=[];for(let i=-2;i<NK+2;i++)L.push([i,.7]);rowsK.push([ys+rk+r*dyK+scK,((r+sK)%2+2)%2,L])}
+ h+=lens(XK,'kocK',c.ka,rk,dyK,NK,rowsK);
+ /* Begleit-Ionen aus dem Salz: Anion wandert zur Anode, Kation zur Kathode */
+ if(c.anion){const f=(t*.06)%1,o=Math.min(1,f*6,(1-f)*6),j=KOJ(3,t,3),x=XA+52+j[0],y=cy-104+f*(ys-cy+70)+j[1];h+=c.anion=='NO3'?`<g clip-path="url(#kocA)">${KONO(x,y,t*.7,o)}</g>`:`<g clip-path="url(#kocA)">${KOI(x,y,18.1,KOCL,'−',o,.3,1,1,'#fff')}</g>`}
+ if(c.sal&&c.mode=='O2'){const f=(t*.06+.5)%1,o=Math.min(1,f*6,(1-f)*6),j=KOJ(8,t,3),x=XK-74+j[0],y=cy-100+f*(ys-cy+64)+j[1];h+=`<g clip-path="url(#kocK)">${KOI(x,y,10.2,KONA,'+',o,0,1,0,'#fff')}</g>`}
+ /* Kathoden-Reaktionen */
+ for(let j=Math.max(0,jK-2);j<=jK+3;j++){const u=t-Tj(j);if(u<-2.4||u>3.2)continue;const [sx,sy]=siteK(j);let g='';
+  if(c.mode=='O2'){
+   if(u<0){const e=KOS((u+2.4)/2.1),jj=KOJ(j,t,3*(1-e)),x=KOL(sx+28,sx,e)+jj[0],y=KOL(cy-96,ys-12,e)+jj[1];g+=KOO2(x,y,.35*Math.sin(t*2+j)*(1-e));
+    const e2=KOS((u+1.8)/1.6);g+=KOW(KOL(sx-64,sx-27,e2),KOL(ys-58,ys-11,e2),KOL(1.2,0,e2))+KOW(KOL(sx+66,sx+27,e2),KOL(ys-52,ys-11,e2),KOL(2,PI,e2));
+    if(j==jK+1&&u<-.4)lab+=TH(x+30,y-12,'O₂','t2','middle')}
+   else{if(u<.5)g+=`<circle cx="${sx}" cy="${ys-12}" r="${18+40*u}" fill="var(--amber)" opacity="${(.45*(1-2*u)).toFixed(2)}"/>`;
+    const e=KOS((u-.25)/2.5),o=1-KOS((u-2.6)/.6),hop=KOS(u/.35),P=[[sx-6,ys-12,sx-34,ys-112],[sx+6,ys-12,sx+38,ys-104],[sx-27,ys-11,sx-84,ys-62],[sx+27,ys-11,sx+88,ys-56]];
+    P.forEach((q,i)=>{const jj=KOJ(i+j*4,t,2.5*e),x=KOL(q[0],q[2],e)+jj[0],y=KOL(q[1],q[3],e)+jj[1],a=Math.atan2(q[3]-q[1],q[2]-q[0]);
+     if(i<2&&hop<1){g+=`<g${KOA(o)}>${BALL(x,y,9,KOO,.8)}</g>`;const hx0=q[0]+(i?21:-21),hy0=ys-17;g+=BALL(KOL(hx0,x+8*Math.cos(a),hop),KOL(hy0,y+8*Math.sin(a),hop),5.2,KOHC,.7)}
+     else g+=KOOH(x,y,i<2?a:a+(i==2?-.5:.5),o)});
+    if(j==jK&&u>.5&&u<2.4)lab+=TH(sx,ys-128,'4 OH⁻','t2','middle')}}
+  else if(c.mode=='H'){
+   if(u<0){const e=KOS((u+2.2)/1.9);[[sx-52,ys-70,sx-15],[sx+48,ys-84,sx+15]].forEach((q,i)=>{const jj=KOJ(i+j*2,t,3*(1-e));g+=KOH3(KOL(q[0],q[2],e)+jj[0],KOL(q[1],ys-13,e)+jj[1],PI/2+(1-e)*Math.sin(t+i))});
+    if(j==jK+1&&u<-.4)lab+=TH(sx,ys-112,'H₃O⁺','t2','middle')}
+   else{const m2=KOS(u/.35),rs=KOS((u-.4)/2.5),o=1-KOS((u-2.6)/.6),x=KOL(sx,sx+12,rs),y=KOL(ys-6,cy-104,rs);
+    [-1,1].forEach((d,i)=>{const e=KOS(u/2.4);g+=KOW(KOL(sx+15*d,sx+64*d,e),KOL(ys-14,ys-58,e),-PI/2+d*.6,1-KOS((u-2)/.8))});
+    g+=`<g${KOA(o)}>${BALL(x-3.7*m2+(1-m2)*-12,y,5.2,KOHC,.9)}${BALL(x+3.7*m2+(1-m2)*12,y,5.2,KOHC,.9)}</g>`;
+    if(j==jK&&u>.5&&u<2.5)lab+=TH(x+26,y-6,'H₂','t2','start')}}
+  else{const IS=c.ka+chg(c.m);
+   if(u<.3){const e=KOS((u+2.4)/2),jj=KOJ(j,t,3*(1-e)),x=KOL(sx+26,sx,e)+jj[0],y=KOL(cy-100,sy,e)+jj[1],sh=KOS((u+.7)/.7),w=KOS(u/.3),r=KOL(rki,rk,w);
+    g+=KOI(x,y,r,KOKI,w<.5?c.m+'+':'',1,PI/6,i=>[1-sh*(i<3?1:.8),1+1.5*sh]);if(w>0)g+=BALL(x,y,r,MC[c.ka],1,KOA(w));
+    if(j==jK+1&&u<-.5)lab+=TH(x+r+34,y-14,IS,'t2','middle')}}
+  h+=`<g clip-path="url(#kocK)">${g}</g>`}
+ /* Elektronen: vom Anodenatom durch das Metall zur Reaktionsstelle an der Kathode */
+ for(let k=Math.max(0,kA-10);k<=kA;k++)for(let e=0;e<n;e++){const mI=k*n+e,r0=rel(mI);if(t<r0)continue;const j=Math.floor(mI/need),T=Tj(j);if(t>T+.15)continue;
+  const [px,py]=siteA(k),[sx,sy]=siteK(j),off=((mI%need)-(need-1)/2)*7.5,yy=c.mode=='DEP'?sy+rk+3:ys+6,
+   P=[[px,py],[px,yb],[XA+hx-4,yb],[XK-hx+4,yb],[sx+off,yb],[sx+off,yy]],q=KOP(P,(t-r0)/ARR);h+=KOE1(q[0],q[1],t>T?1-(t-T)/.15:1,4.6)}
+ /* Rahmen, Beschriftung */
+ [XA,XK].forEach(x=>h+=`<circle cx="${x}" cy="${cy}" r="${R+3}" fill="none" stroke="var(--line)" stroke-width="6" opacity=".6"/><circle cx="${x}" cy="${cy}" r="${R}" fill="none" stroke="var(--ink)" stroke-width="2.2"/>`);
+ h+=lab+TH(XA,24,c.hA,'t1','middle')+TH(XA,46,c.eqA,'t2','middle')+TH(XK,24,c.hK,'t1','middle')+TH(XK,46,c.eqK,'t2','middle');
+ if(c.brk)h+=TH(320,yb+34,'Berührstelle','t3','middle');
+ h+=TH(320,cy+R+30,c.brk?'e⁻ fließen im Metall über die Berührstelle zur Kathode':'e⁻ fließen im Stahl von der Tropfenmitte zum Rand','t2','middle');
+ h+=`<path d="M532 380H632" stroke="var(--ink)" stroke-width="2"/><path d="M532 375V385M632 375V385" stroke="var(--ink)" stroke-width="1.5"/>`+TH(582,372,'1 nm','t3','middle');
+ return h}
 function ROST(s,t){
- const k=[0,1,2.4][s.lu],p=k?(t*.035*k)%1:0,cx=320,FE=MC.Fe;let h='';
- h+=`<rect x="30" y="206" width="580" height="40" fill="${FE}"/><rect x="30" y="206" width="580" height="40" fill="url(#g-cyl)" opacity=".5"/><rect x="30" y="206" width="580" height="8" fill="#fff" opacity=".18"/><rect x="30" y="206" width="580" height="40" fill="none" stroke="var(--ink)" stroke-width="2"/>`+T(40,268,'Stahlblech (Fe)','t2');
- if(!k){h+=TH(cx,150,'Trockene Luft: kein Wasserfilm, kaum Korrosion','t1','middle')+TH(cx,176,'(unter ca. 60 % relativer Luftfeuchte)','t2','middle');
-  return{vb:'0 0 640 300',svg:h,res:[['kaum','Korrosion'],['–','Anode'],['–','Kathode']],th:['Größe','Wert'],rows:[['Elektrolyt','fehlt'],['Typischer Abtrag (ISO 9223)','unter 1,3 µm pro Jahr (Innenraum, trocken)']],st:KST}}
- const sz=s.lu==2?1.15:1,W=200*sz,H=95*sz,dr=`M${cx-W} 206A${W} ${H} 0 0 1 ${cx+W} 206Z`;
- // Rostring und Mulde
- const pit=8*p;h+=`<path d="M${cx-40} 206Q${cx} ${206+2*pit} ${cx+40} 206Z" fill="#3d3f44"/>`;
- [-1,1].forEach(d=>{for(let i=0;i<7;i++){const x=cx+d*(W*.42+i*7),r=(3+3*Math.sin(i*1.7)**2)*Math.min(1,p*2.2);if(r>.3)h+=`<ellipse cx="${x}" cy="${205}" rx="${r*1.6}" ry="${r}" fill="${i%2?RUST:RUST2}"/>`}});
- h+=`<path d="${dr}" fill="var(--flow)" opacity="${s.lu==2?.32:.25}"/><path d="${dr}" fill="url(#g-liqv)"/><path d="${dr}" fill="none" stroke="var(--ink)" stroke-width="1.6" opacity=".7"/><path d="M${cx-W*.62} ${206-H*.62}Q${cx-W*.35} ${206-H*.98} ${cx} ${206-H}" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".6"/>`;
- // Fe2+ aus der Mitte
- for(let i=0;i<6;i++){const ph=(t*.25*k+i/6)%1,x=cx+(i%2?1:-1)*(8+i*4)+ (i%2?1:-1)*W*.38*ph,y=200-30*Math.sin(ph*PI)-6;h+=BALL(x,y,6,'var(--amber)',1.2,` opacity="${ph>.85?(1-ph)*6.6:1}"`)}
- // O2 von außen an den Rand
- [-1,1].forEach(d=>{for(let i=0;i<3;i++){const ph=(t*.22*k+i/3+(d>0?.5:0))%1,x0=cx+d*W*.95,y0=206-H*.9-30,x1=cx+d*W*.68,y1=200,x=x0+(x1-x0)*ph,y=y0+(y1-y0)*ph;h+=BALL(x-4,y,4.5,'var(--red)',1)+BALL(x+4,y,4.5,'var(--red)',1)}
-  for(let i=0;i<3;i++){const ph=(t*.2*k+i/3)%1,x=cx+d*(W*.7-W*.25*ph),y=198-14*Math.sin(ph*PI);h+=BALL(x,y,4,'var(--flow)',1)}});
- // Elektronen im Blech von der Mitte zum Rand
- for(let i=0;i<10;i++){const ph=(t*.3*k+i/10)%1,d=i%2?1:-1;h+=BALL(cx+d*(15+W*.6*ph),228,4,'var(--flow)',1)}
- h+=TH(cx,232,'e⁻','t2','middle')+TH(cx,262,'Anode (Mitte, wenig O₂): Fe → Fe²⁺ + 2 e⁻','t2','middle')+TH(cx,284,'Kathode (Rand, viel O₂): O₂ + 2 H₂O + 4 e⁻ → 4 OH⁻','t2','middle')+TH(cx-W*.5,186,'Rost','t1','middle')+TH(cx+W*.5,186,'Rost','t1','middle')+TH(cx,206-H-30,'O₂ aus der Luft','t2','middle')+TH(cx,206-H-12,s.lu==2?'Salzwassertropfen':'Wassertropfen','t2','middle');
- return{vb:'0 0 640 300',svg:h,res:[[s.lu==2?'stark':'mittel','Korrosion'],['Fe → Fe²⁺','Anode (Mitte)'],['Fe₂O₃ · n H₂O','Rost (Ring)']],th:['Größe','Wert'],rows:[['Elektrolyt',s.lu==2?'Salzwasser, sehr gut leitfähig':'Regen- oder Tauwasser'],['Typischer Abtrag unlegierter Stahl (ISO 9223)',s.lu==2?'80 bis 200 µm pro Jahr (Küste, Streusalz)':'10 bis 50 µm pro Jahr (Stadt, Land)'],['Wo entsteht der Rost?','zwischen Mitte (Fe²⁺) und Rand (OH⁻): Fe²⁺ + 2 OH⁻ → Fe(OH)₂, dann mit O₂ zu Rost'],['Warum wächst das Loch?','Rost ist porös und haftet nicht: Er schützt das Eisen darunter nicht']],st:KST}}
+ const k=[0,1,2.2][s.lu],cx=320,yT=222,yB=272,FE=MC.Fe,tt=t%36,p=tt/36,sal=s.lu==2;let h='';
+ const plate=`<path d="M30 ${yT}l12 -9H622l-12 9Z" fill="${FE}"/><path d="M30 ${yT}l12 -9H622l-12 9Z" fill="#fff" opacity=".22"/><path d="M610 ${yT}l12 -9V${yB-9}l-12 9Z" fill="${FE}"/><path d="M610 ${yT}l12 -9V${yB-9}l-12 9Z" fill="#000" opacity=".25"/><rect x="30" y="${yT}" width="580" height="${yB-yT}" fill="${FE}"/><rect x="30" y="${yT}" width="580" height="${yB-yT}" fill="url(#g-cyl)" opacity=".45"/>`,
+  frame=`<path d="M30 ${yT}l12 -9H622l-12 9ZM610 ${yT}l12 -9V${yB-9}l-12 9Z" fill="none" stroke="var(--ink)" stroke-width="1.6" stroke-linejoin="round"/><rect x="30" y="${yT}" width="580" height="${yB-yT}" fill="none" stroke="var(--ink)" stroke-width="2"/>`;
+ if(!k){h+=plate;for(let i=0;i<9;i++){const j=KOJ(i,t,8),x=70+i*62+j[0],y=120+40*KOZ(i)+j[1];h+=KOsO2(x,y,t*(.5+KOZ(i+2))+i)}
+  for(let i=0;i<34;i++){const j=KOJ(i+40,t,1.2);h+=`<circle cx="${(40+KOZ(i+.2)*560+j[0]).toFixed(1)}" cy="${(yT+8+KOZ(i+5)*(yB-yT-16)+j[1]).toFixed(1)}" r="1.9" fill="var(--flow)" opacity=".6"/>`}
+  h+=frame+TH(cx,40,'Trockene Luft: kein Wasserfilm, kaum Korrosion','t1','middle')+TH(cx,64,'(unter ca. 60 % relativer Luftfeuchte)','t2','middle')+KOLEG(196,[[(x,y)=>KOsO2(x,y,0),'O₂ aus der Luft'],[(x,y)=>`<circle cx="${x}" cy="${y}" r="2.4" fill="var(--flow)"/>`,'Elektronengas im Stahl (ohne Strom)']])+TH(40,yB+26,'Stahlblech (Fe)','t2','start');
+  return{vb:'0 0 640 310',svg:h,res:[['kaum','Korrosion'],['–','Anode'],['–','Kathode']],th:['Größe','Wert'],rows:[['Elektrolyt','fehlt'],['Typischer Abtrag (ISO 9223)','unter 1,3 µm pro Jahr (Innenraum, trocken)']],st:KST}}
+ const rows=[['Elektrolyt',sal?'Salzwasser, sehr gut leitfähig':'Regen- oder Tauwasser'],['Typischer Abtrag unlegierter Stahl (ISO 9223)',sal?'80 bis 200 µm pro Jahr (Küste, Streusalz)':'10 bis 50 µm pro Jahr (Stadt, Land)'],['Warum ist die Mitte die Anode?','Am Rand ist der Weg für O₂ aus der Luft kurz, dort wird O₂ verbraucht (Kathode). In die Mitte kommt kaum O₂ nach, dort löst sich das Eisen (Anode).'],['Wo entsteht der Rost?','Zwischen Mitte und Rand: Fe²⁺ wandert nach außen, OH⁻ nach innen. Wo sie sich treffen, bildet sich Fe(OH)₂, das mit O₂ zu braunem Rost weiterreagiert.'],['Mengenbilanz (gleich viele e⁻)','2 Fe → 2 Fe²⁺ + 4 e⁻ und O₂ + 2 H₂O + 4 e⁻ → 4 OH⁻'],['Warum wächst das Loch?','Rost ist porös und haftet nicht: Er schützt das Eisen darunter nicht']];
+ if(s.ind)rows.push(['Ferroxyl-Indikator (Versuch nach Evans)','Blau zeigt Fe²⁺ (Anode, Mitte), rosa zeigt OH⁻ (Kathode, Rand). Dazwischen bildet sich der Rostring.']);
+ const res=[[sal?'stark':'mittel','Korrosion'],['Fe → Fe²⁺','Anode (Mitte)'],['Fe₂O₃ · n H₂O','Rost (Ring)']];
+ if(s.z==1)return{vb:'0 -40 640 432',svg:KOLUPE({an:'Fe',n:2,ka:'Fe',mode:'O2',m:2,sal,anion:sal?'Cl':'',hA:'Anode: Tropfenmitte',eqA:'Fe → Fe²⁺ + 2 e⁻',hK:'Kathode: Tropfenrand',eqK:'O₂ + 2 H₂O + 4 e⁻ → 4 OH⁻',brk:0,dx:1},t*.8),res,th:['Größe','Wert'],rows:[...rows,['Teilchen-Lupe','Zeitlupe, etwa 1,4 nm breiter Ausschnitt. Atome und Ionen maßstäblich (1 nm = 100 px), Wassermoleküle etwas kleiner, Elektronen nur als Punkte.']],st:KST};
+ const W=sal?250:226,H=106,dT=x=>{const u=(x-cx)/W;return Math.abs(u)>=1?yT:yT-H*Math.sqrt(1-u*u)},dr=`M${cx-W} ${yT}A${W} ${H} 0 0 1 ${cx+W} ${yT}Z`,
+  D=12*KOS(p*1.3),mul=x=>D*Math.exp(-(((x-cx)/(W*.3))**2)),g=KOS(p*3);
+ h+=plate;
+ /* Mulde in der Mitte */
+ {let q=`M${cx-W*.75} ${yT}`;for(let x=cx-W*.75;x<=cx+W*.75;x+=6)q+=`L${x.toFixed(1)} ${(yT+mul(x)).toFixed(1)}`;q+=`L${cx+W*.75} ${yT}Z`;h+=`<path d="${q}" fill="var(--card)"/><path d="${q}" fill="var(--flow)" opacity=".25"/>`}
+ /* Elektronengas im Stahl und gerichtete Elektronen von der Mitte zum Rand */
+ for(let i=0;i<46;i++){const j=KOJ(i+40,t,1.3),sg=(KOZ(i+.9)-.5)*2,x=cx+sg*290;h+=`<circle cx="${(x+j[0]).toFixed(1)}" cy="${(yT+8+KOZ(i+5)*(yB-yT-14)+j[1]).toFixed(1)}" r="1.9" fill="var(--flow)" opacity=".55"/>`}
+ for(let i=0;i<12;i++){const ph=(tt*.3*k+i/12)%1,sg=i%2?1:-1,x0=cx+sg*W*.28*KOZ(i+.4),x1=cx+sg*W*(.72+.2*KOZ(i+.8)),q=KOP([[x0,yT+mul(x0)+4],[x0,yT+30],[x1,yT+30],[x1,yT+4]],ph);h+=KOE1(q[0],q[1],Math.min(1,ph*8,(1-ph)*8))}
+ /* Tropfen mit Indikatorfarben */
+ h+=`<path d="${dr}" fill="var(--flow)" opacity="${sal?.3:.24}"/>`;
+ if(s.ind)h+=`<defs><clipPath id="kodr"><path d="${dr}"/></clipPath></defs><path d="${dr}" fill="#ff4f9a" opacity="${(.3*g).toFixed(2)}"/><ellipse cx="${cx}" cy="${yT}" rx="${W*.42}" ry="${H*.55}" fill="#2a55d4" opacity="${(.38*g).toFixed(2)}" clip-path="url(#kodr)"/>`;
+ h+=`<path d="${dr}" fill="url(#g-liqv)"/><path d="${dr}" fill="none" stroke="var(--ink)" stroke-width="1.6" opacity=".7"/><path d="M${cx-W*.62} ${yT-H*.62}Q${cx-W*.35} ${yT-H*.98} ${cx} ${yT-H}" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".55"/>`;
+ /* Rostring: erst grünliches Fe(OH)₂, dann brauner Rost */
+ [-1,1].forEach(d=>{for(let i=0;i<9;i++){const x=cx+d*W*(.45+.2*KOZ(i*1.7+d)),r=(2.5+4*KOZ(i+d*3))*KOS(p*1.8-KOZ(i+d)*.4);if(r>.3)h+=`<ellipse cx="${x.toFixed(1)}" cy="${(yT-r*.55).toFixed(1)}" rx="${(r*1.5).toFixed(1)}" ry="${r.toFixed(1)}" fill="${KOZ(i*2.3+d)<p*2.4?(i%2?RUST:RUST2):'#6f8f5a'}" stroke="var(--ink)" stroke-width=".5"/>`}});
+ /* Fe²⁺ von der Mitte nach außen, OH⁻ vom Rand nach innen, O₂ aus der Luft an den Rand */
+ const ins=(x,y)=>Math.max(dT(x)+7,Math.min(yT-6,y));
+ for(let i=0;i<12;i++){const ph=(tt*.2*k+i/12)%1,sg=i%2?1:-1,x0=cx+sg*W*.28*KOZ(i+1.1),x1=cx+sg*W*(.46+.14*KOZ(i+3)),j=KOJ(i,t,3),x=KOL(x0,x1,ph)+j[0],y=ins(x,KOL(yT-5-mul(x0)*0,yT-12-22*KOZ(i+5),ph)+j[1]);h+=BALL(x,y,5.5,'var(--amber)',1,KOA(Math.min(1,ph*8,(1-ph)*7)))}
+ for(let i=0;i<10;i++){const ph=(tt*.24*k+i/10)%1,sg=i%2?-1:1,x0=cx+sg*W*(.72+.2*KOZ(i+21)),x1=cx+sg*W*(.5+.12*KOZ(i+23)),j=KOJ(i+20,t,3),x=KOL(x0,x1,ph)+j[0],y=ins(x,KOL(yT-6,yT-14-14*KOZ(i+24),ph)+j[1]);h+=KOsOH(x,y,sg>0?-2.3:-.8,Math.min(1,ph*8,(1-ph)*7))}
+ for(let i=0;i<8;i++){const ph=(tt*.18*k+i/8)%1,sg=i%2?1:-1,xs=cx+sg*W*(.74+.26*KOZ(i+11)),x1=cx+sg*W*(.72+.16*KOZ(i+12)),y0=dT(xs)-36,j=KOJ(i+30,t,2.5),x=KOL(xs,x1,ph)+j[0],y=Math.min(yT-6,KOL(y0,yT-6,ph)+j[1]);h+=KOsO2(x,y,t*.8+i,Math.min(1,ph*8,(1-ph)*6))}
+ if(sal)for(let i=0;i<8;i++){const f=(KOZ(i+60)+t*.04)%1,sg=i%2?1:-1,an=i<4,rr=W*.86*(an?1-f:f),x=cx+sg*rr,j=KOJ(i+60,t,3),y=ins(x,KOL(dT(x)+10,yT-10,KOZ(i+61))+j[1]),o=Math.min(1,f*7,(1-f)*7);h+=an?BALL(x+j[0],y,6.4,KOCL,1,KOA(o)):BALL(x+j[0],y,4.6,KONA,1,KOA(o))}
+ h+=frame;
+ const nA=Math.floor(tt*1.1*k);
+ h+=TH(cx,22,`Zeitraffer: ${nA} Fe²⁺ gelöst → ${2*nA} e⁻ → ${Math.floor(nA/2)} O₂ verbraucht`,'t2','middle');
+ h+=KOLEG(46,[[(x,y)=>BALL(x,y,5.5,'var(--amber)',1),'Fe²⁺'],[(x,y)=>KOsOH(x,y,-.8),'OH⁻'],[(x,y)=>KOsO2(x,y,0),'O₂'],[(x,y)=>KOE1(x,y),'e⁻'],...(sal?[[(x,y)=>BALL(x,y,4.6,KONA,1),'Na⁺'],[(x,y)=>BALL(x,y,6.4,KOCL,1),'Cl⁻']]:[]),...(s.ind?[[(x,y)=>`<rect x="${x-6}" y="${y-6}" width="12" height="12" rx="3" fill="#2a55d4" opacity=".7"/>`,'blau: Fe²⁺'],[(x,y)=>`<rect x="${x-6}" y="${y-6}" width="12" height="12" rx="3" fill="#ff4f9a" opacity=".7"/>`,'rosa: OH⁻']]:[])]);
+ h+=TH(cx,yT-H-14,sal?'Salzwassertropfen':'Wassertropfen','t2','middle');
+ if(p>.2){const x=cx-W*.62,yl=dT(x)-18;h+=`<path d="M${x} ${yl+4}L${cx-W*.55} ${yT-10}" stroke="var(--ink)" stroke-width="1.2"/>`+TH(x-6,yl,'Rostring','t2','end')}
+ h+=TH(cx,yB+24,'Anode (Mitte, wenig O₂)','t2','middle')+TH(cx-W*.86,yB+24,'Kathode (Rand, viel O₂)','t2','middle')+TH(cx+W*.86,yB+24,'Kathode (Rand, viel O₂)','t2','middle');
+ h+=TH(cx,yB+52,'Anode: Fe → Fe²⁺ + 2 e⁻','t2','middle')+TH(cx,yB+74,'Kathode: O₂ + 2 H₂O + 4 e⁻ → 4 OH⁻','t2','middle');
+ return{vb:'0 0 640 356',svg:h,res,th:['Größe','Wert'],rows,st:KST}}
 function KSCH(s,t){
  const K=KS[s.sch],p=(t*.05)%1,FE=MC.Fe,y0=170,sx=300,sw=40;let h='',res;
  const plate=(x,w)=>`<rect x="${x}" y="${y0}" width="${w}" height="60" fill="${FE}"/><rect x="${x}" y="${y0}" width="${w}" height="60" fill="url(#g-cyl)" opacity=".45"/>`;
@@ -795,30 +931,69 @@ function KSCH(s,t){
   h+=`<rect x="30" y="${y0}" width="580" height="60" fill="none" stroke="var(--ink)" stroke-width="2"/>`+T(40,y0+78,s.sch==5?'Edelstahl (Fe + ≥ 10,5 % Cr)':'Stahl (Fe)','t2')}
  h+=TH(320,26,s.sch?K[0]+': '+K[1]:K[0],'t1','middle')+WRAP(K[2],78).map((l,i)=>TH(320,52+i*20,l,'t2','middle')).join('');
  return{vb:'0 0 640 300',svg:h,res:[[res[0],'Was korrodiert'],[res[1],'geschützt wird'],[K[1].split(':')[0],'Prinzip']],th:['Merkmal','Wert'],rows:[['Verfahren',K[0]],['Wirkung',K[2]],['Einsatz',K[3]],...KS.filter((_,i)=>i&&i!=s.sch).map(x=>[x[0],x[1]])],st:KST}}
-M.push({g:'Chemie',name:'Korrosion',anim:1,desc:'Korrosion ist die Zerstörung eines Metalls durch Reaktion mit seiner Umgebung, meist eine Redoxreaktion mit Wasser und Sauerstoff. Drei Ansichten: Kontaktkorrosion zweier Metalle, Rosten von Eisen unter einem Wassertropfen und die wichtigsten Schutzverfahren.',leg:'Zeitraffer. Gelbe Kugeln: Metallionen, blaue Kugeln: Elektronen bzw. OH⁻, rote Doppelkugeln: O₂, braun: Rost. Spannungsreihe: Mg < Al < Zn < Fe < Ni < Sn < Pb < Cu < Ag < Au.',
- p:[['v','Ansicht','sel',['Kontaktkorrosion (zwei Metalle)','Rosten von Eisen (Wassertropfen)','Korrosionsschutz'],0],['a','Metall A','sel',ME.map(m=>m[0]),3],['b','Metall B','sel',ME.map(m=>m[0]),7],['el','Medium','sel',['Feuchte Luft (O₂)','Saure Lösung (H₂)','Metallsalz-Lösung'],2],['lu','Umgebung','sel',['Trockene Luft (Innenraum)','Feuchte Luft (Regen, Tau)','Salzwasser (Meer, Streusalz)'],1],['sch','Schutz','sel',KS.map(x=>x[0]),0]],
- vis2:(o,UI)=>{const on={a:o.v==0,b:o.v==0,el:o.v==0,lu:o.v==1,sch:o.v==2};for(const k in on)(UI[k]||[]).forEach(e=>{const c=e.closest('.ctl');if(c)c.hidden=!on[k]})},
+M.push({g:'Chemie',name:'Korrosion',anim:1,desc:'Korrosion ist die Zerstörung eines Metalls durch Reaktion mit seiner Umgebung, meist eine Redoxreaktion mit Wasser und Sauerstoff. Drei Ansichten: Kontaktkorrosion zweier Metalle, Rosten von Eisen unter einem Wassertropfen und die wichtigsten Schutzverfahren. Die Teilchen-Lupe zeigt, was an der Anode und an der Kathode mit den einzelnen Atomen, Ionen und Elektronen passiert.',leg:'Übersicht im Zeitraffer, Teilchen-Lupe in Zeitlupe. Gelb: gelöste Metall-Ionen, türkis: Metall-Ionen aus dem Salz, blau: Elektronen (im Metall als Elektronengas), rot-weiß: Wasser, OH⁻, O₂ und H₃O⁺, violett: Na⁺, grün: Cl⁻, braun: Rost. In der Lupe sind Atome und Ionen etwa maßstäblich (1 nm = 100 px), Wassermoleküle etwas kleiner, Elektronen nur als Punkte. Spannungsreihe: Mg < Al < Zn < Fe < Ni < Sn < Pb < Cu < Ag < Au.',
+ p:[['v','Ansicht','sel',['Kontaktkorrosion (zwei Metalle)','Rosten von Eisen (Wassertropfen)','Korrosionsschutz'],0],['z','Darstellung','sel',['Übersicht (Zeitraffer)','Teilchen-Lupe (Zeitlupe)'],0],['a','Metall A','sel',ME.map(m=>m[0]),3],['b','Metall B','sel',ME.map(m=>m[0]),7],['el','Medium','sel',['Feuchte Luft (O₂)','Saure Lösung (H₂)','Metallsalz-Lösung'],2],['lu','Umgebung','sel',['Trockene Luft (Innenraum)','Feuchte Luft (Regen, Tau)','Salzwasser (Meer, Streusalz)'],1],['ind','Indikator','sel',['ohne','Ferroxyl (Versuch nach Evans)'],0],['sch','Schutz','sel',KS.map(x=>x[0]),0]],
+ vis2:(o,UI)=>{const on={z:o.v!=2&&!(o.v==1&&o.lu==0),a:o.v==0,b:o.v==0,el:o.v==0,lu:o.v==1,ind:o.v==1&&o.z==0&&o.lu>0,sch:o.v==2};for(const k in on)(UI[k]||[]).forEach(e=>{const c=e.closest('.ctl');if(c)c.hidden=!on[k]})},
  f(s,t){return s.v==1?ROST(s,t):s.v==2?KSCH(s,t):KKON(s,t)}});
 function KKON(s,t){
-  const A=ME[s.a],B=ME[s.b],aIsAn=A[1]<=B[1],an=aIsAn?A:B,nr=s.a!=s.b&&s.el==1&&an[1]>0,same=s.a==s.b||nr,/* nr: beide edler als Wasserstoff, Säure ohne O₂ greift nicht an */ka=aIsAn?B:A,dE=Math.abs(A[1]-B[1]),xa=190,xc=450,xan=aIsAn?xa:xc,xka=aIsAn?xc:xa,dir=xka>xan?1:-1,p=same?0:(t*.07)%1,sp=.4+dE,dep=!same&&s.el==2?14*p:0;
-  const IS=ka[0]+chg(ka[2]),IA=an[0]+chg(an[2]),SALZ=ka[0]+(ka[2]>1?'(NO₃)'+'₀₁₂₃'[ka[2]]:'NO₃'),
-   IO=s.el==2?[`Gelöstes Salz ${SALZ}: ${IS} und NO₃⁻`,`Neu aus der Anode: ${IA}`]:s.el==1?[`Salzsäure: H₃O⁺ und Cl⁻`,`Neu aus der Anode: ${IA}`]:[`Wasser mit NaCl: Na⁺, Cl⁻, H₃O⁺, OH⁻, gelöstes O₂`,`Neu aus der Anode: ${IA}`];
-  const GK=GLAS(100,148,440,114,{lv:100,c:'var(--flow)',op:.22,ry:8});let h=GK.b;
-  [[xa,A],[xc,B]].forEach(([x,m])=>{const isAn=!same&&x==xan,isKa=!same&&x==xka,w=isAn?30*(1-.5*p):30;
-   h+=ROD(x-15,80,30,70,MC[m[0]]);
-   if(isKa&&dep>0)h+=ROD(x-15-dep,150,30+2*dep,90,MC[m[0]]);
-   h+=ROD(x-w/2,150,w,90,MC[m[0]])+T(x,262,m[0],'t1','middle')+T(x,292,same?'':isAn?'Anode (löst sich)':'Kathode','t2','middle')});
-  if(!same){
-   for(let i=0;i<8;i++){const ph=(t*.2*sp+i/8)%1,x=xan+dir*18+(xka-xan-dir*(36+dep))*ph;h+=BALL(x,205+38*Math.sin(i*2.7+t*1.3),7,'var(--amber)',1.5,` opacity="${ph>.92?(1-ph)*12:1}"`)}
-   if(s.el==2)for(let i=0;i<5;i++){const ph=(t*.12*sp+i/5)%1,x=xka-dir*(18+dep)+(xan-xka+dir*(36+dep))*ph;h+=BALL(x,232+22*Math.sin(i*3.1+t),5,'var(--flow)',1.2)}
-   else for(let i=0;i<6;i++){const ph=(t*.5+i/6)%1,x=xka+(i%2?1:-1)*(22+6*(i%3)),y=240-85*ph;h+=s.el==1?`<circle cx="${x}" cy="${y}" r="5" fill="none" stroke="var(--ink)" stroke-width="1.5" opacity="${1-ph}"/>`:`<circle cx="${x}" cy="${y}" r="4" fill="var(--flow)" opacity="${1-ph}"/>`}
-   const D=Math.abs(xka-xan),L=60+D;h+=`<path class="w" d="M${xan} 80V50H${xka}V80"/>`;
-   for(let i=0;i<7;i++){const u=((t*.4*sp+i/7)%1)*L;let x,y;if(u<30){x=xan;y=80-u}else if(u<30+D){x=xan+dir*(u-30);y=50}else{x=xka;y=50+(u-30-D)}h+=BALL(x,y,5,'var(--flow)',1.2)}
-   h+=T(320,38,'e⁻','t2','middle')+T(320,20,`Zeitraffer: ${an[0]} −${Math.round(45*p)} %`+(s.el==2?`, ${ka[0]} wächst`:''),'t2','middle')}
-  else h+=nr?T(320,30,'Beide Metalle edler als Wasserstoff:','t2','middle')+T(320,46,'keine Säurekorrosion ohne Sauerstoff','t2','middle'):T(320,38,'Gleiches Metall: kein Spannungsunterschied','t2','middle');
-  h+=GK.f+TH(320,98,'Ionen in der Lösung','t2','middle')+TH(320,116,IO[0],'t2','middle')+(same?'':TH(320,134,IO[1],'t2','middle'));
-  return{vb:'0 0 640 300',svg:h,res:[[nf(dE,2)+' V','Spannung ΔE'],[same?'–':an[0]+' löst sich','Anode'],[same?'–':ka[0]+(s.el==2?' scheidet ab':' geschützt'),'Kathode']],th:['','Metall','E°','Rolle'],rows:[['A',A[0],nf(A[1],2)+' V',same?'–':aIsAn?'Anode':'Kathode'],['B',B[0],nf(B[1],2)+' V',same?'–':aIsAn?'Kathode':'Anode']],
-  st:[['Anode (Oxidation)',same?'–':`${an[0]} → ${an[0]}${chg(an[2])} + ${an[2]} e⁻`],['Kathode (Reduktion)',same?'–':s.el==2?`${ka[0]}${chg(ka[2])} + ${ka[2]} e⁻ → ${ka[0]} (Abscheidung)`:s.el==1?'2 H₃O⁺ + 2 e⁻ → H₂ + 2 H₂O':'O₂ + 2 H₂O + 4 e⁻ → 4 OH⁻'],['Ionen in der Lösung',same?IO[0]:IO[0]+'; '+IO[1]],['Ionenwanderung','Kationen wandern zur Kathode, Anionen zur Anode (geschlossener Stromkreis)'],...(nr?[['Warum keine Korrosion?',`${an[0]} (E° = ${nf(an[1],2)} V) ist edler als Wasserstoff (0 V). H₃O⁺ kann ${an[0]} nicht oxidieren. Erst mit gelöstem Sauerstoff oder einer oxidierenden Säure greift die Lösung an.`]]:[]),...KST]}}
+  const A=ME[s.a],B=ME[s.b],aIsAn=A[1]<=B[1],an=aIsAn?A:B,ka=aIsAn?B:A,nr=s.a!=s.b&&s.el==1&&an[1]>0,same=s.a==s.b||nr,/* nr: beide edler als Wasserstoff, Säure ohne O₂ greift nicht an */dE=Math.abs(A[1]-B[1]),
+   n=an[2],m=ka[2],mode=s.el==0?'O2':s.el==1?'H':'DEP',need=mode=='O2'?4:mode=='H'?2:m,L=n*need/KOG(n,need),co=(k,x)=>(k==1?'':k+' ')+x,
+   IS=ka[0]+chg(m),IA=an[0]+chg(n),SALZ=ka[0]+(m>1?'(NO₃)'+'₀₁₂₃'[m]:'NO₃'),PR=KOPR[an[0]],
+   IO=s.el==2?[`Gelöstes Salz ${SALZ}: ${IS} und NO₃⁻`,`Neu aus der Anode: ${IA}`]:s.el==1?[`Salzsäure: H₃O⁺ und Cl⁻`,`Neu aus der Anode: ${IA}`]:[`Wasser mit NaCl: Na⁺, Cl⁻, H₃O⁺, OH⁻, gelöstes O₂`,`Neu aus der Anode: ${IA}`],
+   eqA=`${an[0]} → ${IA} + ${n} e⁻`,eqK=mode=='O2'?'O₂ + 2 H₂O + 4 e⁻ → 4 OH⁻':mode=='H'?'2 H₃O⁺ + 2 e⁻ → H₂ + 2 H₂O':`${IS} + ${m} e⁻ → ${ka[0]}`,
+   bA=`${co(L/n,an[0])} → ${co(L/n,IA)} + ${L} e⁻`,bK=mode=='O2'?`${co(L/4,'O₂')} + ${co(L/2,'H₂O')} + ${L} e⁻ → ${L} OH⁻`:mode=='H'?`${L} H₃O⁺ + ${L} e⁻ → ${co(L/2,'H₂')} + ${L} H₂O`:`${co(L/m,IS)} + ${L} e⁻ → ${co(L/m,ka[0])}`;
+  const res=[[nf(dE,2)+' V','Spannung ΔE'],[same?'–':an[0]+' löst sich','Anode'],[same?'–':ka[0]+(s.el==2?' wird beschichtet':' geschützt'),'Kathode']],
+   rows=[['A',A[0],nf(A[1],2)+' V',same?'–':aIsAn?'Anode':'Kathode'],['B',B[0],nf(B[1],2)+' V',same?'–':aIsAn?'Kathode':'Anode']],
+   st=[['Anode (Oxidation)',same?'–':eqA],['Kathode (Reduktion)',same?'–':eqK+(mode=='DEP'?' (Abscheidung)':'')],...(same?[]:[['Mengenbilanz (gleich viele e⁻)',bA+' und '+bK]]),...(!same&&mode=='O2'?[['Korrosionsprodukt',`${IA} und OH⁻ treffen sich im Wasserfilm: ${PR[0]}`]]:[]),
+    ['Ionen in der Lösung',same?IO[0]:IO[0]+'; '+IO[1]],['Ionenwanderung','Kationen wandern zur Kathode, Anionen zur Anode (geschlossener Stromkreis)'],['Warum gerade an der Berührstelle?','Dort ist der Weg für Elektronen und Ionen am kürzesten, darum löst sich die Anode nahe der Berührstelle am schnellsten. Eine Isolierscheibe unterbricht den Elektronenweg.'],
+    ...(!same&&mode!='O2'?[['Zusätzlich',mode=='H'?`Ein unedles Metall wird von Säure auch ohne Partner angegriffen. Die Berührung mit dem edleren Metall beschleunigt das, weil sich H₂ am edleren Metall leichter bildet.`:`In der Salzlösung scheidet sich ${ka[0]} auch direkt auf dem unedleren Metall ab.`]]:[]),
+    ...(nr?[['Warum keine Korrosion?',`${an[0]} (E° = ${nf(an[1],2)} V) ist edler als Wasserstoff (0 V). H₃O⁺ kann ${an[0]} nicht oxidieren. Erst mit gelöstem Sauerstoff oder einer oxidierenden Säure greift die Lösung an.`]]:[]),...KST];
+  const out=svg=>({vb:s.z==1&&!same?'0 -40 640 432':'0 0 640 356',svg,res,th:['','Metall','E°','Rolle'],rows,st});
+  if(s.z==1&&!same)return out(KOLUPE({an:an[0],n,ka:ka[0],mode,m,sal:mode=='O2',anion:mode=='DEP'?'NO3':'Cl',hA:'Anode: '+an[0]+' (unedler)',eqA,hK:'Kathode: '+ka[0]+' (edler)',eqK,brk:1,dx:1},t*.8));
+  const tt=t%36,p=same?0:tt/36,X0=320,yT=212,yB=266,sA=aIsAn?-1:1,/* Seite der Anode: links −1, rechts +1 */
+   W=232,H=110,dT=x=>{const u=(x-X0)/W;return Math.abs(u)>=1?yT:yT-H*Math.sqrt(1-u*u)},dr=`M${X0-W} ${yT}A${W} ${H} 0 0 1 ${X0+W} ${yT}Z`,
+   D=same?0:15*KOS(p*1.2),mul=x=>(x-X0)*sA>=0?D*Math.exp(-Math.abs(x-X0)/70):0,ins=(x,y)=>Math.max(dT(x)+7,Math.min(yT-6,y)),dep=mode=='DEP'&&!same?7*KOS(p*1.2):0;
+  let h='';
+  /* zwei Bleche, die sich an der Berührstelle X0 berühren (Schnitt) */
+  const pl=(x0,x1,c,side)=>`<path d="M${x0} ${yT}l12 -9H${x1+12}l-12 9Z" fill="${c}"/><path d="M${x0} ${yT}l12 -9H${x1+12}l-12 9Z" fill="#fff" opacity=".22"/>`+(side?`<path d="M${x1} ${yT}l12 -9V${yB-9}l-12 9Z" fill="${c}"/><path d="M${x1} ${yT}l12 -9V${yB-9}l-12 9Z" fill="#000" opacity=".25"/>`:'')+`<rect x="${x0}" y="${yT}" width="${x1-x0}" height="${yB-yT}" fill="${c}"/><rect x="${x0}" y="${yT}" width="${x1-x0}" height="${yB-yT}" fill="url(#g-cyl)" opacity=".45"/>`;
+  h+=pl(40,X0,MC[A[0]],0)+pl(X0,600,MC[B[0]],1);
+  /* Mulde an der Anode nahe der Berührstelle, Schicht auf der Kathode */
+  if(D>.2){let q=`M${X0} ${yT}`;for(let i=0;i<=40;i++){const x=X0+sA*i*6;q+=`L${x} ${(yT+mul(x)).toFixed(1)}`}q+=`L${X0+sA*240} ${yT}Z`;h+=`<path d="${q}" fill="var(--card)"/><path d="${q}" fill="var(--flow)" opacity=".25"/>`}
+  if(dep>.3){const x0=Math.min(X0,X0-sA*250),w=250;h+=`<rect x="${x0}" y="${yT-dep}" width="${w}" height="${dep}" fill="${MC[ka[0]]}" stroke="var(--ink)" stroke-width=".8"/>`;for(let i=0;i<25;i++)h+=BALL(x0+5+i*10,yT-dep,2.2+KOZ(i)*1.2,MC[ka[0]],.5)}
+  /* Elektronengas in beiden Blechen und gerichtete Elektronen von der Anode über die Berührstelle zur Kathode */
+  for(let i=0;i<50;i++){const j=KOJ(i+40,t,1.3);h+=`<circle cx="${(44+KOZ(i+.2)*552+j[0]).toFixed(1)}" cy="${(yT+7+KOZ(i+5)*(yB-yT-12)+j[1]).toFixed(1)}" r="1.9" fill="var(--flow)" opacity=".55"/>`}
+  if(!same)for(let i=0;i<12;i++){const ph=(tt*.3*(.6+dE*.5)+i/12)%1,xa=X0+sA*(10+120*KOZ(i*1.3)**1.5),xc=X0-sA*(20+170*KOZ(i*2.7+1)),q=KOP([[xa,yT+mul(xa)+4],[xa,yT+30],[xc,yT+30],[xc,yT+4]],ph);h+=KOE1(q[0],q[1],Math.min(1,ph*8,(1-ph)*8))}
+  /* Wasserfilm */
+  h+=`<path d="${dr}" fill="var(--flow)" opacity=".24"/><path d="${dr}" fill="url(#g-liqv)"/><path d="${dr}" fill="none" stroke="var(--ink)" stroke-width="1.6" opacity=".7"/><path d="M${X0-W*.62} ${yT-H*.62}Q${X0-W*.35} ${yT-H*.98} ${X0} ${yT-H}" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".55"/>`;
+  /* Korrosionsprodukt nahe der Berührstelle */
+  if(!same&&mode=='O2')for(let i=0;i<14;i++){const x=X0+(KOZ(i+40)*2-1)*46-sA*8,r=(2+4*KOZ(i+41))*KOS(p*1.6-KOZ(i+42)*.5);if(r>.3)h+=`<ellipse cx="${x.toFixed(1)}" cy="${(yT-r*.55).toFixed(1)}" rx="${(r*1.5).toFixed(1)}" ry="${r.toFixed(1)}" fill="${an[0]=='Fe'?(KOZ(i*2.3)<p*2.4?(i%2?RUST:RUST2):'#6f8f5a'):PR[1]}" stroke="var(--ink)" stroke-width=".6"/>`}
+  /* Ionen */
+  const leg=[[(x,y)=>BALL(x,y,5.5,'var(--amber)',1),IA],[(x,y)=>KOE1(x,y),'e⁻']];
+  for(let i=0;i<10;i++){const ph=same?KOZ(i+.5):(tt*.22+i/10)%1,x0=X0+sA*(10+120*KOZ(i+.5)**1.6),x1=mode=='O2'?X0-sA*(-14+40*KOZ(i+7)):X0-sA*(40+110*KOZ(i+7)),y1=mode=='O2'?yT-14-24*KOZ(i+4):yT-36-46*KOZ(i+2),j=KOJ(i,t,3),
+   x=(same?x0+(KOZ(i+9)*2-1)*80*sA:KOL(x0,x1,ph))+j[0],y=ins(x,(same?yT-20-50*KOZ(i+3):KOL(yT-6-mul(x0),y1,ph))+j[1]);if(!same||i<5)h+=BALL(x,y,5.5,'var(--amber)',1,KOA(same?1:Math.min(1,ph*8,(1-ph)*(mode=='O2'?7:3))))}
+  if(mode=='O2'){leg.push([(x,y)=>KOsO2(x,y,0),'O₂'],[(x,y)=>KOsOH(x,y,-.8),'OH⁻']);
+   if(!same){for(let i=0;i<6;i++){const ph=(tt*.2+i/6)%1,xs=X0-sA*(30+170*KOZ(i+11)),y0=dT(xs)-34,j=KOJ(i+30,t,2.5),x=KOL(xs,xs-sA*10,ph)+j[0],y=Math.min(yT-6,KOL(y0,yT-6,ph)+j[1]);h+=KOsO2(x,y,t*.8+i,Math.min(1,ph*8,(1-ph)*6))}
+    for(let i=0;i<8;i++){const ph=(tt*.25+i/8)%1,x0=X0-sA*(20+160*KOZ(i+21)),x1=X0+sA*(-10+30*KOZ(i+23)),j=KOJ(i+20,t,3),x=KOL(x0,x1,ph)+j[0],y=ins(x,KOL(yT-6,yT-16-24*KOZ(i+24),ph)+j[1]);h+=KOsOH(x,y,sA>0?-2.3:-.8,Math.min(1,ph*8,(1-ph)*7))}}}
+  else if(mode=='H'){leg.push([(x,y)=>KOsH3(x,y,-1.57),'H₃O⁺'],[(x,y)=>`<circle cx="${x}" cy="${y}" r="5" fill="#fff" fill-opacity=".5" stroke="var(--ink)" stroke-width="1.3"/>`,'H₂']);
+   for(let i=0;i<6;i++){const ph=same?KOZ(i+3):(tt*.15+i/6)%1,x0=X0+(KOZ(i+71)*2-1)*190,x1=X0-sA*(20+160*KOZ(i+72)),j=KOJ(i+70,t,3),x=(same?x0:KOL(x0,x1,ph))+j[0],y=ins(x,(same?yT-30-40*KOZ(i+5):KOL(yT-60,yT-8,ph))+j[1]);h+=KOsH3(x,y,1.57+t*.5+i,same?1:Math.min(1,ph*8,(1-ph)*6))}
+   if(!same)for(let i=0;i<7;i++){const ph=(tt*.45+i/7)%1,x=X0-sA*(20+170*KOZ(i+31))+KOJ(i,t,1.5)[0],y=KOL(yT-4,dT(x)+5,ph),r=2.5+4*ph;h+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" fill="#fff" fill-opacity=".5" stroke="var(--ink)" stroke-width="1.3"${KOA(Math.min(1,(1-ph)*10))}/>`}}
+  else{leg.push([(x,y)=>BALL(x,y,5,KOKI,1),IS],[(x,y)=>KOsNO(x,y,0),'NO₃⁻']);
+   for(let i=0;i<7;i++){const ph=same?KOZ(i+4):(tt*.2+i/7)%1,x1=X0-sA*(30+190*KOZ(i+51)),x0=x1+(KOZ(i+52)*2-1)*60,j=KOJ(i+50,t,3),x=KOL(x0,x1,ph)+j[0],y=ins(x,(same?yT-30-40*KOZ(i+6):KOL(yT-80+30*KOZ(i+53),yT-dep-5,ph))+j[1]);h+=BALL(x,y,5,KOKI,1,KOA(same?1:Math.min(1,ph*8,(1-ph)*7)))}}
+  /* Begleit-Ionen: Kationen zur Kathode, Anionen zur Anode */
+  const an2=mode=='DEP'?'NO':'Cl',ca2=mode=='O2';if(an2=='Cl')leg.push([(x,y)=>BALL(x,y,6.4,KOCL,1),'Cl⁻']);if(ca2)leg.push([(x,y)=>BALL(x,y,4.6,KONA,1),'Na⁺']);
+  for(let i=0;i<8;i++){const isA=i<4;if(!isA&&!ca2)continue;const f=(KOZ(i+80)+(same?0:t*.035))%1,x=X0-200+400*(isA===(sA>0)?f:1-f),j=KOJ(i+80,t,3),y=ins(x,KOL(dT(x)+12,yT-10,KOZ(i+81))+j[1]),o=same?1:Math.min(1,f*7,(1-f)*7);
+   h+=isA?(an2=='NO'?KOsNO(x+j[0],y,t*.6+i,o):BALL(x+j[0],y,6.4,KOCL,1,KOA(o))):BALL(x+j[0],y,4.6,KONA,1,KOA(o))}
+  /* Rahmen und Beschriftung */
+  h+=`<rect x="40" y="${yT}" width="560" height="${yB-yT}" fill="none" stroke="var(--ink)" stroke-width="2"/><path d="M${X0} ${yT}V${yB}" stroke="var(--ink)" stroke-width="2.4"/><path d="M40 ${yT}l12 -9H612l-12 9M600 ${yT}l12 -9V${yB-9}l-12 9" fill="none" stroke="var(--ink)" stroke-width="1.6" stroke-linejoin="round"/>`;
+  if(!same){const x1=X0+sA*64,x2=X0-sA*64;h+=`<path d="M${x1} ${yB-12}H${x2}" stroke="var(--flow)" stroke-width="2.4"/><path d="M${x2} ${yB-12}l${sA*9} -5v10Z" fill="var(--flow)"/>`+TH(x1+sA*16,yB-7,'e⁻','t2','middle')}
+  const nA=Math.floor(tt*1.2),nE=nA*n,nK=Math.floor(nE/need);
+  h+=TH(X0,22,same?(nr?'Beide Metalle edler als Wasserstoff: keine Säurekorrosion ohne O₂':'Gleiches Metall: keine Spannung, keine Kontaktkorrosion'):`Zeitraffer: ${nA} ${IA} gelöst → ${nE} e⁻ → ${nK} ${mode=='O2'?'O₂ verbraucht':mode=='H'?'H₂ entstanden':ka[0]+' abgeschieden'}`,'t2','middle');
+  h+=KOLEG(46,leg)+TH(X0,yT-H-12,mode=='O2'?'Wasserfilm mit gelöstem O₂ und Salz':mode=='H'?'Salzsäure (H₃O⁺ und Cl⁻)':'Metallsalz-Lösung '+SALZ,'t2','middle');
+  if(!same&&mode=='O2'&&p>.2){const xl=X0-sA*96;h+=`<path d="M${xl+sA*14} ${yT-H*.58+4}L${X0-sA*20} ${yT-8}" stroke="var(--ink)" stroke-width="1.2"/>`+TH(xl,yT-H*.58,PR[0],'t2','middle')}
+  const rl=x=>same?(nr?'kein Angriff':'gleiches Metall'):x==an?'Anode, löst sich':mode=='DEP'?'Kathode, wird beschichtet':'Kathode, geschützt';
+  h+=TH(180,yB+22,A[0]+': '+rl(A),'t2','middle')+TH(460,yB+22,B[0]+': '+rl(B),'t2','middle')+`<path d="M${X0} ${yB+2}V${yB+30}" stroke="var(--ink)" stroke-width="1.2"/>`+TH(X0,yB+44,'Berührstelle','t3','middle');
+  if(!same)h+=TH(X0,yB+66,'Anode: '+eqA,'t2','middle')+TH(X0,yB+86,'Kathode: '+eqK,'t2','middle');
+  return out(h)}
 
 /* Aggregatzustand */
 const SU=[['Wasser',0,100],['Ethanol',-114,78],['Stickstoff',-210,-196],['Quecksilber',-39,357],['Eisen',1538,2861]];
