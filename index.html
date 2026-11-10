@@ -4242,20 +4242,21 @@ const VMG=(D,ph,x)=>{const e=D?18:10,F=D?2:2.8,T1=D?313:300,Vc=1/(e-1),k=Math.fl
  if(k==0)return{p:.9,T:T1-273};
  if(k<3){const f=1+(F-1)*VMB(D,ph);return{p:.9*ad**1.4*f,T:T1*ad**.4*f-273}}
  const u=(ph-540)/180;return{p:1.1+(.9*F-1.1)*(1-GZE(u/.15)),T:(T1*F-273)*(1-.2*u)}};
+let VMID=0;
 function VMBILD(s,t,eta){
- const D=s.a==1,ph=(t*60)%720,k=Math.floor(ph/180),u=(ph%180)/180,phi=ph*PI/180,CX=150,Y0=64,c=D?16:26,SH=88,R=44,L=84,cC=Y0+c+16+R+L,
+ const ZI='vmzc'+(++VMID),LI='vmlc'+VMID,D=s.a==1,ph=(t*60)%720,k=Math.floor(ph/180),u=(ph%180)/180,phi=ph*PI/180,CX=150,Y0=64,c=D?16:26,SH=88,R=44,L=84,cC=Y0+c+16+R+L,
   pin=cC-(R*Math.cos(phi)+Math.sqrt(L*L-R*R*Math.sin(phi)**2)),top=pin-16,x=Math.max(0,(top-Y0-c)/SH),cp=[CX+R*Math.sin(phi),cC-R*Math.cos(phi)],
   g=VMG(D,ph,x),hot=Math.max(0,Math.min(1,(g.T-150)/1500)),lIn=k==0?10*Math.sin(PI*u):0,lEx=k==3?10*Math.sin(PI*u):0,
   bot=Y0+c+SH+34,o0=[CX,Y0+1],Rf=ph<348||k>2?(k>2?999:0):D?170*GZE((ph-352)/45):170*GZE((ph-350)/40),
-  AIR='#7cc4f2',FUEL='#f59e0b',BURN=PVMX('#9aa5b1','#f97316',Math.min(1,hot*1.3)),gas=PVMX('#dbeafe','#fdba74',hot);
- let d=`<defs><clipPath id="vmzc"><rect x="90" y="${Y0}" width="120" height="${f2(top-Y0+(D?14:0))}"/></clipPath></defs>`;
+  AIR='#7cc4f2',FUEL='#f59e0b',BURN=PVMX('#9aa5b1','#f97316',Math.min(1,hot*1.8)),gas=PVMX('#dbeafe','#fdba74',hot);
+ let d=`<defs><clipPath id="${ZI}"><rect x="90" y="${Y0}" width="120" height="${f2(top-Y0+(D?14:0))}"/></clipPath></defs>`;
  /* Kurbelgehäuse (hinten) */
  d+=`<path d="M78 ${bot-6}L${CX-66} ${cC-18}A66 66 0 0 0 ${CX+66} ${cC-18}L222 ${bot-6}Z" fill="#cfd8e0" stroke="var(--ink)" stroke-width="1.4" opacity=".75"/>`;
  /* Gasraum: Farbe nach Temperatur */
  d+=`<rect x="90" y="${Y0}" width="120" height="${f2(top-Y0+1)}" fill="${gas}" opacity="${(.35+.45*hot).toFixed(2)}"/>`;
  if(D)d+=`<path d="M120 ${f2(top)}Q150 ${f2(top+20)} 180 ${f2(top)}Z" fill="${gas}" opacity="${(.35+.45*hot).toFixed(2)}"/>`;
  /* Flammenfront */
- if(Rf>0&&Rf<200)d+=`<g clip-path="url(#vmzc)"><circle cx="${o0[0]}" cy="${o0[1]}" r="${f2(Rf)}" fill="#fb923c" opacity=".45"/><circle cx="${o0[0]}" cy="${o0[1]}" r="${f2(Rf)}" fill="none" stroke="#facc15" stroke-width="5" opacity=".8"/></g>`;
+ if(Rf>0&&Rf<200)d+=`<g clip-path="url(#${ZI})"><circle cx="${o0[0]}" cy="${o0[1]}" r="${f2(Rf)}" fill="#fb923c" opacity=".45"/><circle cx="${o0[0]}" cy="${o0[1]}" r="${f2(Rf)}" fill="none" stroke="#facc15" stroke-width="5" opacity=".8"/></g>`;
  /* Gasteilchen */
  const span=Math.max(0,top-Y0-7),pos=(i,b)=>{const j=GZJ(i,t*2.2,.6),j2=GZJ(i+50,t*7,.5+2.8*hot);
   return[Math.max(93.5,Math.min(206.5,94+b[0]*112+j[0]+j2[0])),Math.max(Y0+3.5,Math.min(Math.max(Y0+3.5,top-3.5),Y0+3.5+b[1]*span+j[1]+j2[1]))]};
@@ -4304,14 +4305,15 @@ function VMBILD(s,t,eta){
  d+=`<rect x="74" y="${Y0}" width="16" height="${bot-Y0}" fill="#aab4c0" stroke="var(--ink)" stroke-width="1.4"/><rect x="210" y="${Y0}" width="16" height="${bot-Y0}" fill="#aab4c0" stroke="var(--ink)" stroke-width="1.4"/>`
   +`<rect x="78" y="${Y0+4}" width="5" height="${bot-Y0-14}" fill="#93c5fd" opacity=".7"/><rect x="217" y="${Y0+4}" width="5" height="${bot-Y0-14}" fill="#93c5fd" opacity=".7"/>`;
  /* Kraft auf den Kolben: Druck · Fläche */
- if(g.p>3&&k==2){const ln=8+34*Math.min(1,g.p/100);d+=ARW(118,f2(top+2),118,f2(top+2+ln),'var(--red)',4)+ARW(182,f2(top+2),182,f2(top+2+ln),'var(--red)',4)+`<text x="190" y="${f2(top+19)}" style="font-size:17px;font-weight:800;fill:var(--red);paint-order:stroke;stroke:var(--card);stroke-width:5px;stroke-linejoin:round">F</text>`}
+ if(g.p>3&&k==2){const ln=16+30*Math.min(1,g.p/100);d+=ARW(118,f2(top+2),118,f2(top+2+ln),'var(--red)',4)+ARW(182,f2(top+2),182,f2(top+2+ln),'var(--red)',4)+`<text x="190" y="${f2(top+19)}" style="font-size:17px;font-weight:800;fill:var(--red);paint-order:stroke;stroke:var(--card);stroke-width:5px;stroke-linejoin:round">F</text>`}
  /* OT / UT */
  d+=`<path d="M60 ${Y0+c}H74M60 ${Y0+c+SH}H74" stroke="var(--mute)" stroke-width="1.4" stroke-dasharray="3 2"/>`+TH(57,Y0+c+5,'OT','t2','end')+TH(57,Y0+c+SH+5,'UT','t2','end');
  /* Lupe auf den Brennraum rund um OT (Zünden bzw. Einspritzen sonst zu klein zu sehen) */
  const LU=ph>=318&&ph<420,la=Math.min(1,(ph-318)/8,(420-ph)/8);
  if(LU){const zy=Y0+c/2+4;d+=`<g opacity="${la.toFixed(2)}"><circle cx="${CX}" cy="${zy}" r="31" fill="none" stroke="var(--ink)" stroke-width="1.4" stroke-dasharray="4 3"/><path d="M181 ${zy}L232 150" stroke="var(--ink)" stroke-width="1.2" stroke-dasharray="4 3"/>`
-  +`<clipPath id="vmlc"><circle cx="288" cy="150" r="56"/></clipPath><circle cx="288" cy="150" r="56" fill="var(--card)"/><g clip-path="url(#vmlc)"><g transform="translate(288 150) scale(1.8) translate(-150 ${f2(-zy)})">${d}</g></g>`
+  +`<clipPath id="${LI}"><circle cx="288" cy="150" r="56"/></clipPath><circle cx="288" cy="150" r="56" fill="var(--card)"/><g clip-path="url(#${LI})"><g transform="translate(288 150) scale(1.8) translate(-150 ${f2(-zy)})">${d}</g></g>`
   +`<circle cx="288" cy="150" r="56" fill="none" stroke="var(--ink)" stroke-width="2.6"/>`+TH(288,222,'Lupe: Brennraum','t2','middle')+`</g>`}
+ if(s.nl)return d;
  /* Beschriftungen */
  d+=TH(14,62,'Einlass','t2')+TH(286,62,'Auslass','t2','end')+TH(140,-4,D?'Einspritzdüse':'Zündkerze','t2','end')
   +(LU?'':TH(232,f2(top+22),'Kolben','t2')+TH(236,f2((pin+cp[1])/2+20),'Pleuel','t2'))+TH(226,cC+56,'Kurbelwelle','t2');
@@ -13159,10 +13161,10 @@ Object.assign(EIN,{
 'Verbrennungsmotor (Viertakt)':[
  {d:11,t:'Das Notstromaggregat läuft mit einem Dieselmotor. Im Zylinder wird Kraftstoff verbrannt, der Druck schiebt den Kolben, die Kurbelwelle macht daraus Drehung. Ein Arbeitsspiel hat vier Takte.',
   s:'Das Notstromaggregat läuft mit einem Dieselmotor. Im Zylinder wird Kraftstoff verbrannt, der Druck schiebt den Kolben, die Kurbelwelle macht daraus Drehung. Ein Arbeitsspiel hat vier Takte.',
-  f:(k,t)=>EZYL(90,60,80,160,.5+.35*Math.sin(t*4),{})+EFT(130,245,'Zylinder + Kolben','ein2','middle')+ETUR(300,170,30,t,'#8a96a1')+EFT(300,220,'Kurbelwelle','ein2','middle')+EFT(400,80,'4 Takte','ein1','middle')+EFT(400,110,'2 Umdrehungen','ein2','middle')+EFT(400,160,'Druck → Kraft','ein2','middle')+EFT(400,186,'→ Drehung','ein2','middle')},
+  f:(k,t)=>ESIM('Verbrennungsmotor (Viertakt)',{a:1},t,'0 -18 340 320',0,8,262,250)+EFT(400,80,'4 Takte','ein1','middle')+EFT(400,110,'2 Umdrehungen','ein2','middle')+EFT(400,160,'Druck → Kraft','ein2','middle')+EFT(400,186,'→ Drehung','ein2','middle')},
  {d:11,t:'Takt 1 Ansaugen: Kolben runter, Luft rein. Takt 2 Verdichten: Kolben rauf, Luft wird heiß. Takt 3 Arbeiten: Einspritzen, Verbrennung, Druck treibt den Kolben runter. Takt 4 Ausstoßen: Abgas raus. Nur Takt 3 liefert Arbeit.',
   s:'Takt 1 Ansaugen: Kolben runter, Luft rein. Takt 2 Verdichten: Kolben rauf, Luft wird heiß. Takt 3 Arbeiten: Einspritzen, Verbrennung, Druck treibt den Kolben runter. Takt 4 Ausstoßen: Abgas raus. Nur Takt 3 liefert Arbeit.',
-  f:(k,t)=>{const o=EINQ(k/.9),n=Math.min(3,Math.floor(o*4)),N=['Ansaugen','Verdichten','Arbeiten','Ausstoßen'],P=[.9,.15,.9,.15];return[0,1,2,3].map(i=>`<g opacity="${i<=n?1:.25}">`+EZYL(30+i*115,70,70,120,P[i],{})+(i==2?EFLM(65+i*115,100,.5,t):'')+EFT(65+i*115,215,(i+1)+'. '+N[i],i==2?'ein1':'ein2','middle')+'</g>').join('')+EFT(240,250,'nur Takt 3 gibt Arbeit ab','ein2','middle')}},
+  f:(k,t)=>{const o=EINQ(k/.9),n=Math.min(3,Math.floor(o*4)),N=['Ansaugen','Verdichten','Arbeiten','Ausstoßen'];return[0,1,2,3].map(i=>`<g opacity="${i<=n?1:.25}">`+ESIM('Verbrennungsmotor (Viertakt)',{a:1,nl:1},[110,300,440,630][i]/60,'64 0 166 300',8+i*118,14,110,198)+EFT(63+i*118,232,(i+1)+'. '+N[i],i==2?'ein1':'ein2','middle')+'</g>').join('')+EFT(240,260,'nur Takt 3 gibt Arbeit ab','ein2','middle')}},
  {d:11,t:'Vier Takte sind zwei Kurbelwellenumdrehungen. Bei 1500 Umdrehungen je Minute hat jeder Zylinder 750 Arbeitsspiele je Minute, 12,5 Zündungen je Sekunde. Das Schwungrad trägt den Kolben durch die drei Takte ohne Arbeit.',
   s:'Vier Takte sind zwei Kurbelwellenumdrehungen. Bei 1500 Umdrehungen je Minute hat jeder Zylinder 750 Arbeitsspiele je Minute, 12,5 Zündungen je Sekunde. Das Schwungrad trägt den Kolben durch die drei Takte ohne Arbeit.',
   f:k=>EFX(k,[['4 Takte = 2 Umdrehungen','h'],['n = 1 500 1/min → 750 Arbeitsspiele je min','m'],['= 12,5 Zündungen je Sekunde','r']],['Schwungrad überbrückt die drei Nebentakte'])},
@@ -13174,7 +13176,7 @@ Object.assign(EIN,{
   f:k=>EFX(k,[['P = 200 N·m · 2π · 50 1/s = 62,8 kW','m'],[ESB('P','zu')+' = 0,004 kg/s · 42,5 MJ/kg = 170 kW','m'],['η = P / '+ESB('P','zu')+' = 62,8 kW / 170 kW','m'],['η = 0,37','r']],['Rest: Abgas und Kühlwasser'])},
  {d:9,t:'Merke: Vier Takte, zwei Umdrehungen, nur der dritte Takt arbeitet. P = M · 2π · n, η = P / P_zu, beim Diesel rund 35 bis 40 %.',
   s:'Merke: Vier Takte, zwei Umdrehungen, nur der dritte Takt arbeitet. P gleich M 2 Pi n, Eta gleich P durch P zu, beim Diesel rund 35 bis 40 Prozent.',
-  f:(k,t)=>EMRK(k,t,EZYL(60,70,70,130,.5+.35*Math.sin(t*4),{})+ETUR(190,160,26,t,'#8a96a1'),'P = M · 2π · n','η = P / '+ESB('P','zu'))}
+  f:(k,t)=>EMRK(k,t,ESIM('Verbrennungsmotor (Viertakt)',{a:1},t,'0 -18 340 320',0,30,218,220),'P = M · 2π · n','η = P / '+ESB('P','zu'))}
 ]});
 
 /* Paket Sicherheit + Umrechnen. Hilfen: Sicherheitszeichen (Kreis, Dreieck, Rechteck), GHS-Raute, Branddreieck, STOP-Treppe, Risikomatrix, Haken/Kreuz */
