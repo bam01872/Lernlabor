@@ -2804,17 +2804,66 @@ const psbCard=z=>{const r=z>=57&&z<=71?57:z>=89&&z<=103?89:0,d=PSB[z-1]||PSG[r],
 const AMS={H:1.008,C:12.011,N:14.007,O:15.999,Na:22.99,Cl:35.45,Fe:55.845,Mg:24.305},AT=f=>{const o={};for(const m of f.matchAll(/([A-Z][a-z]?)(\d*)/g))o[m[1]]=(o[m[1]]||0)+ +(m[2]||1);return o},MM=f=>Object.entries(AT(f)).reduce((a,[e,n])=>a+AMS[e]*n,0),pf=f=>f.replace(/\d/g,d=>'₀₁₂₃₄₅₆₇₈₉'[d]);
 const RX=[[2,[2,'H2'],[1,'O2'],[2,'H2O']],[2,[1,'CH4'],[2,'O2'],[1,'CO2'],[2,'H2O']],[2,[4,'Fe'],[3,'O2'],[2,'Fe2O3']],[2,[1,'N2'],[3,'H2'],[2,'NH3']],[2,[2,'Na'],[1,'Cl2'],[2,'NaCl']],[2,[2,'Mg'],[1,'O2'],[2,'MgO']]];
 const eqs=(sp,nr,co)=>sp.map((x,i)=>(i==nr?' → ':i?' + ':'')+(co[i]>1?co[i]+' ':'')+pf(x[1])).join('');
-fm(FC,RS,'Reaktionsgleichungen & Mol','Eine Reaktionsgleichung muss ausgeglichen sein: Von jeder Atomsorte steht links und rechts gleich viel (Erhaltung der Masse). n = m / M verbindet Masse und Stoffmenge.',
- [['r','Reakt.','sel',RX.map(r=>eqs(r.slice(1),r[0],r.slice(1).map(x=>x[0]))),0],['m','m',1,1000,1,'g',10],['v','Koeff.','sel',['ausgeglichen','alle = 1'],0]],
- s=>{const r=RX[s.r],nr=r[0],sp=r.slice(1),co=sp.map(x=>s.v?1:x[0]),xi=s.m/MM(sp[0][1])/sp[0][0],ms=sp.map(x=>xi*x[0]*MM(x[1])),L={},R={};
- sp.forEach((x,i)=>{const a=AT(x[1]),t=i<nr?L:R;for(const e in a)t[e]=(t[e]||0)+a[e]*co[i]});
- const sm=(a,b)=>ms.slice(a,b).reduce((p,q)=>p+q,0),mE=sm(0,nr),mP=sm(nr,sp.length),els=[...new Set([...Object.keys(L),...Object.keys(R)])];
- let h=T(30,36,eqs(sp,nr,co),'t1');
- [[0,nr,50,mE],[nr,sp.length,190,mP]].forEach(([a,b,x0,tot])=>{let y=66;const dd=14;h+=`<ellipse cx="${x0+57}" cy="236" rx="66" ry="7" fill="url(#g-shad)"/>`;for(let i=a;i<b;i++){const hh=ms[i]/mE*164,c=['#5b9bd5','#f0a54a','#5cb85c','#e5736a'][i%4];
-  if(i==a)h+=`<path d="M${x0} ${y}l${dd} ${-dd}h100l${-dd} ${dd}Z" fill="color-mix(in srgb,${c} 60%,#fff)" stroke="var(--ink)" stroke-width="1.2" stroke-linejoin="round"/>`;
-  h+=`<path d="M${x0+100} ${y}l${dd} ${-dd}v${hh}l${-dd} ${dd}Z" fill="color-mix(in srgb,${c} 70%,#000)" stroke="var(--ink)" stroke-width="1.2" stroke-linejoin="round"/><rect x="${x0}" y="${y}" width="100" height="${hh}" fill="${c}" stroke="var(--ink)" stroke-width="1.2"/><rect x="${x0}" y="${y}" width="100" height="${hh}" fill="url(#g-tile)" opacity=".7"/>`+(hh>16?`<text x="${x0+50}" y="${y+hh/2+5}" font-size="14" font-weight="700" text-anchor="middle" style="fill:#1a2433">${pf(sp[i][1])}</text>`:'');y+=hh}h+=T(x0+57,262,(a?'Produkte ':'Edukte ')+nf(tot)+' g','t2','middle')});
- h+=els.map((e,i)=>`<text class="t1" x="360" y="${70+i*26}" style="fill:${(L[e]||0)==(R[e]||0)?'var(--ok)':'var(--red)'}">${e}: ${L[e]||0} → ${R[e]||0}</text>`).join('')+T(360,50,'Atome links → rechts','t2');
- return{d:h,res:[[nf(s.m/MM(sp[0][1]))+' mol','n (1. Edukt)'],[nf(mE)+' g','Σ m Edukte'],[nf(mP)+' g','Σ m Produkte']],rows:sp.map((x,i)=>[pf(x[1]),`${nf(MM(x[1]))} g/mol · ${nf(xi*x[0])} mol = ${nf(ms[i])} g`]),st:[['n = m / M',`${nf(s.m)} g / ${nf(MM(sp[0][1]))} g/mol = ${nf(s.m/MM(sp[0][1]))} mol`],['Erhaltung der Masse','Σ m(Edukte) = Σ m(Produkte)'],['Ausgleichen','Koeffizienten vor die Formeln setzen, nie die Indizes ändern']]}});
+/* ---- Reaktionsgleichungen mit Teilchen-Lupe und Waage (10.11.2026), Helfer mit Präfix RG ---- */
+/* Atome: [Radius, Farbe, Schriftfarbe]; Moleküle: Atome mit Lage relativ zur Mitte (Kalottenmodell, Salze als Formeleinheit) */
+const RGK=1.6,RGA={H:[14,'#f4f6f8','#1a2433'],O:[19,'#e5534b','#fff'],C:[19,'#4a4f57','#fff'],N:[19,'#4c6ef5','#fff'],Na:[21,'#8b5cf6','#fff'],Cl:[21,'#2f9e44','#fff'],Mg:[21,'#a3abb5','#1a2433'],Fe:[21,'#d9783a','#fff']},
+ RGG={H2:[['H',-7,0],['H',7,0]],O2:[['O',-10,0],['O',10,0]],N2:[['N',-10,0],['N',10,0]],Cl2:[['Cl',-11,0],['Cl',11,0]],H2O:[['H',-12,10],['H',12,10],['O',0,0]],
+  CH4:[['H',-13,-11],['H',13,-11],['H',-13,11],['H',13,11],['C',0,0]],CO2:[['O',-21,0],['O',21,0],['C',0,0]],NH3:[['H',-14,8],['H',14,8],['H',0,15],['N',0,-2]],
+  NaCl:[['Na',-13,0],['Cl',13,0]],MgO:[['Mg',-12,0],['O',12,0]],Fe2O3:[['O',-27,10],['O',0,-12],['O',27,10],['Fe',-14,1],['Fe',14,1]],Fe:[['Fe',0,0]],Na:[['Na',0,0]],Mg:[['Mg',0,0]]},
+ RGAT=(x,y,e,o=1)=>{const a=RGA[e];return`<g${KOA(o)}>`+BALL(f2(x),f2(y),a[0],a[1],1.2)+`<text x="${f2(x)}" y="${f2(y+(a[0]>15?6:5))}" text-anchor="middle" style="font-size:${a[0]>15?17:14}px;font-weight:800;fill:${a[2]};paint-order:stroke;stroke:${a[2]=='#fff'?'#0006':'#fff8'};stroke-width:2px">${e}</text></g>`},
+ /* Plätze der Teilchen: jede Formel bekommt eine Spalte, mehrere Teilchen stehen untereinander (ab 4 in zwei Spalten) */
+ RGPL=(sp,co,x0,x1)=>{const n=sp.length,w=(x1-x0)/n,P=[];sp.forEach((q,i)=>{const f=q[1],c=co[i],cx=x0+w*(i+.5),two=c>3,rows=two?Math.ceil(c/2):c,dy=Math.min(74,(f=='Fe2O3'?100:130)/Math.max(1,rows-1||1));
+  for(let k=0;k<c;k++){const col=two?k%2:0,row=two?Math.floor(k/2):k,x=cx+(two?(col-.5)*50:0),y=170+(row-(rows-1)/2)*(rows>1?dy:0);P.push({f,x,y,i})}});return P},
+ RGSUP=v=>String(v).replace(/[0-9-]/g,d=>'⁰¹²³⁴⁵⁶⁷⁸⁹'['0123456789'.indexOf(d)]||'⁻'),
+ RGNUM=N=>{const e=Math.floor(Math.log10(N)),m=N/10**e;return nf(Math.round(m*10)/10)+' · 10'+RGSUP(e)};
+/* Teilchen-Lupe: Edukte zerfallen in Atome, die Atome ordnen sich zu den Produkten um; Atome ohne Partner bleiben rot „übrig“, fehlende Atome erscheinen als „?“ */
+const RGLUPE=(sp,nr,co,t)=>{const P=8,u=((t%P)+P)%P/P,L=RGPL(sp.slice(0,nr),co.slice(0,nr),20,290),R=RGPL(sp.slice(nr),co.slice(nr),350,625),la=[],ra=[];
+ L.forEach(p=>RGG[p.f].forEach(a=>la.push({e:a[0],x:p.x,y:p.y,dx:a[1],dy:a[2]})));R.forEach(p=>RGG[p.f].forEach(a=>ra.push({e:a[0],x:p.x,y:p.y,dx:a[1],dy:a[2]})));
+ const used=ra.map(()=>0),pair=la.map(a=>{const j=ra.findIndex((b,k)=>!used[k]&&b.e==a.e);if(j>=0)used[j]=1;return j});
+ const sb=LPS(u,.2,.32),sm=LPS(u,.34,.7),sc=LPS(u,.72,.84),st=u<.2?0:u<.34?1:u<.84?2:3;
+ let h=`<path d="M300 170H338" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/><polygon points="346,170 334,163 334,177" fill="var(--ink)"/>`;
+ /* Beschriftung unter den Gruppen */
+ const lab=(G,a)=>{const by={};G.forEach(p=>{(by[p.i]=by[p.i]||[]).push(p)});return Object.values(by).map(g=>{const c=g.length,f=g[0].f;return TH(f2(g.reduce((q,p)=>q+p.x,0)/c),280,(c>1?c+' ':'')+pf(f),'t1','middle')}).join('')};
+ h+=lab(L,1)+lab(R,1);
+ /* fehlende Atome als gestrichelte Kreise mit „?“ */
+ ra.forEach((b,k)=>{if(used[k]||sc<=0)return;const r=RGA[b.e][0];h+=`<g opacity="${sc.toFixed(2)}"><circle cx="${f2(b.x+b.dx*RGK)}" cy="${f2(b.y+b.dy*RGK)}" r="${r}" fill="none" stroke="var(--red)" stroke-width="2" stroke-dasharray="4 3"/><text x="${f2(b.x+b.dx*RGK)}" y="${f2(b.y+b.dy*RGK+6)}" text-anchor="middle" style="font-size:18px;font-weight:800;fill:var(--red)">?</text></g>`});
+ /* Atome: kleine Wärmebewegung, dann Bindungen lösen, umordnen, neu binden */
+ const at=la.map((a,i)=>{const j=GZJ(i,t,1.4),ex=1+.7*sb,zz=sm<.5||pair[i]<0?i:100+pair[i],p0=[a.x+a.dx*RGK*ex,a.y+a.dy*RGK*ex];let x,y;
+  if(pair[i]<0){x=p0[0];y=p0[1]}else{const b=ra[pair[i]],ex2=1+.7*(1-sc),p1=[b.x+b.dx*RGK*ex2,b.y+b.dy*RGK*ex2],q=GZL(p0,p1,sm);x=q[0];y=q[1]-38*Math.sin(Math.PI*sm)*(i%2?1:-.6)}
+  return{x:x+j[0],y:y+j[1],e:a.e,lo:pair[i]<0,z:zz}});
+ at.sort((a,b)=>a.z-b.z).forEach(a=>{h+=RGAT(a.x,a.y,a.e);if(a.lo&&sc>0)h+=`<circle cx="${f2(a.x)}" cy="${f2(a.y)}" r="${RGA[a.e][0]+4}" fill="none" stroke="var(--red)" stroke-width="2.5" opacity="${sc.toFixed(2)}"/>`});
+ const lo=at.filter(a=>a.lo);if(lo.length&&sc>0)h+=TH(f2(Math.min(...lo.map(a=>a.x))),f2(Math.min(...lo.map(a=>a.y))-RGA[lo[0].e][0]-8),'übrig','t1').replace('class="t1"','class="t1" style="fill:var(--red)"').replace('style="paint','style="fill:var(--red);paint');
+ h+=T(20,60,'Schritt '+(st+1)+' von 4: '+['Ausgangsstoffe (Edukte)','Bindungen brechen auf','Atome ordnen sich neu','Neue Stoffe (Produkte)'][st],'t2');
+ return h};
+/* Waage (Tafelwaage): links die Edukte, rechts die Produkte als Blöcke (Höhe ∝ Masse); bei falschen Koeffizienten kippt sie */
+const RGWAAGE=(sp,nr,ms,mE,mP)=>{const mx=Math.max(mE,mP),ang=Math.max(-10,Math.min(10,(mE-mP)/mx*40)),ra=ang*Math.PI/180,cx=320,cy=258,Lb=190,
+ E=[cx-Lb*Math.cos(ra),cy+Lb*Math.sin(ra)],Pp=[cx+Lb*Math.cos(ra),cy-Lb*Math.sin(ra)];
+ let h=`<path d="M${cx-14} ${cy}L${cx-26} 312H${cx+26}L${cx+14} ${cy}Z" fill="var(--line)" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round"/><rect x="${cx-60}" y="312" width="120" height="10" rx="3" fill="var(--line)" stroke="var(--ink)" stroke-width="2.5"/>`;
+ h+=`<line x1="${f2(E[0])}" y1="${f2(E[1])}" x2="${f2(Pp[0])}" y2="${f2(Pp[1])}" stroke="var(--ink)" stroke-width="8" stroke-linecap="round"/><line x1="${f2(E[0])}" y1="${f2(E[1])}" x2="${f2(Pp[0])}" y2="${f2(Pp[1])}" stroke="#9aa5b1" stroke-width="4" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="7" fill="var(--card)" stroke="var(--ink)" stroke-width="2.5"/>`;
+ h+=`<polygon points="${cx},${cy-52} ${cx-7},${cy-64} ${cx+7},${cy-64}" fill="var(--mute)"/><line x1="${cx}" y1="${cy}" x2="${f2(cx-46*Math.sin(ra))}" y2="${f2(cy-46*Math.cos(ra))}" stroke="${Math.abs(ang)>.05?'var(--red)':'var(--ok)'}" stroke-width="3.5" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="7" fill="var(--card)" stroke="var(--ink)" stroke-width="2.5"/>`;
+ [[E,0,nr,mE,'Edukte'],[Pp,nr,sp.length,mP,'Produkte']].forEach(([A,a,b,tot,nm])=>{const px=A[0],py=A[1]-22;
+  h+=`<path d="M${f2(px)} ${f2(A[1])}V${f2(py)}" stroke="var(--ink)" stroke-width="4"/><path d="M${f2(px-66)} ${f2(py)}H${f2(px+66)}l-8 7H${f2(px-58)}Z" fill="#9aa5b1" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"/>`;
+  let yy=py;for(let i=b-1;i>=a;i--){const hh=Math.max(6,ms[i]/mx*120),c=['#5b9bd5','#f0a54a','#5cb85c','#e5736a'][i%4],x0=px-48,dd=10;yy-=hh;
+   if(i==a)h+=`<path d="M${f2(x0)} ${f2(yy)}l${dd} ${-dd}h88l${-dd} ${dd}Z" fill="color-mix(in srgb,${c} 60%,#fff)" stroke="var(--ink)" stroke-width="1.2" stroke-linejoin="round"/>`;
+   h+=`<path d="M${f2(x0+88)} ${f2(yy)}l${dd} ${-dd}v${f2(hh)}l${-dd} ${dd}Z" fill="color-mix(in srgb,${c} 70%,#000)" stroke="var(--ink)" stroke-width="1.2" stroke-linejoin="round"/><rect x="${f2(x0)}" y="${f2(yy)}" width="88" height="${f2(hh)}" fill="${c}" stroke="var(--ink)" stroke-width="1.2"/><rect x="${f2(x0)}" y="${f2(yy)}" width="88" height="${f2(hh)}" fill="url(#g-tile)" opacity=".7"/>`+(hh>17?`<text x="${f2(x0+44)}" y="${f2(yy+hh/2+5)}" font-size="13" font-weight="700" text-anchor="middle" style="fill:#1a2433">${pf(sp[i][1])}</text>`:'')}
+  h+=TH(f2(px),f2(Math.max(A[1],cy)+60),nm+': '+nf(tot)+' g','t1','middle')});
+ const eq=Math.abs(mP-mE)<1e-6*mx;h+=T(20,58,eq?'Gleichgewicht: Die Masse bleibt erhalten.':'Die Waage kippt: Die Gleichung ist nicht ausgeglichen.','t2').replace('class="t2"','class="t2" style="fill:'+(eq?'var(--ok)':'var(--red)')+';font-weight:700"');
+ return h};
+fm(FC,RS,'Reaktionsgleichungen & Mol','Eine Reaktionsgleichung muss ausgeglichen sein: Von jeder Atomsorte steht links und rechts gleich viel (Erhaltung der Masse). n = m / M verbindet Masse und Stoffmenge. In der Teilchen-Lupe siehst Du, wie sich die Atome neu ordnen, auf der Waage, dass die Masse erhalten bleibt.',
+ [['a','Ansicht','sel',['Teilchen-Lupe','Waage'],0],['r','Reakt.','sel',RX.map(r=>eqs(r.slice(1),r[0],r.slice(1).map(x=>x[0]))),0],['m','m',1,1000,1,'g',10],['v','Koeff.','sel',['ausgeglichen','alle = 1'],0]],
+ (s,t=0)=>{const r=RX[s.r],nr=r[0],sp=r.slice(1),co=sp.map(x=>s.v?1:x[0]),n1=s.m/MM(sp[0][1]),xi=n1/co[0],ms=sp.map((x,i)=>xi*co[i]*MM(x[1])),L={},R={};
+ sp.forEach((x,i)=>{const a=AT(x[1]),q=i<nr?L:R;for(const e in a)q[e]=(q[e]||0)+a[e]*co[i]});
+ const sm=(a,b)=>ms.slice(a,b).reduce((p,q)=>p+q,0),mE=sm(0,nr),mP=sm(nr,sp.length),els=[...new Set([...Object.keys(L),...Object.keys(R)])],ok=els.every(e=>(L[e]||0)==(R[e]||0));
+ let h=`<text x="20" y="32" style="font-size:20px;font-weight:800">${eqs(sp,nr,co)}</text>`;
+ if(s.a==1)h+=RGWAAGE(sp,nr,ms,mE,mP);
+ else{h+=RGLUPE(sp,nr,co,t);
+  const w=Math.min(200,600/els.length);h+=T(320,306,'Atome zählen: links → rechts','t2','middle');
+  els.forEach((e,i)=>{const x=320+(i-(els.length-1)/2)*w,a=L[e]||0,b=R[e]||0,g=a==b,c=g?'var(--ok)':'var(--red)';h+=RGAT(x-44,334,e)+`<text x="${x-18}" y="340" style="font-size:17px;font-weight:800;fill:${c}">${a} → ${b} ${g?'✓':'✗'}</text>`});
+  h+=T(320,374,`Im Bild: ein Formelumsatz. Bei m = ${nf(s.m)} g ${pf(sp[0][1])} sind es ${RGNUM(n1*6.022e23)} Teilchen.`,'t3','middle')}
+ return{vb:s.a==1?'0 0 640 345':'0 0 640 384',d:h,res:[[nf(n1)+' mol','n (1. Edukt)'],[nf(mE)+' g','Σ m Edukte'],[nf(mP)+' g','Σ m Produkte']],
+ rows:sp.map((x,i)=>[(co[i]>1?co[i]+' ':'')+pf(x[1]),`${nf(xi*co[i])} mol · ${nf(MM(x[1]))} g/mol = ${nf(ms[i])} g`]).concat(ok?[]:[['Achtung','Die Gleichung ist nicht ausgeglichen: Atome fehlen oder bleiben übrig, die Massen links und rechts sind verschieden.']]),
+ st:[['n = m / M',`n = ${nf(s.m)} g / ${nf(MM(sp[0][1]))} g/mol = ${nf(n1)} mol`],['Erhaltung der Masse','Σ m(Edukte) = Σ m(Produkte)'],['Ausgleichen','Koeffizienten vor die Formeln setzen, nie die Indizes ändern']]}},
+ 'Teilchen-Lupe: Kugeln sind Atome (H weiß, O rot, C grau, N blau, Na violett, Cl grün, Mg silbern, Fe orange). Salze wie NaCl, MgO und Fe₂O₃ bilden in Wirklichkeit ein Ionengitter, im Bild steht eine Formeleinheit. Rot umrandet: Atom bleibt übrig, „?“: Atom fehlt. Waage: Die Blockhöhe entspricht der Masse jedes Stoffes.',1);
 fm(FC,SB,'Neutralisation & Titration','Säure + Base → Salz + Wasser. Beim Titrieren von Salzsäure mit Natronlauge springt der pH-Wert am Äquivalenzpunkt von sauer nach basisch.',
  [['ca','c_S',.01,1,.01,'mol/l',.1],['Va','V_S',10,100,1,'mL',25],['cb','c_L',.01,1,.01,'mol/l',.1],['Vb','V_L',0,200,.5,'mL',10]],
  s=>{const na=s.ca*s.Va,Ve=na/s.cb,ph=v=>{const d=(na-s.cb*v)/(s.Va+v);return Math.abs(d)<1e-7?7:d>0?-Math.log10(d):14+Math.log10(-d)},p=ph(s.Vb);
@@ -10130,7 +10179,7 @@ function aufTick(){const b=$('#auf');if(!b||b.hidden||cur<0||b.dataset.n!==M[cur
  if(ok&&!b.dataset.ok){b.dataset.ok='1';b.querySelector('.aufdn').hidden=false;const X=store.get('ll_auf',{});if(!(X[n]&&X[n].ok)){X[n]=Object.assign(X[n]||{},{ok:1,d:mToday()});store.set('ll_auf',X);memRec(n,true,null,'auf')}}}
 // Bildausschnitt v146: engerer viewBox, wo die Zeichnung nur einen Teil der Fläche nutzt (Name|Original-viewBox → Ausschnitt).
 // Ermittelt aus allen Reglerstellungen (Handy und Laptop), Seitenverhältnis nie höher als vorher; tests/check.js prüft, dass nichts abgeschnitten wird.
-const VBC={"Ausmultiplizieren & Ausklammern|0 0 640 300":'-8 12 556 261',"Drehstrom (Stern & Dreieck)|0 0 640 300":'-35 22 549 258',"Gemischt (R₁+R₂)∥(R₃+R₄)|0 0 640 300":'38 61 601 218',"Gemischt (R₁+R₂)∥R₃|0 0 640 300":'38 61 583 218',"Gemischt R₁+(R₂∥R₃)+R₄|0 0 640 300":'35 24 560 263',"Histogramm|0 0 640 300":'24 0 590 270',"Kräfteparallelogramm|0 0 640 300":'0 26 524 243',"Mischungstemperatur|0 0 640 300":'8 87 538 193',"Mittelwert, Median & Modalwert|0 0 640 300":'26 2 588 262',"Ohmsches Gesetz|0 0 640 300":'53 28 580 272',"Oxidationszahlen|0 0 640 300":'35 53 570 247',"Parallel|0 0 640 300":'38 61 602 218',"Pneumatik: Luftverbrauch|0 0 640 300":'16 57 596 215',"Reaktionsgleichungen & Mol|0 0 640 300":'-28 6 583 274',"Reihe|0 0 640 300":'38 24 566 250',"Schmelz- & Verdampfungswärme|0 0 640 300":'6 48 608 242',"Spannweite, Varianz & Standardabweichung|0 0 640 300":'26 12 589 219',"Verbrennungsmotor (Viertakt)|0 0 640 300":'35 16 578 271',"Wirkungsgrad|0 0 640 300":'26 66 525 202',"Wärmekapazität|0 0 640 300":'16 26 523 238'};
+const VBC={"Ausmultiplizieren & Ausklammern|0 0 640 300":'-8 12 556 261',"Drehstrom (Stern & Dreieck)|0 0 640 300":'-35 22 549 258',"Gemischt (R₁+R₂)∥(R₃+R₄)|0 0 640 300":'38 61 601 218',"Gemischt (R₁+R₂)∥R₃|0 0 640 300":'38 61 583 218',"Gemischt R₁+(R₂∥R₃)+R₄|0 0 640 300":'35 24 560 263',"Histogramm|0 0 640 300":'24 0 590 270',"Kräfteparallelogramm|0 0 640 300":'0 26 524 243',"Mischungstemperatur|0 0 640 300":'8 87 538 193',"Mittelwert, Median & Modalwert|0 0 640 300":'26 2 588 262',"Ohmsches Gesetz|0 0 640 300":'53 28 580 272',"Oxidationszahlen|0 0 640 300":'35 53 570 247',"Parallel|0 0 640 300":'38 61 602 218',"Pneumatik: Luftverbrauch|0 0 640 300":'16 57 596 215',"Reihe|0 0 640 300":'38 24 566 250',"Schmelz- & Verdampfungswärme|0 0 640 300":'6 48 608 242',"Spannweite, Varianz & Standardabweichung|0 0 640 300":'26 12 589 219',"Verbrennungsmotor (Viertakt)|0 0 640 300":'35 16 578 271',"Wirkungsgrad|0 0 640 300":'26 66 525 202',"Wärmekapazität|0 0 640 300":'16 26 523 238'};
 const vbOf=(n,vb)=>VBC[n+'|'+vb]||vb;
 function render(){
  if(cur<0)return;const o=M[cur].f(S[cur],clock);
@@ -10957,13 +11006,10 @@ Object.assign(EIN,{
 'Reaktionsgleichungen & Mol':[
  {d:11,t:'Knallgas: Wasserstoff und Sauerstoff reagieren zu Wasser. Die Atome werden nur neu sortiert, keines geht verloren.',
   s:'Knallgas: Wasserstoff und Sauerstoff reagieren zu Wasser. Die Atome werden nur neu sortiert, keines geht verloren.',
-  f:k=>{const a=EINQ((k-.3)/.5),H=(x,y)=>EMOL(x,y,13,'#ffffff','H'),O=(x,y)=>EMOL(x,y,20,'#e05a4f','O'),L=(x0,y0,x1,y1)=>[x0+(x1-x0)*a,y0+(y1-y0)*a];
-   const P=[L(60,90,300,70),L(90,90,340,70),L(60,170,300,190),L(90,170,340,190),L(190,110,320,100),L(190,150,320,160)];
-   return H(...P[0])+H(...P[1])+H(...P[2])+H(...P[3])+O(...P[4])+O(...P[5])+EFT(100,240,a<.5?'2 H₂ + O₂':'','ein1','middle')+EFT(330,240,a>.5?'2 H₂O':'','ein1','middle')+AR(230,240,30,0,'var(--ink)')}},
- {d:11,t:'Ausgleichen heißt zählen: links 4 H und 2 O, rechts 4 H und 2 O. Erst dann stimmt die Gleichung.',
-  s:'Ausgleichen heißt zählen. Links 4 H und 2 O, rechts 4 H und 2 O. Erst dann stimmt die Gleichung.',
-  f:k=>{const a=k>.5;return `<text x="240" y="70" text-anchor="middle" style="font-size:28px;font-weight:800">${a?'2 ':''}H₂ + O₂ → ${a?'2 ':''}H₂O</text>`+EFT(120,130,'links','ein2','middle')+EFT(360,130,'rechts','ein2','middle')+
-   EFT(120,165,'H: '+(a?4:2),'ein1','middle')+EFT(120,200,'O: 2','ein1','middle')+EFT(360,165,'H: '+(a?4:2),'ein1','middle')+EFT(360,200,'O: '+(a?2:1),'ein1','middle')+`<text x="240" y="250" text-anchor="middle" style="font-size:18px;font-weight:700;fill:${a?'var(--ok)':'var(--red)'}">${a?'✓ ausgeglichen':'✗ O stimmt nicht'}</text>`}},
+  f:(k,t)=>ESIM('Reaktionsgleichungen & Mol',{a:0,r:0,v:0},t,'0 0 640 384',0,0,480,270)},
+ {d:12,t:'Ausgleichen heißt zählen: Bei H₂ + O₂ → H₂O bleibt ein O-Atom übrig. Mit 2 H₂ + O₂ → 2 H₂O stehen links und rechts 4 H und 2 O. Erst dann stimmt die Gleichung.',
+  s:'Ausgleichen heißt zählen. Bei H 2 plus O 2 ergibt H 2 O bleibt ein Sauerstoffatom übrig. Mit 2 H 2 plus O 2 ergibt 2 H 2 O stehen links und rechts 4 H und 2 O. Erst dann stimmt die Gleichung.',
+  f:(k,t)=>ESIM('Reaktionsgleichungen & Mol',{a:0,r:0,v:k>.5?0:1},7,'0 0 640 384',0,0,480,270)},
  {d:11,t:'Chemiker zählen in Mol: 1 mol sind 6,022 · 10²³ Teilchen. Die molare Masse M steht im Periodensystem, Wasser hat 18 g/mol.',
   s:'Chemiker zählen in Mol. 1 Mol sind 6,022 mal 10 hoch 23 Teilchen. Die molare Masse M steht im Periodensystem, Wasser hat 18 Gramm pro Mol.',
   f:k=>{const a=EINQ(k/.6);return EGL(25,70,90,140,{lv:90*a})+EFT(70,248,'1 mol Wasser','ein2','middle')+EFT(140,90,'1 mol = 6,022 · 10²³ Teilchen','ein1')+EFT(140,130,'M(H) = 1 g/mol, M(O) = 16 g/mol','ein2')+EFT(140,160,'M(H₂O) = 2 · 1 + 16 = 18 g/mol','ein1')+(a>.9?EFT(140,210,'1 mol Wasser wiegt 18 g','ein1'):'')}},
