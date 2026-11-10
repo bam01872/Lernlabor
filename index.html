@@ -13723,6 +13723,168 @@ const BFA=[
  {a:'n',l:'Nachfrage',q:'Nach dem Nachstellen liegen alle 10 Werte einer neuen Stichprobe zwischen 19,98 mm und 20,02 mm. Darf die Fertigung jetzt einfach weiterlaufen?',
   ant:'Ja, mit Überwachung: Die Werte liegen um das Nennmaß und mit Abstand zu den Grenzen. Man beobachtet den Prozess weiter, z. B. mit einer Qualitätsregelkarte, und prüft die Prozessfähigkeit (C_pk). Die alte Charge bleibt gesperrt, bis sie sortiert ist.'}]}
 ];
+/* Betriebsfälle Teil 2 (10.11.2026) */
+Object.assign(BFIG,{
+ luft:()=>BFV(560,280,`<path d="M10 258H550" stroke-width="2.5"/>
+  <circle cx="150" cy="70" r="26" fill="#f1c9a5"/><path d="M128 60q22-30 46 0" fill="#fbbf24" stroke="#b45309"/><path d="M110 100h80l14 110h-108z" fill="#2563eb" fill-opacity=".85"/><path d="M120 210v46M180 210v46" stroke-width="12" stroke="#1e3a8a"/>
+  <path d="M190 120l70 30" stroke-width="10" stroke="#1e40af"/><path d="M250 140l40 12-6 18-40-10z" fill="#6b7280"/><path d="M284 156l-30-40" stroke-width="4" stroke="#9ca3af"/>
+  ${[0,1,2,3,4].map(i=>`<path d="M${240-i*22} ${110-i*8}q-6 -6 -14 -2" stroke="var(--mute)" stroke-width="2" stroke-dasharray="3 3"/>`).join('')}
+  <path d="M290 160q60 40 140 30t100 60" stroke="#ca8a04" stroke-width="5"/>
+  ${BFBOX(440,170,90,80,16,'#64748b',.7)}${BFT(485,215,'6 bar',{a:'middle',s:18,w:700,c:'#fff'})}
+  ${BFT(150,28,'Späne auf der Kleidung',{a:'middle',s:18})}${BFT(380,110,'Druckluftpistole',{a:'middle',s:18,w:700})}`),
+ kss:()=>BFV(560,280,`<path d="M10 258H550" stroke-width="2.5"/>
+  ${BFBOX(30,90,300,160,24,'#94a3b8',.35)}${BFT(180,58,'Drehmaschine',{a:'middle',s:18,w:700})}
+  <path d="M90 140h120v40H90z" fill="#9ca3af"/><path d="M210 150l40 10-40 10z" fill="#6b7280"/><path d="M120 120v20" stroke-width="6"/><path d="M120 120q10 30 50 32" stroke="#60a5fa" stroke-width="4" stroke-dasharray="6 4"/>
+  ${BFBOX(370,150,160,100,18,'#60a5fa',.5)}<path d="M378 175h144" stroke="#1e40af" stroke-dasharray="8 6"/>${BFT(450,210,'KSS-Tank',{a:'middle',s:18,w:700})}${BFT(450,234,'2 000 l',{a:'middle',s:17})}
+  ${[0,1,2].map(i=>`<path d="M${410+i*30} 130q-8-14 0-26q8-12 0-24" stroke="#16a34a" stroke-width="2.5"/>`).join('')}${BFT(450,40,'riecht faulig',{a:'middle',s:18,c:'#16a34a',w:700})}`),
+ sich:()=>BFV(560,290,`${BFBOX(30,40,120,200,14,'#cbd5e1',.6)}${BFT(90,30,'Verteiler',{a:'middle',s:17,w:700})}
+  <path d="M60 80h60v50H60z" fill="var(--card)"/>${BFT(90,112,'B16',{a:'middle',s:20,w:800})}<path d="M85 140h10v14H85z" fill="#dc2626"/>${BFT(90,175,'1,5 mm²',{a:'middle',s:16})}
+  <path d="M150 105H530" stroke-width="3"/>
+  ${[['Heizlüfter','2 kW',200],['Kompressor','1,5 kW',300],['Kaffee','0,8 kW',400],['Leuchten','0,2 kW',500]].map(([n,p,x])=>`<path d="M${x} 105v45" stroke-width="2"/><circle cx="${x}" cy="105" r="4" fill="currentColor"/><rect x="${x-40}" y="150" width="80" height="54" rx="8" fill="var(--card)" stroke-width="1.5"/>${BFT(x,174,p,{a:'middle',s:17,w:700})}${BFT(x,226,n,{a:'middle',s:15})}`).join('')}
+  ${BFT(340,275,'Löst nach einigen Minuten aus',{a:'middle',s:18,c:'#dc2626',w:700})}`),
+ kran:()=>BFV(560,300,`<path d="M10 280H550" stroke-width="2.5"/><path d="M20 20H540" stroke-width="8" stroke="#ca8a04"/>
+  <path d="M265 24h30v26h-30z" fill="#ca8a04"/><path d="M280 50v20" stroke-width="3"/><path d="M272 70q8 14 16 0" stroke-width="4"/>
+  <path d="M280 78L120 170M280 78L440 170" stroke-width="5" stroke="#475569" stroke-dasharray="10 4"/>
+  ${BFBOX(100,170,360,70,24,'#64748b',.6)}${BFT(280,215,'Maschinenbett 1 200 kg',{a:'middle',s:19,w:700,c:'#fff'})}
+  <path d="M280 78v80" stroke-width="1.5" stroke-dasharray="4 4"/><path d="M280 128A50 50 0 0 0 323 103" stroke-width="1.5"/>${BFT(306,148,'β = 60°',{s:18})}
+  ${BFT(100,128,'Strang 1',{s:17})}${BFT(460,128,'Strang 2',{a:'end',s:17})}${BFT(280,268,'je Strang: Tragfähigkeit 1 000 kg (senkrecht)',{a:'middle',s:16})}`),
+ lager:()=>BFV(560,260,`<path d="M20 150h330v60H20z" fill="#9ca3af" fill-opacity=".7"/>${BFT(110,186,'Welle Ø 50,03 mm',{a:'middle',s:17,w:700})}
+  <ellipse cx="450" cy="150" rx="90" ry="90" fill="#cbd5e1" fill-opacity=".7"/><ellipse cx="450" cy="150" rx="66" ry="66" fill="var(--card)"/>
+  ${[...Array(10)].map((_,i)=>{const a=i*Math.PI/5;return`<circle cx="${(450+57*Math.cos(a)).toFixed(1)}" cy="${(150+57*Math.sin(a)).toFixed(1)}" r="9" fill="#6b7280"/>`}).join('')}
+  <ellipse cx="450" cy="150" rx="46" ry="46" fill="#cbd5e1"/><ellipse cx="450" cy="150" rx="30" ry="30" fill="var(--bg)"/>
+  ${BFT(450,40,'Rillenkugellager',{a:'middle',s:18,w:700})}${BFT(450,255,'Bohrung Ø 50,00 mm',{a:'middle',s:17})}
+  <path d="M170 60l40 60" stroke-width="10" stroke="#78350f"/><path d="M150 40h50v30h-50z" fill="#6b7280" transform="rotate(30 175 55)"/>${BFT(110,50,'Hammer?',{a:'middle',s:18,c:'#dc2626',w:700})}`),
+ komp:()=>BFV(560,280,`<path d="M10 258H550" stroke-width="2.5"/>
+  ${BFBOX(30,120,150,130,20,'#2563eb',.55)}${BFT(105,180,'Kompressor',{a:'middle',s:17,w:700,c:'#fff'})}${BFT(105,204,'15 kW',{a:'middle',s:17,c:'#fff'})}
+  <path d="M200 160H540M300 160v60M420 160v60M520 160v60" stroke-width="5" stroke="#64748b"/>
+  ${[[300,'Schlauch'],[420,'Kupplung'],[520,'Ventil']].map(([x,t])=>`<path d="M${x+8} 196q14-6 22 0M${x+8} 206q18-4 28 4" stroke="var(--mute)" stroke-width="2" stroke-dasharray="3 3"/>${BFT(x,240,t,{a:'middle',s:15})}`).join('')}
+  ${BFT(370,140,'zischt am Wochenende',{a:'middle',s:18,w:700})}
+  <circle cx="500" cy="60" r="34" fill="var(--card)" stroke-width="2"/><path d="M500 60V38M500 60l14 10" stroke-width="3"/>${BFT(300,66,'Sa 6 Uhr bis Mo 6 Uhr',{a:'middle',s:17})}`)
+});
+BFA.push(
+{id:'luft',n:'Druck',f:'Sicherheit',ic:'💨',titel:'Späne mit Druckluft abblasen',
+ lage:'Kurz vor Schichtende bläst sich ein Kollege an der Fräsmaschine mit der Druckluftpistole die Späne von der Arbeitskleidung, zuletzt auch vom Nacken. Das Netz hat 6 bar. Er sagt: „Ist doch nur Luft, das machen hier alle.“',
+ fig:'luft',st:[
+ {a:'w',l:'Erste Einschätzung',q:'Wie gefährlich ist das?',o:[
+  ['Gefährlich: Druckluft kann über kleine Wunden, Haut oder Körperöffnungen ins Gewebe und in Blutgefäße gelangen, und Späne fliegen in Augen und Gesicht.',2,'Richtig: Schon wenige bar reichen für schwere Verletzungen. Späne werden zu Geschossen.'],
+  ['Harmlos, es ist ja nur Luft.',0,'Falsch: Der Luftstrahl hat eine hohe Kraft auf kleiner Fläche, siehe Schritt 2.'],
+  ['Erst ab 10 bar gefährlich.',0,'Falsch: Schon 6 bar sind 60 N auf jeden Quadratzentimeter.'],
+  ['Nur wegen des Lärms ungünstig.',0,'Falsch: Der Lärm ist das kleinste Problem.']]},
+ {a:'z',l:'Rechnen',q:'Welche Kraft übt ein Druck von 6 bar auf 1 cm² Haut aus? (1 bar = 10 N/cm²)',v:60,u:'N',tol:.01,
+  weg:['p = 6 bar = 6 · 10 N/cm² = 60 N/cm²','F = p · A = 60 N/cm² · 1 cm² = 60 N','Das entspricht der Gewichtskraft von etwa 6 kg auf einer Fingerkuppe.']},
+ {a:'w',e:1,l:'Entscheiden',q:'Was tust Du als Meister?',o:[
+  ['Den Kollegen sofort ansprechen und das Abblasen von Personen untersagen. Für die Kleidung Kleiderbürste oder Industriesauger bereitstellen, an Maschinen nur Sicherheitsdüsen mit Schutzbrille. Das Thema in die nächste Unterweisung aufnehmen.',2,'Beste Wahl: Die Gefahr ist sofort weg, und es gibt eine bequeme Alternative, sonst wird weiter abgeblasen.'],
+  ['Den Netzdruck an der Pistole auf 2 bar senken und weiter abblasen lassen.',0,'Falsch: Auch 2 bar (20 N auf 1 cm²) können Luft unter die Haut drücken. Personen bläst man gar nicht ab.'],
+  ['Ein Schild „Abblasen von Personen verboten“ aufhängen.',1,'Vertretbar als Ergänzung, allein aber schwach: Ohne Alternative und Ansprache ändert ein Schild wenig (STOP-Prinzip).'],
+  ['Nichts tun, das machen hier alle seit Jahren.',-1,'Gefährlich: Dass bisher nichts passiert ist, ist Glück. Als Meister musst Du einschreiten.']]},
+ {a:'t',l:'Begründen',q:'Begründe Deine Entscheidung in drei bis fünf Sätzen für die Unterweisung.',
+  mus:'Druckluft mit 6 bar drückt mit 60 N auf jeden Quadratzentimeter. Sie kann über die Haut oder kleine Wunden ins Gewebe und in Blutgefäße gelangen, und weggeblasene Späne treffen Augen und Gesicht. Deshalb ist das Abblasen von Personen verboten, auch bei niedrigerem Druck. Damit das klappt, gibt es an jedem Platz eine Kleiderbürste oder einen Sauger, an Maschinen nur Sicherheitsdüsen mit Schutzbrille. Ich spreche das direkt an und nehme es in die Unterweisung auf.',
+  chk:['Gefahr benannt: Luft unter der Haut oder in Blutgefäßen, Späne in den Augen','6 bar = 60 N auf 1 cm²','Alternative bereitgestellt: Bürste oder Sauger, Sicherheitsdüse und Schutzbrille','Direkt ansprechen und unterweisen, ein Schild allein reicht nicht']},
+ {a:'n',l:'Nachfrage',q:'Warum ist auch das Abblasen der Maschine mit Druckluft ungünstig?',
+  ant:'Die Späne fliegen durch die Halle, auch auf Kollegen, und Kühlschmierstoff wird als Nebel verteilt, den man einatmet. Außerdem drückt die Luft Späne in Führungen und Dichtungen. Besser ist Absaugen. Wenn abgeblasen werden muss, dann mit Sicherheitsdüse, Schutzbrille und ohne andere Personen in der Nähe.'}]},
+{id:'kss',n:'Säuren & Basen',f:'Chemie',ic:'🧴',titel:'Kühlschmierstoff riecht faulig',
+ lage:'Der wassermischbare Kühlschmierstoff (KSS) einer Drehmaschine riecht seit Tagen faulig, zwei Mitarbeiter haben gerötete, rissige Hände. Laut Datenblatt soll der KSS einen pH-Wert von 8,5 bis 9,3 und eine Konzentration von 5 % haben. Ein Kollege sagt: „Ich kipp frisches Konzentrat und etwas Duftstoff rein, dann ist Ruhe.“',
+ fig:'kss',st:[
+ {a:'w',l:'Erste Einschätzung',q:'Womit fängst Du an?',o:[
+  ['Die Hautbeschwerden ernst nehmen: Betriebsarzt einbeziehen, Hautschutz und Handschuhe prüfen. Dann den KSS messen (pH-Wert und Konzentration).',2,'Richtig: Erst die Menschen, dann die Ursache. Ohne Messung weißt Du nicht, was mit dem KSS los ist.'],
+  ['Duftstoff zugeben, damit der Geruch weg ist.',0,'Falsch: Der Geruch ist ein Warnsignal. Duftstoff überdeckt nur und kann die Haut zusätzlich reizen.'],
+  ['Den Mitarbeitern Handcreme geben, mehr nicht.',0,'Falsch: Hautschutz ist wichtig, aber die Ursache im KSS bleibt.'],
+  ['Abwarten, der Geruch geht von selbst weg.',0,'Falsch: Ein KSS, der fault, wird ohne Eingriff schlechter.']]},
+ {a:'w',l:'Prüfen',bef:['🔍 KSS messen','Du nimmst eine Probe aus dem Tank, misst den pH-Wert mit Teststreifen und die Konzentration mit dem Refraktometer.','pH ≈ 7,8 und Konzentration 3 %.'],q:'Was bedeutet der gesunkene pH-Wert?',o:[
+  ['Bakterien vermehren sich und bilden Säuren. Der KSS „kippt“, der Korrosionsschutz und die Hautverträglichkeit werden schlechter.',2,'Richtig: Ein fallender pH-Wert ist das typische Zeichen für Keimbefall, oft zusammen mit fauligem Geruch.'],
+  ['pH 7,8 ist fast neutral, also besonders hautfreundlich.',0,'Falsch: Der KSS ist auf einen leicht basischen Bereich eingestellt. Fällt der pH-Wert, stimmt etwas nicht.'],
+  ['Der KSS ist zu stark konzentriert.',0,'Falsch: Mit 3 % ist er zu schwach, nicht zu stark.'],
+  ['Das ist ein Messfehler, Teststreifen sind ungenau.',0,'Falsch: Geruch, Hautprobleme und Messwert passen zusammen.']]},
+ {a:'z',l:'Rechnen',q:'Der Tank enthält 2 000 l KSS mit 3 % Konzentrat. Wie viele Liter Konzentrat fehlen bis 5 %? Rechne vereinfacht so, als bliebe das Volumen 2 000 l.',v:40,u:'l',tol:.01,
+  weg:['Konzentrat jetzt: 2 000 l · 0,03 = 60 l','Konzentrat bei 5 %: 2 000 l · 0,05 = 100 l','Es fehlen 100 l − 60 l = 40 l']},
+ {a:'w',e:1,l:'Entscheiden',q:'Wie gehst Du mit dem KSS um?',o:[
+  ['Den KSS komplett wechseln: Anlage mit Systemreiniger reinigen, frisch auf 5 % ansetzen. Danach pH-Wert und Konzentration regelmäßig messen und dokumentieren. Den alten KSS über einen Entsorger abgeben.',2,'Beste Wahl: Bei fauligem Geruch, pH unter 8 und Hautbeschwerden ist der KSS verbraucht. Nur ein Wechsel mit Reinigung entfernt die Keime aus Tank und Leitungen.'],
+  ['Die 40 l Konzentrat nachdosieren, ein Biozid zugeben und eine Woche lang täglich messen.',1,'Vertretbar als kurzer Rettungsversuch bei leichtem Befall. Hier sprechen Geruch und Hautbeschwerden aber für einen Wechsel.'],
+  ['Konzentrat nachkippen und Duftstoff zugeben, wie der Kollege vorschlägt.',0,'Falsch: Die Keime bleiben im System, der Geruch wird nur überdeckt.'],
+  ['Den alten KSS in den Abfluss geben und neu ansetzen.',0,'Falsch: KSS enthält Öl und Zusätze und gehört nicht ins Abwasser. Er wird als Abfall entsorgt.']]},
+ {a:'t',l:'Begründen',q:'Begründe Deine Entscheidung in drei bis fünf Sätzen.',
+  mus:'Der faulige Geruch, die Hautbeschwerden und der pH-Wert von 7,8 zeigen, dass sich Bakterien im KSS vermehrt haben. Mit 3 % ist er außerdem zu schwach, es fehlen rechnerisch 40 l Konzentrat. Nachkippen oder Duftstoff ändern nichts an den Keimen in Tank und Leitungen. Deshalb wird der KSS gewechselt, die Anlage gereinigt und frisch auf 5 % angesetzt. Ab jetzt messen wir regelmäßig, und die Mitarbeiter bekommen Hautschutz und Rat vom Betriebsarzt.',
+  chk:['Messwerte gedeutet: pH zu niedrig (Keime), Konzentration zu niedrig','Fehlendes Konzentrat berechnet: 40 l','Duftstoff oder nur Nachkippen beseitigen die Ursache nicht','Wechsel mit Reinigung, danach regelmäßig messen, Hautschutz, Entsorgung über Entsorger']},
+ {a:'n',l:'Nachfrage',q:'Beim Neuansetzen: Gibt man das Konzentrat ins Wasser oder das Wasser ins Konzentrat?',
+  ant:'Das Konzentrat ins Wasser, unter Rühren (Merkregel „Öl ins Wasser“). So entsteht eine feine, stabile Emulsion. Gießt man Wasser ins Konzentrat, entsteht leicht eine dicke, instabile Mischung, die sich nicht richtig verteilt.'}]},
+{id:'sich',n:'Parallel',f:'Elektrotechnik',ic:'⚡',titel:'Sicherung löst immer wieder aus',
+ lage:'In der Werkstatt hängen an einem Stromkreis mit Leitungsschutzschalter B16 und Leitung 1,5 mm² ein Heizlüfter (2 kW), ein Kompressor (1,5 kW), die Kaffeemaschine (0,8 kW) und die Leuchten (0,2 kW). Seit es kalt ist, löst die Sicherung immer wieder aus, meist einige Minuten nachdem alles läuft. Ein Kollege: „Ich setz eine B25 rein, dann ist Ruhe.“ Netzspannung 230 V.',
+ fig:'sich',st:[
+ {a:'z',l:'Rechnen',q:'Wie groß ist der Gesamtstrom, wenn alle Geräte gleichzeitig laufen?',v:19.57,u:'A',tol:.02,
+  weg:['Parallel: Die Leistungen addieren sich. P = 2 kW + 1,5 kW + 0,8 kW + 0,2 kW = 4,5 kW = 4 500 W','I = P / U = 4 500 W / 230 V = 19,6 A','19,6 A ist mehr als die 16 A der Sicherung.']},
+ {a:'w',l:'Deuten',q:'Was sagt Dir, dass die Sicherung erst nach einigen Minuten auslöst?',o:[
+  ['Überlast: Es fließt dauerhaft etwas mehr als 16 A, der thermische Auslöser spricht nach einer Weile an.',2,'Richtig: Bei leichter Überlast braucht der thermische Auslöser Sekunden bis Minuten.'],
+  ['Kurzschluss im Kompressor.',0,'Falsch: Ein Kurzschluss löst sofort aus, über den magnetischen Auslöser.'],
+  ['Die Sicherung ist defekt.',0,'Falsch: Die Rechnung zeigt, dass sie richtig arbeitet.'],
+  ['Ein Fehlerstrom gegen Erde.',0,'Falsch: Dafür ist der Fehlerstrom-Schutzschalter (RCD) zuständig, nicht der Leitungsschutzschalter.']]},
+ {a:'w',e:1,l:'Entscheiden',q:'Wie entscheidest Du?',o:[
+  ['Eine B25 einsetzen.',-1,'Gefährlich: Die Sicherung schützt die Leitung. Eine 1,5-mm²-Leitung ist für 16 A ausgelegt. Mit B25 kann sie dauerhaft überlastet werden, heiß werden und einen Brand auslösen.'],
+  ['Die Last aufteilen: Heizlüfter an einen anderen Stromkreis, der Reserve hat, oder ganz weglassen. Die Elektrofachkraft prüft, ob ein eigener Stromkreis für die Werkstatt nötig ist.',2,'Beste Wahl: Der Strom sinkt unter 16 A (ohne Heizlüfter 2,5 kW, also 10,9 A), die Leitung bleibt geschützt.'],
+  ['Eine Kabeltrommel vom Nachbarraum quer durch die Werkstatt legen.',0,'Falsch: Stolperfalle, Leitung wird beschädigt, und Du weißt nicht, ob der andere Stromkreis Reserve hat. Allenfalls kurzfristig nach Prüfung durch die Elektrofachkraft.'],
+  ['Die Sicherung nach jedem Auslösen sofort wieder einschalten.',0,'Falsch: Die Überlast bleibt. Häufiges Auslösen ist ein Zeichen, dass der Stromkreis zu stark belastet ist.']]},
+ {a:'t',l:'Begründen',q:'Begründe Deine Entscheidung in drei bis fünf Sätzen.',
+  mus:'Alle Geräte sind parallel geschaltet, ihre Ströme addieren sich: 4 500 W / 230 V = 19,6 A. Das ist dauerhaft mehr als 16 A, deshalb löst die Sicherung nach einigen Minuten aus, sie arbeitet also richtig. Die Sicherung schützt die Leitung mit 1,5 mm², die für 16 A ausgelegt ist. Eine B25 würde eine Überlastung der Leitung zulassen, die Leitung könnte heiß werden und brennen. Deshalb wird die Last verteilt, und die Elektrofachkraft prüft einen eigenen Stromkreis.',
+  chk:['Ströme addieren sich in der Parallelschaltung: 19,6 A','Auslösen nach Minuten = Überlast, Sicherung arbeitet richtig','Sicherung schützt die Leitung, B25 auf 1,5 mm² ist Brandgefahr','Last verteilen, Elektrofachkraft einbeziehen']},
+ {a:'n',l:'Nachfrage',q:'Angenommen, die Sicherung löst jedes Mal sofort beim Einschalten des Kompressors aus. Was könnte dann die Ursache sein?',
+  ant:'Ein Motor zieht beim Anlauf kurz ein Vielfaches seines Nennstroms. Eine B-Sicherung löst schon ab dem 3- bis 5-fachen Nennstrom sofort aus. Möglich ist also ein hoher Anlaufstrom oder ein Defekt (Kurzschluss) im Kompressor. Die Elektrofachkraft misst und entscheidet, z. B. über eine Sicherung mit C-Charakteristik bei gleichem Nennstrom. Eine größere Nennstromstärke ist auch hier keine Lösung.'}]},
+{id:'kran',n:'Kräftezerlegung (Seilkräfte)',f:'Physik',ic:'🏗️',titel:'Maschinenbett mit dem Hallenkran heben',
+ lage:'Ein Maschinenbett mit 1 200 kg soll mit dem Hallenkran umgesetzt werden. Ihr habt eine Zweistrang-Kette, jeder Strang trägt laut Anhänger 1 000 kg bei senkrechtem Zug. Die Anschlagpunkte liegen weit auseinander, die Kette ist kurz: Jeder Strang ist um β = 60° gegen die Senkrechte geneigt. Der Kollege: „Zwei mal 1 000 kg sind 2 000 kg, das passt locker.“ Rechne mit g = 9,81 m/s².',
+ fig:'kran',st:[
+ {a:'z',l:'Rechnen',q:'Wie groß ist die Kraft in jedem Strang? Gib sie in kN an.',v:11.77,u:'kN',tol:.02,
+  weg:['F_G = m · g = 1 200 kg · 9,81 m/s² = 11 772 N','Jeder Strang trägt die Hälfte der Last senkrecht: F_S · cos β = F_G / 2','F_S = F_G / (2 · cos 60°) = 11 772 N / (2 · 0,5) = 11 772 N = 11,77 kN']},
+ {a:'z',l:'Rechnen',q:'Welche Kraft darf ein Strang höchstens aufnehmen? Gib sie in kN an.',v:9.81,u:'kN',tol:.02,
+  weg:['F_zul = 1 000 kg · 9,81 m/s² = 9 810 N = 9,81 kN','11,77 kN ist mehr als 9,81 kN: Jeder Strang wäre um 20 % überlastet.']},
+ {a:'w',e:1,l:'Entscheiden',q:'Wie entscheidest Du?',o:[
+  ['Längere Kettenstränge oder eine Traverse verwenden, sodass der Winkel höchstens 45° beträgt. Dann kurz anheben und prüfen, ob die Last ruhig hängt.',2,'Beste Wahl: Bei 45° ist F_S = 11 772 N / (2 · 0,707) = 8 325 N = 8,33 kN, also unter 9,81 kN.'],
+  ['So anheben, 2 · 1 000 kg sind mehr als 1 200 kg.',0,'Falsch: Die Tragfähigkeit gilt bei senkrechtem Zug. Schräge Stränge tragen weniger, hier sind sie überlastet.'],
+  ['Eine Vierstrang-Kette mit gleichem Winkel nehmen, dann trägt jeder Strang nur ein Viertel.',0,'Falsch: Bei einer starren Last tragen oft nur zwei Stränge. Deshalb rechnet man auch bei vier Strängen nur mit zwei tragenden.'],
+  ['Anheben und zwei Kollegen halten die Last beim Schwenken mit den Händen.',-1,'Gefährlich: Niemand steht unter oder an einer schwebenden Last, die überlastet hängt. Reißt ein Strang, wird die Person erschlagen.']]},
+ {a:'t',l:'Begründen',q:'Erkläre dem Kollegen in drei bis fünf Sätzen, warum „2 000 kg“ hier nicht stimmt.',
+  mus:'Die 1 000 kg je Strang gelten nur für senkrechten Zug. Hängt ein Strang schräg, muss er mehr Kraft aufnehmen, weil nur sein senkrechter Anteil die Last trägt: F_S = F_G / (2 · cos β). Bei 60° ist das 11,77 kN je Strang, erlaubt sind 9,81 kN. Mit längeren Strängen oder einer Traverse und höchstens 45° sinkt die Kraft auf 8,33 kN. Eine Vierstrang-Kette hilft nicht automatisch, weil bei starren Lasten nur zwei Stränge sicher tragen.',
+  chk:['Tragfähigkeit gilt für senkrechten Zug, schräg wird die Strangkraft größer','11,77 kN je Strang gegen erlaubte 9,81 kN','Lösung: längere Stränge oder Traverse, Winkel höchstens 45°','Vier Stränge oder Festhalten mit der Hand sind keine Lösung']},
+ {a:'n',l:'Nachfrage',q:'Was passiert mit der Strangkraft, wenn der Winkel immer größer wird, bis fast 90°?',
+  ant:'Der Kosinus wird immer kleiner, die Strangkraft F_S = F_G / (2 · cos β) wird immer größer. Bei fast 90° hängen die Stränge fast waagerecht, und die Kraft wird riesig. Eine waagerecht gespannte Kette kann keine Last tragen.'}]},
+{id:'lager',n:'Wärmeausdehnung',f:'Physik',ic:'⚙️',titel:'Wälzlager auf die Welle bringen',
+ lage:'Ein neues Rillenkugellager soll auf eine Welle. Die Bohrung des Lagers hat 50,00 mm, die Welle 50,03 mm, das Lager sitzt also mit Übermaß fest. Ein Kollege legt schon den Hammer bereit: „Ein paar kräftige Schläge auf den Außenring, dann sitzt es.“ Wärmeausdehnungskoeffizient Stahl α = 12 · 10⁻⁶ 1/K.',
+ fig:'lager',st:[
+ {a:'w',l:'Erste Einschätzung',q:'Was hältst Du von den Schlägen auf den Außenring?',o:[
+  ['Nichts: Die Schläge laufen über die Kugeln auf den Innenring. Dabei entstehen Eindrücke in den Laufbahnen, das Lager wird laut und fällt früh aus.',2,'Richtig: Die Montagekraft darf nie über die Wälzkörper gehen.'],
+  ['In Ordnung, wenn man einen Kupferhammer nimmt.',0,'Falsch: Auch mit Kupferhammer gehen die Schläge über die Kugeln.'],
+  ['Mit einer Montagehülse auf den Innenring einpressen.',1,'Vertretbar: Bei kleinen Lagern üblich. Bei diesem Übermaß ist Anwärmen schonender.'],
+  ['In Ordnung, wenn man nur leicht schlägt.',0,'Falsch: Auch leichte Schläge hinterlassen Eindrücke, und das Lager geht so nicht auf die Welle.']]},
+ {a:'z',l:'Rechnen',q:'Die Bohrung soll beim Aufschieben 0,05 mm größer sein als im kalten Zustand (Übermaß plus etwas Spiel). Um wie viel Kelvin muss das Lager erwärmt werden?',v:83.33,u:'K',tol:.02,
+  weg:['Δd = d · α · ΔT, nach ΔT umstellen: ΔT = Δd / (d · α)','ΔT = 0,05 mm / (50 mm · 12 · 10⁻⁶ 1/K) = 83,3 K','Von 20 °C ausgehend sind das etwa 103 °C.']},
+ {a:'w',e:1,l:'Entscheiden',q:'Wie bringst Du das Lager auf die Welle?',o:[
+  ['Mit einem Induktions-Anwärmgerät auf etwa 100 °C erwärmen (höchstens 120 °C), mit Hitzeschutzhandschuhen zügig bis zur Anlage aufschieben, kurz andrücken und abkühlen lassen.',2,'Beste Wahl: gleichmäßig warm, keine Schläge, die Temperatur bleibt im erlaubten Bereich.'],
+  ['Mit dem Schweißbrenner erwärmen.',-1,'Gefährlich und schädlich: Die Erwärmung ist ungleichmäßig, örtlich viel zu heiß. Das Lager verliert seine Härte, Dichtungen und Fett verbrennen.'],
+  ['Die Welle abschleifen, bis das Lager von Hand draufgeht.',0,'Falsch: Dann sitzt der Innenring lose, dreht auf der Welle mit und verschleißt sie.'],
+  ['Im Ölbad auf 100 °C erwärmen.',1,'Vertretbar und früher üblich: Das Öl kann aber brennen und spritzen, und das Lager wird schmutzig. Ein Anwärmgerät ist sicherer.']]},
+ {a:'t',l:'Begründen',q:'Begründe Deine Entscheidung in drei bis fünf Sätzen.',
+  mus:'Schläge auf den Außenring gehen über die Kugeln und drücken Dellen in die Laufbahnen, das Lager fällt früh aus. Mit Wärme geht es ohne Kraft: Beim Erwärmen dehnt sich die Bohrung aus, nach Δd = d · α · ΔT braucht es etwa 83 K, also rund 100 °C. Das Anwärmgerät erwärmt gleichmäßig und hält die Höchsttemperatur von 120 °C ein. Brenner oder Abschleifen der Welle würden das Lager oder den Sitz zerstören.',
+  chk:['Keine Montagekraft über die Wälzkörper (Schäden an den Laufbahnen)','Erwärmung berechnet: etwa 83 K, also rund 100 °C','Gleichmäßig erwärmen, höchstens 120 °C, Hitzeschutzhandschuhe','Brenner oder Abschleifen der Welle sind keine Lösung']},
+ {a:'n',l:'Nachfrage',q:'Man könnte auch die Welle abkühlen statt das Lager zu erwärmen. Warum macht man das seltener?',
+  ant:'Die Welle ist meist groß und schwer, sie lässt sich schlecht kühlen. Mit Trockeneis erreicht man etwa −78 °C, also rund 100 K Unterschied, das ginge zwar, ist aber aufwendiger. Außerdem bildet sich an der kalten Welle Kondenswasser, das zu Rost führen kann.'}]},
+{id:'komp',n:'Elektrische Arbeit & Leistung',f:'Energie',ic:'🔧',titel:'Kompressor läuft am Wochenende',
+ lage:'Am Wochenende (Samstag 6 Uhr bis Montag 6 Uhr, also 48 h) produziert niemand, trotzdem springt der Kompressor (15 kW) immer wieder an. Die Druckluft entweicht durch undichte Schläuche, Kupplungen und Ventile. Laut Betriebsstundenzähler läuft er am Wochenende etwa 40 % der Zeit. Strompreis 0,25 €/kWh, 52 Wochenenden im Jahr. Ein Kollege meint: „Druckluft kostet doch nichts.“',
+ fig:'komp',st:[
+ {a:'z',l:'Rechnen',q:'Was kosten die Leckagen allein an den Wochenenden pro Jahr?',v:3744,u:'€',tol:.01,
+  weg:['Laufzeit je Wochenende: 48 h · 0,4 = 19,2 h','W = P · t = 15 kW · 19,2 h · 52 = 14 976 kWh','Kosten = 14 976 kWh · 0,25 €/kWh = 3 744 €']},
+ {a:'w',l:'Erste Einschätzung',q:'Ein anderer Kollege schlägt vor, den Kompressor freitags einfach auszuschalten. Was sagst Du?',o:[
+  ['Gute Sofortmaßnahme, aber erst prüfen, ob am Wochenende etwas Druckluft braucht, z. B. pneumatische Spannvorrichtungen, die eine Last halten, oder eine Sprinkleranlage mit Druckluft.',2,'Richtig: Abschalten spart sofort, darf aber nichts Sicherheitsrelevantes drucklos machen.'],
+  ['Einfach ausschalten, ohne nachzusehen.',1,'Vertretbar als Idee, aber riskant: Eine Spannvorrichtung, die drucklos wird, kann ein Werkstück fallen lassen.'],
+  ['Nicht nötig, Druckluft ist billig.',0,'Falsch: Allein die Wochenenden kosten rund 3 744 € im Jahr.'],
+  ['Lieber den Druck auf 10 bar erhöhen, damit die Werkzeuge am Montag besser laufen.',0,'Falsch: Mehr Druck heißt mehr Leckluft und mehr Energie.']]},
+ {a:'w',e:1,l:'Entscheiden',q:'Welche Lösung schlägst Du der Werkleitung vor?',o:[
+  ['Nach der Prüfung: Kompressor und Hauptabsperrventil am Wochenende automatisch abschalten. Dazu Leckagen mit einem Ultraschall-Lecksuchgerät suchen und beheben, den Netzdruck auf das nötige Maß senken und die Suche jährlich wiederholen.',2,'Beste Wahl: Die Kosten am Wochenende fallen sofort weg, und die Leckagen kosten auch unter der Woche Geld.'],
+  ['Nur die Leckagen abdichten.',1,'Vertretbar: richtig, aber neue Lecks entstehen immer wieder. Das automatische Abschalten spart dauerhaft.'],
+  ['Einen größeren Kompressor kaufen, damit der Druck stabil bleibt.',0,'Falsch: Mehr Leistung für mehr Leckluft erhöht die Kosten.'],
+  ['Nichts ändern, 3 744 € sind bei unserem Umsatz egal.',0,'Falsch: Das Geld ist ohne Nutzen weg, und die Maßnahme ist günstig.']]},
+ {a:'t',l:'Begründen',q:'Begründe Deinen Vorschlag in drei bis fünf Sätzen für die Werkleitung.',
+  mus:'Der Kompressor läuft am Wochenende etwa 19,2 h nur für die Leckagen. Das sind 15 kW · 19,2 h · 52 = 14 976 kWh oder rund 3 744 € im Jahr, ohne Nutzen. Nach einer Prüfung, ob am Wochenende Druckluft gebraucht wird, schalten wir Kompressor und Hauptventil automatisch ab. Zusätzlich suchen wir die Lecks mit Ultraschall und beheben sie, denn sie kosten auch unter der Woche. Den Netzdruck senken wir auf das nötige Maß.',
+  chk:['Kosten berechnet: 14 976 kWh, rund 3 744 € pro Jahr','Vor dem Abschalten geprüft, was Druckluft braucht','Automatisch abschalten und Leckagen suchen und beheben','Netzdruck senken, regelmäßig wiederholen']},
+ {a:'n',l:'Nachfrage',q:'Warum spart es Energie, den Netzdruck von 8 bar auf 6 bar zu senken?',
+  ant:'Durch ein Leck strömt bei höherem Druck mehr Luft aus, bei weniger Druck geht also weniger verloren. Außerdem braucht der Kompressor weniger Energie, um die Luft auf einen niedrigeren Druck zu verdichten. Als Faustwert gelten etwa 6 bis 8 % weniger Energie je bar.'}]}
+);
 /* Ablauf */
 const BFR={2:['✅','Beste Wahl','r2'],1:['🟡','Vertretbar','r1'],0:['❌','Falsch','r0'],'-1':['⛔','Gefährlich','rg']};
 const bfaFb=t=>t.replace(/^(Richtig|Falsch|Gefährlich|Beste Wahl|Vertretbar|Teilweise richtig)( und [a-z]+)?: ?/,'');
