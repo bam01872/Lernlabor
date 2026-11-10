@@ -4232,19 +4232,118 @@ fm(FE,E4,'Biogasanlage mit BHKW','Mikroorganismen zersetzen Biomasse ohne Luft (
  res:[[nf(Vg)+' m³/d','Biogas'],[nf(Pe)+' kW','elektrische Leistung (Mittel)'],[nf(Pt)+' kW','Wärmeleistung (Mittel)']],rows:[['Methan darin',nf(Vm)+' m³/d ('+B[2]+' %)'],['Energieinhalt Methan',nf(E)+' kWh/d (9,97 kWh/m³)'],['Gesamtwirkungsgrad',(s.ee+s.et)+' % (Kraft-Wärme-Kopplung)']],st:[['V_Biogas = Menge · Gasausbeute',`${s.t} t · ${B[1]} m³/t = ${nf(Vg)} m³`],['E = V_CH₄ · H_i',`${nf(Vm)} m³ · 9,97 kWh/m³ = ${nf(E)} kWh/d`],['P_el = η_el · E / 24 h',nf(Pe)+' kW']]}},
  'Gülle liefert wenig Gas (25 m³/t), energiereiche Pflanzen wie Mais deutlich mehr (200 m³/t). Die Rückstände sind wertvoller Dünger. Gasausbeute-Werte sind Richtwerte.',1);
 const FLM=(x,y,k)=>`<g transform="translate(${x} ${y}) scale(${k})"><path d="M0 0C-9 0-11-8-7-14C-5-10-3-10-3-12C-3-17 0-20 1-25C4-20 10-15 9-7C9-3 6 0 0 0Z" fill="#f97316" stroke="#b91c1c" stroke-width="1.2" stroke-linejoin="round"/><path d="M0-2C-4-2-5-6-3-9C-2-7-1-7-1-9C0-11 2-13 2-15C4-12 5-9 5-6C5-3 3-2 0-2Z" fill="#fde047"/></g>`;
-fm(FE,E1,'Verbrennungsmotor (Viertakt)','Im Arbeitszylinder wird die chemische Energie des Kraftstoff-Luft-Gemischs in Druck und Ausdehnung umgesetzt. Ein Arbeitsspiel besteht aus vier Takten und zwei Kurbelwellenumdrehungen: Ansaugen, Verdichten, Arbeiten, Ausstoßen.',
+/* Verbrennungsmotor (Viertakt) mit Gasteilchen (Präfix VM). ph = Kurbelwinkel 0…720° (0 = OT vor dem Ansaugen).
+   Gaszustand als vereinfachtes Modell: Verdichten und Ausdehnen adiabat (κ = 1,4), Verbrennung hebt p und T um den Faktor F. */
+const VMP=(()=>{const P=[];for(let i=0;i<24;i++){const c=i%6,r=Math.floor(i/6);P.push([(c+.5+.55*(GZH(i*3.1+1)-.5))/6,(r+.5+.55*(GZH(i*7.7+2)-.5))/4])}
+ [[.28,.42],[.72,.55],[.5,.3],[.42,.72]].forEach(q=>P.push(q));
+ const rk=P.map((_,i)=>i).sort((a,b)=>GZH(a*1.37+5)-GZH(b*1.37+5)),R=[];rk.forEach((v,j)=>R[v]=j);return{P,R}})();
+const VMB=(D,ph)=>D?GZE((ph-352)/48):GZE((ph-350)/40);
+const VMG=(D,ph,x)=>{const e=D?18:10,F=D?2:2.8,T1=D?313:300,Vc=1/(e-1),k=Math.floor(ph/180),ad=(1+Vc)/(Vc+x);
+ if(k==0)return{p:.9,T:T1-273};
+ if(k<3){const f=1+(F-1)*VMB(D,ph);return{p:.9*ad**1.4*f,T:T1*ad**.4*f-273}}
+ const u=(ph-540)/180;return{p:1.1+(.9*F-1.1)*(1-GZE(u/.15)),T:(T1*F-273)*(1-.2*u)}};
+function VMBILD(s,t,eta){
+ const D=s.a==1,ph=(t*60)%720,k=Math.floor(ph/180),u=(ph%180)/180,phi=ph*PI/180,CX=150,Y0=64,c=D?16:26,SH=88,R=44,L=84,cC=Y0+c+16+R+L,
+  pin=cC-(R*Math.cos(phi)+Math.sqrt(L*L-R*R*Math.sin(phi)**2)),top=pin-16,x=Math.max(0,(top-Y0-c)/SH),cp=[CX+R*Math.sin(phi),cC-R*Math.cos(phi)],
+  g=VMG(D,ph,x),hot=Math.max(0,Math.min(1,(g.T-150)/1500)),lIn=k==0?10*Math.sin(PI*u):0,lEx=k==3?10*Math.sin(PI*u):0,
+  bot=Y0+c+SH+34,o0=[CX,Y0+1],Rf=ph<348||k>2?(k>2?999:0):D?170*GZE((ph-352)/45):170*GZE((ph-350)/40),
+  AIR='#7cc4f2',FUEL='#f59e0b',BURN=PVMX('#9aa5b1','#f97316',Math.min(1,hot*1.3)),gas=PVMX('#dbeafe','#fdba74',hot);
+ let d=`<defs><clipPath id="vmzc"><rect x="90" y="${Y0}" width="120" height="${f2(top-Y0+(D?14:0))}"/></clipPath></defs>`;
+ /* Kurbelgehäuse (hinten) */
+ d+=`<path d="M78 ${bot-6}L${CX-66} ${cC-18}A66 66 0 0 0 ${CX+66} ${cC-18}L222 ${bot-6}Z" fill="#cfd8e0" stroke="var(--ink)" stroke-width="1.4" opacity=".75"/>`;
+ /* Gasraum: Farbe nach Temperatur */
+ d+=`<rect x="90" y="${Y0}" width="120" height="${f2(top-Y0+1)}" fill="${gas}" opacity="${(.35+.45*hot).toFixed(2)}"/>`;
+ if(D)d+=`<path d="M120 ${f2(top)}Q150 ${f2(top+20)} 180 ${f2(top)}Z" fill="${gas}" opacity="${(.35+.45*hot).toFixed(2)}"/>`;
+ /* Flammenfront */
+ if(Rf>0&&Rf<200)d+=`<g clip-path="url(#vmzc)"><circle cx="${o0[0]}" cy="${o0[1]}" r="${f2(Rf)}" fill="#fb923c" opacity=".45"/><circle cx="${o0[0]}" cy="${o0[1]}" r="${f2(Rf)}" fill="none" stroke="#facc15" stroke-width="5" opacity=".8"/></g>`;
+ /* Gasteilchen */
+ const span=Math.max(0,top-Y0-7),pos=(i,b)=>{const j=GZJ(i,t*2.2,.6),j2=GZJ(i+50,t*7,.5+2.8*hot);
+  return[Math.max(93.5,Math.min(206.5,94+b[0]*112+j[0]+j2[0])),Math.max(Y0+3.5,Math.min(Math.max(Y0+3.5,top-3.5),Y0+3.5+b[1]*span+j[1]+j2[1]))]};
+ const isF=i=>!D&&[2,9,15,20].includes(i);let pt='';
+ for(let i=0;i<(D?28:24);i++){
+  if(D&&i>=24&&!(ph>=356+(i-24)*4&&k<4))continue;
+  let p=pos(i,VMP.P[i]),e=.04+.78*VMP.R[i]/28,w=(u-e)/.16;
+  if(k==0){if(i>=24||w<0)continue;if(w<1){const sx=i%2?104:134;p=PW([[18,35],[98,35],[sx,63+lIn*.6],p],GZE(w))}}
+  if(k==3){if(w>=1)continue;if(w>0){const sx=i%2?166:196;p=PW([p,[sx,63+lEx*.6],[202,35],[284,35]],GZE(w))}}
+  const burnt=k==3||(ph>=348&&Math.hypot(p[0]-o0[0],p[1]-o0[1])<Rf)||(D&&i>=24),col=burnt?BURN:isF(i)?FUEL:AIR;
+  pt+=BALL(f2(p[0]),f2(p[1]),3.4,col,.9)}
+ d+=pt;
+ /* Einspritzstrahlen (Diesel) */
+ if(D&&ph>=344&&ph<382){const J=[[-1,.2],[-.75,.5],[.75,.5],[1,.2]],a=Math.min(1,(ph-344)/5)*(ph>376?(382-ph)/6:1);
+  J.forEach(([jx,jy],m)=>{const n=Math.hypot(jx,jy),ux=jx/n,uy=jy/n,len=Math.min(58,(top-Y0+(Math.abs(jx)<.8?12:2))/uy),ex=CX+ux*len,ey=Y0+2+uy*len,px=-uy*len*.2,py=ux*len*.2;
+   d+=`<polygon points="${CX},${Y0+2} ${f2(ex+px)},${f2(ey+py)} ${f2(ex-px)},${f2(ey-py)}" fill="${FUEL}" opacity="${(.6*a).toFixed(2)}"/>`;
+   for(let q=0;q<3;q++){const w=((ph-344)/7+q/3)%1;d+=`<circle cx="${f2(CX+ux*len*w)}" cy="${f2(Y0+2+uy*len*w)}" r="2.4" fill="${FUEL}" stroke="#92400e" stroke-width=".7" opacity="${a.toFixed(2)}"/>`}
+   if(ph>=352)d+=FLM(f2(ex),f2(ey+4),.32+.08*Math.sin(t*30+m))})}
+ /* Zylinderkopf mit Einlass- und Auslasskanal */
+ d+=`<rect x="60" y="14" width="180" height="50" fill="#a7b2bd" stroke="var(--ink)" stroke-width="1.4"/><rect x="60" y="14" width="180" height="50" fill="url(#g-tile)"/>`
+  +`<path d="M14 24H96Q112 24 120 40L132 64.5H106L98 52Q92 46 84 46H14Z" fill="#e3eef7" stroke="var(--ink)" stroke-width="1.4"/>`
+  +`<path d="M286 24H204Q188 24 180 40L168 64.5H194L202 52Q208 46 216 46H286Z" fill="${k==3?PVMX('#e5e7eb','#fed7aa',hot):'#e5e7eb'}" stroke="var(--ink)" stroke-width="1.4"/>`
+  +`<path d="M14 24H60M14 46H60M240 24H286M240 46H286" stroke="var(--ink)" stroke-width="2.4"/>`;
+ /* Ventile (Tellerventile): öffnen nach unten */
+ const VV=(vx,lf)=>`<rect x="${vx-2}" y="${f2(2+lf)}" width="4" height="56" fill="#64748b" stroke="var(--ink)" stroke-width=".8"/><rect x="${vx-7}" y="${f2(2+lf)}" width="14" height="3.5" rx="1" fill="#475569"/>`
+  +`<polygon points="${vx-14},${f2(64+lf)} ${vx+14},${f2(64+lf)} ${vx+7},${f2(57.5+lf)} ${vx-7},${f2(57.5+lf)}" fill="#64748b" stroke="var(--ink)" stroke-width="1.1"/>`;
+ d+=VV(119,lIn)+VV(181,lEx);
+ /* Zündkerze (Otto) oder Einspritzdüse (Diesel) */
+ if(!D){d+=`<rect x="145" y="14" width="10" height="48" fill="#9ca3af" stroke="var(--ink)" stroke-width="1"/><path d="M145 20h10M145 26h10M145 32h10M145 38h10" stroke="#6b7280" stroke-width=".8"/>`
+   +`<rect x="141" y="2" width="18" height="12" fill="#475569" stroke="var(--ink)" stroke-width="1"/><rect x="146" y="-10" width="8" height="12" rx="2" fill="#f1f5f9" stroke="var(--ink)" stroke-width="1"/><rect x="148" y="-14" width="4" height="4" fill="#64748b"/>`
+   +`<path d="M150 62V66M155 62V69H151" fill="none" stroke="#334155" stroke-width="1.6"/>`;
+  if(ph>=344&&ph<357)d+=`<circle cx="150" cy="67" r="${f2(9+4*Math.sin(t*50))}" fill="#fde047" opacity=".75"/><path d="M146 63L151 67L147 69L153 74" fill="none" stroke="#fff" stroke-width="1.6"/>`}
+ else d+=`<rect x="144" y="-10" width="12" height="66" rx="2" fill="#64748b" stroke="var(--ink)" stroke-width="1"/><rect x="144" y="-10" width="12" height="66" rx="2" fill="url(#g-tile)"/><polygon points="146,56 154,56 152,64 148,64" fill="#475569" stroke="var(--ink)" stroke-width="1"/><path d="M156 -4H176" stroke="var(--ink)" stroke-width="2.4"/>`;
+ /* Kurbelwelle mit Gegengewicht, Pleuel, Kolben */
+ const ca=phi+PI,cw=a=>[CX+40*Math.sin(a),cC-40*Math.cos(a)],c1=cw(ca-1),c2=cw(ca+1);
+ d+=`<path d="M${CX} ${cC}L${f2(c1[0])} ${f2(c1[1])}A40 40 0 0 1 ${f2(c2[0])} ${f2(c2[1])}Z" fill="#7b8794" stroke="var(--ink)" stroke-width="1.2"/>`
+  +`<line x1="${CX}" y1="${cC}" x2="${f2(cp[0])}" y2="${f2(cp[1])}" stroke="var(--ink)" stroke-width="24" stroke-linecap="round"/><line x1="${CX}" y1="${cC}" x2="${f2(cp[0])}" y2="${f2(cp[1])}" stroke="#8a96a1" stroke-width="21.4" stroke-linecap="round"/>`
+  +`<circle cx="${CX}" cy="${cC}" r="10" fill="#475569" stroke="var(--ink)" stroke-width="1.2"/>`;
+ const ra=Math.atan2(cp[1]-pin,cp[0]-CX),nx=-Math.sin(ra),ny=Math.cos(ra);
+ d+=`<polygon points="${f2(CX+nx*6)},${f2(pin+ny*6)} ${f2(cp[0]+nx*8)},${f2(cp[1]+ny*8)} ${f2(cp[0]-nx*8)},${f2(cp[1]-ny*8)} ${f2(CX-nx*6)},${f2(pin-ny*6)}" fill="#a3aeb9" stroke="var(--ink)" stroke-width="1.2"/>`
+  +`<circle cx="${f2(cp[0])}" cy="${f2(cp[1])}" r="10" fill="#a3aeb9" stroke="var(--ink)" stroke-width="1.2"/><circle cx="${f2(cp[0])}" cy="${f2(cp[1])}" r="4" fill="#475569"/>`;
+ d+=`<rect x="91" y="${f2(top)}" width="118" height="30" rx="2" fill="#b8c2cc" stroke="var(--ink)" stroke-width="1.4"/><rect x="91" y="${f2(top)}" width="118" height="30" rx="2" fill="url(#g-cyl)"/>`
+  +`<path d="M92 ${f2(top+6)}H208M92 ${f2(top+10)}H208" stroke="#475569" stroke-width="1.2"/><circle cx="${CX}" cy="${f2(pin)}" r="6" fill="#64748b" stroke="var(--ink)" stroke-width="1"/>`;
+ if(D)d+=`<path d="M120 ${f2(top)}Q150 ${f2(top+20)} 180 ${f2(top)}" fill="${gas}" stroke="var(--ink)" stroke-width="1.2"/>`;
+ /* Zylinderwand */
+ d+=`<rect x="74" y="${Y0}" width="16" height="${bot-Y0}" fill="#aab4c0" stroke="var(--ink)" stroke-width="1.4"/><rect x="210" y="${Y0}" width="16" height="${bot-Y0}" fill="#aab4c0" stroke="var(--ink)" stroke-width="1.4"/>`
+  +`<rect x="78" y="${Y0+4}" width="5" height="${bot-Y0-14}" fill="#93c5fd" opacity=".7"/><rect x="217" y="${Y0+4}" width="5" height="${bot-Y0-14}" fill="#93c5fd" opacity=".7"/>`;
+ /* Kraft auf den Kolben: Druck · Fläche */
+ if(g.p>3&&k==2){const ln=8+34*Math.min(1,g.p/100);d+=ARW(118,f2(top+2),118,f2(top+2+ln),'var(--red)',4)+ARW(182,f2(top+2),182,f2(top+2+ln),'var(--red)',4)+`<text x="190" y="${f2(top+19)}" style="font-size:17px;font-weight:800;fill:var(--red);paint-order:stroke;stroke:var(--card);stroke-width:5px;stroke-linejoin:round">F</text>`}
+ /* OT / UT */
+ d+=`<path d="M60 ${Y0+c}H74M60 ${Y0+c+SH}H74" stroke="var(--mute)" stroke-width="1.4" stroke-dasharray="3 2"/>`+TH(57,Y0+c+5,'OT','t2','end')+TH(57,Y0+c+SH+5,'UT','t2','end');
+ /* Lupe auf den Brennraum rund um OT (Zünden bzw. Einspritzen sonst zu klein zu sehen) */
+ const LU=ph>=318&&ph<420,la=Math.min(1,(ph-318)/8,(420-ph)/8);
+ if(LU){const zy=Y0+c/2+4;d+=`<g opacity="${la.toFixed(2)}"><circle cx="${CX}" cy="${zy}" r="31" fill="none" stroke="var(--ink)" stroke-width="1.4" stroke-dasharray="4 3"/><path d="M181 ${zy}L232 150" stroke="var(--ink)" stroke-width="1.2" stroke-dasharray="4 3"/>`
+  +`<clipPath id="vmlc"><circle cx="288" cy="150" r="56"/></clipPath><circle cx="288" cy="150" r="56" fill="var(--card)"/><g clip-path="url(#vmlc)"><g transform="translate(288 150) scale(1.8) translate(-150 ${f2(-zy)})">${d}</g></g>`
+  +`<circle cx="288" cy="150" r="56" fill="none" stroke="var(--ink)" stroke-width="2.6"/>`+TH(288,222,'Lupe: Brennraum','t2','middle')+`</g>`}
+ /* Beschriftungen */
+ d+=TH(14,62,'Einlass','t2')+TH(286,62,'Auslass','t2','end')+TH(140,-4,D?'Einspritzdüse':'Zündkerze','t2','end')
+  +(LU?'':TH(232,f2(top+22),'Kolben','t2')+TH(236,f2((pin+cp[1])/2+20),'Pleuel','t2'))+TH(226,cC+56,'Kurbelwelle','t2');
+ /* Legende */
+ const LG=[[AIR,'Luft'],[FUEL,D?'Diesel':'Benzin'],['#f97316','heißes Gas'],['#9aa5b1','Abgas']];
+ d+=LG.map(([cl,tx],i)=>BALL(10,234+i*17,4,cl,.9)+SXT(20,238+i*17,tx,12,'start','var(--ink)',500)).join('');
+ /* Erklärfeld rechts */
+ const N4=['Ansaugen','Verdichten','Arbeiten','Ausstoßen'],KO=['↓','↑','↓','↑'],EV=[[1,0],[0,0],[0,0],[0,1]],X0=350;
+ d+=SXT(X0,20,`Takt ${k+1} von 4: ${N4[k]}`,16,'start','var(--ink)',800)
+  +SXT(X0,38,`Kurbelwelle ${Math.round(ph)}° von 720° (${ph<360?1:2}. Umdrehung)`,12,'start','var(--mute)',500)
+  +SXT(X0,58,'Takt',11,'start','var(--mute)',700)+SXT(482,58,'Kolben',11,'middle','var(--mute)',700)+SXT(540,58,'Einlass',11,'middle','var(--mute)',700)+SXT(600,58,'Auslass',11,'middle','var(--mute)',700);
+ N4.forEach((n,i)=>{const y=75+i*18,on=i==k,vc=o=>o?'var(--ok)':'var(--mute)';
+  d+=(on?`<rect x="${X0-4}" y="${y-13}" width="288" height="17" rx="5" fill="var(--amber)" opacity=".28"/>`:'')
+   +SXT(X0,y,(i+1)+' '+n,12,'start',on?'var(--ink)':'var(--mute)',on?800:500)+SXT(482,y+1,KO[i],14,'middle',on?'var(--ink)':'var(--mute)',800)
+   +SXT(540,y,EV[i][0]?'auf':'zu',12,'middle',vc(EV[i][0]),EV[i][0]?800:500)+SXT(600,y,EV[i][1]?'auf':'zu',12,'middle',vc(EV[i][1]),EV[i][1]?800:500)});
+ const TX=D?[['Der Kolben geht nach unten und','saugt nur Luft an.'],['Der Kolben drückt die Luft sehr stark','zusammen (ε ≈ 18). Die Teilchen werden','eng, die Luft wird über 700 °C heiß.'],['Diesel wird eingespritzt und zündet in','der heißen Luft von selbst. Das heiße Gas','drückt den Kolben nach unten: Kraft F.'],['Der Kolben geht hoch und schiebt','das Abgas durch den Auslass hinaus.']]
+  :[['Der Kolben geht nach unten und saugt','Luft mit fein verteiltem Benzin an.'],['Der Kolben drückt das Gemisch zusammen','(ε ≈ 10). Die Teilchen werden eng,','Druck und Temperatur steigen.'],['Kurz vor OT zündet die Zündkerze. Das','Gemisch verbrennt, das heiße Gas drückt','den Kolben nach unten: Kraft F.'],['Der Kolben geht hoch und schiebt','das Abgas durch den Auslass hinaus.']];
+ if(k==1&&ph>=344)TX[1]=D?['Kurz vor OT wird Diesel fein eingespritzt.','In der heißen Luft zündet er von selbst','(Selbstzündung). Die Verbrennung beginnt.']:['Kurz vor OT springt an der Zündkerze','ein Funke über (Fremdzündung). Die Flamme','breitet sich im Gemisch aus.'];
+ d+=TX[k].map((q,i)=>SXT(X0,150+i*16,q,12.5,'start','var(--ink)',k==2&&i==2?700:500)).join('');
+ const BW=110,BX=440,BR=(y,lab,f,cl,val)=>SXT(X0,y+9,lab,12,'start','var(--ink)',600)+`<rect x="${BX}" y="${y}" width="${BW}" height="11" rx="3" fill="none" stroke="var(--wire)" stroke-dasharray="3 3"/><rect x="${BX}" y="${y}" width="${f2(Math.max(2,BW*Math.min(1,f)))}" height="11" rx="3" fill="${cl}" stroke="var(--ink)" stroke-width=".8"/>`+SXT(BX+BW+6,y+10,val,12,'start','var(--ink)',700);
+ d+=BR(198,'Druck p',g.p/100,'#3b82f6','≈ '+nf(+g.p.toPrecision(2))+' bar')+BR(216,'Temperatur ϑ',g.T/2200,PVMX('#fbbf24','#dc2626',hot),'≈ '+nf(Math.round(g.T/10)*10)+' °C')
+  +SXT(X0,246,'Energie (aus den Reglern berechnet)',11,'start','var(--mute)',600)
+  +BR(252,'Kraftstoff',1,'#fcd34d','100 %')+BR(270,'an der Welle',Math.min(1,eta),'#22a06b',nf(eta*100)+' %');
+ if(eta>(D?.5:.45))d+=SXT(X0,298,eta>1?'⚠️ Unmöglich: mehr Leistung als Kraftstoff':'⚠️ Wirkungsgrad unrealistisch hoch',12,'start','var(--red)',700);
+ return d;
+}
+fm(FE,E1,'Verbrennungsmotor (Viertakt)','Im Arbeitszylinder wird die chemische Energie des Kraftstoffs in Druck und Ausdehnung umgesetzt. Ein Arbeitsspiel besteht aus vier Takten und zwei Kurbelwellenumdrehungen: Ansaugen, Verdichten, Arbeiten, Ausstoßen. Die Kugeln im Zylinder sind Gasteilchen: Sie werden zusammengedrückt, verbrennen, werden heiß und schnell und drücken den Kolben nach unten.',
  [['a','Motor','sel',['Ottomotor (Benzin)','Dieselmotor'],0],['n','n',800,6000,100,'1/min',3000],['M','M',50,400,5,'N·m',150],['V','Verbr.',2,60,.5,'l/h',15]],
- (s,t=0)=>{const Hi=s.a?42.7:43,rho=s.a?.83:.74,P=s.M*2*PI*s.n/60,Pz=s.V*rho*Hi/3.6*1000,eta=P/Pz,ph=(t*90)%720,ta=Math.floor(ph/180),r=26,l=90,cy=140,phi=ph*PI/180,py=cy-(r*Math.cos(phi)+Math.sqrt(l*l-r*r*Math.sin(phi)**2)),cx=110,top=40;
- const names=['1. Ansaugen','2. Verdichten','3. Arbeiten','4. Ausstoßen'],gas=['var(--flow)','var(--amber)','var(--red)','var(--mute)'][ta],hy=cy+r*Math.cos(phi)*-1;
- const crank=`<circle cx="${cx}" cy="${cy+75}" r="${r}" fill="none" stroke="var(--ink)" stroke-width="2.4"/><line x1="${cx}" y1="${cy+75}" x2="${cx+r*Math.sin(phi)}" y2="${cy+75-r*Math.cos(phi)}" stroke="var(--ink)" stroke-width="4"/>`;
- const pyy=60+(py-(cy-l-r))/ (2*r)*0+0;
- const pTop=44+(1-(Math.cos(phi)+1)/2)*(2*r)*1.0, pst=pTop;
- return{d:`<g transform="translate(30 32)"><rect x="${cx-38}" y="30" width="76" height="${210-30}" fill="none"/><path d="M${cx-38} 30V150M${cx+38} 30V150" stroke="var(--ink)" stroke-width="4"/><rect x="${cx-36}" y="${pst+6}" width="72" height="${150-pst-6}" fill="${gas}" opacity=".4"/><rect x="${cx-36}" y="${pst}" width="72" height="14" rx="2" fill="var(--mute)" stroke="var(--ink)" stroke-width="2"/><line x1="${cx}" y1="${pst+14}" x2="${cx+r*Math.sin(phi)}" y2="${cy+75-r*Math.cos(phi)}" stroke="var(--ink)" stroke-width="5"/>`+crank.replace(`cy="${cy+75}"`,`cy="${cy+75}"`)+
- `<line x1="${cx-38}" x2="${cx+38}" y1="30" y2="30" stroke="var(--ink)" stroke-width="5"/>`+`<rect x="${cx-30}" y="14" width="22" height="${ta==0?4:14}" fill="var(--flow)"/><rect x="${cx+8}" y="14" width="22" height="${ta==3?4:14}" fill="var(--mute)"/>`+T(cx-8,12,'Einlass','t2','end')+T(cx+8,12,'Auslass','t2')+(ta==2&&ph%720<420?FLM(cx,47,.85+.15*Math.sin(t*40)):'')+`</g>`+
- names.map((q,i)=>T(230,60+i*24,q+[s.a?' (nur Luft strömt ein)':' (Gemisch strömt ein)',s.a?' (Luft wird verdichtet, heiß)':' (Gemisch wird komprimiert)',s.a?' (Einspritzen, Selbstzündung)':' (Zündfunke, Expansion)',' (Abgas wird ausgeschoben)'][i],i==ta?'t1':'t2')).join('')+
- CH(230,168,150,[['Kraftstoff',1],['mechanische Leistung',Math.min(1,eta)]]).replace('Energiefluss (100 % = zugeführt)','')+(eta>(s.a?.5:.45)?T(230,262,eta>1?'⚠️ Unmöglich: mehr Leistung als Kraftstoff':'⚠️ Wirkungsgrad unrealistisch hoch','t2'):''),
- res:[[nf(P/1000)+' kW','Motorleistung P'],[nf(Pz/1000)+' kW','Kraftstoffleistung'],[(eta>(s.a?.5:.45)?'⚠️ ':'')+nf(eta*100)+' %','Wirkungsgrad']],rows:[['Plausibel?',eta>1?'Unmöglich: Der Wirkungsgrad kann nicht über 100 % liegen. Für diese Leistung braucht der Motor mehr Kraftstoff (Regler Verbr. erhöhen).':eta>(s.a?.5:.45)?'Unrealistisch: Reale Motoren erreichen höchstens etwa '+(s.a?'45':'40')+' %. Regler Verbr. erhöhen oder M bzw. n senken.':eta<.1?'Sehr niedrig, wie im Leerlauf oder bei kleiner Last.':'Ja, im realen Bereich.'],['Abwärme + Abgas',eta>1?'–':nf((Pz-P)/1000)+' kW'],['Arbeitsspiel','4 Takte = 2 Umdrehungen'],['Kraftstoff',s.a?'Diesel (H_i ≈ 42,7 MJ/kg)':'Benzin (H_i ≈ 43 MJ/kg)']],st:[['P = M · 2π · n',`${s.M} N·m · 2π · ${nf(s.n/60)} 1/s = ${nf(P)} W`],['P_zu = ṁ · H_i',`${nf(s.V)} l/h · ${nf(rho)} kg/l · ${nf(Hi)} MJ/kg = ${nf(Pz)} W`],['η = P / P_zu',nf(eta*100)+' %']]}},
- 'Otto: Fremdzündung (Zündkerze), Diesel: Selbstzündung durch hochverdichtete Luft. Heizwerte in der Formelsammlung können abweichen. In der Prüfung die dort angegebenen Werte verwenden. Realer Wirkungsgrad: Otto ca. 30–36 %, Diesel ca. 35–42 %.',1);
+ (s,t=0)=>{const D=s.a==1,Hi=D?42.7:43,rho=D?.83:.74,P=s.M*2*PI*s.n/60,Pz=s.V*rho*Hi/3.6*1000,eta=P/Pz,e=D?18:10,T1=D?313:300;
+ return{vb:'0 -18 640 320',d:VMBILD(s,t,eta),
+ res:[[nf(P/1000)+' kW','Motorleistung P'],[nf(Pz/1000)+' kW','Kraftstoffleistung'],[(eta>(D?.5:.45)?'⚠️ ':'')+nf(eta*100)+' %','Wirkungsgrad']],rows:[['Plausibel?',eta>1?'Unmöglich: Der Wirkungsgrad kann nicht über 100 % liegen. Für diese Leistung braucht der Motor mehr Kraftstoff (Regler Verbr. erhöhen).':eta>(D?.5:.45)?'Unrealistisch: Reale Motoren erreichen höchstens etwa '+(D?'45':'40')+' %. Regler Verbr. erhöhen oder M bzw. n senken.':eta<.1?'Sehr niedrig, wie im Leerlauf oder bei kleiner Last.':'Ja, im realen Bereich.'],['Abwärme + Abgas',eta>1?'–':nf((Pz-P)/1000)+' kW'],['Arbeitsspiel','4 Takte = 2 Umdrehungen'],['Zündung',D?'Selbstzündung: Diesel entzündet sich in der heißen Luft':'Fremdzündung: Zündkerze kurz vor OT'],['Verdichtung (Modell)',`ε ≈ ${e} : 1, danach ≈ ${nf(Math.round(.9*e**1.4))} bar und ≈ ${nf(Math.round((T1*e**.4-273)/10)*10)} °C`],['Zeitlupe',`Bei ${nf(s.n)} 1/min dauert ein Arbeitsspiel nur ${nf(120/s.n)} s`],['Kraftstoff',D?'Diesel (H_i ≈ 42,7 MJ/kg)':'Benzin (H_i ≈ 43 MJ/kg)']],st:[['P = M · 2π · n',`${s.M} N·m · 2π · ${nf(s.n/60)} 1/s = ${nf(P)} W`],['P_zu = ṁ · H_i',`${nf(s.V)} l/h · ${nf(rho)} kg/l · ${nf(Hi)} MJ/kg = ${nf(Pz)} W`],['η = P / P_zu',nf(eta*100)+' %']]}},
+ 'Otto: Fremdzündung (Zündkerze), Diesel: Selbstzündung durch hochverdichtete, heiße Luft. Im Bild steht jede Kugel für sehr viele Moleküle. Heiße Teilchen bewegen sich schneller und drücken stärker auf den Kolben. Druck und Temperatur sind vereinfachte Modellwerte, der Brennraum ist nicht maßstäblich. Viele Ottomotoren spritzen heute direkt in den Zylinder ein, gezündet wird trotzdem mit der Zündkerze. Heizwerte in der Formelsammlung können abweichen. In der Prüfung die dort angegebenen Werte verwenden. Realer Wirkungsgrad: Otto ca. 30–36 %, Diesel ca. 35–42 %.',1);
 
 const GEN={
 'Grundlagen: Stromkreis':r=>{const I=rg(r,2,40,1)/10,N=I/1.602e-19;return[`Durch einen Verbraucher fließen ${nf(I)} A. Wie viele Elektronen fließen pro Sekunde hindurch? Gib das Ergebnis in 10¹⁸ an.`,N/1e18,'· 10¹⁸',[`N = I / e = ${nf(I)} A / (1,602 · 10⁻¹⁹ C) = ${nf(N/1e18)} · 10¹⁸ 1/s`,'Einheit: 1 A = 1 C/s, also A / C = 1/s, das heißt Elektronen pro Sekunde.']]},
@@ -10229,7 +10328,7 @@ function aufTick(){const b=$('#auf');if(!b||b.hidden||cur<0||b.dataset.n!==M[cur
  if(ok&&!b.dataset.ok){b.dataset.ok='1';b.querySelector('.aufdn').hidden=false;const X=store.get('ll_auf',{});if(!(X[n]&&X[n].ok)){X[n]=Object.assign(X[n]||{},{ok:1,d:mToday()});store.set('ll_auf',X);memRec(n,true,null,'auf')}}}
 // Bildausschnitt v146: engerer viewBox, wo die Zeichnung nur einen Teil der Fläche nutzt (Name|Original-viewBox → Ausschnitt).
 // Ermittelt aus allen Reglerstellungen (Handy und Laptop), Seitenverhältnis nie höher als vorher; tests/check.js prüft, dass nichts abgeschnitten wird.
-const VBC={"Ausmultiplizieren & Ausklammern|0 0 640 300":'-8 12 556 261',"Drehstrom (Stern & Dreieck)|0 0 640 300":'-35 22 549 258',"Gemischt (R₁+R₂)∥(R₃+R₄)|0 0 640 300":'38 61 601 218',"Gemischt (R₁+R₂)∥R₃|0 0 640 300":'38 61 583 218',"Gemischt R₁+(R₂∥R₃)+R₄|0 0 640 300":'35 24 560 263',"Histogramm|0 0 640 300":'24 0 590 270',"Kräfteparallelogramm|0 0 640 300":'0 26 524 243',"Mischungstemperatur|0 0 640 300":'8 87 538 193',"Mittelwert, Median & Modalwert|0 0 640 300":'26 2 588 262',"Ohmsches Gesetz|0 0 640 300":'53 28 580 272',"Oxidationszahlen|0 0 640 300":'35 53 570 247',"Parallel|0 0 640 300":'38 61 602 218',"Pneumatik: Luftverbrauch|0 0 640 300":'16 57 596 215',"Reihe|0 0 640 300":'38 24 566 250',"Schmelz- & Verdampfungswärme|0 0 640 300":'6 48 608 242',"Spannweite, Varianz & Standardabweichung|0 0 640 300":'26 12 589 219',"Verbrennungsmotor (Viertakt)|0 0 640 300":'35 16 578 271',"Wirkungsgrad|0 0 640 300":'26 66 525 202',"Wärmekapazität|0 0 640 300":'16 26 523 238'};
+const VBC={"Ausmultiplizieren & Ausklammern|0 0 640 300":'-8 12 556 261',"Drehstrom (Stern & Dreieck)|0 0 640 300":'-35 22 549 258',"Gemischt (R₁+R₂)∥(R₃+R₄)|0 0 640 300":'38 61 601 218',"Gemischt (R₁+R₂)∥R₃|0 0 640 300":'38 61 583 218',"Gemischt R₁+(R₂∥R₃)+R₄|0 0 640 300":'35 24 560 263',"Histogramm|0 0 640 300":'24 0 590 270',"Kräfteparallelogramm|0 0 640 300":'0 26 524 243',"Mischungstemperatur|0 0 640 300":'8 87 538 193',"Mittelwert, Median & Modalwert|0 0 640 300":'26 2 588 262',"Ohmsches Gesetz|0 0 640 300":'53 28 580 272',"Oxidationszahlen|0 0 640 300":'35 53 570 247',"Parallel|0 0 640 300":'38 61 602 218',"Pneumatik: Luftverbrauch|0 0 640 300":'16 57 596 215',"Reihe|0 0 640 300":'38 24 566 250',"Schmelz- & Verdampfungswärme|0 0 640 300":'6 48 608 242',"Spannweite, Varianz & Standardabweichung|0 0 640 300":'26 12 589 219',"Wirkungsgrad|0 0 640 300":'26 66 525 202',"Wärmekapazität|0 0 640 300":'16 26 523 238'};
 const vbOf=(n,vb)=>VBC[n+'|'+vb]||vb;
 function render(){
  if(cur<0)return;const o=M[cur].f(S[cur],clock);
@@ -13552,9 +13651,10 @@ function mcView(){const box=$('#mc');if(!box)return;const a=mcAll(),run=store.ge
 function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="panel"><h2>🧮 Mathe-Check</h2><p class="sub">Noch nicht gemacht. Der Check zeigt Dir in 20 Minuten, wo Du in den Mathe-Grundlagen stehst.</p><div class="pb"><button type="button" class="sbtn2" data-mco="1">Zum Mathe-Check →</button></div></div>`;
  return`<div class="panel"><h2>🧮 Mathe-Check</h2>${mcTable(a)}<div class="pb"><button type="button" class="sbtn2" data-mco="1">Startplan und Lösungswege →</button></div></div>`}
 /* Pilot-Einstellungen: Version, Neuigkeit, Kontakt */
-const APPV=285,NEWS='Reaktionsgleichungen, Ansicht Waage: Massen stehen auf den Blöcken, Beschriftung bleibt beim Kippen im Bild.';
+const APPV=286,NEWS='Verbrennungsmotor: Otto- und Dieselmotor mit Gasteilchen, Zünden bzw. Einspritzen in der Lupe auf den Brennraum.';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
+['10.11.2026',286,['Verbrennungsmotor (Viertakt): Zylinder im Schnitt mit Ventilen, Zündkerze bzw. Einspritzdüse, Kolben, Pleuel und Kurbelwelle. Gasteilchen strömen ein, werden verdichtet, verbrennen und drücken den Kolben nach unten (Kraft F). Otto mit Zündfunke, Diesel mit Einspritzen und Selbstzündung, Lupe auf den Brennraum, Tabelle der vier Takte.']],
 ['10.11.2026',285,['Reaktionsgleichungen & Mol, Ansicht Waage: Jeder Block zeigt Stoff und Masse, die Summen Edukte und Produkte bleiben auch beim Kippen sichtbar. Leichte Stoffe wie H₂ haben eine Mindesthöhe.']],
 ['10.11.2026',284,['Kurz erklärt zur Blei-Batterie zeigt die Zelle der Simulation mit Aräometer: Beim Entladen und Laden bewegen sich Plattenbelag und Schwimmer mit. Dazu die Teilchen-Lupe an beiden Platten.']],
 ['10.11.2026',283,['Reaktionsgleichungen & Mol: Teilchen-Lupe zeigt, wie sich die Atome zu den Produkten umordnen, mit Atombilanz. Bei falschen Koeffizienten bleiben Atome übrig oder fehlen. Neue Ansicht Waage: Masse bleibt erhalten, bei falscher Gleichung kippt sie.','Schutzleiter & RCD: ganze Fehlerschleife vom Transformator über L, Gehäuse und PE (oder Körper und Erdreich) zurück, Strombänder je nach Stromstärke, Ströme an den Leitern, Skala mit 30 mA und 80 A, sichtbares Abschalten von LS und RCD.','Kurz erklärt zu beiden Themen zeigt die neuen Skizzen.']],
