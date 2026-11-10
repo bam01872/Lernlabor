@@ -10676,33 +10676,27 @@ Object.assign(EIN,{
   f:(k,t)=>EMRK(k,t,EMOL(110,110,20,'#e05a4f','O')+EMOL(90,145,13,'#ffffff','H')+EMOL(130,145,13,'#ffffff','H')+EFT(110,200,'H₂O: 18 g/mol','ein1','middle'),'n = m / M','Masse links = Masse rechts')}
 ],
 'Korrosion':[
- {d:11,t:'Ein Stahlblech an feuchter Luft rostet. Korrosion ist eine Redoxreaktion zwischen Metall, Wasser und Sauerstoff.',
-  s:'Ein Stahlblech an feuchter Luft rostet. Korrosion ist eine Redoxreaktion zwischen Metall, Wasser und Sauerstoff.',
-  f:(k,t)=>{const a=EINQ(k/.9);let h=BAR3(60,150,360,40,'#8a96a1',12);for(let i=0;i<9;i++){const o=Math.min(1,Math.max(0,(a*9-i)));h+=`<ellipse cx="${90+i*40}" cy="${150+(i%3)*8}" rx="${14*o}" ry="${7*o}" fill="#b5651d" opacity=".85"/>`}
-   h+=`<path d="M150 100q10 -20 20 0q-10 20 -20 0" fill="var(--flow)" opacity=".6"/>`+EFT(185,100,'H₂O','ein2')+EMOL(300,95,10,'#e05a4f','')+EMOL(318,95,10,'#e05a4f','')+EFT(335,100,'O₂','ein2');return h+EFT(240,240,'Stahl + Wasser + Sauerstoff → Rost','ein1','middle')}},
- {d:11,t:'Oxidation: Das Eisen gibt Elektronen ab und geht als Fe²⁺ in Lösung. Diese Stelle ist die Anode.',
-  s:'Oxidation: Das Eisen gibt Elektronen ab und geht als Eisen zwei plus in Lösung. Diese Stelle ist die Anode.',
-  f:k=>{const a=EINQ((k-.2)/.5);let h=BAR3(40,170,400,40,'#8a96a1',12)+`<path d="M120 170q60 -70 160 0z" fill="var(--flow)" opacity=".3"/>`;
-   h+=EMOL(200,170-40*a,14,'var(--amber)','Fe')+(a>.1?EFT(222,146-40*a,'Fe²⁺','ein1'):'')+EMOL(150-30*a,185,7,'var(--flow)','',1)+EMOL(250+30*a,185,7,'var(--flow)','',1)+EFT(240,235,'2 e⁻ bleiben im Metall','ein2','middle');
-   return h+EFT(240,50,'Fe → Fe²⁺ + 2 e⁻','ein1','middle')+EFT(240,76,'Oxidation an der Anode','ein2','middle')}},
- {d:11,t:'Reduktion: Sauerstoff und Wasser nehmen die Elektronen auf und bilden OH⁻. Mit Fe²⁺ entsteht daraus Rost.',
-  s:'Reduktion: Sauerstoff und Wasser nehmen die Elektronen auf und bilden Hydroxid-Ionen. Mit Eisen zwei plus entsteht daraus Rost.',
-  f:k=>{const a=EINQ((k-.2)/.5);let h=BAR3(40,170,400,40,'#8a96a1',12)+`<path d="M120 170q60 -70 160 0z" fill="var(--flow)" opacity=".3"/>`;
-   h+=EMOL(300,120,10,'#e05a4f','')+EMOL(318,120,10,'#e05a4f','')+EFT(336,126,'O₂','ein2')+EMOL(260-60*a,185,7,'var(--flow)','',1)+EMOL(280-40*a,185,7,'var(--flow)','',1);
-   if(a>.9)h+=EFT(170,150,'OH⁻','ein1')+EFT(230,150,'OH⁻','ein1')+`<ellipse cx="200" cy="166" rx="40" ry="10" fill="#b5651d"/>`+EFT(200,245,'Rost: Fe₂O₃ · n H₂O','ein1','middle');
-   return h+EFT(240,50,'O₂ + 2 H₂O + 4 e⁻ → 4 OH⁻','ein1','middle')+EFT(240,76,'Reduktion an der Kathode','ein2','middle')}},
- {d:11,t:'Das unedlere Metall opfert sich: Zink auf Stahl korrodiert zuerst und schützt das Eisen, auch an Kratzern.',
-  s:'Das unedlere Metall opfert sich. Zink auf Stahl korrodiert zuerst und schützt das Eisen, auch an Kratzern.',
-  f:k=>{const a=EINQ(k/.7);let h=BAR3(60,170,360,40,'#8a96a1',12)+BAR3(60,154,150,16,'#c9d1d9',6)+BAR3(270,154,150,16,'#c9d1d9',6)+EFT(135,146,'Zink','ein2','middle')+EFT(345,146,'Zink','ein2','middle')+EFT(240,200,'Stahl','ein1','middle');
-   h+=EFT(240,146,'Kratzer','ein2','middle')+`<path d="M210 170h60" stroke="var(--red)" stroke-width="3"/>`;
-   if(a>.3)h+=AR(200,130,-40*a,-30*a,'var(--amber)')+EFT(150,90,'Zn → Zn²⁺ + 2 e⁻','ein1','middle')+EFT(240,245,'Fe bleibt geschützt (Opferanode)','ein1','middle');
-   return h+EFT(240,40,'unedel  Mg Al Zn Fe Ni Sn Cu Ag Au  edel','ein2','middle')}},
+ {d:12,t:'Ein Wassertropfen auf Stahl: Nach einiger Zeit bildet sich ein Rostring am Rand des Tropfens, in der Mitte wird das Eisen abgetragen. Korrosion ist eine Redoxreaktion zwischen Metall, Wasser und Sauerstoff.',
+  s:'Ein Wassertropfen auf Stahl: Nach einiger Zeit bildet sich ein Rostring am Rand des Tropfens, in der Mitte wird das Eisen abgetragen. Korrosion ist eine Redoxreaktion zwischen Metall, Wasser und Sauerstoff.',
+  f:(k,t)=>ESIM('Korrosion',{v:1,z:0,lu:1,ind:0},t,'30 90 590 210',0,20,480,171)+ETAG(240,248,'Stahl + Wasser + Sauerstoff → Rost','middle','ein1')},
+ {d:12,t:'Oxidation in der Tropfenmitte, wo wenig Sauerstoff hinkommt: Ein Eisenatom gibt 2 Elektronen ab und geht als Fe²⁺ in Lösung. Diese Stelle ist die Anode.',
+  s:'Oxidation in der Tropfenmitte, wo wenig Sauerstoff hinkommt: Ein Eisenatom gibt 2 Elektronen ab und geht als Eisen 2 plus in Lösung. Diese Stelle ist die Anode.',
+  f:(k,t)=>ESIM('Korrosion',{v:1,z:1,lu:1},t,'20 55 280 280',0,20,220,220)+EFT(350,70,'Anode: Tropfenmitte','ein1','middle')+EFT(350,104,'wenig O₂','ein2','middle')+EFT(350,150,'Fe → Fe²⁺ + 2 e⁻','ein1','middle')+EFT(350,196,'Oxidation','ein2','middle')+EFT(350,224,'e⁻ wandern im Stahl','ein2','middle')},
+ {d:12,t:'Reduktion am Tropfenrand, wo viel Sauerstoff ist: O₂ und Wasser nehmen die Elektronen auf und bilden OH⁻. Wo Fe²⁺ und OH⁻ sich treffen, entsteht der Rostring.',
+  s:'Reduktion am Tropfenrand, wo viel Sauerstoff ist: Sauerstoff und Wasser nehmen die Elektronen auf und bilden Hydroxid-Ionen. Wo Eisen 2 plus und Hydroxid sich treffen, entsteht der Rostring.',
+  f:(k,t)=>ESIM('Korrosion',{v:1,z:1,lu:1},t,'340 55 280 280',260,20,220,220)+EFT(130,70,'Kathode: Tropfenrand','ein1','middle')+EFT(130,104,'viel O₂','ein2','middle')+EFT(130,150,'O₂ + 2 H₂O + 4 e⁻ → 4 OH⁻','ein1','middle')+EFT(130,196,'Reduktion','ein2','middle')+EFT(130,224,'Rost: Fe₂O₃ · n H₂O','ein2','middle')},
+ {d:12,t:'Kontaktkorrosion: Berühren sich zwei verschiedene Metalle unter einem Wasserfilm, löst sich das unedlere auf. Eisen an Kupfer: Das Eisen ist die Anode, die Elektronen fließen über die Berührstelle zum Kupfer.',
+  s:'Kontaktkorrosion: Berühren sich zwei verschiedene Metalle unter einem Wasserfilm, löst sich das unedlere auf. Eisen an Kupfer: Das Eisen ist die Anode, die Elektronen fließen über die Berührstelle zum Kupfer.',
+  f:(k,t)=>ESIM('Korrosion',{v:0,z:0,a:3,b:7,el:0},t,'20 60 620 255',0,15,480,197)+ETAG(240,256,'Das unedlere Metall löst sich auf','middle','ein1')},
+ {d:11,t:'Das unedlere Metall opfert sich: Bei verzinktem Stahl löst sich am Kratzer das Zink auf und schützt das Eisen. Das ist eine Opferanode.',
+  s:'Das unedlere Metall opfert sich: Bei verzinktem Stahl löst sich am Kratzer das Zink auf und schützt das Eisen. Das ist eine Opferanode.',
+  f:(k,t)=>ESIM('Korrosion',{v:2,sch:2},t,'20 105 600 150',0,55,480,124)+ETAG(240,256,'Zink opfert sich, Stahl bleibt geschützt','middle','ein1')},
  {d:13,t:'Alles zusammen: Fe → Fe²⁺ + 2 e⁻ (Oxidation) und O₂ + 2 H₂O + 4 e⁻ → 4 OH⁻ (Reduktion). Gesamt: 4 Fe + 3 O₂ + 2n H₂O → 2 Fe₂O₃ · n H₂O.',
   s:'Alles zusammen: Eisen wird oxidiert, Sauerstoff mit Wasser reduziert. Gesamt: 4 Fe plus 3 O 2 plus Wasser ergibt Rost.',
   f:k=>EFX(k,[['Oxidation: Fe → Fe²⁺ + 2 e⁻','m'],['Reduktion: O₂ + 2 H₂O + 4 e⁻ → 4 OH⁻','m'],['4 Fe + 3 O₂ + 2n H₂O → 2 Fe₂O₃ · n H₂O','r']],['Rost braucht Wasser UND Sauerstoff','Salz beschleunigt (leitfähig)'])},
- {d:9,t:'Merke: Rost braucht Wasser und Sauerstoff. Schutz: Lack, Fett, Verzinken oder eine Opferanode aus unedlerem Metall.',
-  s:'Merke: Rost braucht Wasser und Sauerstoff. Schutz: Lack, Fett, Verzinken oder eine Opferanode aus unedlerem Metall.',
-  f:(k,t)=>EMRK(k,t,BAR3(20,120,180,34,'#8a96a1',10)+BAR3(20,108,180,12,'#c9d1d9',6)+EFT(110,100,'Zinkschicht','ein2','middle')+EFT(110,190,'Stahl geschützt','ein1','middle'),'Me → Meⁿ⁺ + n e⁻','unedler rostet zuerst')}
+ {d:9,t:'Merke: Rost braucht Wasser und Sauerstoff. Das unedlere Metall löst sich auf. Schutz: Lack, Fett, Verzinken oder eine Opferanode aus unedlerem Metall.',
+  s:'Merke: Rost braucht Wasser und Sauerstoff. Das unedlere Metall löst sich auf. Schutz: Lack, Fett, Verzinken oder eine Opferanode aus unedlerem Metall.',
+  f:(k,t)=>EMRK(k,t,ESIM('Korrosion',{v:1,z:0,lu:1,ind:0},t,'30 90 590 210',0,100,230,82),'Me → Meⁿ⁺ + n e⁻','unedler löst sich zuerst')}
 ],
 'Dreisatz (proportional & umgekehrt)':[
  {d:11,t:'3 Paletten Material kosten 240 €. Was kosten 7 Paletten? Das ist ein Dreisatz.',
@@ -11459,24 +11453,24 @@ Object.assign(EIN,{
   f:(k,t)=>EMRK(k,t,AR(60,180,0,-90,'var(--red)')+EFT(60,210,'Oxidation','ein2','middle')+EFT(60,70,'Zahl ↑','ein2','middle')+AR(170,90,0,90,'var(--flow)')+EFT(170,210,'Reduktion','ein2','middle')+EFT(170,70,'Zahl ↓','ein2','middle'),'Σ OZ = Ladung','O: −II, H: +I')}
 ],
 'Galvanische Zelle & Spannungsreihe':[
- {d:11,t:'Ein Zinkblech in Zinksulfatlösung, ein Kupferblech in Kupfersulfatlösung, dazwischen eine Salzbrücke. Verbindet man beide mit einem Draht, fließt Strom: eine Batterie.',
-  s:'Ein Zinkblech in Zinksulfatlösung, ein Kupferblech in Kupfersulfatlösung, dazwischen eine Salzbrücke. Verbindet man beide mit einem Draht, fließt Strom: eine Batterie.',
-  f:(k,t)=>{const a=k>.5;return ECEL(60,90,150,130,{cl:'#8a96a1',cr:'#c8743a',ll:'Zn',lr:'Cu'})+`<path d="M93 70V40H177V70" fill="none" stroke="var(--ink)" stroke-width="3"/>`+(a?EDOT(t,[[93,70,93,40,.5],[93,40,177,40,.5],[177,40,177,70,.5]]):'')+`<path d="M110 130h50" stroke="var(--line)" stroke-width="10" stroke-linecap="round"/>`+EFT(135,118,'Salzbrücke','ein2','middle')+EFT(135,266,'ZnSO₄ · CuSO₄','ein2','middle')+EFT(350,110,a?'Strom fließt!':'Draht verbinden','ein1','middle')+EFT(350,146,'U ≈ 1,1 V','ein1','middle')}},
- {d:11,t:'Die Spannungsreihe ordnet Metalle nach ihrem Drang, Elektronen abzugeben. Unedle wie Zink stehen bei negativen Potentialen, edle wie Kupfer bei positiven.',
-  s:'Die Spannungsreihe ordnet Metalle nach ihrem Drang, Elektronen abzugeben. Unedle wie Zink stehen bei negativen Potentialen, edle wie Kupfer bei positiven.',
-  f:k=>{const a=EINQ(k/.9),x0=60,W=360,sc=W/4;let h=`<path d="M${x0} 150H${x0+W}" stroke="var(--ink)" stroke-width="2"/>`;[['Mg',-2.37,'−2,37'],['Zn',-.76,'−0,76'],['Fe',-.44,'−0,44'],['H',0,'0'],['Cu',.34,'+0,34'],['Ag',.8,'+0,80'],['Au',1.5,'+1,50']].forEach(([n,E,L],i)=>{const x=x0+(E+2.5)*sc,g=EINQ((a*7-i)/1);h+=`<g opacity="${g.toFixed(2)}"><path d="M${x.toFixed(1)} 144v12" stroke="var(--ink)" stroke-width="2"/>`+EFT(x,i%2?130:184,n,'ein1','middle')+EFT(x,i%2?110:206,L+' V','ein2','middle')+'</g>'});return h+EFT(x0,250,'unedel','ein2')+EFT(x0+W,250,'edel','ein2','end')+AR(200,236,80,0,'var(--ink)')}},
- {d:11,t:'Am Zink: Oxidation. Zn → Zn²⁺ + 2 e⁻. Die Elektronen bleiben im Blech zurück, es wird zum Minuspol. Über den Draht wandern sie zum Kupfer.',
-  s:'Am Zink: Oxidation. Zink wird zu Zink 2 plus und 2 Elektronen. Die Elektronen bleiben im Blech zurück, es wird zum Minuspol. Über den Draht wandern sie zum Kupfer.',
-  f:(k,t)=>{const a=EINQ(k/.8);return ECEL(60,90,150,130,{cl:'#8a96a1',cr:'#c8743a',ll:'Zn: −',lr:'Cu: +'})+`<path d="M93 70V40H177V70" fill="none" stroke="var(--ink)" stroke-width="3"/>`+EDOT(t,[[93,70,93,40,.5],[93,40,177,40,.5],[177,40,177,70,.5]])+`<path d="M110 130h50" stroke="var(--line)" stroke-width="10" stroke-linecap="round"/>`+(a>.3?EION(93+40*a,170,'Zn²⁺','var(--flow)',16):'')+EFT(350,80,'Oxidation am Zn','ein1','middle')+EFT(350,112,'Zn → Zn²⁺ + 2 e⁻','ein2','middle')+EFT(350,160,'Zn löst sich auf','ein2','middle')+EFT(350,200,'e⁻ über den Draht','ein1','middle')+EFT(350,226,'zum Cu','ein2','middle')}},
- {d:11,t:'Am Kupfer: Reduktion. Cu²⁺ + 2 e⁻ → Cu. Kupfer-Ionen aus der Lösung holen sich die Elektronen und scheiden sich als Metall ab. Die Salzbrücke gleicht die Ladungen aus.',
-  s:'Am Kupfer: Reduktion. Kupfer 2 plus und 2 Elektronen werden zu Kupfer. Kupfer Ionen aus der Lösung holen sich die Elektronen und scheiden sich als Metall ab. Die Salzbrücke gleicht die Ladungen aus.',
-  f:(k,t)=>{const a=EINQ(k/.8);return ECEL(60,90,150,130,{cl:'#8a96a1',cr:'#c8743a',ll:'Zn: −',lr:'Cu: +'})+`<path d="M93 70V40H177V70" fill="none" stroke="var(--ink)" stroke-width="3"/>`+EDOT(t,[[93,70,93,40,.5],[93,40,177,40,.5],[177,40,177,70,.5]])+`<path d="M110 130h50" stroke="var(--line)" stroke-width="10" stroke-linecap="round"/>`+EION(205-30*a,170,'Cu²⁺','#c8743a',16)+EFT(350,80,'Reduktion am Cu','ein1','middle')+EFT(350,112,'Cu²⁺ + 2 e⁻ → Cu','ein2','middle')+EFT(350,160,'Cu scheidet sich ab','ein2','middle')+EFT(350,200,'Salzbrücke:','ein1','middle')+EFT(350,226,'Ionen gleichen aus','ein2','middle')}},
+ {d:12,t:'Ein Zinkblech in Zinknitratlösung, ein Kupferblech in Kupfernitratlösung, dazwischen eine Salzbrücke. Das Voltmeter liegt parallel zur Zelle und zeigt 1,10 V. Schließt man den Schalter, fließen Elektronen durch den Draht: eine Batterie.',
+  s:'Ein Zinkblech in Zinknitratlösung, ein Kupferblech in Kupfernitratlösung, dazwischen eine Salzbrücke. Das Voltmeter liegt parallel zur Zelle und zeigt 1,10 Volt. Schließt man den Schalter, fließen Elektronen durch den Draht: eine Batterie.',
+  f:(k,t)=>{const z=k<.45?1:0;return ESIM('Galvanische Zelle & Spannungsreihe',{v:0,a:2,b:7,sw:z},t,'0 0 640 395',0,0,480,240)+ETAG(240,262,z?'Schalter offen: Voltmeter zeigt 1,10 V':'Schalter zu: Elektronen fließen','middle','ein1')}},
+ {d:11,t:'Die Spannungsreihe ordnet Metalle nach ihrem Drang, Elektronen abzugeben. Unedle wie Zink stehen bei negativen Potentialen, edle wie Kupfer bei positiven. Der Abstand zwischen beiden ist die Zellspannung.',
+  s:'Die Spannungsreihe ordnet Metalle nach ihrem Drang, Elektronen abzugeben. Unedle wie Zink stehen bei negativen Potentialen, edle wie Kupfer bei positiven. Der Abstand zwischen beiden ist die Zellspannung.',
+  f:(k,t)=>ESIM('Galvanische Zelle & Spannungsreihe',{v:0,a:2,b:7,sw:0},t,'20 480 620 140',0,50,480,108)+EFT(30,240,'unedel: gibt Elektronen ab','ein2')+EFT(450,240,'edel: nimmt auf','ein2','end')+AR(200,258,80,0,'var(--ink)')},
+ {d:12,t:'Am Zink: Oxidation. Ein Zinkatom gibt 2 Elektronen an das Metall ab und geht als Zn²⁺-Ion in die Lösung, Wasser umhüllt es. Die Elektronen bleiben im Blech zurück, es wird zum Minuspol, der Anode.',
+  s:'Am Zink: Oxidation. Ein Zinkatom gibt 2 Elektronen an das Metall ab und geht als Zink 2 plus Ion in die Lösung, Wasser umhüllt es. Die Elektronen bleiben im Blech zurück, es wird zum Minuspol, der Anode.',
+  f:(k,t)=>ESIM('Galvanische Zelle & Spannungsreihe',{v:1,a:2,b:7,sw:0},t,'15 55 300 320',0,14,220,235)+EFT(350,70,'Anode (−): Zink','ein1','middle')+EFT(350,104,'Oxidation','ein2','middle')+EFT(350,150,'Zn → Zn²⁺ + 2 e⁻','ein1','middle')+EFT(350,196,'Zink löst sich auf','ein2','middle')+EFT(350,224,'e⁻ über den Draht','ein2','middle')},
+ {d:12,t:'Am Kupfer: Reduktion. Ein Cu²⁺-Ion mit Wasserhülle kommt an die Oberfläche, holt sich 2 Elektronen und wird ein Atom im Metallgitter. Das Kupferblech ist der Pluspol, die Kathode. Die Salzbrücke gleicht die Ladungen aus.',
+  s:'Am Kupfer: Reduktion. Ein Kupfer 2 plus Ion mit Wasserhülle kommt an die Oberfläche, holt sich 2 Elektronen und wird ein Atom im Metallgitter. Das Kupferblech ist der Pluspol, die Kathode. Die Salzbrücke gleicht die Ladungen aus.',
+  f:(k,t)=>ESIM('Galvanische Zelle & Spannungsreihe',{v:1,a:2,b:7,sw:0},t,'325 55 300 320',260,14,220,235)+EFT(130,70,'Kathode (+): Kupfer','ein1','middle')+EFT(130,104,'Reduktion','ein2','middle')+EFT(130,150,'Cu²⁺ + 2 e⁻ → Cu','ein1','middle')+EFT(130,196,'Kupfer scheidet sich ab','ein2','middle')+EFT(130,224,'Salzbrücke: NO₃⁻ und Na⁺','ein2','middle')},
  {d:13,t:'Alles zusammen: Die Zellspannung ist die Differenz der Standardpotentiale: U = E(Cu) − E(Zn) = 0,34 V − (−0,76 V) = 1,10 V. Das edlere Metall ist immer der Pluspol.',
   s:'Alles zusammen: Die Zellspannung ist die Differenz der Standardpotentiale: U gleich E Kupfer minus E Zink gleich 0,34 Volt minus minus 0,76 Volt gleich 1,10 Volt. Das edlere Metall ist immer der Pluspol.',
-  f:k=>EFX(k,[['E°(Zn) = −0,76 V, E°(Cu) = +0,34 V','m'],['U = E°(edel) − E°(unedel)','h'],['U = 0,34 V − (−0,76 V)','m'],['U = 1,10 V','r']],['Minuspol: unedel, Oxidation · Pluspol: edel, Reduktion'])},
- {d:9,t:'Merke: Unedel gibt ab (Minuspol, Oxidation), edel nimmt auf (Pluspol, Reduktion). U = Differenz der Potentiale.',
-  s:'Merke: Unedel gibt ab, Minuspol, Oxidation. Edel nimmt auf, Pluspol, Reduktion. U gleich Differenz der Potentiale.',
-  f:(k,t)=>EMRK(k,t,`<g transform="translate(-20 30) scale(.75)">${ECEL(60,90,150,130,{ll:'Zn −',lr:'Cu +'})}<path d="M93 70V40H177V70" fill="none" stroke="var(--ink)" stroke-width="3"/>${EDOT(t,[[93,70,93,40,.5],[93,40,177,40,.5],[177,40,177,70,.5]])}</g>`,'U = E°(+) − E°(−)','Zn/Cu: 1,10 V')}
+  f:k=>EFX(k,[['E°(Zn) = −0,76 V, E°(Cu) = +0,34 V','m'],['U = E°(edel) − E°(unedel)','h'],['U = 0,34 V − (−0,76 V)','m'],['U = 1,10 V','r']],['Minuspol: unedel, Oxidation','Pluspol: edel, Reduktion'])},
+ {d:9,t:'Merke: Unedel gibt ab (Minuspol, Oxidation), edel nimmt auf (Pluspol, Reduktion). U = Differenz der Potentiale, gemessen mit dem Voltmeter parallel zur Zelle.',
+  s:'Merke: Unedel gibt ab, Minuspol, Oxidation. Edel nimmt auf, Pluspol, Reduktion. U gleich Differenz der Potentiale, gemessen mit dem Voltmeter parallel zur Zelle.',
+  f:(k,t)=>EMRK(k,t,ESIM('Galvanische Zelle & Spannungsreihe',{v:0,a:2,b:7,sw:0},t,'0 0 640 395',0,60,230,142),'U = E°(+) − E°(−)','Zn und Cu: 1,10 V')}
 ],
 'Elektrolyse':[
  {d:11,t:'Verkupfern: Ein Werkstück hängt in Kupfersulfatlösung, eine Gleichspannung liegt an. Nach einer halben Stunde ist es mit einer dünnen Kupferschicht überzogen. Strom erzwingt hier eine Reaktion.',
@@ -11889,22 +11883,22 @@ Object.assign(EIN,{
 'Wasserkraftwerke':[
  {d:11,t:'Ein Stausee liegt 50 m über der Turbine. Durch die Rohrleitung fließen 20 m³ Wasser je Sekunde. Welche elektrische Leistung liefert das Kraftwerk?',
   s:'Ein Stausee liegt 50 Meter über der Turbine. Durch die Rohrleitung fließen 20 Kubikmeter Wasser je Sekunde. Welche elektrische Leistung liefert das Kraftwerk?',
-  f:(k,t)=>ESIM('Wasserkraftwerke',{w:1,H:50,Q:20,e:90,V:5},t,'0 0 640 300',0,0,480,225)+ETAG(240,252,'H = 50 m, Q = 20 m³/s','middle','ein1')},
+  f:(k,t)=>ESIM('Wasserkraftwerke',{w:1,H:50,Q:20,e:90,V:5},t,'0 0 422 300',85,0,309,220)+ETAG(240,252,'H = 50 m, Q = 20 m³/s','middle','ein1')},
  {d:11,t:'Die Leistung ist Dichte mal Erdbeschleunigung mal Fallhöhe mal Volumenstrom mal Wirkungsgrad: P = ρ · g · H · Q · η. Jede Sekunde fallen 20 000 kg Wasser 50 m tief.',
   s:'Die Leistung ist Dichte mal Erdbeschleunigung mal Fallhöhe mal Volumenstrom mal Wirkungsgrad: P gleich Rho mal g mal H mal Q mal Eta. Jede Sekunde fallen 20000 Kilogramm Wasser 50 Meter tief.',
   f:k=>EFX(k,[['P = ρ · g · H · Q · η','h'],['P = 1 000 kg/m³ · 9,81 m/s² · 50 m · 20 m³/s · 0,9','m'],['P = 8 829 000 W ≈ 8,8 MW','r']],['kg·m²/s³ = W'])},
- {d:11,t:'Drei Bauarten: Laufwasser am Fluss hat wenig Gefälle und viel Wasser. Speicherkraftwerke im Gebirge haben viel Gefälle und wenig Wasser. Laufwasser liefert Grundlast rund um die Uhr, Speicher decken auf Abruf die Spitzenlast.',
-  s:'Drei Bauarten: Laufwasser am Fluss hat wenig Gefälle und viel Wasser. Speicherkraftwerke im Gebirge haben viel Gefälle und wenig Wasser. Laufwasser liefert Grundlast rund um die Uhr, Speicher decken auf Abruf die Spitzenlast.',
-  f:(k,t)=>{const w=k<.5?0:1;return ESIM('Wasserkraftwerke',{w,H:w?400:8,Q:w?5:200,e:90,V:5},t,'0 0 640 300',0,0,480,225)+ETAG(240,252,w?'Speicher: viel Höhe, wenig Wasser':'Laufwasser: wenig Höhe, viel Wasser','middle','ein1')}},
+ {d:14,t:'Drei Bauarten: Das Laufwasserkraftwerk am Fluss hat wenig Gefälle und viel Wasser und liefert Grundlast rund um die Uhr. Das Speicherkraftwerk im Gebirge hat viel Gefälle und wenig Wasser und deckt auf Abruf die Spitzenlast. Das Pumpspeicherkraftwerk hat ein Ober- und ein Unterbecken.',
+  s:'Drei Bauarten: Das Laufwasserkraftwerk am Fluss hat wenig Gefälle und viel Wasser und liefert Grundlast rund um die Uhr. Das Speicherkraftwerk im Gebirge hat viel Gefälle und wenig Wasser und deckt auf Abruf die Spitzenlast. Das Pumpspeicherkraftwerk hat ein Ober- und ein Unterbecken.',
+  f:(k,t)=>{const w=k<.36?0:k<.72?1:2;return ESIM('Wasserkraftwerke',[{w:0,H:8,Q:200,e:90},{w:1,H:400,Q:5,e:90,V:5},{w:2,b:0,H:300,Q:100,e:90,V:5}][w],t,'0 0 422 300',85,0,309,220)+ETAG(240,252,['Laufwasser: wenig Höhe, viel Wasser','Speicher: viel Höhe, wenig Wasser','Pumpspeicher: Ober- und Unterbecken'][w],'middle','ein1')}},
  {d:11,t:'Das Pumpspeicherwerk ist ein Speicher, kein Erzeuger: Bei Stromüberschuss pumpt es Wasser nach oben, bei Bedarf lässt es das Wasser wieder durch die Turbine. Hin und zurück bleiben etwa 75 % übrig: η = η_Pumpe · η_Turbine.',
   s:'Das Pumpspeicherwerk ist ein Speicher, kein Erzeuger: Bei Stromüberschuss pumpt es Wasser nach oben, bei Bedarf lässt es das Wasser wieder durch die Turbine. Hin und zurück bleiben etwa 75 Prozent übrig: Eta gleich Eta Pumpe mal Eta Turbine.',
-  f:(k,t)=>{const b=k<.5?1:0;return ESIM('Wasserkraftwerke',{w:2,b,H:50,Q:20,e:90,V:5},t,'0 0 640 300',0,0,480,225)+ETAG(240,252,b?'Überschuss: Wasser hochpumpen':'Bedarf: Wasser durch die Turbine','middle','ein1')}},
+  f:(k,t)=>{const b=k<.5?1:0;return ESIM('Wasserkraftwerke',{w:2,b,H:300,Q:100,e:90,V:5},t,'0 0 422 300',85,0,309,220)+ETAG(240,252,b?'Überschuss: Wasser hochpumpen':'Bedarf: Wasser durch die Turbine','middle','ein1')}},
  {d:13,t:'Alles zusammen: P = ρ · g · H · Q · η = 1 000 · 9,81 · 50 · 20 · 0,9 W = 8,8 MW. Gleiche Leistung bei 500 m Fallhöhe braucht nur 2 m³/s. Pumpspeicher: 75 % hin und zurück.',
   s:'Alles zusammen: P gleich Rho mal g mal H mal Q mal Eta gleich 8,8 Megawatt. Gleiche Leistung bei 500 Meter Fallhöhe braucht nur 2 Kubikmeter je Sekunde. Pumpspeicher: 75 Prozent hin und zurück.',
   f:k=>EFX(k,[['P = ρ · g · H · Q · η','h'],['P = 1 000 kg/m³ · 9,81 m/s² · 50 m · 20 m³/s · 0,9','m'],['P = 8,8 MW','r'],['500 m und 2 m³/s: ebenfalls 8,8 MW','m']],['H und Q sind austauschbar, ihr Produkt zählt'])},
  {d:9,t:'Merke: P = ρ · g · H · Q · η. Laufwasser: wenig Höhe, viel Wasser. Speicher: viel Höhe, wenig Wasser. Pumpspeicher speichert, erzeugt aber nichts.',
   s:'Merke: P gleich Rho mal g mal H mal Q mal Eta. Laufwasser: wenig Höhe, viel Wasser. Speicher: viel Höhe, wenig Wasser. Pumpspeicher speichert, erzeugt aber nichts.',
-  f:(k,t)=>EMRK(k,t,ESIM('Wasserkraftwerke',{w:1,H:50,Q:20,e:90,V:5},t,'0 60 480 240',0,50,230,140),'P = ρ · g · H · Q · η','Pumpspeicher: η ≈ 75 %')}
+  f:(k,t)=>EMRK(k,t,ESIM('Wasserkraftwerke',{w:1,H:50,Q:20,e:90,V:5},t,'0 0 422 300',10,60,197,140),'P = ρ · g · H · Q · η','Pumpspeicher: η ≈ 75 %')}
 ],
 'Windkraftanlage':[
  {d:11,t:'Eine Windkraftanlage mit 100 m Rotordurchmesser steht im Wind mit 10 m/s. Wie viel Leistung holt sie aus dem Wind? Der Rotor überstreicht eine Kreisfläche von 7854 m².',
@@ -13160,9 +13154,10 @@ function mcView(){const box=$('#mc');if(!box)return;const a=mcAll(),run=store.ge
 function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="panel"><h2>🧮 Mathe-Check</h2><p class="sub">Noch nicht gemacht. Der Check zeigt Dir in 20 Minuten, wo Du in den Mathe-Grundlagen stehst.</p><div class="pb"><button type="button" class="sbtn2" data-mco="1">Zum Mathe-Check →</button></div></div>`;
  return`<div class="panel"><h2>🧮 Mathe-Check</h2>${mcTable(a)}<div class="pb"><button type="button" class="sbtn2" data-mco="1">Startplan und Lösungswege →</button></div></div>`}
 /* Pilot-Einstellungen: Version, Neuigkeit, Kontakt */
-const APPV=278,NEWS='Wasserkraftwerke neu: Laufwasser, Speicher und Pumpspeicher mit eigenem Bild, Fallhöhe, Volumenstrom und Speichervolumen sichtbar.';
+const APPV=279,NEWS='Kurz erklärt passt zu den neuen Simulationen: Galvanische Zelle, Korrosion und Wasserkraftwerke zeigen dieselben Bilder.';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
+['10.11.2026',279,['Kurz erklärt zur galvanischen Zelle zeigt den Aufbau der Simulation mit Voltmeter parallel, Schalter und Teilchen-Lupe an Zink und Kupfer.','Kurz erklärt zur Korrosion zeigt den Tropfenversuch mit Rostring, die Teilchen-Lupe an Tropfenmitte und Tropfenrand und neu die Kontaktkorrosion zweier Bleche.','Kurz erklärt zu Wasserkraftwerken zeigt alle drei Bauarten mit den Bildern der Simulation.']],
 ['10.11.2026',278,['Wasserkraftwerke neu: drei Bauarten mit eigenem Bild. Laufwasser nutzt den Fluss selbst, das Speicherkraftwerk einen Stausee mit Zufluss aus den Bergen, das Pumpspeicherkraftwerk pumpt dasselbe Wasser zwischen zwei Becken hin und her (Regler „Betrieb“: Turbine oder Pumpe).','Die Fallhöhe H verändert nur den oberen Teil, das Unterwasser liegt immer unter dem Hallenboden. Mehr Volumenstrom Q lässt das Wasser schneller fließen, das Speichervolumen V macht den See tiefer.']],
 ['10.11.2026',277,['Kontaktkorrosion neu: Zwei Bleche berühren sich unter einem Wasserfilm. Die Elektronen laufen im Metall über die Berührstelle, das unedlere Metall löst sich nahe der Berührstelle auf. Ionen zittern und wandern, Kationen zur Kathode, Anionen zur Anode.','Rosten neu als Tropfenversuch nach Evans: Fe²⁺ wandert nach außen, OH⁻ nach innen, dazwischen entsteht der Rostring. Neuer Regler „Indikator“ (Ferroxyl: blau an der Anode, rosa an der Kathode).','Neuer Regler „Darstellung“ mit der Teilchen-Lupe für Kontaktkorrosion und Rosten. Unter „Rechenweg und Hintergrund“ steht die Mengenbilanz, zum Beispiel 2 Fe → 2 Fe²⁺ + 4 e⁻ und O₂ + 2 H₂O + 4 e⁻ → 4 OH⁻.']],
 ['10.11.2026',276,['Galvanische Zelle neu: Elektronen laufen von der Anodenoberfläche durch Elektrode, Draht und Schalter bis an die Kathode. Ionen zittern (Wärmebewegung), lösen sich an der Anode und scheiden sich an der Kathode ab. Ein Zähler zeigt, dass die Mengen stimmen.','Neue Ansicht „Teilchen-Lupe“: Metallgitter, Wassermoleküle und Ionen mit Wasserhülle in maßstäblicher Größe, mit den vier Schritten an jeder Elektrode.','Fachliche Korrektur: Das Voltmeter ist parallel zur Zelle geschaltet und zeigt die Spannung auch bei offenem Schalter.']],
