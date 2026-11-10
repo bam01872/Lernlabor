@@ -8488,31 +8488,81 @@ fm(FSI,SXG2,'Strom durch den Körper','Berührt man ein spannungsführendes Teil
  'Richtwerte für Wechselstrom 50 Hz bei längerer Einwirkung, Stromweg Hand – Füße. Die genauen Grenzen hängen von Dauer, Stromweg und Person ab (IEC 60479).',1);
 
 /* Schutzleiter & RCD */
+/* Schutzleiter & RCD (10.11.2026): ganze Fehlerschleife vom Transformator über L, Gehäuse und PE (oder Körper und Erde) zurück zum Sternpunkt.
+   Wechselstrom: Leuchtband = Stromweg (Dicke ∝ Stromstärke), Elektronen pendeln ohne feste Richtung (stark verlangsamt). Helfer mit Präfix SXQ */
+const SXQP=6,SXQT=2.4,
+ SXQL=I=>I<=0?0:Math.max(2,Math.min(16,3+2.6*Math.log10(I*1000+1)-5)),
+ /* Leuchtband und pendelnde Elektronen auf einem Weg P; I in A */
+ SXQW=(P,I,t,c='#dc2626')=>{if(I<=0)return'';const w=SXQL(I),pts=P.map(p=>p.join(',')).join(' ');let h=`<polyline points="${pts}" fill="none" stroke="${c}" stroke-width="${w+6}" stroke-linejoin="round" stroke-linecap="round" opacity=".22"/><polyline points="${pts}" fill="none" stroke="${c}" stroke-width="${f2(w/2+1)}" stroke-linejoin="round" stroke-linecap="round" opacity=".5"/>`;
+  let L=0;for(let i=1;i<P.length;i++)L+=Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]);const n=Math.floor(L/30),A=9*Math.sin(2*Math.PI*t/1.6);
+  for(let k=1;k<n;k++){const[x,y]=PW(P,(k*30+A)/L);h+=`<circle cx="${f2(x)}" cy="${f2(y)}" r="3.4" fill="var(--flow)" stroke="var(--card)" stroke-width="1"/>`}return h},
+ SXQB=(x,y,s,c)=>`<g style="paint-order:stroke">`+SXT(x,y,s,15,'middle',c,800).replace('style="','style="paint-order:stroke;stroke:var(--card);stroke-width:5px;stroke-linejoin:round;')+'</g>',
+ /* Strom-Skala 0,01 A … 1000 A (logarithmisch) mit Marken 30 mA (RCD) und 80 A (LS B16) */
+ SXQS=(x,y,w,I,m)=>{const X=v=>x+w*(Math.log10(v)+2)/5;let h=`<rect x="${x}" y="${y}" width="${w}" height="10" rx="5" fill="var(--line)" stroke="var(--ink)" stroke-width="1.2"/>`;
+  [.01,.1,1,10,100,1000].forEach(v=>h+=`<line x1="${f2(X(v))}" x2="${f2(X(v))}" y1="${y+10}" y2="${y+15}" stroke="var(--ink)"/>`+SXT(f2(X(v)),y+28,v<1?nf(v):v+'',12,'middle','var(--mute)',500));
+  if(m==2||m==0)h+=`<line x1="${f2(X(.03))}" x2="${f2(X(.03))}" y1="${y-6}" y2="${y+12}" stroke="var(--flow)" stroke-width="3"/>`+SXT(f2(X(.03)),y-10,'RCD 30 mA',12,'middle','var(--flow)',700);
+  if(m==1||m==0)h+=`<line x1="${f2(X(80))}" x2="${f2(X(80))}" y1="${y-6}" y2="${y+12}" stroke="var(--ink)" stroke-width="3"/>`+SXT(f2(X(80)),y-10,'LS 80 A',12,'middle','var(--ink)',700);
+  if(I>0){const xi=Math.max(x,Math.min(x+w,X(I)));h+=`<rect x="${x}" y="${y}" width="${f2(xi-x)}" height="10" rx="5" fill="#dc2626" opacity=".75"/><polygon points="${f2(xi)},${y+11} ${f2(xi-7)},${y+22} ${f2(xi+7)},${y+22}" fill="#dc2626" stroke="var(--card)"/>`}
+  return h};
 fm(FSI,SXG2,'Schutzleiter & RCD','Hat ein Gerät einen Isolationsfehler, kann das Metallgehäuse Spannung führen. Der Schutzleiter leitet den Fehlerstrom ab, damit die Sicherung abschaltet. Der Fehlerstrom-Schutzschalter (RCD) vergleicht hin- und zurückfließenden Strom und schaltet schon bei 30 mA Differenz ab. Z_s ist der Widerstand der Fehlerschleife.',
  [['m','Schutz','sel',['Ohne Schutzleiter','Schutzleiter + LS B16','Schutzleiter + RCD 30 mA','Schutzisolierung (Klasse II)'],1],['f','Fehler','sel',['kein Fehler','Körperschluss'],1],['z','Z_s',.2,5,.1,'Ω',1]],
- (s,t=0)=>{const U0=230,Ia=80,IF=U0/s.z,fl=s.f==1,pe=s.m==1||s.m==2;
+ (s,t=0)=>{const U0=230,Ia=80,Ib=6.5,IF=U0/s.z,fl=s.f==1,pe=s.m==1||s.m==2,tp=((t%SXQP)+SXQP)%SXQP;
  let st,ok,dev,fs,why;
  if(!fl){st='Normalbetrieb';ok=1;dev='nicht nötig';fs='0 A';why='Kein Fehler: Strom fließt nur über L und N durch den Motor.'}
  else if(s.m==3){st='Gehäuse spannungsfrei';ok=1;dev='nicht nötig';fs='0 A';why='Doppelte oder verstärkte Isolierung: Der Fehler erreicht das berührbare Gehäuse nicht.'}
- else if(s.m==0){st='Lebensgefahr';ok=0;dev='löst nicht aus';fs='0,23 A';why='Das Gehäuse führt 230 V. Der Strom fließt durch den Menschen zur Erde: 230 V / 1000 Ω = 230 mA. Viel zu wenig für die Sicherung, aber tödlich.'}
+ else if(s.m==0){st='Lebensgefahr';ok=0;dev='löst nicht aus';fs='0,23 A';why='Das Gehäuse führt 230 V. Der Strom fließt durch den Menschen und die Erde zurück zum Transformator: 230 V / 1000 Ω = 230 mA. Viel zu wenig für die Sicherung, aber tödlich.'}
  else if(s.m==1){ok=IF>=Ia;st=ok?'LS schaltet ab':'LS schaltet zu spät ab';dev=ok?'löst aus':'zu langsam';fs=nf(IF)+' A';why=ok?'Großer Fehlerstrom über den Schutzleiter, der LS-Schalter schaltet in höchstens 0,4 s ab.':'Die Schleifenimpedanz ist zu groß. Der Fehlerstrom reicht nicht für die schnelle Auslösung, das Gehäuse bleibt gefährlich lange unter Spannung.'}
  else{st='RCD schaltet ab';ok=1;dev='löst aus';fs=nf(IF)+' A';why='Der Fehlerstrom fließt über den Schutzleiter statt über N zurück. Der RCD merkt die Differenz (weit über 30 mA) und schaltet in Sekundenbruchteilen ab.'}
- const off=fl&&ok&&(s.m==1||s.m==2),Lc='#8b5a2b',Nc='#2563eb';
- let g=SXT(10,28,'L',20,'start',Lc,800)+SXT(10,98,'N',20,'start',Nc,800)+(pe?SXT(10,298,'PE',20,'start','#16a34a',800):'');
- const sw=(x,y)=>off?`<path d="M${x} ${y}l26 -16" stroke="var(--ink)" stroke-width="4"/>`:`<path d="M${x} ${y}h30" stroke="var(--ink)" stroke-width="4"/>`;
- g+=`<path d="M34 22H110M146 22H360V130" stroke="${Lc}" stroke-width="4" fill="none"/><path d="M34 92H${s.m==2?110:360}${s.m==2?'M146 92H360':''}V150" stroke="${Nc}" stroke-width="4" fill="none"/>`+sw(112,22)+(s.m==2?sw(112,92)+`<rect x="98" y="4" width="62" height="106" rx="8" fill="none" stroke="var(--ink)" stroke-width="2.5"/>`+SXT(129,126,'RCD',16,'middle','var(--ink)',800):`<rect x="98" y="6" width="62" height="34" rx="6" fill="none" stroke="var(--ink)" stroke-width="2.5"/>`+SXT(129,58,s.m==1?'LS B16':'LS',15,'middle','var(--ink)',800));
- g+=`<rect x="300" y="110" width="170" height="150" rx="12" fill="${s.m==3?'var(--bg)':'#9ca3af'}" fill-opacity="${s.m==3?1:.5}" stroke="var(--ink)" stroke-width="3"/>`+(s.m==3?`<rect x="312" y="122" width="146" height="126" rx="8" fill="none" stroke="var(--ink)" stroke-width="2"/><rect x="430" y="226" width="22" height="22" fill="none" stroke="var(--ink)" stroke-width="2"/><rect x="435" y="231" width="12" height="12" fill="none" stroke="var(--ink)" stroke-width="2"/>`:'')+`<circle cx="360" cy="150" r="22" fill="var(--bg)" stroke="var(--ink)" stroke-width="3"/>`+SXT(360,157,'M',20,'middle','var(--ink)',800);
- if(fl&&s.m!=3)g+=`<polygon points="372,128 404,112 396,124 430,116 398,140 406,128" fill="#f4c20d" stroke="#111" stroke-width="1.5"/>`;
- if(fl&&s.m==3)g+=`<polygon points="372,128 394,118 390,126 410,122" fill="none" stroke="#f4c20d" stroke-width="3"/>`;
- if(pe)g+=`<path d="M400 260V292H34" stroke="#16a34a" stroke-width="5" fill="none"/><path d="M400 260V292H34" stroke="#facc15" stroke-width="5" fill="none" stroke-dasharray="10 10"/>`;
- g+=`<line x1="480" y1="340" x2="640" y2="340" stroke="var(--wire)" stroke-width="3"/>`+SXMAN(560,338,{d:-1,s:1.3,h1:[472,192]})+SXGND(610,336);
- if(fl&&s.m==0)g+=FLO([[360,22],[360,128],[400,124],[472,192],[512,206],[552,187],[556,250],[545,334]],t,9,'#dc2626',5,70);
- if(fl&&pe&&!off)g+=FLO([[360,22],[360,128],[400,124],[400,292],[34,292]],t,9,'#dc2626',5,90);
- g+=`<rect x="20" y="316" width="300" height="42" rx="10" fill="${ok?'var(--ok)':'var(--red)'}"/>`+SXT(170,344,(ok?'✓ ':'⚠️ ')+st,20,'middle','#fff',800);
- return{vb:'0 0 640 370',d:g,res:[[fs,s.m==0&&fl?'Fehlerstrom durch den Körper':'Fehlerstrom'],[dev,'Schutzeinrichtung'],[ok?'sicher':'Gefahr','Ergebnis']],
+ /* Ablauf: Fehlerstrom fließt, nach SXQT Sekunden öffnet die Schutzeinrichtung (stark verlangsamt) */
+ const trip=fl&&ok&&pe,off=trip&&tp>=SXQT,run=!off,Lc='#8b5a2b',Nc='#2563eb',GY='#16a34a';
+ const IL=run?(fl&&s.m==0?Ib+.23:fl&&pe?Ib+IF:Ib):0,IN=run?Ib:0,IPE=run&&fl&&pe?IF:0,IK=run&&fl&&s.m==0?.23:0;
+ /* Erdreich, Transformator mit geerdetem Sternpunkt */
+ let g=`<rect x="0" y="384" width="640" height="34" fill="#a0784f" opacity=".28"/><line x1="0" y1="384" x2="640" y2="384" stroke="#8b6a45" stroke-width="2.5"/>`+SXT(626,410,'Erdreich',13,'end','var(--mute)',600);
+ g+=`<path d="M18 30l10 -8h64l-10 8Z" fill="#cbd5e1" stroke="var(--ink)" stroke-width="1.5" stroke-linejoin="round"/><path d="M82 30l10 -8v70l-10 8Z" fill="#94a3b8" stroke="var(--ink)" stroke-width="1.5" stroke-linejoin="round"/><rect x="18" y="30" width="64" height="70" rx="3" fill="#e2e8f0" stroke="var(--ink)" stroke-width="2"/><circle cx="42" cy="58" r="13" fill="none" stroke="var(--ink)" stroke-width="2"/><circle cx="58" cy="58" r="13" fill="none" stroke="var(--ink)" stroke-width="2"/>`+SXT(50,92,'Trafo',12,'middle','#1a2433',700);
+ /* Leitungen */
+ const lsx=158;
+ g+=`<path d="M82 40H${lsx-6}M${lsx+34} 40H420V150" stroke="${Lc}" stroke-width="4" fill="none"/>`;
+ g+=`<path d="M82 88H${s.m==2?lsx-6:370}${s.m==2?`M${lsx+34} 88H370`:''}V150" stroke="${Nc}" stroke-width="4" fill="none"/>`;
+ g+=`<path d="M100 88V384" stroke="var(--ink)" stroke-width="3" fill="none"/><circle cx="100" cy="88" r="5" fill="var(--ink)"/>`+SXGND(100,398)+(pe?`<path d="M100 88V310" stroke="${GY}" stroke-width="5" fill="none"/><path d="M100 88V310" stroke="#facc15" stroke-width="5" fill="none" stroke-dasharray="10 10"/>`:'');
+ if(pe)g+=`<path d="M450 270V310H100" stroke="${GY}" stroke-width="5" fill="none"/><path d="M450 270V310H100" stroke="#facc15" stroke-width="5" fill="none" stroke-dasharray="10 10"/><circle cx="100" cy="310" r="5" fill="var(--ink)"/>`;
+ g+=SXT(26,124,'Sternpunkt',12,'start','var(--mute)',600)+SXT(26,138,'geerdet',12,'start','var(--mute)',600);
+ g+=SXT(116,34,'L',18,'middle',Lc,800)+SXT(116,82,'N',18,'middle',Nc,800)+(pe?SXT(126,304,'PE',18,'middle',GY,800):'');
+ /* Schaltgerät: LS oder RCD mit Summenstromwandler */
+ const sw=(y)=>off?`<path d="M${lsx-6} ${y}L${lsx+22} ${y-18}" stroke="var(--ink)" stroke-width="4" stroke-linecap="round"/><circle cx="${lsx+34}" cy="${y}" r="3" fill="var(--ink)"/>`:`<path d="M${lsx-6} ${y}H${lsx+34}" stroke="var(--ink)" stroke-width="4"/>`;
+ if(s.m==2)g+=`<rect x="${lsx-16}" y="18" width="78" height="86" rx="8" fill="none" stroke="var(--ink)" stroke-width="2.5"/>`+sw(40)+sw(88)+`<ellipse cx="${lsx+50}" cy="64" rx="7" ry="34" fill="none" stroke="#64748b" stroke-width="5"/>`+SXT(lsx+23,124,'RCD',15,'middle','var(--ink)',800);
+ else g+=`<rect x="${lsx-16}" y="20" width="68" height="34" rx="6" fill="none" stroke="var(--ink)" stroke-width="2.5"/>`+sw(40)+SXT(lsx+18,70,s.m==1?'LS B16':'LS',14,'middle','var(--ink)',800);
+ /* Gerät: Motor im Gehäuse, räumlich */
+ const iso=s.m==3,hc=iso?'#f1f5f9':'#9ca3af';
+ g+=`<path d="M330 150l16 -12h140l-16 12Z" fill="${hc}" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"/><path d="M470 150l16 -12v120l-16 12Z" fill="${hc}" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"/><path d="M470 150l16 -12v120l-16 12Z" fill="#000" opacity=".18"/><rect x="330" y="150" width="140" height="120" rx="4" fill="${hc}" stroke="var(--ink)" stroke-width="2.5"/>`+(iso?'':`<rect x="330" y="150" width="140" height="120" rx="4" fill="url(#g-tile)" opacity=".5"/>`);
+ g+=`<path d="M370 150V180M420 150V176" stroke="var(--ink)" stroke-width="2"/><circle cx="395" cy="205" r="26" fill="var(--bg)" stroke="var(--ink)" stroke-width="3"/>`+SXT(395,212,'M',20,'middle','var(--ink)',800);
+ if(iso)g+=`<rect x="338" y="158" width="124" height="104" rx="4" fill="none" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="5 3"/><rect x="438" y="236" width="20" height="20" fill="none" stroke="var(--ink)" stroke-width="2"/><rect x="443" y="241" width="10" height="10" fill="none" stroke="var(--ink)" stroke-width="2"/>`;
+ if(fl)g+=iso?`<polygon points="420,176 440,168 436,176 452,172" fill="none" stroke="#f4c20d" stroke-width="3"/>`:`<polygon points="420,176 446,164 440,174 468,168 442,188 448,178" fill="#f4c20d" stroke="#111" stroke-width="1.5"/>`;
+ /* Mensch auf dem Boden, Hand am Gehäuse */
+ g+=SXMAN(560,382,{d:-1,s:1.3,h1:[488,226]});
+ /* Stromwege */
+ const PN=[[82,40],[420,40],[420,176],[395,205],[370,180],[370,88],[82,88]],
+  PF=[[82,40],[420,40],[420,176],[450,190],[450,310],[100,310],[100,88],[82,88]],
+  PK=[[82,40],[420,40],[420,176],[470,200],[488,226],[520,236],[550,236],[552,300],[550,380],[550,392],[100,392],[100,88],[82,88]];
+ if(run&&!(fl&&(s.m==0||pe)))g+=SXQW(PN,Ib,t,'#f59e0b');
+ else if(run)g+=SXQW(PN,Ib,t,'#f59e0b');
+ if(IPE)g+=SXQW(PF,IPE,t);
+ if(IK)g+=SXQW(PK,IK,t);
+ /* Ströme direkt an den Leitern */
+ if(run){g+=SXQB(270,30,'I = '+nf(IL)+' A',Lc)+SXQB(270,80,'I = '+nf(IN)+' A',Nc);if(IPE)g+=SXQB(270,302,'I = '+nf(IPE)+' A',GY);if(IK)g+=SXQB(600,300,'230 mA',('#dc2626'))}
+ else g+=SXQB(270,30,'I = 0 A',Lc)+SXQB(270,80,'I = 0 A',Nc);
+ /* Anzeige im Bild: Fehlerstrom auf der Skala */
+ const Iz=fl&&s.m!=3?(s.m==0?.23:IF):0;
+ g+=SXT(130,166,fl&&s.m!=3?(s.m==0?'Strom durch den Körper':'Fehlerstrom I_k bei Z_s = '+nf(s.z)+' Ω'):'kein Fehlerstrom',14,'start','var(--ink)',700);
+ g+=SXQS(130,198,180,Iz,s.m);
+ if(s.m==2&&fl)g+=SXT(130,252,run?`hin (L) ${nf(IL)} A, zurück (N) ${nf(IN)} A`:'hin und zurück: 0 A',13,'start','var(--mute)',600)+SXT(130,270,run?`Differenz ${nf(IL-IN)} A ≥ 30 mA`:'RCD hat abgeschaltet',13,'start','var(--flow)',700);
+ else if(s.m==2)g+=SXT(130,252,`hin (L) ${nf(Ib)} A, zurück (N) ${nf(Ib)} A`,13,'start','var(--mute)',600)+SXT(130,270,'Differenz 0 A: RCD bleibt ein',13,'start','var(--ok)',700);
+ /* Meldung */
+ const msg=trip&&!off?(s.m==1?'Fehlerstrom fließt …':'Differenzstrom …'):st,mc=trip&&!off?'var(--amber)':ok?'var(--ok)':'var(--red)';
+ g+=`<rect x="122" y="326" width="250" height="40" rx="10" fill="${mc}"/>`+SXT(247,352,(trip&&!off?'⚡ ':ok?'✓ ':'⚠️ ')+msg,17,'middle','#fff',800);
+ return{vb:'0 0 640 418',d:g,res:[[fs,s.m==0&&fl?'Fehlerstrom durch den Körper':'Fehlerstrom'],[dev,'Schutzeinrichtung'],[ok?'sicher':'Gefahr','Ergebnis']],
  rows:[['Was passiert?',why],['Abschaltbedingung',s.m==1?`I_k = ${U0} V / ${nf(s.z)} Ω = ${nf(IF)} A ${IF>=Ia?'≥':'<'} I_a = 5 · 16 A = 80 A`:'gilt für den LS-Schalter (Auswahl Schutzleiter + LS B16)'],['Schutzklasse',['Metallgehäuse ohne Schutzleiter ist nicht zulässig','I: Schutzleiter am Gehäuse','I mit Zusatzschutz durch RCD','II: schutzisoliert (Quadrat im Quadrat), kein Schutzleiter'][s.m]]],
  st:[['I_k = U_0 / Z_s','Kurzschlussstrom in der Fehlerschleife'],['Z_s · I_a ≤ U_0','Abschaltbedingung: Schutzeinrichtung schaltet rechtzeitig ab (Endstromkreise höchstens 0,4 s)'],['I_a = 5 · I_n','sicherer Auslösestrom LS-Schalter Charakteristik B'],['I_Δn = 30 mA','RCD als zusätzlicher Schutz für Personen, z. B. an Steckdosen']]}},
- 'Vereinfacht: TN-Netz mit 230 V, Fehler zwischen Außenleiter L und Metallgehäuse, Körperwiderstand 1000 Ω. Schutzklasse III (Schutzkleinspannung bis 50 V AC) ist nicht dargestellt.',1);
+ 'Vereinfacht: TN-Netz mit 230 V, Fehler zwischen Außenleiter L und Metallgehäuse, Körperwiderstand 1000 Ω, Motor mit 6,5 A Betriebsstrom. Die Fehlerschleife Z_s reicht vom Transformator über L und die Fehlerstelle zurück über PE (oder Körper und Erde) zum geerdeten Sternpunkt. Rotes Leuchtband: Fehlerstrom, orange: Betriebsstrom, je dicker, desto größer. Wechselstrom hat keine feste Richtung: Die Elektronen (blaue Punkte) pendeln 50-mal pro Sekunde hin und her, im Bild stark verlangsamt. Auch das Abschalten ist verlangsamt, in Wirklichkeit dauert es nur Millisekunden. Schutzklasse III (Schutzkleinspannung bis 50 V AC) ist nicht dargestellt.',1);
 
 /* Fünf Sicherheitsregeln */
 const SX5=[['Freischalten','Freischalten','Alle Leiter allpolig von der Spannung trennen, z. B. Hauptschalter aus oder Sicherungen heraus.'],['Gegen Wiedereinschalten sichern','Gegen Wieder-|einschalten sichern','Schalter mit persönlichem Vorhängeschloss abschließen und Schild „Nicht schalten“ anbringen.'],['Spannungsfreiheit feststellen','Spannungsfreiheit|feststellen','Mit zweipoligem Spannungsprüfer an der Arbeitsstelle allpolig prüfen. Den Prüfer vorher und nachher testen.'],['Erden und kurzschließen','Erden und|kurzschließen','Erst erden, dann die Leiter miteinander kurzschließen. Das schützt, falls doch Spannung kommt.'],['Benachbarte, unter Spannung stehende Teile abdecken oder abschranken','Benachbarte Teile|abdecken','Isolierende Abdeckungen oder Absperrungen vor Teilen, die noch Spannung führen.']];
@@ -12431,36 +12481,36 @@ Object.assign(EIN,{
 'Schutzleiter & RCD':[
  {d:11,t:'In einer Bohrmaschine scheuert ein Kabel durch. Der Außenleiter L berührt das Metallgehäuse. Ohne Schutz liegt das Gehäuse auf 230 V, und niemand merkt es, bis jemand anfasst.',
   s:'In einer Bohrmaschine scheuert ein Kabel durch. Der Außenleiter L berührt das Metallgehäuse. Ohne Schutz liegt das Gehäuse auf 230 Volt, und niemand merkt es, bis jemand anfasst.',
-  f:(k,t)=>ESIM('Schutzleiter & RCD',{m:0,f:1},t,'0 0 640 370',0,0,480,270)},
+  f:(k,t)=>ESIM('Schutzleiter & RCD',{m:0,f:1},t,'0 0 640 418',0,0,480,270)},
  {d:12,t:'Der Schutzleiter PE verbindet das Gehäuse mit der Erde. Beim Fehler fließt ein großer Fehlerstrom: I_k = U_0 / Z_s = 230 V / 0,5 Ω = 460 A. Ein B16-Automat löst ab 5 · 16 A = 80 A sofort aus. Abgeschaltet.',
   s:'Der Schutzleiter PE verbindet das Gehäuse mit der Erde. Beim Fehler fließt ein großer Fehlerstrom: I k gleich U 0 durch Z s gleich 230 Volt durch 0,5 Ohm gleich 460 Ampere. Ein B16-Automat löst ab 5 mal 16 Ampere gleich 80 Ampere sofort aus. Abgeschaltet.',
   f:k=>EFX(k,[[ESB('I','k')+' = '+ESB('U','0')+' / '+ESB('Z','s'),'h'],[ESB('I','k')+' = 230 V / 0,5 Ω = 460 A','m'],['B16 löst ab 5 · 16 A = 80 A aus','m'],['460 A > 80 A: schaltet ab','r']],['Z_s: Widerstand der Fehlerschleife'])},
  {d:12,t:'Der Fehlerstrom-Schutzschalter, RCD, vergleicht den Strom in L mit dem Strom in N. Fließt ein Teil über Gehäuse oder Körper zur Erde, fehlt er auf dem Rückweg. Ab 30 mA Differenz schaltet der RCD in 0,2 s ab.',
   s:'Der Fehlerstrom-Schutzschalter, RCD, vergleicht den Strom in L mit dem Strom in N. Fließt ein Teil über Gehäuse oder Körper zur Erde, fehlt er auf dem Rückweg. Ab 30 Milliampere Differenz schaltet der RCD in 0,2 Sekunden ab.',
-  f:(k,t)=>ESIM('Schutzleiter & RCD',{m:2,f:1},t,'0 0 640 370',0,0,480,270)},
+  f:(k,t)=>ESIM('Schutzleiter & RCD',{m:2,f:1},t,'0 0 640 418',0,0,480,270)},
  {d:11,t:'Beide ergänzen sich: Der Schutzleiter braucht einen großen Strom, damit die Sicherung fällt. Der RCD reagiert schon bei 30 mA, auch wenn der Fehlerstrom nur durch einen Menschen fließt, für den Schutzleiter zu wenig.',
   s:'Beide ergänzen sich: Der Schutzleiter braucht einen großen Strom, damit die Sicherung fällt. Der RCD reagiert schon bei 30 Milliampere, auch wenn der Fehlerstrom nur durch einen Menschen fließt, für den Schutzleiter zu wenig.',
-  f:(k,t)=>ESIM('Schutzleiter & RCD',{m:k<.5?1:2,f:1},t,'0 0 640 370',0,0,480,270)},
+  f:(k,t)=>ESIM('Schutzleiter & RCD',{m:k<.5?1:2,f:1},t,'0 0 640 418',0,0,480,270)},
  {d:12,t:'Alles zusammen: Schutzleiter macht aus dem Isolationsfehler einen Kurzschluss, I_k = U_0 / Z_s, und die Sicherung schaltet ab. Der RCD schaltet ab 30 mA Differenz. Schutzklasse II kommt ohne PE aus: doppelt isoliert.',
   s:'Alles zusammen: Schutzleiter macht aus dem Isolationsfehler einen Kurzschluss, I k gleich U 0 durch Z s, und die Sicherung schaltet ab. Der RCD schaltet ab 30 Milliampere Differenz. Schutzklasse zwei kommt ohne PE aus: doppelt isoliert.',
   f:k=>EFX(k,[['Schutzleiter: Fehler → Kurzschluss','m'],[ESB('I','k')+' = '+ESB('U','0')+' / '+ESB('Z','s')+' = 460 A → Sicherung','m'],['RCD: ab 30 mA Differenz, 0,2 s','r'],['Schutzklasse II: doppelt isoliert','m']],['Prüfung: Z_s messen, RCD-Taste drücken'])},
  {d:9,t:'Merke: Der Schutzleiter lässt die Sicherung fallen, der RCD schützt den Menschen ab 30 mA. Monatlich die Prüftaste drücken.',
   s:'Merke: Der Schutzleiter lässt die Sicherung fallen, der RCD schützt den Menschen ab 30 Milliampere. Monatlich die Prüftaste drücken.',
-  f:(k,t)=>EMRK(k,t,ESIM('Schutzleiter & RCD',{m:2,f:1},t,'0 0 640 370',0,40,220,127),ESB('I','Δn')+' = 30 mA','PE + RCD')}
+  f:(k,t)=>EMRK(k,t,ESIM('Schutzleiter & RCD',{m:2,f:1},t,'0 0 640 418',0,40,220,144),ESB('I','Δn')+' = 30 mA','PE + RCD')}
 ],
 'Fünf Sicherheitsregeln':[
  {d:11,t:'An der Fräsmaschine soll der Motor gewechselt werden. Bevor jemand die Klemmen anfasst, muss die Anlage spannungsfrei sein und bleiben. Dafür gibt es fünf Regeln in fester Reihenfolge.',
   s:'An der Fräsmaschine soll der Motor gewechselt werden. Bevor jemand die Klemmen anfasst, muss die Anlage spannungsfrei sein und bleiben. Dafür gibt es fünf Regeln in fester Reihenfolge.',
-  f:(k,t)=>ESIM('Fünf Sicherheitsregeln',{n:0},t,'0 0 640 370',0,0,480,270)},
+  f:(k,t)=>ESIM('Fünf Sicherheitsregeln',{n:0},t,'0 0 640 418',0,0,480,270)},
  {d:12,t:'Regel 1: Freischalten, also allpolig abschalten, zum Beispiel am Hauptschalter. Regel 2: gegen Wiedereinschalten sichern, mit Vorhängeschloss und Schild. Sonst schaltet ein Kollege ahnungslos wieder ein.',
   s:'Regel 1: Freischalten, also allpolig abschalten, zum Beispiel am Hauptschalter. Regel 2: gegen Wiedereinschalten sichern, mit Vorhängeschloss und Schild. Sonst schaltet ein Kollege ahnungslos wieder ein.',
-  f:(k,t)=>ESIM('Fünf Sicherheitsregeln',{n:Math.min(2,Math.floor(k*2.4)+1)},t,'0 0 640 370',0,0,480,270)},
+  f:(k,t)=>ESIM('Fünf Sicherheitsregeln',{n:Math.min(2,Math.floor(k*2.4)+1)},t,'0 0 640 418',0,0,480,270)},
  {d:11,t:'Regel 3: Spannungsfreiheit feststellen, zweipolig mit einem geprüften Spannungsprüfer an allen Leitern. Nie dem Schalter glauben, immer messen. Der Prüfer wird vorher und nachher an bekannter Spannung getestet.',
   s:'Regel 3: Spannungsfreiheit feststellen, zweipolig mit einem geprüften Spannungsprüfer an allen Leitern. Nie dem Schalter glauben, immer messen. Der Prüfer wird vorher und nachher an bekannter Spannung getestet.',
-  f:(k,t)=>ESIM('Fünf Sicherheitsregeln',{n:3},t,'0 0 640 370',0,0,480,270)},
+  f:(k,t)=>ESIM('Fünf Sicherheitsregeln',{n:3},t,'0 0 640 418',0,0,480,270)},
  {d:12,t:'Regel 4: Erden und kurzschließen, bei Anlagen über 1 kV immer. Dann kann keine Spannung zurückkommen, auch nicht aus einem zweiten Netz. Regel 5: benachbarte, unter Spannung stehende Teile abdecken oder abschranken.',
   s:'Regel 4: Erden und kurzschließen, bei Anlagen über 1 Kilovolt immer. Dann kann keine Spannung zurückkommen, auch nicht aus einem zweiten Netz. Regel 5: benachbarte, unter Spannung stehende Teile abdecken oder abschranken.',
-  f:(k,t)=>ESIM('Fünf Sicherheitsregeln',{n:k<.5?4:5},t,'0 0 640 370',0,0,480,270)},
+  f:(k,t)=>ESIM('Fünf Sicherheitsregeln',{n:k<.5?4:5},t,'0 0 640 418',0,0,480,270)},
  {d:12,t:'Alles zusammen: Freischalten, sichern, Spannungsfreiheit feststellen, erden und kurzschließen, Nachbarteile abdecken. Immer in dieser Reihenfolge. Nach der Arbeit werden sie rückwärts aufgehoben, Regel 5 zuerst, Regel 1 zuletzt.',
   s:'Alles zusammen: Freischalten, sichern, Spannungsfreiheit feststellen, erden und kurzschließen, Nachbarteile abdecken. Immer in dieser Reihenfolge. Nach der Arbeit werden sie rückwärts aufgehoben, Regel 5 zuerst, Regel 1 zuletzt.',
   f:(k,t)=>EKET(k,[['1','freischalten'],['2','sichern'],['3','messen'],['4','erden'],['5','abdecken']],100,78,10)+EFT(240,60,'immer in dieser Reihenfolge','ein1','middle')+AR(400,190,-320,0,'var(--muted)')+EFT(240,225,'nach der Arbeit rückwärts aufheben','ein2','middle')},
