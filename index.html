@@ -2804,17 +2804,66 @@ const psbCard=z=>{const r=z>=57&&z<=71?57:z>=89&&z<=103?89:0,d=PSB[z-1]||PSG[r],
 const AMS={H:1.008,C:12.011,N:14.007,O:15.999,Na:22.99,Cl:35.45,Fe:55.845,Mg:24.305},AT=f=>{const o={};for(const m of f.matchAll(/([A-Z][a-z]?)(\d*)/g))o[m[1]]=(o[m[1]]||0)+ +(m[2]||1);return o},MM=f=>Object.entries(AT(f)).reduce((a,[e,n])=>a+AMS[e]*n,0),pf=f=>f.replace(/\d/g,d=>'₀₁₂₃₄₅₆₇₈₉'[d]);
 const RX=[[2,[2,'H2'],[1,'O2'],[2,'H2O']],[2,[1,'CH4'],[2,'O2'],[1,'CO2'],[2,'H2O']],[2,[4,'Fe'],[3,'O2'],[2,'Fe2O3']],[2,[1,'N2'],[3,'H2'],[2,'NH3']],[2,[2,'Na'],[1,'Cl2'],[2,'NaCl']],[2,[2,'Mg'],[1,'O2'],[2,'MgO']]];
 const eqs=(sp,nr,co)=>sp.map((x,i)=>(i==nr?' → ':i?' + ':'')+(co[i]>1?co[i]+' ':'')+pf(x[1])).join('');
-fm(FC,RS,'Reaktionsgleichungen & Mol','Eine Reaktionsgleichung muss ausgeglichen sein: Von jeder Atomsorte steht links und rechts gleich viel (Erhaltung der Masse). n = m / M verbindet Masse und Stoffmenge.',
- [['r','Reakt.','sel',RX.map(r=>eqs(r.slice(1),r[0],r.slice(1).map(x=>x[0]))),0],['m','m',1,1000,1,'g',10],['v','Koeff.','sel',['ausgeglichen','alle = 1'],0]],
- s=>{const r=RX[s.r],nr=r[0],sp=r.slice(1),co=sp.map(x=>s.v?1:x[0]),xi=s.m/MM(sp[0][1])/sp[0][0],ms=sp.map(x=>xi*x[0]*MM(x[1])),L={},R={};
- sp.forEach((x,i)=>{const a=AT(x[1]),t=i<nr?L:R;for(const e in a)t[e]=(t[e]||0)+a[e]*co[i]});
- const sm=(a,b)=>ms.slice(a,b).reduce((p,q)=>p+q,0),mE=sm(0,nr),mP=sm(nr,sp.length),els=[...new Set([...Object.keys(L),...Object.keys(R)])];
- let h=T(30,36,eqs(sp,nr,co),'t1');
- [[0,nr,50,mE],[nr,sp.length,190,mP]].forEach(([a,b,x0,tot])=>{let y=66;const dd=14;h+=`<ellipse cx="${x0+57}" cy="236" rx="66" ry="7" fill="url(#g-shad)"/>`;for(let i=a;i<b;i++){const hh=ms[i]/mE*164,c=['#5b9bd5','#f0a54a','#5cb85c','#e5736a'][i%4];
-  if(i==a)h+=`<path d="M${x0} ${y}l${dd} ${-dd}h100l${-dd} ${dd}Z" fill="color-mix(in srgb,${c} 60%,#fff)" stroke="var(--ink)" stroke-width="1.2" stroke-linejoin="round"/>`;
-  h+=`<path d="M${x0+100} ${y}l${dd} ${-dd}v${hh}l${-dd} ${dd}Z" fill="color-mix(in srgb,${c} 70%,#000)" stroke="var(--ink)" stroke-width="1.2" stroke-linejoin="round"/><rect x="${x0}" y="${y}" width="100" height="${hh}" fill="${c}" stroke="var(--ink)" stroke-width="1.2"/><rect x="${x0}" y="${y}" width="100" height="${hh}" fill="url(#g-tile)" opacity=".7"/>`+(hh>16?`<text x="${x0+50}" y="${y+hh/2+5}" font-size="14" font-weight="700" text-anchor="middle" style="fill:#1a2433">${pf(sp[i][1])}</text>`:'');y+=hh}h+=T(x0+57,262,(a?'Produkte ':'Edukte ')+nf(tot)+' g','t2','middle')});
- h+=els.map((e,i)=>`<text class="t1" x="360" y="${70+i*26}" style="fill:${(L[e]||0)==(R[e]||0)?'var(--ok)':'var(--red)'}">${e}: ${L[e]||0} → ${R[e]||0}</text>`).join('')+T(360,50,'Atome links → rechts','t2');
- return{d:h,res:[[nf(s.m/MM(sp[0][1]))+' mol','n (1. Edukt)'],[nf(mE)+' g','Σ m Edukte'],[nf(mP)+' g','Σ m Produkte']],rows:sp.map((x,i)=>[pf(x[1]),`${nf(MM(x[1]))} g/mol · ${nf(xi*x[0])} mol = ${nf(ms[i])} g`]),st:[['n = m / M',`${nf(s.m)} g / ${nf(MM(sp[0][1]))} g/mol = ${nf(s.m/MM(sp[0][1]))} mol`],['Erhaltung der Masse','Σ m(Edukte) = Σ m(Produkte)'],['Ausgleichen','Koeffizienten vor die Formeln setzen, nie die Indizes ändern']]}});
+/* ---- Reaktionsgleichungen mit Teilchen-Lupe und Waage (10.11.2026), Helfer mit Präfix RG ---- */
+/* Atome: [Radius, Farbe, Schriftfarbe]; Moleküle: Atome mit Lage relativ zur Mitte (Kalottenmodell, Salze als Formeleinheit) */
+const RGK=1.6,RGA={H:[14,'#f4f6f8','#1a2433'],O:[19,'#e5534b','#fff'],C:[19,'#4a4f57','#fff'],N:[19,'#4c6ef5','#fff'],Na:[21,'#8b5cf6','#fff'],Cl:[21,'#2f9e44','#fff'],Mg:[21,'#a3abb5','#1a2433'],Fe:[21,'#d9783a','#fff']},
+ RGG={H2:[['H',-7,0],['H',7,0]],O2:[['O',-10,0],['O',10,0]],N2:[['N',-10,0],['N',10,0]],Cl2:[['Cl',-11,0],['Cl',11,0]],H2O:[['H',-12,10],['H',12,10],['O',0,0]],
+  CH4:[['H',-13,-11],['H',13,-11],['H',-13,11],['H',13,11],['C',0,0]],CO2:[['O',-21,0],['O',21,0],['C',0,0]],NH3:[['H',-14,8],['H',14,8],['H',0,15],['N',0,-2]],
+  NaCl:[['Na',-13,0],['Cl',13,0]],MgO:[['Mg',-12,0],['O',12,0]],Fe2O3:[['O',-27,10],['O',0,-12],['O',27,10],['Fe',-14,1],['Fe',14,1]],Fe:[['Fe',0,0]],Na:[['Na',0,0]],Mg:[['Mg',0,0]]},
+ RGAT=(x,y,e,o=1)=>{const a=RGA[e];return`<g${KOA(o)}>`+BALL(f2(x),f2(y),a[0],a[1],1.2)+`<text x="${f2(x)}" y="${f2(y+(a[0]>15?6:5))}" text-anchor="middle" style="font-size:${a[0]>15?17:14}px;font-weight:800;fill:${a[2]};paint-order:stroke;stroke:${a[2]=='#fff'?'#0006':'#fff8'};stroke-width:2px">${e}</text></g>`},
+ /* Plätze der Teilchen: jede Formel bekommt eine Spalte, mehrere Teilchen stehen untereinander (ab 4 in zwei Spalten) */
+ RGPL=(sp,co,x0,x1)=>{const n=sp.length,w=(x1-x0)/n,P=[];sp.forEach((q,i)=>{const f=q[1],c=co[i],cx=x0+w*(i+.5),two=c>3,rows=two?Math.ceil(c/2):c,dy=Math.min(74,(f=='Fe2O3'?100:130)/Math.max(1,rows-1||1));
+  for(let k=0;k<c;k++){const col=two?k%2:0,row=two?Math.floor(k/2):k,x=cx+(two?(col-.5)*50:0),y=170+(row-(rows-1)/2)*(rows>1?dy:0);P.push({f,x,y,i})}});return P},
+ RGSUP=v=>String(v).replace(/[0-9-]/g,d=>'⁰¹²³⁴⁵⁶⁷⁸⁹'['0123456789'.indexOf(d)]||'⁻'),
+ RGNUM=N=>{const e=Math.floor(Math.log10(N)),m=N/10**e;return nf(Math.round(m*10)/10)+' · 10'+RGSUP(e)};
+/* Teilchen-Lupe: Edukte zerfallen in Atome, die Atome ordnen sich zu den Produkten um; Atome ohne Partner bleiben rot „übrig“, fehlende Atome erscheinen als „?“ */
+const RGLUPE=(sp,nr,co,t)=>{const P=8,u=((t%P)+P)%P/P,L=RGPL(sp.slice(0,nr),co.slice(0,nr),20,290),R=RGPL(sp.slice(nr),co.slice(nr),350,625),la=[],ra=[];
+ L.forEach(p=>RGG[p.f].forEach(a=>la.push({e:a[0],x:p.x,y:p.y,dx:a[1],dy:a[2]})));R.forEach(p=>RGG[p.f].forEach(a=>ra.push({e:a[0],x:p.x,y:p.y,dx:a[1],dy:a[2]})));
+ const used=ra.map(()=>0),pair=la.map(a=>{const j=ra.findIndex((b,k)=>!used[k]&&b.e==a.e);if(j>=0)used[j]=1;return j});
+ const sb=LPS(u,.2,.32),sm=LPS(u,.34,.7),sc=LPS(u,.72,.84),st=u<.2?0:u<.34?1:u<.84?2:3;
+ let h=`<path d="M300 170H338" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/><polygon points="346,170 334,163 334,177" fill="var(--ink)"/>`;
+ /* Beschriftung unter den Gruppen */
+ const lab=(G,a)=>{const by={};G.forEach(p=>{(by[p.i]=by[p.i]||[]).push(p)});return Object.values(by).map(g=>{const c=g.length,f=g[0].f;return TH(f2(g.reduce((q,p)=>q+p.x,0)/c),280,(c>1?c+' ':'')+pf(f),'t1','middle')}).join('')};
+ h+=lab(L,1)+lab(R,1);
+ /* fehlende Atome als gestrichelte Kreise mit „?“ */
+ ra.forEach((b,k)=>{if(used[k]||sc<=0)return;const r=RGA[b.e][0];h+=`<g opacity="${sc.toFixed(2)}"><circle cx="${f2(b.x+b.dx*RGK)}" cy="${f2(b.y+b.dy*RGK)}" r="${r}" fill="none" stroke="var(--red)" stroke-width="2" stroke-dasharray="4 3"/><text x="${f2(b.x+b.dx*RGK)}" y="${f2(b.y+b.dy*RGK+6)}" text-anchor="middle" style="font-size:18px;font-weight:800;fill:var(--red)">?</text></g>`});
+ /* Atome: kleine Wärmebewegung, dann Bindungen lösen, umordnen, neu binden */
+ const at=la.map((a,i)=>{const j=GZJ(i,t,1.4),ex=1+.7*sb,zz=sm<.5||pair[i]<0?i:100+pair[i],p0=[a.x+a.dx*RGK*ex,a.y+a.dy*RGK*ex];let x,y;
+  if(pair[i]<0){x=p0[0];y=p0[1]}else{const b=ra[pair[i]],ex2=1+.7*(1-sc),p1=[b.x+b.dx*RGK*ex2,b.y+b.dy*RGK*ex2],q=GZL(p0,p1,sm);x=q[0];y=q[1]-38*Math.sin(Math.PI*sm)*(i%2?1:-.6)}
+  return{x:x+j[0],y:y+j[1],e:a.e,lo:pair[i]<0,z:zz}});
+ at.sort((a,b)=>a.z-b.z).forEach(a=>{h+=RGAT(a.x,a.y,a.e);if(a.lo&&sc>0)h+=`<circle cx="${f2(a.x)}" cy="${f2(a.y)}" r="${RGA[a.e][0]+4}" fill="none" stroke="var(--red)" stroke-width="2.5" opacity="${sc.toFixed(2)}"/>`});
+ const lo=at.filter(a=>a.lo);if(lo.length&&sc>0)h+=TH(f2(Math.min(...lo.map(a=>a.x))),f2(Math.min(...lo.map(a=>a.y))-RGA[lo[0].e][0]-8),'übrig','t1').replace('class="t1"','class="t1" style="fill:var(--red)"').replace('style="paint','style="fill:var(--red);paint');
+ h+=T(20,60,'Schritt '+(st+1)+' von 4: '+['Ausgangsstoffe (Edukte)','Bindungen brechen auf','Atome ordnen sich neu','Neue Stoffe (Produkte)'][st],'t2');
+ return h};
+/* Waage (Tafelwaage): links die Edukte, rechts die Produkte als Blöcke (Höhe ∝ Masse); bei falschen Koeffizienten kippt sie */
+const RGWAAGE=(sp,nr,ms,mE,mP)=>{const mx=Math.max(mE,mP),ang=Math.max(-10,Math.min(10,(mE-mP)/mx*40)),ra=ang*Math.PI/180,cx=320,cy=258,Lb=190,
+ E=[cx-Lb*Math.cos(ra),cy+Lb*Math.sin(ra)],Pp=[cx+Lb*Math.cos(ra),cy-Lb*Math.sin(ra)];
+ let h=`<path d="M${cx-14} ${cy}L${cx-26} 312H${cx+26}L${cx+14} ${cy}Z" fill="var(--line)" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round"/><rect x="${cx-60}" y="312" width="120" height="10" rx="3" fill="var(--line)" stroke="var(--ink)" stroke-width="2.5"/>`;
+ h+=`<line x1="${f2(E[0])}" y1="${f2(E[1])}" x2="${f2(Pp[0])}" y2="${f2(Pp[1])}" stroke="var(--ink)" stroke-width="8" stroke-linecap="round"/><line x1="${f2(E[0])}" y1="${f2(E[1])}" x2="${f2(Pp[0])}" y2="${f2(Pp[1])}" stroke="#9aa5b1" stroke-width="4" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="7" fill="var(--card)" stroke="var(--ink)" stroke-width="2.5"/>`;
+ h+=`<polygon points="${cx},${cy-52} ${cx-7},${cy-64} ${cx+7},${cy-64}" fill="var(--mute)"/><line x1="${cx}" y1="${cy}" x2="${f2(cx-46*Math.sin(ra))}" y2="${f2(cy-46*Math.cos(ra))}" stroke="${Math.abs(ang)>.05?'var(--red)':'var(--ok)'}" stroke-width="3.5" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="7" fill="var(--card)" stroke="var(--ink)" stroke-width="2.5"/>`;
+ [[E,0,nr,mE,'Edukte'],[Pp,nr,sp.length,mP,'Produkte']].forEach(([A,a,b,tot,nm])=>{const px=A[0],py=A[1]-22;
+  h+=`<path d="M${f2(px)} ${f2(A[1])}V${f2(py)}" stroke="var(--ink)" stroke-width="4"/><path d="M${f2(px-66)} ${f2(py)}H${f2(px+66)}l-8 7H${f2(px-58)}Z" fill="#9aa5b1" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"/>`;
+  let yy=py;for(let i=b-1;i>=a;i--){const hh=Math.max(6,ms[i]/mx*120),c=['#5b9bd5','#f0a54a','#5cb85c','#e5736a'][i%4],x0=px-48,dd=10;yy-=hh;
+   if(i==a)h+=`<path d="M${f2(x0)} ${f2(yy)}l${dd} ${-dd}h88l${-dd} ${dd}Z" fill="color-mix(in srgb,${c} 60%,#fff)" stroke="var(--ink)" stroke-width="1.2" stroke-linejoin="round"/>`;
+   h+=`<path d="M${f2(x0+88)} ${f2(yy)}l${dd} ${-dd}v${f2(hh)}l${-dd} ${dd}Z" fill="color-mix(in srgb,${c} 70%,#000)" stroke="var(--ink)" stroke-width="1.2" stroke-linejoin="round"/><rect x="${f2(x0)}" y="${f2(yy)}" width="88" height="${f2(hh)}" fill="${c}" stroke="var(--ink)" stroke-width="1.2"/><rect x="${f2(x0)}" y="${f2(yy)}" width="88" height="${f2(hh)}" fill="url(#g-tile)" opacity=".7"/>`+(hh>17?`<text x="${f2(x0+44)}" y="${f2(yy+hh/2+5)}" font-size="13" font-weight="700" text-anchor="middle" style="fill:#1a2433">${pf(sp[i][1])}</text>`:'')}
+  h+=TH(f2(px),f2(Math.max(A[1],cy)+60),nm+': '+nf(tot)+' g','t1','middle')});
+ const eq=Math.abs(mP-mE)<1e-6*mx;h+=T(20,58,eq?'Gleichgewicht: Die Masse bleibt erhalten.':'Die Waage kippt: Die Gleichung ist nicht ausgeglichen.','t2').replace('class="t2"','class="t2" style="fill:'+(eq?'var(--ok)':'var(--red)')+';font-weight:700"');
+ return h};
+fm(FC,RS,'Reaktionsgleichungen & Mol','Eine Reaktionsgleichung muss ausgeglichen sein: Von jeder Atomsorte steht links und rechts gleich viel (Erhaltung der Masse). n = m / M verbindet Masse und Stoffmenge. In der Teilchen-Lupe siehst Du, wie sich die Atome neu ordnen, auf der Waage, dass die Masse erhalten bleibt.',
+ [['a','Ansicht','sel',['Teilchen-Lupe','Waage'],0],['r','Reakt.','sel',RX.map(r=>eqs(r.slice(1),r[0],r.slice(1).map(x=>x[0]))),0],['m','m',1,1000,1,'g',10],['v','Koeff.','sel',['ausgeglichen','alle = 1'],0]],
+ (s,t=0)=>{const r=RX[s.r],nr=r[0],sp=r.slice(1),co=sp.map(x=>s.v?1:x[0]),n1=s.m/MM(sp[0][1]),xi=n1/co[0],ms=sp.map((x,i)=>xi*co[i]*MM(x[1])),L={},R={};
+ sp.forEach((x,i)=>{const a=AT(x[1]),q=i<nr?L:R;for(const e in a)q[e]=(q[e]||0)+a[e]*co[i]});
+ const sm=(a,b)=>ms.slice(a,b).reduce((p,q)=>p+q,0),mE=sm(0,nr),mP=sm(nr,sp.length),els=[...new Set([...Object.keys(L),...Object.keys(R)])],ok=els.every(e=>(L[e]||0)==(R[e]||0));
+ let h=`<text x="20" y="32" style="font-size:20px;font-weight:800">${eqs(sp,nr,co)}</text>`;
+ if(s.a==1)h+=RGWAAGE(sp,nr,ms,mE,mP);
+ else{h+=RGLUPE(sp,nr,co,t);
+  const w=Math.min(200,600/els.length);h+=T(320,306,'Atome zählen: links → rechts','t2','middle');
+  els.forEach((e,i)=>{const x=320+(i-(els.length-1)/2)*w,a=L[e]||0,b=R[e]||0,g=a==b,c=g?'var(--ok)':'var(--red)';h+=RGAT(x-44,334,e)+`<text x="${x-18}" y="340" style="font-size:17px;font-weight:800;fill:${c}">${a} → ${b} ${g?'✓':'✗'}</text>`});
+  h+=T(320,374,`Im Bild: ein Formelumsatz. Bei m = ${nf(s.m)} g ${pf(sp[0][1])} sind es ${RGNUM(n1*6.022e23)} Teilchen.`,'t3','middle')}
+ return{vb:s.a==1?'0 0 640 345':'0 0 640 384',d:h,res:[[nf(n1)+' mol','n (1. Edukt)'],[nf(mE)+' g','Σ m Edukte'],[nf(mP)+' g','Σ m Produkte']],
+ rows:sp.map((x,i)=>[(co[i]>1?co[i]+' ':'')+pf(x[1]),`${nf(xi*co[i])} mol · ${nf(MM(x[1]))} g/mol = ${nf(ms[i])} g`]).concat(ok?[]:[['Achtung','Die Gleichung ist nicht ausgeglichen: Atome fehlen oder bleiben übrig, die Massen links und rechts sind verschieden.']]),
+ st:[['n = m / M',`n = ${nf(s.m)} g / ${nf(MM(sp[0][1]))} g/mol = ${nf(n1)} mol`],['Erhaltung der Masse','Σ m(Edukte) = Σ m(Produkte)'],['Ausgleichen','Koeffizienten vor die Formeln setzen, nie die Indizes ändern']]}},
+ 'Teilchen-Lupe: Kugeln sind Atome (H weiß, O rot, C grau, N blau, Na violett, Cl grün, Mg silbern, Fe orange). Salze wie NaCl, MgO und Fe₂O₃ bilden in Wirklichkeit ein Ionengitter, im Bild steht eine Formeleinheit. Rot umrandet: Atom bleibt übrig, „?“: Atom fehlt. Waage: Die Blockhöhe entspricht der Masse jedes Stoffes.',1);
 fm(FC,SB,'Neutralisation & Titration','Säure + Base → Salz + Wasser. Beim Titrieren von Salzsäure mit Natronlauge springt der pH-Wert am Äquivalenzpunkt von sauer nach basisch.',
  [['ca','c_S',.01,1,.01,'mol/l',.1],['Va','V_S',10,100,1,'mL',25],['cb','c_L',.01,1,.01,'mol/l',.1],['Vb','V_L',0,200,.5,'mL',10]],
  s=>{const na=s.ca*s.Va,Ve=na/s.cb,ph=v=>{const d=(na-s.cb*v)/(s.Va+v);return Math.abs(d)<1e-7?7:d>0?-Math.log10(d):14+Math.log10(-d)},p=ph(s.Vb);
@@ -8439,31 +8488,81 @@ fm(FSI,SXG2,'Strom durch den Körper','Berührt man ein spannungsführendes Teil
  'Richtwerte für Wechselstrom 50 Hz bei längerer Einwirkung, Stromweg Hand – Füße. Die genauen Grenzen hängen von Dauer, Stromweg und Person ab (IEC 60479).',1);
 
 /* Schutzleiter & RCD */
+/* Schutzleiter & RCD (10.11.2026): ganze Fehlerschleife vom Transformator über L, Gehäuse und PE (oder Körper und Erde) zurück zum Sternpunkt.
+   Wechselstrom: Leuchtband = Stromweg (Dicke ∝ Stromstärke), Elektronen pendeln ohne feste Richtung (stark verlangsamt). Helfer mit Präfix SXQ */
+const SXQP=6,SXQT=2.4,
+ SXQL=I=>I<=0?0:Math.max(2,Math.min(16,3+2.6*Math.log10(I*1000+1)-5)),
+ /* Leuchtband und pendelnde Elektronen auf einem Weg P; I in A */
+ SXQW=(P,I,t,c='#dc2626')=>{if(I<=0)return'';const w=SXQL(I),pts=P.map(p=>p.join(',')).join(' ');let h=`<polyline points="${pts}" fill="none" stroke="${c}" stroke-width="${w+6}" stroke-linejoin="round" stroke-linecap="round" opacity=".22"/><polyline points="${pts}" fill="none" stroke="${c}" stroke-width="${f2(w/2+1)}" stroke-linejoin="round" stroke-linecap="round" opacity=".5"/>`;
+  let L=0;for(let i=1;i<P.length;i++)L+=Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]);const n=Math.floor(L/30),A=9*Math.sin(2*Math.PI*t/1.6);
+  for(let k=1;k<n;k++){const[x,y]=PW(P,(k*30+A)/L);h+=`<circle cx="${f2(x)}" cy="${f2(y)}" r="3.4" fill="var(--flow)" stroke="var(--card)" stroke-width="1"/>`}return h},
+ SXQB=(x,y,s,c)=>`<g style="paint-order:stroke">`+SXT(x,y,s,15,'middle',c,800).replace('style="','style="paint-order:stroke;stroke:var(--card);stroke-width:5px;stroke-linejoin:round;')+'</g>',
+ /* Strom-Skala 0,01 A … 1000 A (logarithmisch) mit Marken 30 mA (RCD) und 80 A (LS B16) */
+ SXQS=(x,y,w,I,m)=>{const X=v=>x+w*(Math.log10(v)+2)/5;let h=`<rect x="${x}" y="${y}" width="${w}" height="10" rx="5" fill="var(--line)" stroke="var(--ink)" stroke-width="1.2"/>`;
+  [.01,.1,1,10,100,1000].forEach(v=>h+=`<line x1="${f2(X(v))}" x2="${f2(X(v))}" y1="${y+10}" y2="${y+15}" stroke="var(--ink)"/>`+SXT(f2(X(v)),y+28,v<1?nf(v):v+'',12,'middle','var(--mute)',500));
+  if(m==2||m==0)h+=`<line x1="${f2(X(.03))}" x2="${f2(X(.03))}" y1="${y-6}" y2="${y+12}" stroke="var(--flow)" stroke-width="3"/>`+SXT(f2(X(.03)),y-10,'RCD 30 mA',12,'middle','var(--flow)',700);
+  if(m==1||m==0)h+=`<line x1="${f2(X(80))}" x2="${f2(X(80))}" y1="${y-6}" y2="${y+12}" stroke="var(--ink)" stroke-width="3"/>`+SXT(f2(X(80)),y-10,'LS 80 A',12,'middle','var(--ink)',700);
+  if(I>0){const xi=Math.max(x,Math.min(x+w,X(I)));h+=`<rect x="${x}" y="${y}" width="${f2(xi-x)}" height="10" rx="5" fill="#dc2626" opacity=".75"/><polygon points="${f2(xi)},${y+11} ${f2(xi-7)},${y+22} ${f2(xi+7)},${y+22}" fill="#dc2626" stroke="var(--card)"/>`}
+  return h};
 fm(FSI,SXG2,'Schutzleiter & RCD','Hat ein Gerät einen Isolationsfehler, kann das Metallgehäuse Spannung führen. Der Schutzleiter leitet den Fehlerstrom ab, damit die Sicherung abschaltet. Der Fehlerstrom-Schutzschalter (RCD) vergleicht hin- und zurückfließenden Strom und schaltet schon bei 30 mA Differenz ab. Z_s ist der Widerstand der Fehlerschleife.',
  [['m','Schutz','sel',['Ohne Schutzleiter','Schutzleiter + LS B16','Schutzleiter + RCD 30 mA','Schutzisolierung (Klasse II)'],1],['f','Fehler','sel',['kein Fehler','Körperschluss'],1],['z','Z_s',.2,5,.1,'Ω',1]],
- (s,t=0)=>{const U0=230,Ia=80,IF=U0/s.z,fl=s.f==1,pe=s.m==1||s.m==2;
+ (s,t=0)=>{const U0=230,Ia=80,Ib=6.5,IF=U0/s.z,fl=s.f==1,pe=s.m==1||s.m==2,tp=((t%SXQP)+SXQP)%SXQP;
  let st,ok,dev,fs,why;
  if(!fl){st='Normalbetrieb';ok=1;dev='nicht nötig';fs='0 A';why='Kein Fehler: Strom fließt nur über L und N durch den Motor.'}
  else if(s.m==3){st='Gehäuse spannungsfrei';ok=1;dev='nicht nötig';fs='0 A';why='Doppelte oder verstärkte Isolierung: Der Fehler erreicht das berührbare Gehäuse nicht.'}
- else if(s.m==0){st='Lebensgefahr';ok=0;dev='löst nicht aus';fs='0,23 A';why='Das Gehäuse führt 230 V. Der Strom fließt durch den Menschen zur Erde: 230 V / 1000 Ω = 230 mA. Viel zu wenig für die Sicherung, aber tödlich.'}
+ else if(s.m==0){st='Lebensgefahr';ok=0;dev='löst nicht aus';fs='0,23 A';why='Das Gehäuse führt 230 V. Der Strom fließt durch den Menschen und die Erde zurück zum Transformator: 230 V / 1000 Ω = 230 mA. Viel zu wenig für die Sicherung, aber tödlich.'}
  else if(s.m==1){ok=IF>=Ia;st=ok?'LS schaltet ab':'LS schaltet zu spät ab';dev=ok?'löst aus':'zu langsam';fs=nf(IF)+' A';why=ok?'Großer Fehlerstrom über den Schutzleiter, der LS-Schalter schaltet in höchstens 0,4 s ab.':'Die Schleifenimpedanz ist zu groß. Der Fehlerstrom reicht nicht für die schnelle Auslösung, das Gehäuse bleibt gefährlich lange unter Spannung.'}
  else{st='RCD schaltet ab';ok=1;dev='löst aus';fs=nf(IF)+' A';why='Der Fehlerstrom fließt über den Schutzleiter statt über N zurück. Der RCD merkt die Differenz (weit über 30 mA) und schaltet in Sekundenbruchteilen ab.'}
- const off=fl&&ok&&(s.m==1||s.m==2),Lc='#8b5a2b',Nc='#2563eb';
- let g=SXT(10,28,'L',20,'start',Lc,800)+SXT(10,98,'N',20,'start',Nc,800)+(pe?SXT(10,298,'PE',20,'start','#16a34a',800):'');
- const sw=(x,y)=>off?`<path d="M${x} ${y}l26 -16" stroke="var(--ink)" stroke-width="4"/>`:`<path d="M${x} ${y}h30" stroke="var(--ink)" stroke-width="4"/>`;
- g+=`<path d="M34 22H110M146 22H360V130" stroke="${Lc}" stroke-width="4" fill="none"/><path d="M34 92H${s.m==2?110:360}${s.m==2?'M146 92H360':''}V150" stroke="${Nc}" stroke-width="4" fill="none"/>`+sw(112,22)+(s.m==2?sw(112,92)+`<rect x="98" y="4" width="62" height="106" rx="8" fill="none" stroke="var(--ink)" stroke-width="2.5"/>`+SXT(129,126,'RCD',16,'middle','var(--ink)',800):`<rect x="98" y="6" width="62" height="34" rx="6" fill="none" stroke="var(--ink)" stroke-width="2.5"/>`+SXT(129,58,s.m==1?'LS B16':'LS',15,'middle','var(--ink)',800));
- g+=`<rect x="300" y="110" width="170" height="150" rx="12" fill="${s.m==3?'var(--bg)':'#9ca3af'}" fill-opacity="${s.m==3?1:.5}" stroke="var(--ink)" stroke-width="3"/>`+(s.m==3?`<rect x="312" y="122" width="146" height="126" rx="8" fill="none" stroke="var(--ink)" stroke-width="2"/><rect x="430" y="226" width="22" height="22" fill="none" stroke="var(--ink)" stroke-width="2"/><rect x="435" y="231" width="12" height="12" fill="none" stroke="var(--ink)" stroke-width="2"/>`:'')+`<circle cx="360" cy="150" r="22" fill="var(--bg)" stroke="var(--ink)" stroke-width="3"/>`+SXT(360,157,'M',20,'middle','var(--ink)',800);
- if(fl&&s.m!=3)g+=`<polygon points="372,128 404,112 396,124 430,116 398,140 406,128" fill="#f4c20d" stroke="#111" stroke-width="1.5"/>`;
- if(fl&&s.m==3)g+=`<polygon points="372,128 394,118 390,126 410,122" fill="none" stroke="#f4c20d" stroke-width="3"/>`;
- if(pe)g+=`<path d="M400 260V292H34" stroke="#16a34a" stroke-width="5" fill="none"/><path d="M400 260V292H34" stroke="#facc15" stroke-width="5" fill="none" stroke-dasharray="10 10"/>`;
- g+=`<line x1="480" y1="340" x2="640" y2="340" stroke="var(--wire)" stroke-width="3"/>`+SXMAN(560,338,{d:-1,s:1.3,h1:[472,192]})+SXGND(610,336);
- if(fl&&s.m==0)g+=FLO([[360,22],[360,128],[400,124],[472,192],[512,206],[552,187],[556,250],[545,334]],t,9,'#dc2626',5,70);
- if(fl&&pe&&!off)g+=FLO([[360,22],[360,128],[400,124],[400,292],[34,292]],t,9,'#dc2626',5,90);
- g+=`<rect x="20" y="316" width="300" height="42" rx="10" fill="${ok?'var(--ok)':'var(--red)'}"/>`+SXT(170,344,(ok?'✓ ':'⚠️ ')+st,20,'middle','#fff',800);
- return{vb:'0 0 640 370',d:g,res:[[fs,s.m==0&&fl?'Fehlerstrom durch den Körper':'Fehlerstrom'],[dev,'Schutzeinrichtung'],[ok?'sicher':'Gefahr','Ergebnis']],
+ /* Ablauf: Fehlerstrom fließt, nach SXQT Sekunden öffnet die Schutzeinrichtung (stark verlangsamt) */
+ const trip=fl&&ok&&pe,off=trip&&tp>=SXQT,run=!off,Lc='#8b5a2b',Nc='#2563eb',GY='#16a34a';
+ const IL=run?(fl&&s.m==0?Ib+.23:fl&&pe?Ib+IF:Ib):0,IN=run?Ib:0,IPE=run&&fl&&pe?IF:0,IK=run&&fl&&s.m==0?.23:0;
+ /* Erdreich, Transformator mit geerdetem Sternpunkt */
+ let g=`<rect x="0" y="384" width="640" height="34" fill="#a0784f" opacity=".28"/><line x1="0" y1="384" x2="640" y2="384" stroke="#8b6a45" stroke-width="2.5"/>`+SXT(626,410,'Erdreich',13,'end','var(--mute)',600);
+ g+=`<path d="M18 30l10 -8h64l-10 8Z" fill="#cbd5e1" stroke="var(--ink)" stroke-width="1.5" stroke-linejoin="round"/><path d="M82 30l10 -8v70l-10 8Z" fill="#94a3b8" stroke="var(--ink)" stroke-width="1.5" stroke-linejoin="round"/><rect x="18" y="30" width="64" height="70" rx="3" fill="#e2e8f0" stroke="var(--ink)" stroke-width="2"/><circle cx="42" cy="58" r="13" fill="none" stroke="var(--ink)" stroke-width="2"/><circle cx="58" cy="58" r="13" fill="none" stroke="var(--ink)" stroke-width="2"/>`+SXT(50,92,'Trafo',12,'middle','#1a2433',700);
+ /* Leitungen */
+ const lsx=158;
+ g+=`<path d="M82 40H${lsx-6}M${lsx+34} 40H420V150" stroke="${Lc}" stroke-width="4" fill="none"/>`;
+ g+=`<path d="M82 88H${s.m==2?lsx-6:370}${s.m==2?`M${lsx+34} 88H370`:''}V150" stroke="${Nc}" stroke-width="4" fill="none"/>`;
+ g+=`<path d="M100 88V384" stroke="var(--ink)" stroke-width="3" fill="none"/><circle cx="100" cy="88" r="5" fill="var(--ink)"/>`+SXGND(100,398)+(pe?`<path d="M100 88V310" stroke="${GY}" stroke-width="5" fill="none"/><path d="M100 88V310" stroke="#facc15" stroke-width="5" fill="none" stroke-dasharray="10 10"/>`:'');
+ if(pe)g+=`<path d="M450 270V310H100" stroke="${GY}" stroke-width="5" fill="none"/><path d="M450 270V310H100" stroke="#facc15" stroke-width="5" fill="none" stroke-dasharray="10 10"/><circle cx="100" cy="310" r="5" fill="var(--ink)"/>`;
+ g+=SXT(26,124,'Sternpunkt',12,'start','var(--mute)',600)+SXT(26,138,'geerdet',12,'start','var(--mute)',600);
+ g+=SXT(116,34,'L',18,'middle',Lc,800)+SXT(116,82,'N',18,'middle',Nc,800)+(pe?SXT(126,304,'PE',18,'middle',GY,800):'');
+ /* Schaltgerät: LS oder RCD mit Summenstromwandler */
+ const sw=(y)=>off?`<path d="M${lsx-6} ${y}L${lsx+22} ${y-18}" stroke="var(--ink)" stroke-width="4" stroke-linecap="round"/><circle cx="${lsx+34}" cy="${y}" r="3" fill="var(--ink)"/>`:`<path d="M${lsx-6} ${y}H${lsx+34}" stroke="var(--ink)" stroke-width="4"/>`;
+ if(s.m==2)g+=`<rect x="${lsx-16}" y="18" width="78" height="86" rx="8" fill="none" stroke="var(--ink)" stroke-width="2.5"/>`+sw(40)+sw(88)+`<ellipse cx="${lsx+50}" cy="64" rx="7" ry="34" fill="none" stroke="#64748b" stroke-width="5"/>`+SXT(lsx+23,124,'RCD',15,'middle','var(--ink)',800);
+ else g+=`<rect x="${lsx-16}" y="20" width="68" height="34" rx="6" fill="none" stroke="var(--ink)" stroke-width="2.5"/>`+sw(40)+SXT(lsx+18,70,s.m==1?'LS B16':'LS',14,'middle','var(--ink)',800);
+ /* Gerät: Motor im Gehäuse, räumlich */
+ const iso=s.m==3,hc=iso?'#f1f5f9':'#9ca3af';
+ g+=`<path d="M330 150l16 -12h140l-16 12Z" fill="${hc}" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"/><path d="M470 150l16 -12v120l-16 12Z" fill="${hc}" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"/><path d="M470 150l16 -12v120l-16 12Z" fill="#000" opacity=".18"/><rect x="330" y="150" width="140" height="120" rx="4" fill="${hc}" stroke="var(--ink)" stroke-width="2.5"/>`+(iso?'':`<rect x="330" y="150" width="140" height="120" rx="4" fill="url(#g-tile)" opacity=".5"/>`);
+ g+=`<path d="M370 150V180M420 150V176" stroke="var(--ink)" stroke-width="2"/><circle cx="395" cy="205" r="26" fill="var(--bg)" stroke="var(--ink)" stroke-width="3"/>`+SXT(395,212,'M',20,'middle','var(--ink)',800);
+ if(iso)g+=`<rect x="338" y="158" width="124" height="104" rx="4" fill="none" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="5 3"/><rect x="438" y="236" width="20" height="20" fill="none" stroke="var(--ink)" stroke-width="2"/><rect x="443" y="241" width="10" height="10" fill="none" stroke="var(--ink)" stroke-width="2"/>`;
+ if(fl)g+=iso?`<polygon points="420,176 440,168 436,176 452,172" fill="none" stroke="#f4c20d" stroke-width="3"/>`:`<polygon points="420,176 446,164 440,174 468,168 442,188 448,178" fill="#f4c20d" stroke="#111" stroke-width="1.5"/>`;
+ /* Mensch auf dem Boden, Hand am Gehäuse */
+ g+=SXMAN(560,382,{d:-1,s:1.3,h1:[488,226]});
+ /* Stromwege */
+ const PN=[[82,40],[420,40],[420,176],[395,205],[370,180],[370,88],[82,88]],
+  PF=[[82,40],[420,40],[420,176],[450,190],[450,310],[100,310],[100,88],[82,88]],
+  PK=[[82,40],[420,40],[420,176],[470,200],[488,226],[520,236],[550,236],[552,300],[550,380],[550,392],[100,392],[100,88],[82,88]];
+ if(run&&!(fl&&(s.m==0||pe)))g+=SXQW(PN,Ib,t,'#f59e0b');
+ else if(run)g+=SXQW(PN,Ib,t,'#f59e0b');
+ if(IPE)g+=SXQW(PF,IPE,t);
+ if(IK)g+=SXQW(PK,IK,t);
+ /* Ströme direkt an den Leitern */
+ if(run){g+=SXQB(270,30,'I = '+nf(IL)+' A',Lc)+SXQB(270,80,'I = '+nf(IN)+' A',Nc);if(IPE)g+=SXQB(270,302,'I = '+nf(IPE)+' A',GY);if(IK)g+=SXQB(600,300,'230 mA',('#dc2626'))}
+ else g+=SXQB(270,30,'I = 0 A',Lc)+SXQB(270,80,'I = 0 A',Nc);
+ /* Anzeige im Bild: Fehlerstrom auf der Skala */
+ const Iz=fl&&s.m!=3?(s.m==0?.23:IF):0;
+ g+=SXT(130,166,fl&&s.m!=3?(s.m==0?'Strom durch den Körper':'Fehlerstrom I_k bei Z_s = '+nf(s.z)+' Ω'):'kein Fehlerstrom',14,'start','var(--ink)',700);
+ g+=SXQS(130,198,180,Iz,s.m);
+ if(s.m==2&&fl)g+=SXT(130,252,run?`hin (L) ${nf(IL)} A, zurück (N) ${nf(IN)} A`:'hin und zurück: 0 A',13,'start','var(--mute)',600)+SXT(130,270,run?`Differenz ${nf(IL-IN)} A ≥ 30 mA`:'RCD hat abgeschaltet',13,'start','var(--flow)',700);
+ else if(s.m==2)g+=SXT(130,252,`hin (L) ${nf(Ib)} A, zurück (N) ${nf(Ib)} A`,13,'start','var(--mute)',600)+SXT(130,270,'Differenz 0 A: RCD bleibt ein',13,'start','var(--ok)',700);
+ /* Meldung */
+ const msg=trip&&!off?(s.m==1?'Fehlerstrom fließt …':'Differenzstrom …'):st,mc=trip&&!off?'var(--amber)':ok?'var(--ok)':'var(--red)';
+ g+=`<rect x="122" y="326" width="250" height="40" rx="10" fill="${mc}"/>`+SXT(247,352,(trip&&!off?'⚡ ':ok?'✓ ':'⚠️ ')+msg,17,'middle','#fff',800);
+ return{vb:'0 0 640 418',d:g,res:[[fs,s.m==0&&fl?'Fehlerstrom durch den Körper':'Fehlerstrom'],[dev,'Schutzeinrichtung'],[ok?'sicher':'Gefahr','Ergebnis']],
  rows:[['Was passiert?',why],['Abschaltbedingung',s.m==1?`I_k = ${U0} V / ${nf(s.z)} Ω = ${nf(IF)} A ${IF>=Ia?'≥':'<'} I_a = 5 · 16 A = 80 A`:'gilt für den LS-Schalter (Auswahl Schutzleiter + LS B16)'],['Schutzklasse',['Metallgehäuse ohne Schutzleiter ist nicht zulässig','I: Schutzleiter am Gehäuse','I mit Zusatzschutz durch RCD','II: schutzisoliert (Quadrat im Quadrat), kein Schutzleiter'][s.m]]],
  st:[['I_k = U_0 / Z_s','Kurzschlussstrom in der Fehlerschleife'],['Z_s · I_a ≤ U_0','Abschaltbedingung: Schutzeinrichtung schaltet rechtzeitig ab (Endstromkreise höchstens 0,4 s)'],['I_a = 5 · I_n','sicherer Auslösestrom LS-Schalter Charakteristik B'],['I_Δn = 30 mA','RCD als zusätzlicher Schutz für Personen, z. B. an Steckdosen']]}},
- 'Vereinfacht: TN-Netz mit 230 V, Fehler zwischen Außenleiter L und Metallgehäuse, Körperwiderstand 1000 Ω. Schutzklasse III (Schutzkleinspannung bis 50 V AC) ist nicht dargestellt.',1);
+ 'Vereinfacht: TN-Netz mit 230 V, Fehler zwischen Außenleiter L und Metallgehäuse, Körperwiderstand 1000 Ω, Motor mit 6,5 A Betriebsstrom. Die Fehlerschleife Z_s reicht vom Transformator über L und die Fehlerstelle zurück über PE (oder Körper und Erde) zum geerdeten Sternpunkt. Rotes Leuchtband: Fehlerstrom, orange: Betriebsstrom, je dicker, desto größer. Wechselstrom hat keine feste Richtung: Die Elektronen (blaue Punkte) pendeln 50-mal pro Sekunde hin und her, im Bild stark verlangsamt. Auch das Abschalten ist verlangsamt, in Wirklichkeit dauert es nur Millisekunden. Schutzklasse III (Schutzkleinspannung bis 50 V AC) ist nicht dargestellt.',1);
 
 /* Fünf Sicherheitsregeln */
 const SX5=[['Freischalten','Freischalten','Alle Leiter allpolig von der Spannung trennen, z. B. Hauptschalter aus oder Sicherungen heraus.'],['Gegen Wiedereinschalten sichern','Gegen Wieder-|einschalten sichern','Schalter mit persönlichem Vorhängeschloss abschließen und Schild „Nicht schalten“ anbringen.'],['Spannungsfreiheit feststellen','Spannungsfreiheit|feststellen','Mit zweipoligem Spannungsprüfer an der Arbeitsstelle allpolig prüfen. Den Prüfer vorher und nachher testen.'],['Erden und kurzschließen','Erden und|kurzschließen','Erst erden, dann die Leiter miteinander kurzschließen. Das schützt, falls doch Spannung kommt.'],['Benachbarte, unter Spannung stehende Teile abdecken oder abschranken','Benachbarte Teile|abdecken','Isolierende Abdeckungen oder Absperrungen vor Teilen, die noch Spannung führen.']];
@@ -10130,7 +10229,7 @@ function aufTick(){const b=$('#auf');if(!b||b.hidden||cur<0||b.dataset.n!==M[cur
  if(ok&&!b.dataset.ok){b.dataset.ok='1';b.querySelector('.aufdn').hidden=false;const X=store.get('ll_auf',{});if(!(X[n]&&X[n].ok)){X[n]=Object.assign(X[n]||{},{ok:1,d:mToday()});store.set('ll_auf',X);memRec(n,true,null,'auf')}}}
 // Bildausschnitt v146: engerer viewBox, wo die Zeichnung nur einen Teil der Fläche nutzt (Name|Original-viewBox → Ausschnitt).
 // Ermittelt aus allen Reglerstellungen (Handy und Laptop), Seitenverhältnis nie höher als vorher; tests/check.js prüft, dass nichts abgeschnitten wird.
-const VBC={"Ausmultiplizieren & Ausklammern|0 0 640 300":'-8 12 556 261',"Drehstrom (Stern & Dreieck)|0 0 640 300":'-35 22 549 258',"Gemischt (R₁+R₂)∥(R₃+R₄)|0 0 640 300":'38 61 601 218',"Gemischt (R₁+R₂)∥R₃|0 0 640 300":'38 61 583 218',"Gemischt R₁+(R₂∥R₃)+R₄|0 0 640 300":'35 24 560 263',"Histogramm|0 0 640 300":'24 0 590 270',"Kräfteparallelogramm|0 0 640 300":'0 26 524 243',"Mischungstemperatur|0 0 640 300":'8 87 538 193',"Mittelwert, Median & Modalwert|0 0 640 300":'26 2 588 262',"Ohmsches Gesetz|0 0 640 300":'53 28 580 272',"Oxidationszahlen|0 0 640 300":'35 53 570 247',"Parallel|0 0 640 300":'38 61 602 218',"Pneumatik: Luftverbrauch|0 0 640 300":'16 57 596 215',"Reaktionsgleichungen & Mol|0 0 640 300":'-28 6 583 274',"Reihe|0 0 640 300":'38 24 566 250',"Schmelz- & Verdampfungswärme|0 0 640 300":'6 48 608 242',"Spannweite, Varianz & Standardabweichung|0 0 640 300":'26 12 589 219',"Verbrennungsmotor (Viertakt)|0 0 640 300":'35 16 578 271',"Wirkungsgrad|0 0 640 300":'26 66 525 202',"Wärmekapazität|0 0 640 300":'16 26 523 238'};
+const VBC={"Ausmultiplizieren & Ausklammern|0 0 640 300":'-8 12 556 261',"Drehstrom (Stern & Dreieck)|0 0 640 300":'-35 22 549 258',"Gemischt (R₁+R₂)∥(R₃+R₄)|0 0 640 300":'38 61 601 218',"Gemischt (R₁+R₂)∥R₃|0 0 640 300":'38 61 583 218',"Gemischt R₁+(R₂∥R₃)+R₄|0 0 640 300":'35 24 560 263',"Histogramm|0 0 640 300":'24 0 590 270',"Kräfteparallelogramm|0 0 640 300":'0 26 524 243',"Mischungstemperatur|0 0 640 300":'8 87 538 193',"Mittelwert, Median & Modalwert|0 0 640 300":'26 2 588 262',"Ohmsches Gesetz|0 0 640 300":'53 28 580 272',"Oxidationszahlen|0 0 640 300":'35 53 570 247',"Parallel|0 0 640 300":'38 61 602 218',"Pneumatik: Luftverbrauch|0 0 640 300":'16 57 596 215',"Reihe|0 0 640 300":'38 24 566 250',"Schmelz- & Verdampfungswärme|0 0 640 300":'6 48 608 242',"Spannweite, Varianz & Standardabweichung|0 0 640 300":'26 12 589 219',"Verbrennungsmotor (Viertakt)|0 0 640 300":'35 16 578 271',"Wirkungsgrad|0 0 640 300":'26 66 525 202',"Wärmekapazität|0 0 640 300":'16 26 523 238'};
 const vbOf=(n,vb)=>VBC[n+'|'+vb]||vb;
 function render(){
  if(cur<0)return;const o=M[cur].f(S[cur],clock);
@@ -10957,13 +11056,10 @@ Object.assign(EIN,{
 'Reaktionsgleichungen & Mol':[
  {d:11,t:'Knallgas: Wasserstoff und Sauerstoff reagieren zu Wasser. Die Atome werden nur neu sortiert, keines geht verloren.',
   s:'Knallgas: Wasserstoff und Sauerstoff reagieren zu Wasser. Die Atome werden nur neu sortiert, keines geht verloren.',
-  f:k=>{const a=EINQ((k-.3)/.5),H=(x,y)=>EMOL(x,y,13,'#ffffff','H'),O=(x,y)=>EMOL(x,y,20,'#e05a4f','O'),L=(x0,y0,x1,y1)=>[x0+(x1-x0)*a,y0+(y1-y0)*a];
-   const P=[L(60,90,300,70),L(90,90,340,70),L(60,170,300,190),L(90,170,340,190),L(190,110,320,100),L(190,150,320,160)];
-   return H(...P[0])+H(...P[1])+H(...P[2])+H(...P[3])+O(...P[4])+O(...P[5])+EFT(100,240,a<.5?'2 H₂ + O₂':'','ein1','middle')+EFT(330,240,a>.5?'2 H₂O':'','ein1','middle')+AR(230,240,30,0,'var(--ink)')}},
- {d:11,t:'Ausgleichen heißt zählen: links 4 H und 2 O, rechts 4 H und 2 O. Erst dann stimmt die Gleichung.',
-  s:'Ausgleichen heißt zählen. Links 4 H und 2 O, rechts 4 H und 2 O. Erst dann stimmt die Gleichung.',
-  f:k=>{const a=k>.5;return `<text x="240" y="70" text-anchor="middle" style="font-size:28px;font-weight:800">${a?'2 ':''}H₂ + O₂ → ${a?'2 ':''}H₂O</text>`+EFT(120,130,'links','ein2','middle')+EFT(360,130,'rechts','ein2','middle')+
-   EFT(120,165,'H: '+(a?4:2),'ein1','middle')+EFT(120,200,'O: 2','ein1','middle')+EFT(360,165,'H: '+(a?4:2),'ein1','middle')+EFT(360,200,'O: '+(a?2:1),'ein1','middle')+`<text x="240" y="250" text-anchor="middle" style="font-size:18px;font-weight:700;fill:${a?'var(--ok)':'var(--red)'}">${a?'✓ ausgeglichen':'✗ O stimmt nicht'}</text>`}},
+  f:(k,t)=>ESIM('Reaktionsgleichungen & Mol',{a:0,r:0,v:0},t,'0 0 640 384',0,0,480,270)},
+ {d:12,t:'Ausgleichen heißt zählen: Bei H₂ + O₂ → H₂O bleibt ein O-Atom übrig. Mit 2 H₂ + O₂ → 2 H₂O stehen links und rechts 4 H und 2 O. Erst dann stimmt die Gleichung.',
+  s:'Ausgleichen heißt zählen. Bei H 2 plus O 2 ergibt H 2 O bleibt ein Sauerstoffatom übrig. Mit 2 H 2 plus O 2 ergibt 2 H 2 O stehen links und rechts 4 H und 2 O. Erst dann stimmt die Gleichung.',
+  f:(k,t)=>ESIM('Reaktionsgleichungen & Mol',{a:0,r:0,v:k>.5?0:1},7,'0 0 640 384',0,0,480,270)},
  {d:11,t:'Chemiker zählen in Mol: 1 mol sind 6,022 · 10²³ Teilchen. Die molare Masse M steht im Periodensystem, Wasser hat 18 g/mol.',
   s:'Chemiker zählen in Mol. 1 Mol sind 6,022 mal 10 hoch 23 Teilchen. Die molare Masse M steht im Periodensystem, Wasser hat 18 Gramm pro Mol.',
   f:k=>{const a=EINQ(k/.6);return EGL(25,70,90,140,{lv:90*a})+EFT(70,248,'1 mol Wasser','ein2','middle')+EFT(140,90,'1 mol = 6,022 · 10²³ Teilchen','ein1')+EFT(140,130,'M(H) = 1 g/mol, M(O) = 16 g/mol','ein2')+EFT(140,160,'M(H₂O) = 2 · 1 + 16 = 18 g/mol','ein1')+(a>.9?EFT(140,210,'1 mol Wasser wiegt 18 g','ein1'):'')}},
@@ -12385,36 +12481,36 @@ Object.assign(EIN,{
 'Schutzleiter & RCD':[
  {d:11,t:'In einer Bohrmaschine scheuert ein Kabel durch. Der Außenleiter L berührt das Metallgehäuse. Ohne Schutz liegt das Gehäuse auf 230 V, und niemand merkt es, bis jemand anfasst.',
   s:'In einer Bohrmaschine scheuert ein Kabel durch. Der Außenleiter L berührt das Metallgehäuse. Ohne Schutz liegt das Gehäuse auf 230 Volt, und niemand merkt es, bis jemand anfasst.',
-  f:(k,t)=>ESIM('Schutzleiter & RCD',{m:0,f:1},t,'0 0 640 370',0,0,480,270)},
+  f:(k,t)=>ESIM('Schutzleiter & RCD',{m:0,f:1},t,'0 0 640 418',0,0,480,270)},
  {d:12,t:'Der Schutzleiter PE verbindet das Gehäuse mit der Erde. Beim Fehler fließt ein großer Fehlerstrom: I_k = U_0 / Z_s = 230 V / 0,5 Ω = 460 A. Ein B16-Automat löst ab 5 · 16 A = 80 A sofort aus. Abgeschaltet.',
   s:'Der Schutzleiter PE verbindet das Gehäuse mit der Erde. Beim Fehler fließt ein großer Fehlerstrom: I k gleich U 0 durch Z s gleich 230 Volt durch 0,5 Ohm gleich 460 Ampere. Ein B16-Automat löst ab 5 mal 16 Ampere gleich 80 Ampere sofort aus. Abgeschaltet.',
   f:k=>EFX(k,[[ESB('I','k')+' = '+ESB('U','0')+' / '+ESB('Z','s'),'h'],[ESB('I','k')+' = 230 V / 0,5 Ω = 460 A','m'],['B16 löst ab 5 · 16 A = 80 A aus','m'],['460 A > 80 A: schaltet ab','r']],['Z_s: Widerstand der Fehlerschleife'])},
  {d:12,t:'Der Fehlerstrom-Schutzschalter, RCD, vergleicht den Strom in L mit dem Strom in N. Fließt ein Teil über Gehäuse oder Körper zur Erde, fehlt er auf dem Rückweg. Ab 30 mA Differenz schaltet der RCD in 0,2 s ab.',
   s:'Der Fehlerstrom-Schutzschalter, RCD, vergleicht den Strom in L mit dem Strom in N. Fließt ein Teil über Gehäuse oder Körper zur Erde, fehlt er auf dem Rückweg. Ab 30 Milliampere Differenz schaltet der RCD in 0,2 Sekunden ab.',
-  f:(k,t)=>ESIM('Schutzleiter & RCD',{m:2,f:1},t,'0 0 640 370',0,0,480,270)},
+  f:(k,t)=>ESIM('Schutzleiter & RCD',{m:2,f:1},t,'0 0 640 418',0,0,480,270)},
  {d:11,t:'Beide ergänzen sich: Der Schutzleiter braucht einen großen Strom, damit die Sicherung fällt. Der RCD reagiert schon bei 30 mA, auch wenn der Fehlerstrom nur durch einen Menschen fließt, für den Schutzleiter zu wenig.',
   s:'Beide ergänzen sich: Der Schutzleiter braucht einen großen Strom, damit die Sicherung fällt. Der RCD reagiert schon bei 30 Milliampere, auch wenn der Fehlerstrom nur durch einen Menschen fließt, für den Schutzleiter zu wenig.',
-  f:(k,t)=>ESIM('Schutzleiter & RCD',{m:k<.5?1:2,f:1},t,'0 0 640 370',0,0,480,270)},
+  f:(k,t)=>ESIM('Schutzleiter & RCD',{m:k<.5?1:2,f:1},t,'0 0 640 418',0,0,480,270)},
  {d:12,t:'Alles zusammen: Schutzleiter macht aus dem Isolationsfehler einen Kurzschluss, I_k = U_0 / Z_s, und die Sicherung schaltet ab. Der RCD schaltet ab 30 mA Differenz. Schutzklasse II kommt ohne PE aus: doppelt isoliert.',
   s:'Alles zusammen: Schutzleiter macht aus dem Isolationsfehler einen Kurzschluss, I k gleich U 0 durch Z s, und die Sicherung schaltet ab. Der RCD schaltet ab 30 Milliampere Differenz. Schutzklasse zwei kommt ohne PE aus: doppelt isoliert.',
   f:k=>EFX(k,[['Schutzleiter: Fehler → Kurzschluss','m'],[ESB('I','k')+' = '+ESB('U','0')+' / '+ESB('Z','s')+' = 460 A → Sicherung','m'],['RCD: ab 30 mA Differenz, 0,2 s','r'],['Schutzklasse II: doppelt isoliert','m']],['Prüfung: Z_s messen, RCD-Taste drücken'])},
  {d:9,t:'Merke: Der Schutzleiter lässt die Sicherung fallen, der RCD schützt den Menschen ab 30 mA. Monatlich die Prüftaste drücken.',
   s:'Merke: Der Schutzleiter lässt die Sicherung fallen, der RCD schützt den Menschen ab 30 Milliampere. Monatlich die Prüftaste drücken.',
-  f:(k,t)=>EMRK(k,t,ESIM('Schutzleiter & RCD',{m:2,f:1},t,'0 0 640 370',0,40,220,127),ESB('I','Δn')+' = 30 mA','PE + RCD')}
+  f:(k,t)=>EMRK(k,t,ESIM('Schutzleiter & RCD',{m:2,f:1},t,'0 0 640 418',0,40,220,144),ESB('I','Δn')+' = 30 mA','PE + RCD')}
 ],
 'Fünf Sicherheitsregeln':[
  {d:11,t:'An der Fräsmaschine soll der Motor gewechselt werden. Bevor jemand die Klemmen anfasst, muss die Anlage spannungsfrei sein und bleiben. Dafür gibt es fünf Regeln in fester Reihenfolge.',
   s:'An der Fräsmaschine soll der Motor gewechselt werden. Bevor jemand die Klemmen anfasst, muss die Anlage spannungsfrei sein und bleiben. Dafür gibt es fünf Regeln in fester Reihenfolge.',
-  f:(k,t)=>ESIM('Fünf Sicherheitsregeln',{n:0},t,'0 0 640 370',0,0,480,270)},
+  f:(k,t)=>ESIM('Fünf Sicherheitsregeln',{n:0},t,'0 0 640 418',0,0,480,270)},
  {d:12,t:'Regel 1: Freischalten, also allpolig abschalten, zum Beispiel am Hauptschalter. Regel 2: gegen Wiedereinschalten sichern, mit Vorhängeschloss und Schild. Sonst schaltet ein Kollege ahnungslos wieder ein.',
   s:'Regel 1: Freischalten, also allpolig abschalten, zum Beispiel am Hauptschalter. Regel 2: gegen Wiedereinschalten sichern, mit Vorhängeschloss und Schild. Sonst schaltet ein Kollege ahnungslos wieder ein.',
-  f:(k,t)=>ESIM('Fünf Sicherheitsregeln',{n:Math.min(2,Math.floor(k*2.4)+1)},t,'0 0 640 370',0,0,480,270)},
+  f:(k,t)=>ESIM('Fünf Sicherheitsregeln',{n:Math.min(2,Math.floor(k*2.4)+1)},t,'0 0 640 418',0,0,480,270)},
  {d:11,t:'Regel 3: Spannungsfreiheit feststellen, zweipolig mit einem geprüften Spannungsprüfer an allen Leitern. Nie dem Schalter glauben, immer messen. Der Prüfer wird vorher und nachher an bekannter Spannung getestet.',
   s:'Regel 3: Spannungsfreiheit feststellen, zweipolig mit einem geprüften Spannungsprüfer an allen Leitern. Nie dem Schalter glauben, immer messen. Der Prüfer wird vorher und nachher an bekannter Spannung getestet.',
-  f:(k,t)=>ESIM('Fünf Sicherheitsregeln',{n:3},t,'0 0 640 370',0,0,480,270)},
+  f:(k,t)=>ESIM('Fünf Sicherheitsregeln',{n:3},t,'0 0 640 418',0,0,480,270)},
  {d:12,t:'Regel 4: Erden und kurzschließen, bei Anlagen über 1 kV immer. Dann kann keine Spannung zurückkommen, auch nicht aus einem zweiten Netz. Regel 5: benachbarte, unter Spannung stehende Teile abdecken oder abschranken.',
   s:'Regel 4: Erden und kurzschließen, bei Anlagen über 1 Kilovolt immer. Dann kann keine Spannung zurückkommen, auch nicht aus einem zweiten Netz. Regel 5: benachbarte, unter Spannung stehende Teile abdecken oder abschranken.',
-  f:(k,t)=>ESIM('Fünf Sicherheitsregeln',{n:k<.5?4:5},t,'0 0 640 370',0,0,480,270)},
+  f:(k,t)=>ESIM('Fünf Sicherheitsregeln',{n:k<.5?4:5},t,'0 0 640 418',0,0,480,270)},
  {d:12,t:'Alles zusammen: Freischalten, sichern, Spannungsfreiheit feststellen, erden und kurzschließen, Nachbarteile abdecken. Immer in dieser Reihenfolge. Nach der Arbeit werden sie rückwärts aufgehoben, Regel 5 zuerst, Regel 1 zuletzt.',
   s:'Alles zusammen: Freischalten, sichern, Spannungsfreiheit feststellen, erden und kurzschließen, Nachbarteile abdecken. Immer in dieser Reihenfolge. Nach der Arbeit werden sie rückwärts aufgehoben, Regel 5 zuerst, Regel 1 zuletzt.',
   f:(k,t)=>EKET(k,[['1','freischalten'],['2','sichern'],['3','messen'],['4','erden'],['5','abdecken']],100,78,10)+EFT(240,60,'immer in dieser Reihenfolge','ein1','middle')+AR(400,190,-320,0,'var(--muted)')+EFT(240,225,'nach der Arbeit rückwärts aufheben','ein2','middle')},
@@ -13456,9 +13552,10 @@ function mcView(){const box=$('#mc');if(!box)return;const a=mcAll(),run=store.ge
 function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="panel"><h2>🧮 Mathe-Check</h2><p class="sub">Noch nicht gemacht. Der Check zeigt Dir in 20 Minuten, wo Du in den Mathe-Grundlagen stehst.</p><div class="pb"><button type="button" class="sbtn2" data-mco="1">Zum Mathe-Check →</button></div></div>`;
  return`<div class="panel"><h2>🧮 Mathe-Check</h2>${mcTable(a)}<div class="pb"><button type="button" class="sbtn2" data-mco="1">Startplan und Lösungswege →</button></div></div>`}
 /* Pilot-Einstellungen: Version, Neuigkeit, Kontakt */
-const APPV=282,NEWS='Kurz erklärt zur Elektrolyse zeigt jetzt den Aufbau und die Teilchen-Lupe der Simulation.';
+const APPV=283,NEWS='Reaktionsgleichungen mit Teilchen-Lupe und Waage, Schutzleiter & RCD mit sichtbarer Fehlerschleife.';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
+['10.11.2026',283,['Reaktionsgleichungen & Mol: Teilchen-Lupe zeigt, wie sich die Atome zu den Produkten umordnen, mit Atombilanz. Bei falschen Koeffizienten bleiben Atome übrig oder fehlen. Neue Ansicht Waage: Masse bleibt erhalten, bei falscher Gleichung kippt sie.','Schutzleiter & RCD: ganze Fehlerschleife vom Transformator über L, Gehäuse und PE (oder Körper und Erdreich) zurück, Strombänder je nach Stromstärke, Ströme an den Leitern, Skala mit 30 mA und 80 A, sichtbares Abschalten von LS und RCD.','Kurz erklärt zu beiden Themen zeigt die neuen Skizzen.']],
 ['10.11.2026',282,['Kurz erklärt zur Elektrolyse zeigt den Aufbau der Simulation mit zwei Graphitelektroden in Kupfersulfatlösung und die Teilchen-Lupe an Kathode und Anode. An der Anode entsteht Sauerstoff.']],
 ['10.11.2026',280,['Photovoltaik neu: Haus mit Solarmodulen, die Zahl der Module folgt der Fläche A (1 Modul ≈ 2 m²). G bestimmt den Sonnenstand wie an einem klaren Sommertag, ein Punkt „jetzt“ läuft auf der Tageskurve mit. Balken zeigen, wie viel vom Licht als Gleichstrom und als Wechselstrom ankommt (η_M, η_WR).','Neue Ansicht Teilchen-Lupe: n-Schicht mit Phosphor, p-Schicht mit Bor, feste Ionen P⁺ und B⁻ am p-n-Übergang. Licht löst ein Elektron, das Feld trennt Elektron und Loch, das Elektron läuft vom Frontkontakt (−) über die Lampe zum Rückkontakt (+).','Kurz erklärt zur Photovoltaik zeigt dieselben Bilder wie die Simulation.']],
 ['10.11.2026',279,['Kurz erklärt zur galvanischen Zelle zeigt den Aufbau der Simulation mit Voltmeter parallel, Schalter und Teilchen-Lupe an Zink und Kupfer.','Kurz erklärt zur Korrosion zeigt den Tropfenversuch mit Rostring, die Teilchen-Lupe an Tropfenmitte und Tropfenrand und neu die Kontaktkorrosion zweier Bleche.','Kurz erklärt zu Wasserkraftwerken zeigt alle drei Bauarten mit den Bildern der Simulation.']],
