@@ -3001,17 +3001,115 @@ fm(FC,EC,'Galvanische Zelle & Spannungsreihe','Zwei Halbzellen mit verschiedenen
   if(!same){const y1=ey(ka[1]),y2=ey(an[1]);h+=ARW(560,(y1+y2)/2,560,y1+1,'var(--ink)',1.8)+ARW(560,(y1+y2)/2,560,y2-1,'var(--ink)',1.8)+TH(572,(y1+y2)/2+5,'U = '+U.toFixed(2).replace('.',',')+' V','t2')}
   return out('0 0 640 630',h)},
  'Zeitraffer. Gelb: Metall-Ionen, die sich an der Anode lösen. Türkis: Metall-Ionen, die sich an der Kathode abscheiden. Rot: Nitrat-Ionen NO₃⁻, violett: Na⁺ aus der Salzbrücke, kleine blaue Kugeln: Elektronen. Jedes gelöste Atom schickt so viele Elektronen durch den Draht, wie es Ladungen hat. Das Voltmeter ist parallel zur Zelle geschaltet und zeigt die Spannung auch bei offenem Schalter.',1);
+/* ---- Elektrolyse und Blei-Batterie mit Teilchen-Lupe (10.11.2026): Teilchen wie bei galvanischer Zelle und Korrosion (GZ- und KO-Helfer), eigene Helfer mit Präfix LP ---- */
+const LPC={C:'#4a4f57',Cl:'#2f9e44',S:'#e0b84a',CK:'#0ea5b7',CN:'#8b5cf6',P2:'#d9dcd6',P4:'#7a4632'};
+/* Sulfat-Ion SO₄²⁻: S in der Mitte, vier O (kleiner gezeichnet wie Nitrat) */
+const LPSO=(x,y,a,o=1,q=1)=>{let h='';for(let k=0;k<4;k++){const w=a+k*1.571+.4;h+=KOAT(x+6.4*Math.cos(w),y+6.4*Math.sin(w),4.3,KOO)}return`<g${KOA(o)}>${h}${KOAT(x,y,4,LPC.S)}${q?`<text x="${f2(x+9)}" y="${f2(y-8)}" font-size="9.5" font-weight="800" style="fill:var(--red)">2−</text>`:''}</g>`},
+ LPH2=(x,y,a,o=1)=>`<g${KOA(o)}>${KOAT(x-3.7*Math.cos(a),y-3.7*Math.sin(a),3.1,KOHC)}${KOAT(x+3.7*Math.cos(a),y+3.7*Math.sin(a),3.1,KOHC)}</g>`,
+ LPCL2=(x,y,a,o=1)=>`<g${KOA(o)}>${BALL(f2(x-9.9*Math.cos(a)),f2(y-9.9*Math.sin(a)),9.9,LPC.Cl,1)}${BALL(f2(x+9.9*Math.cos(a)),f2(y+9.9*Math.sin(a)),9.9,LPC.Cl,1)}</g>`,
+ LPS=(u,a,b)=>GZE((u-a)/(b-a)),
+ /* Elektronen auf einem Weg (Anteil u); lab: erstes mit „e⁻“ beschriften */
+ LPEL=(P,u,lab)=>{const[x,y]=PW(P,u);return BALL(f2(x),f2(y),3.4,'var(--flow)',1)+(lab?TH(f2(x+6),f2(y-6),'e⁻','t2'):'')},
+ /* Lupenrand, Schrittliste */
+ LPFR=(C,R)=>`<circle cx="${C[0]}" cy="${C[1]}" r="${R}" fill="none" stroke="var(--ink)" stroke-width="3"/><circle cx="${C[0]}" cy="${C[1]}" r="${R-4}" fill="none" stroke="#fff" stroke-width="1.5" opacity=".35"/>`,
+ LPST=(L,a,x)=>L.map((l,i)=>`<text class="t2" x="${x}" y="${428+i*22}"${i===a?' style="fill:var(--ink);font-weight:700"':''}>${i+1}. ${l}</text>`+(i===a?`<circle cx="${x-10}" cy="${423+i*22}" r="4" fill="var(--flow)"/>`:'')).join(''),
+ /* Wasser in der Lösung, ohne die Reaktionszone fr=[x,y,r] */
+ LPWAT=(C,R,x1,x2,seed,t,fr,n=24)=>{let g='';for(let i=0;i<n;i++){const x=x1+GZH(i*3.1+seed)*(x2-x1),y=C[1]-R+12+GZH(i*7.7+seed)*(2*R-24);if(Math.hypot(x-C[0],y-C[1])>R-4||fr&&Math.hypot(x-fr[0],y-fr[1])<fr[2])continue;const j=GZJ(i+seed,t,3);g+=GZW(x+j[0],y+j[1],GZH(i*1.3+seed)*6.28+.4*Math.sin(t*.8+i),.8)}return g},
+ /* frei bewegliche Elektronen im Leiter */
+ LPEG=(C,R,x1,x2,seed,t,n=16)=>{let g='';for(let i=0;i<n;i++){const x=x1+GZH(i*5.3+seed)*(x2-x1),y=C[1]-R+10+GZH(i*9.1+seed)*(2*R-20),j=GZJ(i*3+seed,t,6);g+=`<circle cx="${f2(x+j[0])}" cy="${f2(y+j[1])}" r="1.9" fill="var(--flow)" opacity=".75"/>`}return g};
 const EY=[['CuCl₂-Lösung',['Cu',2,63.55],['Cl₂',2,0],'Cu²⁺ + 2 e⁻ → Cu','2 Cl⁻ → Cl₂ + 2 e⁻'],['NaCl-Lösung',['H₂',2,0],['Cl₂',2,0],'2 H₂O + 2 e⁻ → H₂ + 2 OH⁻','2 Cl⁻ → Cl₂ + 2 e⁻'],['Wasser (H₂SO₄)',['H₂',2,0],['O₂',4,0],'2 H₃O⁺ + 2 e⁻ → H₂ + 2 H₂O','6 H₂O → O₂ + 4 H₃O⁺ + 4 e⁻'],['CuSO₄-Lösung',['Cu',2,63.55],['O₂',4,0],'Cu²⁺ + 2 e⁻ → Cu','6 H₂O → O₂ + 4 H₃O⁺ + 4 e⁻']];
-fm(FC,EC,'Elektrolyse','Bei der Elektrolyse erzwingt eine Gleichspannung eine Redoxreaktion: An der Kathode (−) wird reduziert, an der Anode (+) oxidiert.',
- [['e','Lösung','sel',EY.map(x=>x[0]),0],['I','I',.1,10,.1,'A',2],['t','t',1,120,1,'min',30]],
- (s,tm)=>{const E=EY[s.e],k=E[1],a=E[2],Q=s.I*s.t*60,ne=Q/96485,nk=ne/k[1],na=ne/a[1],amt=(g,n)=>g[2]?nf(n*g[2])+' g '+g[0]:nf(n*24)+' L '+g[0],dep=Math.min(14,2+Q/72000*14);
- const GE=GLAS(100,98,240,152,{lv:136,ry:10,c:'var(--flow)',op:.25}),d2=18+dep*1.4;let h=GE.b+EROD3(170,80,238,18,'#555b63');
+/* Was an den Elektroden reagiert: k = Kathode (Cu, Wasser W, H₃O⁺ H3), a = Anode (Cl, O), dazu Kation/Anion der Lösung (Anzahl ladungsgleich) */
+const EYL=[{k:'Cu',a:'Cl',ca:'Cu',an:'Cl',nc:4,na:8},{k:'W',a:'Cl',ca:'Na',an:'Cl',nc:6,na:6},{k:'H3',a:'O',ca:'H3',an:'SO',nc:8,na:4},{k:'Cu',a:'O',ca:'Cu',an:'SO',nc:5,na:5}];
+/* Ion in der Lupe zeichnen (mit Wasserhülle), x,y Mitte */
+const EYI=(w,x,y,t,i)=>{const j=GZJ(i,t,3),X=x+j[0],Y=y+j[1],r=.3*Math.sin(t*.5+i)+i;return w=='Cu'?GZI(X,Y,7.3,LPC.CK,'2+',1,r):w=='Na'?KOI(X,Y,10.2,LPC.CN,'+',1,r):w=='Cl'?KOI(X,Y,18.1,LPC.Cl,'−',1,r,1,1):w=='H3'?KOH3(X,Y,t*.6+i):LPSO(X,Y,t*.5+i)};
+/* Teilchen-Lupe der Elektrolyse: links Kathode (−), rechts Anode (+), beide aus Graphit */
+function ELUPE(e,t){const E=EY[e],L=EYL[e],C1=[165,224],C2=[475,224],R=145,cy=224,xs1=150,xs2=490,Q=7,ke=Math.floor(t/Q),ph=(t%Q)/Q,QA=L.a=='O'?2*Q:Q,pa=(t%QA)/QA,S=LPS,PI=Math.PI;
+ let h=`<defs><clipPath id="lpc1"><circle cx="${C1[0]}" cy="${cy}" r="${R}"/></clipPath><clipPath id="lpc2"><circle cx="${C2[0]}" cy="${cy}" r="${R}"/></clipPath></defs>`;
+ const pan=(C,x0,w,i)=>`<g clip-path="url(#lpc${i})"><rect x="${C[0]-R}" y="${cy-R}" width="${2*R}" height="${2*R}" fill="var(--card)"/><rect x="${C[0]-R}" y="${cy-R}" width="${2*R}" height="${2*R}" fill="#7fb6d6" opacity=".16"/><rect x="${x0}" y="${cy-R}" width="${w}" height="${2*R}" fill="${LPC.C}" opacity=".25"/>`;
+ /* Graphit: Schichten aus C-Atomen (Abstand der Atome 142 pm, der Schichten 335 pm) */
+ const GR=(xs,dir,C)=>{let g='';for(let k=0;k<6;k++){const x=xs-dir*(7.1+k*33.5);if(Math.abs(x-C[0])>R+8)continue;g+=`<line x1="${x}" x2="${x}" y1="${cy-R}" y2="${cy+R}" stroke="${LPC.C}" stroke-width="3" opacity=".6"/>`;for(let j=-11;j<=11;j++){const y=cy+j*14.2+(k%2?7.1:0);if(Math.hypot(x-C[0],y-cy)>R+8)continue;const q=GZJ(k*31+j,t,.6);g+=BALL(f2(x+q[0]),f2(y+q[1]),6.6,LPC.C,.8)}}return g};
+ /* ---------- Kathode ---------- */
+ h+=pan(C1,C1[0]-R,xs1-C1[0]+R,1)+GR(xs1,1,C1)+LPEG(C1,R,C1[0]-R+10,xs1-6,2,t)+LPWAT(C1,R,xs1+16,C1[0]+R,1,t,[xs1+50,cy,62]);
+ let ik=0,SK;
+ if(L.k=='Cu'){const rC=12.8,D=[];for(let j=-3;j<=3;j++)D.push({x:xs1+rC,y:cy+j*2*rC});D.sort((a,b)=>Math.abs(a.y-cy)-Math.abs(b.y-cy)||a.y-b.y);
+  const sc=ke%7,tg=D[Math.min(sc,6)];
+  D.forEach((a,ix)=>{if(ix<sc||ix===sc&&ph>.8){const q=GZJ(a.y,t,.8);h+=BALL(f2(a.x+q[0]),f2(a.y+q[1]),rC-.4,MC.Cu,.9)}});
+  if(sc<7){const st0=[xs1+120,tg.y+(tg.y>cy?-40:40)],ap=S(ph,0,.42),[x0,y0]=GZL(st0,[tg.x,tg.y],ap),sh=1+2.6*S(ph,.42,.58),so=1-S(ph,.44,.58),g=S(ph,.66,.8),r=7.3+(rC-7.3)*g,j=GZJ(11,t,2.5*(1-ap));
+   if(ph<=.8)h+=GZI(x0+j[0],y0+j[1],r,g>.5?MC.Cu:LPC.CK,g>.5?'':'2+',1,.2,sh,so);
+   if(ph>.42&&ph<.72){const u=S(ph,.42,.68);for(let k=0;k<2;k++)h+=LPEL([[66,110+k*10],[xs1-30,tg.y-18+k*8],[tg.x-4,tg.y+(k-.5)*6]],u,!k)}}
+  SK=['Cu²⁺-Ion mit Wasserhülle kommt','Wasserhülle löst sich','Elektrode liefert 2 e⁻','Cu-Atom wird abgeschieden'];ik=ph<.42?0:ph<.56?1:ph<.72?2:3}
+ else{const W=L.k=='W',P=[[xs1+13,cy-16],[xs1+13,cy+16]],B=[[xs1+95,cy-72],[xs1+100,cy+70]],M=[xs1+9,cy],ap=S(ph,0,.32),sp=S(ph,.55,.7),mv=S(ph,.7,1),fd=1-S(ph,.9,1);
+  P.forEach((p,i)=>{const sg=i?1:-1,[bx,by]=GZL(B[i],p,ap),j=GZJ(i+20,t,2.5*(1-ap)),x=bx+j[0],y=by+j[1],la=W?PI+sg*.91:PI,hx=x+6.6*Math.cos(la),hy=y+6.6*Math.sin(la),hm=[M[0],M[1]+sg*3.7];
+   if(ph<.55)h+=W?GZW(x,y,PI):KOH3(x,y,PI);
+   else{const rx=x+(85*mv),ry=y+sg*55*mv;h+=W?KOOH(rx,ry,PI-sg*.91,fd):GZW(rx,ry,0,fd);if(ph<.7){const[qx,qy]=GZL([hx,hy],hm,sp);h+=KOAT(qx,qy,3.1,KOHC)}}
+   if(ph>.32&&ph<.57)h+=LPEL([[66,110+i*10],[xs1-30,y-16],[x-4,y]],S(ph,.32,.55),!i)});
+  if(ph>=.7)h+=LPH2(M[0]+40*mv,M[1]-120*mv,PI/2+mv,fd)+(mv>.15?`<g${KOA(fd)}>`+TH(f2(M[0]+40*mv+12),f2(M[1]-120*mv+4),'H₂','t2')+'</g>':'');
+  SK=W?['Zwei Wassermoleküle an der Oberfläche','Elektrode liefert 2 e⁻','je ein H löst sich, 2 OH⁻ bleiben','H + H → H₂ (Gasblase)']:['Zwei H₃O⁺-Ionen kommen','Elektrode liefert 2 e⁻','je ein H löst sich, H₂O bleibt','H + H → H₂ (Gasblase)'];ik=ph<.32?0:ph<.55?1:ph<.7?2:3}
+ /* Ionen, die an der Kathode nicht reagieren */
+ h+=EYI(L.k=='Cu'?'Cu':L.ca,258,150,t,40)+EYI(L.an,256,312,t,41)+'</g>';
+ /* ---------- Anode ---------- */
+ h+=pan(C2,xs2,C2[0]+R-xs2,2)+GR(xs2,-1,C2)+LPEG(C2,R,xs2+6,C2[0]+R-10,7,t)+LPWAT(C2,R,C2[0]-R,xs2-16,5,t,[xs2-55,cy,L.a=='O'?82:66]);
+ let ia=0,SA;
+ if(L.a=='Cl'){const P=[[xs2-22,cy-24],[xs2-22,cy+24]],B=[[xs2-120,cy-82],[xs2-125,cy+80]],M=[xs2-14,cy],ap=S(pa,0,.35),sh=1+2*S(pa,.35,.48),so=1-S(pa,.36,.48),ec=S(pa,.48,.66),cm=S(pa,.68,.8),mv=S(pa,.8,1);
+  P.forEach((p,i)=>{const sg=i?1:-1,[bx,by]=GZL(B[i],p,ap),j=GZJ(i+30,t,2.5*(1-ap)),x=bx+j[0],y=by+j[1],r=18.1+(9.9-18.1)*ec;
+   if(pa<.68)h+=KOI(x,y,r,LPC.Cl,ec<.5?'−':'',1,.3+i,i=>[so,sh],1);else if(pa<.8){const[qx,qy]=GZL([x,y],[M[0],M[1]+sg*9.9],cm);h+=BALL(f2(qx),f2(qy),9.9,LPC.Cl,1.2)}
+   if(pa>.48&&pa<.7)h+=LPEL([[x+r*.6,y],[xs2+30,y-20],[574,110+i*10]],S(pa,.48,.68),!i)});
+  if(pa>=.8)h+=LPCL2(M[0]-50*mv,M[1]-110*mv,PI/2+.6*mv,1-S(pa,.92,1))+`<g${KOA(1-S(pa,.92,1))}>`+TH(f2(M[0]-50*mv-26),f2(M[1]-110*mv+4),'Cl₂','t2','end')+'</g>';
+  SA=['Zwei Cl⁻-Ionen mit Wasserhülle kommen','Wasserhülle löst sich','jedes Cl⁻ gibt 1 e⁻ ab','Cl + Cl → Cl₂ (Gasblase)'];ia=pa<.35?0:pa<.48?1:pa<.68?2:3}
+ else{const P=[[xs2-12,cy-17],[xs2-12,cy+17]],B=[[xs2-80,cy-62],[xs2-86,cy+60]],Rv=[[xs2-66,cy-66],[xs2-86,cy-26],[xs2-86,cy+26],[xs2-66,cy+66]],M=[xs2-12,cy],ap=S(pa,0,.25),hp=S(pa,.5,.66),cm=S(pa,.62,.76),mv=S(pa,.76,1),fd=1-S(pa,.9,1);
+  const Os=P.map((p,i)=>{const[bx,by]=GZL(B[i],p,ap),j=GZJ(i+50,t,2.5*(1-ap));return[bx+j[0],by+j[1]]});
+  /* Empfänger-Wasser: werden zu H₃O⁺ */
+  Rv.forEach((r,i)=>{const j=GZJ(i+60,t,2.5),a=Math.atan2(Os[i>>1][1]-r[1],Os[i>>1][0]-r[0]),x=r[0]+j[0]-70*mv,y=r[1]+j[1]+(i-1.5)*14*mv;h+=pa<.66?GZW(x,y,a+PI):KOH3(x,y,a,fd)});
+  Os.forEach((o,i)=>{const sg=i?1:-1;[PI+.91,PI-.91].forEach((la,k)=>{if(pa>=.66)return;const hx=o[0]+6.6*Math.cos(la),hy=o[1]+6.6*Math.sin(la),r=Rv[2*i+k],a=Math.atan2(o[1]-r[1],o[0]-r[0]),tg=[r[0]+6.6*Math.cos(a),r[1]+6.6*Math.sin(a)],[qx,qy]=GZL([hx,hy],tg,hp);h+=KOAT(qx,qy,3.1,KOHC)});
+   if(pa<.76){const[qx,qy]=GZL(o,[M[0],M[1]+sg*4.4],cm);h+=KOAT(qx,qy,5.4,KOO)}
+   if(pa>.25&&pa<.52)for(let k=0;k<2;k++)h+=LPEL([[o[0]+4,o[1]+(k-.5)*6],[xs2+30,o[1]-20+k*8],[574,108+(2*i+k)*7]],S(pa,.25+k*.03,.48+k*.03),!i&&!k)});
+  if(pa>=.76)h+=KOO2(M[0]-40*mv,M[1]-115*mv,PI/2+.6*mv,fd)+(mv>.15?`<g${KOA(fd)}>`+TH(f2(M[0]-40*mv-14),f2(M[1]-115*mv+4),'O₂','t2','end')+'</g>':'');
+  SA=['Zwei Wassermoleküle an der Oberfläche','geben 4 e⁻ an die Elektrode ab','4 H⁺ gehen an Wasser: 4 H₃O⁺','O + O → O₂ (Gasblase)'];ia=pa<.25?0:pa<.5?1:pa<.66?2:3}
+ h+=EYI(L.a=='Cl'?L.ca:L.an,392,150,t,44)+EYI(L.a=='Cl'?'Cl':L.ca,380,318,t,45)+'</g>';
+ h+=LPFR(C1,R)+LPFR(C2,R);
+ /* Beschriftung */
+ h+=TH(C1[0],24,'Kathode (−): Graphit','t1','middle')+T(C1[0],44,'Reduktion: Elektronen­aufnahme','t2','middle')+TH(C2[0],24,'Anode (+): Graphit','t1','middle')+T(C2[0],44,'Oxidation: Elektronen­abgabe','t2','middle');
+ h+=TH(70,152,'Graphit','t2','middle')+TH(250,96,'Lösung','t2','middle')+TH(400,96,'Lösung','t2','middle')+TH(570,152,'Graphit','t2','middle');
+ h+=ARW(46,80,70,104,'var(--flow)',2)+TH(16,70,'e⁻ vom Netzgerät','t2')+ARW(570,104,592,80,'var(--flow)',2)+TH(624,70,'e⁻ zum Netzgerät','t2','end');
+ h+=TH(C1[0],398,E[3],'t1','middle')+TH(C2[0],398,E[4],'t1','middle');
+ h+=LPST(SK,ik,24)+LPST(SA,ia,334);
+ /* Legende: nur Teilchen, die in dieser Lösung vorkommen */
+ const lg=[[(x,y)=>BALL(x,y,6,LPC.C,.8),'C (Graphit)'],[(x,y)=>GZW(x,y,-1.57),'Wasser']];
+ if(L.k=='Cu')lg.push([(x,y)=>BALL(x,y,7,MC.Cu,.9),'Cu'],[(x,y)=>BALL(x,y,5,LPC.CK,1.2),'Cu²⁺']);
+ if(L.ca=='Na')lg.push([(x,y)=>BALL(x,y,6,LPC.CN,1.2),'Na⁺']);
+ if(L.k!='Cu')lg.push([(x,y)=>LPH2(x,y,0),'H₂']);
+ if(L.k=='W')lg.push([(x,y)=>KOOH(x-2,y,0,1,0),'OH⁻']);
+ if(L.k=='H3'||L.a=='O')lg.push([(x,y)=>KOH3(x,y,-1.57),'H₃O⁺']);
+ if(L.an=='Cl')lg.push([(x,y)=>BALL(x,y,7,LPC.Cl,1.2),'Cl⁻'],[(x,y)=>LPCL2(x,y,0).replace(/r="9.9"/g,'r="5"').replace(/cx="([\d.]+)"/g,(m,v)=>`cx="${(x+(+v-x)*.5).toFixed(1)}"`),'Cl₂']);
+ if(L.an=='SO')lg.push([(x,y)=>LPSO(x,y,0,1,0),'SO₄²⁻']);
+ if(L.a=='O')lg.push([(x,y)=>KOO2(x,y,0),'O₂']);
+ lg.push([(x,y)=>`<circle cx="${x-3}" cy="${y}" r="1.9" fill="var(--flow)"/><circle cx="${x+3}" cy="${y-4}" r="1.9" fill="var(--flow)"/>`,'e⁻']);
+ const half=Math.ceil(lg.length/2);h+=KOLEG(530,lg.slice(0,half))+KOLEG(552,lg.slice(half));
+ h+=T(320,576,'Atome und Ionen maßstäblich (Radien in pm), Wasser, Sulfat und Gase kleiner gezeichnet','t3','middle');
+ return h}
+fm(FC,EC,'Elektrolyse','Bei der Elektrolyse erzwingt eine Gleichspannung eine Redoxreaktion: An der Kathode (−) wird reduziert, an der Anode (+) oxidiert. In der Teilchen-Lupe siehst Du, was direkt an den Elektroden passiert.',
+ [['v','Ansicht','sel',['Versuchsaufbau','Teilchen-Lupe'],0],['e','Lösung','sel',EY.map(x=>x[0]),0],['I','I',.1,10,.1,'A',2],['t','t',1,120,1,'min',30]],
+ (s,tm)=>{const E=EY[s.e],L=EYL[s.e],k=E[1],a=E[2],Q=s.I*s.t*60,ne=Q/96485,nk=ne/k[1],na=ne/a[1],amt=(g,n)=>g[2]?nf(n*g[2])+' g '+g[0]:nf(n*24)+' L '+g[0],dep=Math.min(14,2+Q/72000*14);
+ const bil=a[1]==4?(k[2]?'Für 1 O₂ (4 e⁻) scheiden sich 2 Cu-Atome ab (je 2 e⁻)':'Für 1 O₂ (4 e⁻) entstehen 2 H₂ (je 2 e⁻): doppelt so viel Wasserstoff wie Sauerstoff'):(k[2]?'Für 1 Cl₂ (2 e⁻) scheidet sich 1 Cu-Atom ab (2 e⁻)':'Für 1 Cl₂ (2 e⁻) entsteht 1 H₂ (2 e⁻): gleich viel Gas an beiden Elektroden');
+ const out=(vb,h)=>({vb,d:h,res:[[nf(Q/3600)+' Ah','Ladung Q'],[amt(k,nk),'an der Kathode'],[amt(a,na),'an der Anode']],rows:[['Ladung Q in C',nf(Q)+' C'],['Zeit t',s.t+' min = '+nf(s.t/60)+' h'],['Elektronen',bil],['Ionen',L.ca=='Na'?'Na⁺ wandert zur Kathode, wird aber nicht entladen: Dort reagiert Wasser':L.an=='SO'?'SO₄²⁻ wandert zur Anode, wird aber nicht entladen: Dort reagiert Wasser':'Kationen wandern zur Kathode, Anionen zur Anode']],
+  st:[['Q = I · t',`${nf(s.I)} A · ${nf(s.t/60)} h = ${nf(Q/3600)} Ah`],['Kathode (Reduktion)',E[3]],['Anode (Oxidation)',E[4]],['Elektronen','fließen vom Minuspol des Netzgeräts zur Kathode und von der Anode zurück zum Pluspol'],['Mehr Ladung, mehr Stoff','Doppelte Ladung Q scheidet doppelt so viel ab.']]});
+ if(s.v==1)return out('0 0 640 584',ELUPE(s.e,tm));
+ const GE=GLAS(100,98,240,152,{lv:136,ry:10,c:'var(--flow)',op:.25}),d2=18+dep*1.4,sp=.5+s.I/10*1.5;let h=GE.b;
+ /* Ionen: Wärmebewegung; was an einer Elektrode reagiert, wandert dorthin (Kationen zur Kathode, Anionen zur Anode) */
+ const ion=(w,x,y)=>w=='Cu'?ION(f2(x),f2(y),5.5,LPC.CK,'2+'):w=='Na'?ION(f2(x),f2(y),6,LPC.CN,'+'):w=='Cl'?ION(f2(x),f2(y),7,LPC.Cl,'−'):w=='H3'?KOsH3(x,y,tm+x)+`<text x="${f2(x+5)}" y="${f2(y-5)}" font-size="9" font-weight="800" style="fill:#2b7fe0">+</text>`:LPSO(x,y,tm*.5+y,1,0)+`<text x="${f2(x+8)}" y="${f2(y-7)}" font-size="8.5" font-weight="800" style="fill:var(--red)">2−</text>`;
+ [[L.ca,L.nc,170,L.k!='W'],[L.an,L.na,270,L.a=='Cl']].forEach(([w,n,xe,re],z)=>{for(let i=0;i<n;i++){const sd=i*13.7+z*101,j=GZJ(sd,tm,2.5);
+  if(!re){const x=112+GZH(sd)*216,y=128+GZH(sd+.5)*112;h+=ion(w,x+j[0],y+j[1]);continue}
+  const T0=7/sp,v=tm/T0+GZH(sd+.3),c=Math.floor(v),u=v-c,x0=112+GZH(sd+c*3.3)*216,y=128+GZH(sd+c*1.7)*112,x=x0+(xe-x0)*u,o=Math.min(1,u*5,(1-u)*6);
+  h+=`<g opacity="${o.toFixed(2)}">${ion(w,x+j[0],y+j[1])}</g>`}});
+ h+=EROD3(170,80,238,18,'#555b63');
  if(k[2]&&dep>2){h+=EROD3(170,124,240,d2,MC.Cu);for(let i=0;i<16;i++){const sd=i%2?1:-1,px=170+sd*(d2/2-1-(i*7%5)*.4),py=130+(i*41)%104;h+=`<circle cx="${px.toFixed(1)}" cy="${py}" r="${(1.1+(i%3)*.5).toFixed(1)}" fill="${i%3?'#c9683b':'#8c3b1f'}"/>`}}
  h+=EROD3(270,80,238,18,'#555b63')+T(170,272,'Kathode (−)','t2','middle')+T(270,272,'Anode (+)','t2','middle');
- for(let i=0;i<6;i++){const ph=(tm*.6+i/6)%1,y=235-110*ph,d=(i%2?1:-1)*(16+5*(i%3));if(!k[2])h+=`<circle cx="${170+d*1.3}" cy="${y}" r="4" fill="none" stroke="var(--ink)" stroke-width="1.5" opacity="${1-ph}"/>`;h+=`<circle cx="${270+d*1.3}" cy="${y}" r="4" fill="none" stroke="var(--ink)" stroke-width="1.5" opacity="${1-ph}"/>`}
+ for(let i=0;i<6;i++){const ph=(tm*.6*sp+i/6)%1,y=235-110*ph,d=(i%2?1:-1)*(16+5*(i%3));if(!k[2])h+=`<circle cx="${170+d*1.3}" cy="${y}" r="4" fill="none" stroke="var(--ink)" stroke-width="1.5" opacity="${1-ph}"/>`;h+=`<circle cx="${270+d*1.3}" cy="${y}" r="4" fill="none" stroke="var(--ink)" stroke-width="1.5" opacity="${1-ph}"/>`}
  h+=GE.f+EKL3(170,80,'#1f2937')+EKL3(270,80,'#c0392b')+T(170,104,'−','t1','middle').replace('<text ','<text style="fill:#fff" ')+T(270,104,'+','t1','middle').replace('<text ','<text style="fill:#fff" ')+ECAB3('M170 52V34H188','#1f2937')+ECAB3('M252 34H270V52','#c0392b')+BAR3(188,20,64,28,'#2b2f36',8,{sw:1.4})+`<rect x="201" y="27" width="38" height="14" rx="2" fill="#cfe8c6" stroke="var(--ink)" stroke-width=".8"/><text x="220" y="38" font-size="10" font-weight="700" text-anchor="middle" style="fill:#1a2433">DC</text>`+TH(176,24,'−','t1','middle')+TH(272,24,'+','t1','middle');
+ /* Elektronen: vom Minuspol des Netzgeräts in die Kathode, aus der Anode zurück zum Pluspol */
+ const PK=[[188,34],[170,34],[170,62]],PA=[[270,62],[270,34],[252,34]];for(let i=0;i<3;i++){const u=(tm*sp*.5+i/3)%1;h+=LPEL(PK,u)+LPEL(PA,u)}
  h+=T(360,110,'Kathode: '+k[0],'t1')+T(360,136,E[3],'t2')+T(360,176,'Anode: '+a[0],'t1')+T(360,202,E[4],'t2');
- return{d:h,res:[[nf(Q/3600)+' Ah','Ladung Q'],[amt(k,nk),'an der Kathode'],[amt(a,na),'an der Anode']],rows:[['Ladung Q in C',nf(Q)+' C'],['Zeit t',s.t+' min = '+nf(s.t/60)+' h']],st:[['Q = I · t',`${nf(s.I)} A · ${nf(s.t/60)} h = ${nf(Q/3600)} Ah`],['Kathode (Reduktion)',E[3]],['Anode (Oxidation)',E[4]],['Mehr Ladung, mehr Stoff','Doppelte Ladung Q scheidet doppelt so viel ab.']]}},'',1);
+ return out(undefined,h)},'Versuchsaufbau: Kationen wandern zur Kathode (−), Anionen zur Anode (+). Kleine blaue Kugeln: Elektronen, sie fließen vom Minuspol des Netzgeräts zur Kathode. Je größer I, desto schneller. Teilchen-Lupe: Was an der Graphit-Oberfläche der beiden Elektroden passiert, Schritt für Schritt.',1);
 const EK=[['Essig (Essigsäure 5 %)','CaCO₃ + 2 CH₃COOH → Ca(CH₃COO)₂ + H₂O + CO₂↑','günstig, riecht stark, kann Gummidichtungen angreifen',1],['Zitronensäure','3 CaCO₃ + 2 C₆H₈O₇ → Ca₃(C₆H₅O₇)₂ + 3 H₂O + 3 CO₂↑','geruchlos; nur kalt oder lauwarm verwenden, heiß fällt schwer lösliches Calciumcitrat aus',1.3],['Amidosulfonsäure','CaCO₃ + 2 H₂NSO₃H → Ca(H₂NSO₃)₂ + H₂O + CO₂↑','sehr wirksam, in vielen Entkalkern; Hautkontakt meiden',1.8],['Milchsäure','CaCO₃ + 2 C₃H₆O₃ → Ca(C₃H₅O₃)₂ + H₂O + CO₂↑','mild, oft für Kaffeemaschinen empfohlen',1.2]];
 const WHST=[['Gesamthärte','c = ρ(Ca²⁺) / 40,08 + ρ(Mg²⁺) / 24,31 in mmol/l, 1 mmol/l ≈ 5,6 °dH'],['Härtebereiche (Waschmittelgesetz)','weich < 1,5 mmol/l (< 8,4 °dH), mittel 1,5 bis 2,5, hart > 2,5 mmol/l (> 14 °dH)'],['Wie entsteht Kalk?','Beim Erwärmen zerfällt Hydrogencarbonat: Ca²⁺ + 2 HCO₃⁻ → CaCO₃↓ + H₂O + CO₂↑. Darum verkalken vor allem Geräte mit heißem Wasser.'],['Folgen im Alltag','Kalk isoliert den Heizstab: Er braucht länger, mehr Energie und kann überhitzen. Düsen und Rohre verengen sich, Geräte fallen aus, Flecken auf Armaturen und Gläsern, mehr Waschmittel nötig. In der Industrie: Kesselstein in Dampfkesseln und Wärmetauschern.'],['Entkalken','Eine Säure löst Kalk: Carbonat + Säure → lösliches Salz + Wasser + CO₂. Das Sprudeln ist das CO₂. Danach gründlich mit klarem Wasser spülen.'],['Nicht verwenden','Salzsäure und andere starke Mineralsäuren: greifen Metall an und sind gefährlich'],['Abkochen','Ca(HCO₃)₂ → CaCO₃↓ + H₂O + CO₂ (entfernt nur die Carbonathärte)'],['Ionentauscher','Ca²⁺ + 2 Na⁺-Harz → Ca²⁺-Harz + 2 Na⁺'],['Destillation','Verdampfen und Kondensieren, das Wasser wird salzfrei']];
 fm(FC,WH,'Wasserhärte','Hartes Wasser enthält viele Calcium- und Magnesium-Ionen. Beim Erhitzen fällt vor allem Calcium als Kalk (CaCO₃) aus. Enthärten kann man mit Ionentauscher, durch Abkochen (nur Carbonathärte) oder Destillation. In der Ansicht „Entkalken“ siehst Du, wie eine Säure Kalk aus einem Wasserkocher löst.',
@@ -3348,14 +3446,95 @@ fm(FP,ET,'Drehstrom (Stern & Dreieck)','Drehstrom hat drei um 120° versetzte Au
  `<polygon points="240,60 120,200 360,200" fill="none" stroke="var(--wire)" stroke-width="3"/>`+rr(180,130,'R')+rr(300,130,'R')+rr(240,200,'R')+T(246,52,'L1','t1')+T(96,216,'L2','t1')+T(366,216,'L3','t1'))+T(40,262,'Strangspannung U_Str = '+nf(Us)+' V','t2')+`<rect x="400" y="${240-Math.min(150,P/Pdr*150)}" width="40" height="${Math.min(150,P/Pdr*150)}" fill="var(--amber)"/>`+T(420,258,st?'Y':'Δ','t2','middle'),
  res:[[nf(P/1000)+' kW','Gesamtleistung P'],[nf(Us)+' V','Strangspannung'],[nf(IL)+' A','Leiterstrom I_L']],rows:[['Strangstrom I_Str',nf(Is)+' A'],['P (Stern) / P (Dreieck)',nf(Pst/1000)+' kW / '+nf(Pdr/1000)+' kW'],['Verhältnis Δ : Y','3 : 1']],st:[['U_Str',st?`U_L / √3 = ${nf(Us)} V`:`U_L = ${s.UL} V`],['I_Str = U_Str / R',nf(Is)+' A'],['I_L',st?'I_L = I_Str':'I_L = √3 · I_Str = '+nf(IL)+' A'],['P = 3 · U_Str · I_Str = √3 · U_L · I_L',nf(P/1000)+' kW']]}},
  'Verkettete Spannung U_L = 400 V zwischen den Außenleitern, 230 V zwischen Außenleiter und Neutralleiter. Rein ohmsche Last (cos φ = 1).');
-/* Chemie: Blei-Batterie */
-fm(FC,EC,'Blei-Batterie (Akkumulator)','Beim Entladen reagieren Pb (−) und PbO₂ (+) mit der Schwefelsäure zu PbSO₄; die Säure wird dabei verdünnt. Beim Laden läuft die Reaktion umgekehrt. Eine Zelle liefert etwa 2 V, sechs Zellen in Reihe 12 V.',
- [['q','Ladezustand',0,100,1,'%',100]],
- s=>{const q=s.q/100,rho=1.10+.18*q,U=1.95+.17*q,mix=(a,b,c)=>`color-mix(in srgb,${a} ${c}%,${b})`;
- return{d:`<path d="M60 70L84 52H374L350 70Z" fill="#3b4148" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"/><path d="M350 70L374 52V222L350 240Z" fill="#2a2f35" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"/><rect x="60" y="70" width="290" height="170" fill="url(#g-glas)"/><rect x="62" y="${110-20*q}" width="286" height="${128+20*q}" fill="color-mix(in srgb,var(--flow) ${25+q*25}%,transparent)"/>`+`<path d="M62 ${110-20*q}L86 ${92-20*q}H348V${110-20*q}Z" fill="color-mix(in srgb,var(--flow) ${35+q*25}%,transparent)"/><path d="M62 ${110-20*q}L86 ${92-20*q}H348" fill="none" stroke="#fff" stroke-width="1.4" opacity=".55"/>`+EPL3(112,86,40,140,mix('#3a3f45','#d8dcd2',20+q*80))+EPL3(252,86,40,140,mix('#6b3a2a','#d8dcd2',q*100))+[[138,'#1f2937'],[278,'#c0392b']].map(([x,c])=>`<ellipse cx="${x}" cy="62" rx="13" ry="4" fill="${c}" stroke="var(--ink)" stroke-width="1.2"/>`+EROD3(x,36,78,14,'#8a9097')).join('')+`<rect x="60" y="70" width="290" height="170" fill="url(#g-cyl)" opacity=".35" stroke="var(--ink)" stroke-width="3"/><rect x="72" y="80" width="8" height="150" rx="4" fill="#fff" opacity=".4"/>`+TH(138,24,'Pb (−)','t2','middle')+TH(278,24,'PbO₂ (+)','t2','middle')+T(205,262,'Entladen: Pb + PbO₂ + 2 H₂SO₄ → 2 PbSO₄ + 2 H₂O','t2','middle')+T(205,280,'Laden: 2 PbSO₄ + 2 H₂O → Pb + PbO₂ + 2 H₂SO₄','t2','middle')+
- `<rect x="400" y="${240-170*q}" width="40" height="${170*q}" fill="var(--ok)"/><rect x="400" y="70" width="40" height="170" rx="6" fill="url(#g-cyl)" stroke="var(--ink)" stroke-width="2"/>`+T(420,260,nf(rho)+' g/cm³','t2','middle'),
- res:[[nf(rho)+' g/cm³','Säuredichte'],[nf(U)+' V','Zellspannung (Ruhe)'],[nf(U*6)+' V','6 Zellen (Autobatterie)']],rows:[['PbSO₄ auf den Platten',nf((1-q)*100)+' %'],['Säure (H₂SO₄)','verdünnte Schwefelsäure, ca. '+Math.round(15+22*q)+' %'],['Zustand',s.q<25?'tiefentladen, laden!':s.q>85?'voll':'teilgeladen']],st:[['Säuredichte ρ',`1,10 g/cm³ + 0,18 g/cm³ · ${nf(q)} = ${nf(rho)} g/cm³`],['Spannung 6 Zellen',nf(U*6)+' V']]}},
- 'Die Säuredichte (Aräometer) zeigt den Ladezustand: ca. 1,28 g/cm³ voll, ca. 1,10 g/cm³ leer. Deshalb wird tiefentladene Batterie auch bei Frost gefährdet (Eis bildet sich).');
+/* Chemie: Blei-Batterie (10.11.2026: Vorgang Entladen/Laden, bewegte Ionen und Elektronen, Aräometer, Teilchen-Lupe) */
+/* Teilchen-Lupe der Blei-Batterie: links Minuspol (Pb), rechts Pluspol (PbO₂). Laden = Entladen rückwärts abgespielt */
+function BBLUPE(q,ld,t){const C1=[165,224],C2=[475,224],R=145,cy=224,xs1=150,xs2=490,Q=8,ph0=(t%Q)/Q,ph=ld?1-ph0:ph0,S=LPS,PI=Math.PI,rP=17.5,r2=11.9,r4=7.75;
+ let h=`<defs><clipPath id="bbc1"><circle cx="${C1[0]}" cy="${cy}" r="${R}"/></clipPath><clipPath id="bbc2"><circle cx="${C2[0]}" cy="${cy}" r="${R}"/></clipPath></defs>`;
+ const pan=(C,x0,w,i,c)=>`<g clip-path="url(#bbc${i})"><rect x="${C[0]-R}" y="${cy-R}" width="${2*R}" height="${2*R}" fill="var(--card)"/><rect x="${C[0]-R}" y="${cy-R}" width="${2*R}" height="${2*R}" fill="#7fb6d6" opacity=".16"/><rect x="${x0}" y="${cy-R}" width="${w}" height="${2*R}" fill="${c}" opacity=".3"/>`;
+ /* PbSO₄ als fester Belag: Pb²⁺ an der Platte, SO₄²⁻ zur Säure hin */
+ const sulf=(xp,xs,y,o=1)=>`<g${KOA(o)}><rect x="${f2(Math.min(xp,xs)-15)}" y="${f2(y-14)}" width="${f2(Math.abs(xs-xp)+30)}" height="28" rx="8" fill="#f1f1ea" stroke="#0004" stroke-width="1" opacity=".75"/>${BALL(f2(xp),f2(y),r2,LPC.P2,1)}${LPSO(xs,y,.3,1,0)}</g>`;
+ /* Säure: SO₄²⁻ und doppelt so viele H₃O⁺, Menge wächst mit dem Ladezustand */
+ const acid=(x1,x2,seed,fr)=>{let g='';const n=1+Math.round(2*q);let k=0;for(let i=0;i<40&&k<3*n;i++){const x=x1+GZH(i*4.7+seed)*(x2-x1),y=cy-R+20+GZH(i*6.1+seed)*(2*R-40),C=seed<5?C1:C2;if(Math.hypot(x-C[0],y-cy)>R-20||Math.hypot(x-fr[0],y-fr[1])<fr[2])continue;const j=GZJ(i+seed,t,3);g+=k<n?LPSO(x+j[0],y+j[1],t*.4+i):KOH3(x+j[0],y+j[1],t*.5+i);k++}return g};
+ const msg=(x,m)=>TH(x,330,m[0],'t2','middle')+TH(x,350,m[1],'t2','middle');
+ /* ---------- Minuspol: Bleigitter ---------- */
+ const A=[];for(let c=0;c<6;c++){const x=xs1-(rP+c*1.732*rP);for(let k=-6;k<=6;k++){const y=cy+(k+(c&1?.5:0))*2*rP;if(Math.hypot(x-C1[0],y-cy)<R+rP)A.push({c,x,y})}}
+ const SL=A.filter(a=>a.c==0&&Math.abs(a.y-cy)<110).sort((a,b)=>Math.abs(a.y-cy)-Math.abs(b.y-cy)||a.y-b.y),N1=SL.length,n1=Math.round((1-q)*N1),ev1=ld?n1-1:n1,go1=ev1>=0&&ev1<N1;
+ h+=pan(C1,C1[0]-R,xs1-C1[0]+R,1,MC.Pb);
+ A.forEach(a=>{const ix=SL.indexOf(a);if(ix>=0&&(ix<n1&&ix!==ev1||ix===ev1&&go1))return;const j=GZJ(a.x+a.y,t,.9);h+=BALL(f2(a.x+j[0]),f2(a.y+j[1]),rP-.4,MC.Pb,.9)});
+ h+=LPEG(C1,R,C1[0]-R+10,xs1-8,2,t)+LPWAT(C1,R,xs1+34,C1[0]+R,1,t,go1?[xs1+60,SL[ev1].y,58]:null,20)+acid(xs1+40,C1[0]+R-10,1,go1?[xs1+60,SL[ev1].y,64]:[0,0,0]);
+ SL.forEach((a,ix)=>{if(ix<n1&&ix!==ev1)h+=sulf(xs1-8,xs1+16,a.y)});
+ let i1=-1;
+ if(go1){const a=SL[ev1],y=a.y,ox=a.x,ion=S(ph,.25,.5),j=GZJ(5,t,.9+2.2*S(ph,0,.25)*(1-ion)),px=ox+(xs1-8-ox)*ion,r=rP+(r2-rP)*ion,so=GZL([xs1+115,y+(y>cy?-50:50)],[xs1+16,y],S(ph,.4,.7)),cr=S(ph,.7,.88);
+  if(cr<1)h+=BALL(f2(px+j[0]*(1-ion)),f2(y+j[1]*(1-ion)),f2(r),ion>.5?LPC.P2:MC.Pb,1)+(ion>.5&&cr<.5?KOQ(px,y,'2+',9):'');
+  if(ph>.38&&cr<1){const jj=GZJ(7,t,2*(1-S(ph,.4,.7)));h+=LPSO(so[0]+jj[0],so[1]+jj[1],.3+(1-S(ph,.4,.7))*2,1,cr<.5?1:0)}
+  if(cr>0)h+=sulf(xs1-8,xs1+16,y,cr);
+  if(ph>.25&&ph<.52)for(let k=0;k<2;k++)h+=LPEL([[ox,y+(k-.5)*8],[xs1-40,y-18+k*8],[66,110+k*10]],S(ph,.25,.5),!k);
+  i1=ph<.25?0:ph<.5?1:ph<.7?2:3;if(ld)i1=3-i1}
+ h+='</g>';
+ /* ---------- Pluspol: Bleidioxid ---------- */
+ const B=[];for(let c=0;c<8;c++){const x=xs2+12+c*24;for(let k=-7;k<=7;k++){const y=cy+k*24+(c&1?12:0);if(Math.hypot(x-C2[0],y-cy)<R+12)B.push({c,x,y})}}
+ const SR=B.filter(a=>a.c==0&&Math.abs(a.y-cy)<110&&Math.round((a.y-cy)/24)%2==0).sort((a,b)=>Math.abs(a.y-cy)-Math.abs(b.y-cy)||a.y-b.y),N2=SR.length,n2=Math.round((1-q)*N2),ev2=ld?n2-1:n2,go2=ev2>=0&&ev2<N2;
+ const pbo=(x,y,j,o=1)=>`<g${KOA(o)}>${KOAT(x+7+j[0],y-7+j[1],5.4,KOO)}${BALL(f2(x+j[0]),f2(y+j[1]),r4,LPC.P4,.9)}${KOAT(x-7+j[0],y+7+j[1],5.4,KOO)}</g>`;
+ h+=pan(C2,xs2,C2[0]+R-xs2,2,LPC.P4);
+ B.forEach(a=>{const ix=SR.indexOf(a);if(ix>=0&&(ix<n2&&ix!==ev2||ix===ev2&&go2))return;h+=pbo(a.x,a.y,GZJ(a.x+a.y,t,.7))});
+ h+=LPEG(C2,R,xs2+8,C2[0]+R-10,7,t,12)+LPWAT(C2,R,C2[0]-R,xs2-34,5,t,go2?[xs2-60,SR[ev2].y,70]:null,20)+acid(C2[0]-R+10,xs2-40,6,go2?[xs2-60,SR[ev2].y,76]:[0,0,0]);
+ SR.forEach((a,ix)=>{if(ix<n2&&ix!==ev2)h+=sulf(xs2+8,xs2-16,a.y)});
+ let i2=-1;
+ if(go2){const a=SR[ev2],y=a.y,ap=S(ph,0,.3),ec=S(ph,.3,.5),ow=S(ph,.5,.7),cr=S(ph,.7,.88),mv=S(ph,.72,1),fd=1-S(ph,.9,1),px=a.x+(xs2+8-a.x)*ec,r=r4+(r2-r4)*ec,
+   so=GZL([xs2-112,y+(y>cy?-56:56)],[xs2-16,y],ap),HP=[[-44,-40],[-60,-14],[-60,14],[-44,40]].map(([dx,dy],i)=>{const st=[xs2+dx-60,y+dy*1.8],en=[xs2+dx,y+dy];return GZL(st,en,ap)}),
+   OP=[[a.x+7,y-7],[a.x-7,y+7]],OW=[[xs2-26,y-30],[xs2-26,y+30]];
+  /* zwei O wandern aus dem Gitter, bekommen je 2 H⁺ und werden Wasser */
+  OP.forEach((o,i)=>{const[x,yy]=GZL(o,OW[i],ow),aw=PI+(i?-.5:.5);if(ph<.7)h+=KOAT(x,yy,5.4,KOO);else h+=GZW(x-60*mv,yy+(i?40:-40)*mv,aw,fd)});
+  HP.forEach((p,i)=>{const o=OW[i>>1],a2=Math.atan2(o[1]-p[1],o[0]-p[0]),hp=[p[0]+6.6*Math.cos(a2),p[1]+6.6*Math.sin(a2)],tg=[o[0]+6.6*Math.cos(a2+PI+(i&1?.91:-.91)),o[1]+6.6*Math.sin(a2+PI+(i&1?.91:-.91))],jj=GZJ(i+80,t,2*(1-ap));
+   if(ph<.5)h+=KOH3(p[0]+jj[0],p[1]+jj[1],a2);else{h+=GZW(p[0]-70*mv,p[1]+(i-1.5)*16*mv,a2+PI,ph<.7?1:fd);if(ph<.7){const[x,yy]=GZL(hp,tg,ow);h+=KOAT(x,yy,3.1,KOHC)}}});
+  if(cr<1){h+=BALL(f2(px),f2(y),f2(r),ec>.5?LPC.P2:LPC.P4,1)+(cr<.5?KOQ(px,y,ec>.5?'2+':'4+',8.5):'');const jj=GZJ(9,t,2*(1-ap));h+=LPSO(so[0]+jj[0],so[1]+jj[1],.3+(1-ap)*2,1,cr<.5?1:0)}
+  if(cr>0)h+=sulf(xs2+8,xs2-16,y,cr);
+  if(ph>.3&&ph<.52)for(let k=0;k<2;k++)h+=LPEL([[574,108+k*10],[xs2+30,y-20+k*8],[a.x+4,y+(k-.5)*6]],S(ph,.3,.5),!k);
+  i2=ph<.3?0:ph<.5?1:ph<.7?2:3;if(ld)i2=3-i2}
+ h+='</g>'+LPFR(C1,R)+LPFR(C2,R);
+ /* Beschriftung */
+ h+=TH(C1[0],24,'Minuspol (−): Pb','t1','middle')+T(C1[0],44,ld?'Laden: Reduktion':'Entladen: Oxidation','t2','middle')+TH(C2[0],24,'Pluspol (+): PbO₂','t1','middle')+T(C2[0],44,ld?'Laden: Oxidation':'Entladen: Reduktion','t2','middle');
+ h+=TH(66,152,'Blei','t2','middle')+TH(250,96,'Säure','t2','middle')+TH(400,96,'Säure','t2','middle')+TH(574,152,'PbO₂','t2','middle');
+ h+=ld?ARW(46,80,70,104,'var(--flow)',2)+TH(16,70,'e⁻ vom Ladegerät','t2')+ARW(570,104,592,80,'var(--flow)',2)+TH(624,70,'e⁻ zum Ladegerät','t2','end')
+  :ARW(70,104,46,80,'var(--flow)',2)+TH(16,70,'e⁻ zum Verbraucher','t2')+ARW(592,80,570,104,'var(--flow)',2)+TH(624,70,'e⁻ vom Verbraucher','t2','end');
+ const em=ld?['PbSO₄ + 2 e⁻ → Pb + SO₄²⁻','PbSO₄ + 6 H₂O → PbO₂ + SO₄²⁻ + 4 H₃O⁺ + 2 e⁻']:['Pb + SO₄²⁻ → PbSO₄ + 2 e⁻','PbO₂ + SO₄²⁻ + 4 H₃O⁺ + 2 e⁻ → PbSO₄ + 6 H₂O'];
+ h+=TH(C1[0],398,em[0],'t1','middle')+TH(634,398,em[1],'t1','end').replace('style="','style="font-size:13px;');
+ const L1=ld?['PbSO₄ auf der Platte löst sich','SO₄²⁻ geht zurück in die Säure','Pb²⁺ nimmt 2 e⁻ auf','Pb-Atom sitzt wieder im Gitter']:['Pb-Atom an der Oberfläche schwingt','gibt 2 e⁻ ab: Pb²⁺ entsteht','SO₄²⁻ aus der Säure kommt dazu','PbSO₄ bleibt fest auf der Platte'],
+  L2=ld?['PbSO₄ auf der Platte löst sich','Wasser gibt O ab: 4 H₃O⁺ entstehen','Pb²⁺ gibt 2 e⁻ ab: Pb⁴⁺ (PbO₂)','SO₄²⁻ und H₃O⁺ gehen in die Säure']:['SO₄²⁻ und 4 H₃O⁺ kommen','Platte liefert 2 e⁻: Pb⁴⁺ wird Pb²⁺','2 O und 4 H⁺ werden zu Wasser','PbSO₄ bleibt fest auf der Platte'];
+ h+=go1?LPST(L1,i1,24):msg(C1[0],ld?['Kein PbSO₄ mehr:','Batterie ist voll']:['Platte ganz mit PbSO₄ bedeckt:','Batterie ist leer']);
+ h+=go2?LPST(L2,i2,334):msg(C2[0],ld?['Kein PbSO₄ mehr:','Batterie ist voll']:['Platte ganz mit PbSO₄ bedeckt:','Batterie ist leer']);
+ h+=KOLEG(530,[[(x,y)=>BALL(x,y,7,MC.Pb,.9),'Pb'],[(x,y)=>KOAT(x-5,y-3,3.6,KOO)+BALL(x,y,4.5,LPC.P4,.9)+KOAT(x+5,y+3,3.6,KOO),'PbO₂'],[(x,y)=>`<rect x="${x-8}" y="${y-7}" width="22" height="14" rx="4" fill="#f1f1ea" stroke="#0004"/>`+BALL(x-2,y,5,LPC.P2,.9)+KOAT(x+7,y,3.4,LPC.S),'PbSO₄'],[(x,y)=>LPSO(x,y,0,1,0),'SO₄²⁻']])+
+  KOLEG(552,[[(x,y)=>KOH3(x,y,-1.57),'H₃O⁺'],[(x,y)=>GZW(x,y,-1.57),'Wasser'],[(x,y)=>`<circle cx="${x-3}" cy="${y}" r="1.9" fill="var(--flow)"/><circle cx="${x+3}" cy="${y-4}" r="1.9" fill="var(--flow)"/>`,'e⁻']]);
+ h+=T(320,576,'Pb-Atome und Pb-Ionen maßstäblich (Radien in pm), PbO₂, Wasser und Säure kleiner gezeichnet','t3','middle');
+ return h}
+fm(FC,EC,'Blei-Batterie (Akkumulator)','Beim Entladen reagieren Pb (−) und PbO₂ (+) mit der Schwefelsäure zu PbSO₄; die Säure wird dabei verdünnt. Beim Laden läuft die Reaktion umgekehrt. Eine Zelle liefert etwa 2 V, sechs Zellen in Reihe 12 V. In der Teilchen-Lupe siehst Du, was an beiden Platten passiert.',
+ [['v','Ansicht','sel',['Versuchsaufbau','Teilchen-Lupe'],0],['b','Vorgang','sel',['Entladen','Laden'],0],['q','Ladezustand',0,100,1,'%',100]],
+ (s,t)=>{const q=s.q/100,rho=1.10+.18*q,U=1.95+.17*q,ld=s.b==1,mix=(a,b,c)=>`color-mix(in srgb,${a} ${c}%,${b})`;
+ const out=(vb,d)=>({vb,d,res:[[nf(rho)+' g/cm³','Säuredichte'],[nf(U)+' V','Zellspannung (Ruhe)'],[nf(U*6)+' V','6 Zellen (Autobatterie)']],rows:[['PbSO₄ auf den Platten',nf((1-q)*100)+' %'],['Säure (H₂SO₄)','verdünnte Schwefelsäure, ca. '+Math.round(15+22*q)+' %'],['Zustand',s.q<25?'tiefentladen, laden!':s.q>85?'voll':'teilgeladen'],['Vorgang',ld?'Laden: Das Ladegerät drückt Elektronen in den Minuspol, PbSO₄ wird abgebaut, die Säure wird dichter':'Entladen: Elektronen fließen vom Minuspol über den Verbraucher zum Pluspol, an beiden Platten entsteht PbSO₄']],
+  st:[['Säuredichte ρ',`1,10 g/cm³ + 0,18 g/cm³ · ${nf(q)} = ${nf(rho)} g/cm³`],['Minuspol (Entladen)','Pb + SO₄²⁻ → PbSO₄ + 2 e⁻'],['Pluspol (Entladen)','PbO₂ + SO₄²⁻ + 4 H₃O⁺ + 2 e⁻ → PbSO₄ + 6 H₂O'],['Gesamt (Entladen)','Pb + PbO₂ + 2 H₂SO₄ → 2 PbSO₄ + 2 H₂O'],['Spannung 6 Zellen',nf(U*6)+' V']]});
+ if(s.v==1)return out('0 0 640 584',BBLUPE(q,ld,t));
+ const yl=110-20*q;
+ let h=`<path d="M60 70L84 52H374L350 70Z" fill="#3b4148" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"/><path d="M350 70L374 52V222L350 240Z" fill="#2a2f35" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"/><rect x="60" y="70" width="290" height="170" fill="url(#g-glas)"/><rect x="62" y="${yl}" width="286" height="${128+20*q}" fill="color-mix(in srgb,var(--flow) ${25+q*25}%,transparent)"/>`+`<path d="M62 ${yl}L86 ${92-20*q}H348V${yl}Z" fill="color-mix(in srgb,var(--flow) ${35+q*25}%,transparent)"/><path d="M62 ${yl}L86 ${92-20*q}H348" fill="none" stroke="#fff" stroke-width="1.4" opacity=".55"/>`;
+ /* Säure-Teilchen: SO₄²⁻ (gelb) und H₃O⁺; mehr Teilchen = dichtere Säure. Entladen: sie wandern in die Platten, Laden: sie kommen heraus */
+ const G=[[68,104],[170,246],[310,344]],nS=2+Math.round(4*q);
+ for(let i=0;i<3*nS;i++){const g=G[i%3],x=g[0]+GZH(i*3.7)*(g[1]-g[0]),y=yl+12+GZH(i*5.1)*(226-yl),j=GZJ(i,t,2.2),so=i<nS;h+=so?LPSO(x+j[0],y+j[1],t*.4+i,1,0):KOsH3(x+j[0],y+j[1],t*.5+i)}
+ for(let i=0;i<4;i++){const u0=(t/6+i/4)%1,u=ld?1-u0:u0,so=i%2==0,xe=i<2?(so?164:152):(so?304:292),x0=i<2?208:208,y=150+i*18,x=x0+(xe-x0)*u,o=Math.min(1,u0*5,(1-u0)*6),pl=i>=2;
+  if(!pl&&!so)continue;h+=`<g opacity="${o.toFixed(2)}">`+(so?LPSO(x,y,t*.4+i,1,0):KOsH3(x,y,t*.5+i))+'</g>'}
+ h+=EPL3(112,86,40,140,mix('#3a3f45','#d8dcd2',20+q*80))+EPL3(252,86,40,140,mix('#6b3a2a','#d8dcd2',q*100))+[[138,'#1f2937'],[278,'#c0392b']].map(([x,c])=>`<ellipse cx="${x}" cy="62" rx="13" ry="4" fill="${c}" stroke="var(--ink)" stroke-width="1.2"/>`+EROD3(x,36,78,14,'#8a9097')).join('')+`<rect x="60" y="70" width="290" height="170" fill="url(#g-cyl)" opacity=".35" stroke="var(--ink)" stroke-width="3"/><rect x="72" y="80" width="8" height="150" rx="4" fill="#fff" opacity=".4"/>`;
+ /* Elektronen am Polbolzen: Entladen aus dem Minuspol heraus, in den Pluspol hinein; Laden umgekehrt */
+ for(let k=0;k<3;k++){const u0=(t*.5+k/3)%1,up=ld?1-u0:u0;h+=LPEL([[138,90],[138,20]],up)+LPEL([[278,20],[278,90]],up)}
+ h+=(ld?ARW(118,22,118,52,'var(--flow)',2)+ARW(298,52,298,22,'var(--flow)',2):ARW(118,52,118,22,'var(--flow)',2)+ARW(298,22,298,52,'var(--flow)',2))+TH(110,40,'e⁻','t2','end')+TH(306,40,'e⁻','t2');
+ h+=TH(150,16,'Pb (−)','t2','start')+TH(266,16,'PbO₂ (+)','t2','end');
+ h+=T(205,262,'Entladen: Pb + PbO₂ + 2 H₂SO₄ → 2 PbSO₄ + 2 H₂O','t2','middle').replace(ld?'X':'class="t2"',ld?'X':'class="t2" style="font-weight:700;fill:var(--ink)"')+T(205,282,'Laden: 2 PbSO₄ + 2 H₂O → Pb + PbO₂ + 2 H₂SO₄','t2','middle').replace(ld?'class="t2"':'X',ld?'class="t2" style="font-weight:700;fill:var(--ink)"':'X');
+ /* Aräometer (Säureheber mit Schwimmer): je dichter die Säure, desto höher schwimmt er */
+ const ax=462,ys=132,rel=d=>8+(d-1.10)/.2*36,ft=ys-rel(rho);
+ h+=`<ellipse cx="${ax}" cy="40" rx="16" ry="20" fill="#2b2f36" stroke="var(--ink)" stroke-width="1.5"/><ellipse cx="${ax-5}" cy="33" rx="5" ry="8" fill="#fff" opacity=".18"/><rect x="${ax-6}" y="56" width="12" height="10" fill="#2b2f36"/>`+
+  `<rect x="${ax-22}" y="64" width="44" height="190" rx="10" fill="url(#g-glas)" stroke="var(--ink)" stroke-width="2"/><rect x="${ax-20}" y="${ys}" width="40" height="120" rx="8" fill="color-mix(in srgb,var(--flow) ${25+q*25}%,transparent)"/><path d="M${ax-20} ${ys}H${ax+20}" stroke="#fff" stroke-width="1.4" opacity=".6"/><path d="M${ax-4} 254V276H${ax+4}V254" fill="url(#g-glas)" stroke="var(--ink)" stroke-width="1.5"/>`+
+  `<rect x="${ax-3.5}" y="${f2(ft)}" width="7" height="54" rx="3" fill="#f6f4ea" stroke="var(--ink)" stroke-width="1"/>`+[1.1,1.15,1.2,1.25,1.3].map(d=>`<path d="M${ax-3.5} ${f2(ft+rel(d))}h${d*100%10==0?7:4}" stroke="#c0392b" stroke-width="1"/>`).join('')+
+  `<path d="M${ax-11} ${f2(ft+54)}Q${ax-13} ${f2(ft+90)} ${ax} ${f2(ft+100)}Q${ax+13} ${f2(ft+90)} ${ax+11} ${f2(ft+54)}Z" fill="#e8f3f8" fill-opacity=".8" stroke="var(--ink)" stroke-width="1.2"/><ellipse cx="${ax}" cy="${f2(ft+92)}" rx="6" ry="5" fill="#5a6068"/>`+
+  `<rect x="${ax-22}" y="64" width="44" height="190" rx="10" fill="url(#g-cyl)" opacity=".3"/>`+TH(ax,290,'Aräometer','t2','middle')+`<path d="M${ax+22} ${ys}H${ax+34}" stroke="var(--ink)" stroke-width="1"/>`+TH(ax+38,ys+5,nf(rho)+' g/cm³','t2');
+ return out('0 0 640 300',h)},
+ 'Versuchsaufbau: Gelb mit rot: Sulfat-Ionen SO₄²⁻, dazu Oxonium-Ionen H₃O⁺. Beim Entladen wandert Sulfat in beide Platten (PbSO₄), die Säure wird dünner, und der Schwimmer im Aräometer sinkt tiefer ein: ca. 1,28 g/cm³ voll, ca. 1,10 g/cm³ leer. Eine tiefentladene Batterie kann deshalb bei Frost einfrieren. Teilchen-Lupe: was an beiden Platten passiert, Laden ist der umgekehrte Weg.',1);
 /* Steuern & Regeln */
 fm(FP,SR,'Steuerung oder Regelung (Heizung)','Steuerung: offener Wirkungsweg ohne Rückmeldung – Störungen werden nicht ausgeglichen. Regelung: geschlossener Wirkungskreis, der Istwert wird ständig mit dem Sollwert verglichen.',
  [['m','Betriebsart','sel',['Steuerung (Außentemperatur)','Regelung (Raumtemperatur)'],1],['w','Soll w',15,25,.5,'°C',20],['ta','Außentemp.',-15,10,1,'°C',-5],['z','Störwärme z',0,1500,50,'W',600],['kp','Verstärkung K_P',200,6000,100,'W/K',2500]],
@@ -13277,7 +13456,7 @@ function mcView(){const box=$('#mc');if(!box)return;const a=mcAll(),run=store.ge
 function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="panel"><h2>🧮 Mathe-Check</h2><p class="sub">Noch nicht gemacht. Der Check zeigt Dir in 20 Minuten, wo Du in den Mathe-Grundlagen stehst.</p><div class="pb"><button type="button" class="sbtn2" data-mco="1">Zum Mathe-Check →</button></div></div>`;
  return`<div class="panel"><h2>🧮 Mathe-Check</h2>${mcTable(a)}<div class="pb"><button type="button" class="sbtn2" data-mco="1">Startplan und Lösungswege →</button></div></div>`}
 /* Pilot-Einstellungen: Version, Neuigkeit, Kontakt */
-const APPV=280,NEWS='Photovoltaik neu: Die Regler verändern das Bild (Module, Sonnenstand, Energiefluss), dazu eine Teilchen-Lupe am p-n-Übergang.';
+const APPV=281,NEWS='Elektrolyse und Blei-Batterie neu: Teilchen-Lupe an den Elektroden, wandernde Ionen und Elektronen, Aräometer mit Schwimmer.';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
 ['10.11.2026',280,['Photovoltaik neu: Haus mit Solarmodulen, die Zahl der Module folgt der Fläche A (1 Modul ≈ 2 m²). G bestimmt den Sonnenstand wie an einem klaren Sommertag, ein Punkt „jetzt“ läuft auf der Tageskurve mit. Balken zeigen, wie viel vom Licht als Gleichstrom und als Wechselstrom ankommt (η_M, η_WR).','Neue Ansicht Teilchen-Lupe: n-Schicht mit Phosphor, p-Schicht mit Bor, feste Ionen P⁺ und B⁻ am p-n-Übergang. Licht löst ein Elektron, das Feld trennt Elektron und Loch, das Elektron läuft vom Frontkontakt (−) über die Lampe zum Rückkontakt (+).','Kurz erklärt zur Photovoltaik zeigt dieselben Bilder wie die Simulation.']],
