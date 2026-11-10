@@ -2655,8 +2655,8 @@ fm(FC,OR,'Oxidationszahlen','Die Summe der Oxidationszahlen ergibt die Ladung de
  return{d:`<text x="320" y="110" font-size="44" font-weight="800" text-anchor="middle">${f}</text>`+T(320,160,`Oxidationszahl von ${el}: ${sg(x)}`,'t1','middle')+`<defs><linearGradient id="g-ox" x1="0" x2="1"><stop offset="0" stop-color="#5b9bd5"/><stop offset=".36" stop-color="#cfd6dd"/><stop offset="1" stop-color="#e5736a"/></linearGradient></defs><rect x="60" y="222" width="520" height="16" rx="8" fill="url(#g-ox)"/><rect x="60" y="222" width="520" height="16" rx="8" fill="url(#g-tile)" stroke="var(--line)"/>`+[...Array(12)].map((_,i)=>`<line x1="${60+i/11*520}" x2="${60+i/11*520}" y1="240" y2="246" stroke="var(--mute)"/>`+T(60+i/11*520,262,sg(i-4),'t2','middle')).join('')+BALL(px,230,11,'var(--amber)',2)+T(60,284,'← Reduktion (Elektronen aufnehmen)','t2')+T(580,284,'Oxidation (Elektronen abgeben) →','t2','end'),
  res:[[sg(x),'Oxidationszahl '+el],[x>=4?'Oxidationsmittel':x<=-2?'Reduktionsmittel':'beides möglich','typische Rolle'],[ch?(Math.abs(ch)>1?Math.abs(ch):'')+(ch>0?'+':'−'):'neutral','Ladung']],rows:o.map(([c,v])=>['Andere Atome',`${c} × (${sg(v)})`]),st:[['Σ Oxidationszahlen = Ladung',`${n}·x ${o.map(([c,v])=>c*v>=0?'+ '+c*v:'− '+(-c*v)).join(' ')} = ${ch}`],['Ergebnis',`x = ${sg(x)}`],['Redox','Oxidation: Elektronen abgeben, Reduktion: Elektronen aufnehmen']]}});
 const MN=ME.map(m=>m[0]);
-/* Galvanische Zelle (v276, realistisch): Voltmeter parallel zur Zelle, Motor als Verbraucher hinter dem Schalter,
-   Elektronen von der Anodenoberfläche durch Elektrode, Draht, Schalter und Motor bis an die Kathodenoberfläche,
+/* Galvanische Zelle (v276, realistisch): Voltmeter parallel zur Zelle,
+   Elektronen von der Anodenoberfläche durch Elektrode, Draht und Schalter bis an die Kathodenoberfläche,
    Ionen mit Wärmebewegung und stimmiger Mengenbilanz (je Zeitraffer-Runde 6 Ladungen), Ansicht „Teilchen-Lupe“ mit
    Metallgitter, Wassermolekülen und hydratisierten Ionen. Radien maßstäblich (Metallradius / Ionenradius in pm). */
 const SOLC={Cu:['#2f7fd8',.5],Ni:['#3fa66b',.42],Fe:['#9cc98a',.38],Au:['#e0b84a',.38]},SOL0=['#cdbf9f',.32];
@@ -2688,9 +2688,9 @@ fm(FC,EC,'Galvanische Zelle & Spannungsreihe','Zwei Halbzellen mit verschiedenen
   gesamt=`${ek(na)}${an[0]} + ${ek(nk)}${IK} → ${ek(na)}${IA} + ${ek(nk)}${ka[0]}`,
   bil=`${na>1?na+' '+an[0]+'-Atome geben':'1 '+an[0]+'-Atom gibt'} ${L} e⁻ ab, damit ${nk>1?'werden '+nk+' '+IK+'-Ionen':'wird 1 '+IK+'-Ion'} zu ${ka[0]}`;
   const out=(vb,h)=>({vb,d:h,res:[[(same?0:U).toFixed(2).replace('.',',')+' V','Zellspannung'],[same?'–':an[0]+' (−)','Anode'],[same?'–':ka[0]+' (+)','Kathode']],
-   rows:[['E° '+A[0],nf(A[1])+' V'],['E° '+B[0],nf(B[1])+' V'],['Schalter',on?'geschlossen: Strom fließt, Motor dreht':s.sw==0?'geschlossen':'offen: kein Strom'],['Voltmeter',same?'0 V':'misst immer die Zellspannung (parallel)'],['Mengen',same?'–':bil]],
+   rows:[['E° '+A[0],nf(A[1])+' V'],['E° '+B[0],nf(B[1])+' V'],['Schalter',on?'geschlossen: Strom fließt':s.sw==0?'geschlossen':'offen: kein Strom'],['Voltmeter',same?'0 V':'misst immer die Zellspannung (parallel)'],['Mengen',same?'–':bil]],
    st:[['Anode (Oxidation)',`${an[0]} → ${IA} + ${za} e⁻`],['Kathode (Reduktion)',`${IK} + ${zk} e⁻ → ${ka[0]}`],['Gesamtreaktion',gesamt],['Zellspannung',`U = E°(Kathode) − E°(Anode) = ${nf(ka[1])} V − (${nf(an[1])} V) = ${nf(U)} V`.replace(/\(-/,'(−')],
-    ['Elektronen','fließen im Draht vom Minuspol (Anode) durch den Motor zum Pluspol (Kathode)'],['Salzbrücke','Na⁺ wandert zur Kathode, NO₃⁻ zur Anode: Ladungsausgleich, der Stromkreis ist geschlossen'],
+    ['Elektronen','fließen im Draht vom Minuspol (Anode) zum Pluspol (Kathode)'],['Salzbrücke','Na⁺ wandert zur Kathode, NO₃⁻ zur Anode: Ladungsausgleich, der Stromkreis ist geschlossen'],
     ['Schalter offen','Die Elektronen können nicht abfließen. An jeder Elektrode bildet sich eine dünne Ladungsschicht, dann kommt die Reaktion zum Stillstand. Das Voltmeter zeigt trotzdem die Spannung.']]});
   /* ================= Ansicht 2: Teilchen-Lupe ================= */
   if(s.v==1){const Q=7,ke=on?Math.floor(t/Q):0,ph=on?(t%Q)/Q:0,sc=on?ke%5:0,R1=GZR[an[0]],R2=GZR[ka[0]],ra=R1[0]/10,ri=R1[1]/10,rk=R2[0]/10,rj=R2[1]/10,
@@ -2766,9 +2766,9 @@ fm(FC,EC,'Galvanische Zelle & Spannungsreihe','Zwei Halbzellen mit verschiedenen
   for(let j=0;j<nd;j++)h+=BALL(f2(xk+sK(j)*(9+dep+1)),f2(yK(j)),3.2,MC[ka[0]],1);
   h+=CLIP(xa,'#1f2937')+CLIP(xk,'#c0392b');
   h+=T(xa,140,'−','t1','middle').replace('<text ','<text fill="#fff" ')+T(xk,140,'+','t1','middle').replace('<text ','<text fill="#fff" ');
-  /* Elektronen: von der Oberfläche der Anode durch die Elektrode, Draht, Schalter und Motor bis an die Oberfläche der Kathode */
+  /* Elektronen: von der Oberfläche der Anode durch die Elektrode, Draht und Schalter bis an die Oberfläche der Kathode */
   const PE=[[xa,262],[xa,84],[xa,76],[xk,76],[xk,84],[xk,262]],LE=372+xk-xa,sp=30,NE=Math.floor(LE/sp),ve=E/P*sp,eW=[];
-  if(on){for(let k=0;k<NE;k++){const[x,y]=PW(PE,((t*ve)/LE+k/NE)%1);if(x>402&&x<438&&y<92||x>158&&x<240&&y<92)continue;if(y>96)h+=BALL(f2(x),f2(y),3.2,'var(--flow)',.8,' opacity=".9"');else eW.push([x,y])}
+  if(on){for(let k=0;k<NE;k++){const[x,y]=PW(PE,((t*ve)/LE+k/NE)%1);if(x>158&&x<240&&y<92)continue;if(y>96)h+=BALL(f2(x),f2(y),3.2,'var(--flow)',.8,' opacity=".9"');else eW.push([x,y])}
    /* beim Lösen: z Elektronen bleiben im Metall und laufen in die Elektrode */
    for(let i=0;i<Da;i++){const a=tau-tA(i);if(a<0||a>1)continue;const sd=sA(i),y0=yA(i);for(let k=0;k<za;k++){const u=GZE(a);h+=BALL(f2(xa+sd*(wA/2-1)*(1-u)),f2(y0-8*u+(k-(za-1)/2)*6),3.2,'var(--flow)',.8,` opacity="${(1-u*.6).toFixed(2)}"`)}}
    for(let j=0;j<Dk;j++){const d=tK(j)-tau;if(d<0||d>1)continue;const u=GZE(1-d);for(let k=0;k<zk;k++)h+=BALL(f2(xk+sK(j)*(8+dep)*u),f2(yK(j)+(k-(zk-1)/2)*6),3.2,'var(--flow)',.8)}}
@@ -2794,20 +2794,15 @@ fm(FC,EC,'Galvanische Zelle & Spannungsreihe','Zwei Halbzellen mit verschiedenen
   for(let i=0;i<nK0*zk;i++){const[x,y]=PK(kk++),j=GZJ(i+51,t,3.5);h+=seen(x+j[0],y+j[1],1,CR,'−',5.5)}
   for(let m=0;m<E;m++){const hm=PK(kk++);if(!on)continue;const a=tau-(m+.5)*P/E;if(a<0)continue;const st=[450,278],u=GZE(a/5),j=GZJ(m+61,t,3.5*Math.min(1,a/1.5));h+=seen(st[0]+(hm[0]-st[0])*u+j[0],st[1]+(hm[1]-st[1])*u+j[1],Math.min(1,a/.3),CN,'+',5.5)}
   h+=GA.f+GK.f;
-  /* Leitung mit Schalter und Motor; Voltmeter parallel zur Zelle */
+  /* Leitung mit Schalter; Voltmeter parallel zur Zelle */
   const CAB=(d,c)=>`<path d="${d}" fill="none" stroke="var(--ink)" stroke-width="5.5" stroke-linejoin="round" stroke-linecap="round"/><path d="${d}" fill="none" stroke="${c}" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/><path d="${d}" fill="none" stroke="#fff" stroke-width=".9" opacity=".45" stroke-linejoin="round" transform="translate(-.8 -.8)"/>`;
   h+=CAB(`M${xa-6} 106H84Q72 106 72 94V28Q72 18 82 18H252Q262 18 262 28V38Q262 46 270 46H279`,'#1f2937')+CAB(`M${xk+6} 106H556Q568 106 568 94V28Q568 18 558 18H388Q378 18 378 28V38Q378 46 370 46H361`,'#c0392b');
-  h+=CAB(`M${xa} 96V76H166`,'#1f2937')+CAB(`M234 76H404`,'#1f2937')+CAB(`M436 76H${xk}V96`,'#c0392b');
+  h+=CAB(`M${xa} 96V76H166`,'#1f2937')+CAB(`M234 76H380`,'#1f2937')+CAB(`M380 76H${xk}V96`,'#c0392b');
   eW.forEach(([x,y])=>h+=BALL(f2(x),f2(y),3.6,'var(--flow)',1));
   if(on)h+=TH(122,64,'e⁻','t1')+ARW(142,58,160,58,'var(--flow)',2)+ARW(xk-18,86,xk-18,112,'var(--flow)',2);
   const ang=on||same&&s.sw==0?0:-34;
   h+=`<g transform="translate(0 30)"><rect x="160" y="50" width="80" height="10" rx="3" fill="#8e979f"/><rect x="160" y="50" width="80" height="10" rx="3" fill="url(#g-cyl)" stroke="var(--ink)" stroke-width="1.5"/>`+ROD(166,34,14,18,'#b9c0c6',1.5)+ROD(218,34,14,18,'#b9c0c6',1.5)+
    `<g transform="rotate(${ang} 173 40)"><rect x="170" y="37" width="56" height="7" rx="2" fill="#c3c9ce" stroke="var(--ink)" stroke-width="1.5"/><rect x="214" y="33" width="26" height="15" rx="6" fill="var(--ok)" stroke="var(--ink)" stroke-width="1.5"/><rect x="214" y="33" width="26" height="15" rx="6" fill="url(#g-cyl)"/></g><circle cx="173" cy="40" r="3" fill="var(--ink)"/></g>`+TH(200,108,'Schalter','t2','middle');
-  /* Motor mit Propeller: dreht nur, wenn Strom fließt, schneller bei höherer Spannung */
-  const ma=on?t*(3+2.2*U):.6,bw=24*Math.cos(ma),bw2=24*Math.cos(ma+1.5708);
-  h+=`<rect x="417.5" y="44" width="5" height="22" rx="2" fill="#c0c6cc" stroke="var(--ink)" stroke-width="1"/>`+(on?`<ellipse cx="420" cy="46" rx="25" ry="5" fill="var(--flow)" opacity=".12"/>`:'')+
-   [[bw,0],[bw2,1]].map(([w,k])=>`<path d="M420 46L${f2(420+w)} ${f2(46-2.5)}Q${f2(420+w*1.08)} 46 ${f2(420+w)} ${f2(46+2.5)}Z" fill="${k?'#e0b84a':'#d9a32a'}" stroke="var(--ink)" stroke-width="1"/>`).join('')+
-   `<circle cx="420" cy="46" r="3.2" fill="#8e979f" stroke="var(--ink)" stroke-width="1"/><rect x="404" y="62" width="32" height="28" rx="7" fill="#5b6470"/><rect x="404" y="62" width="32" height="28" rx="7" fill="url(#g-cyl)" stroke="var(--ink)" stroke-width="1.5"/><text x="420" y="80" text-anchor="middle" font-size="10" font-weight="800" style="fill:#fff">M</text>`+TH(450,60,'Motor','t2');
   /* Digitalmultimeter (Voltmeter) */
   h+=`<rect x="266" y="2" width="108" height="60" rx="9" fill="#3a3f47" stroke="var(--ink)" stroke-width="1.8"/><rect x="266" y="2" width="108" height="60" rx="9" fill="url(#g-liqv)" opacity=".6"/><rect x="276" y="8" width="88" height="26" rx="3" fill="#c9d4bd" stroke="#1f2937" stroke-width="1.2"/><rect x="276" y="8" width="88" height="8" rx="3" fill="#fff" opacity=".18"/>`+
    `<text x="352" y="28" text-anchor="end" font-size="18" font-weight="700" font-family="ui-monospace,Menlo,Consolas,monospace" style="fill:#1d2a1f">${(same?0:U).toFixed(2).replace('.',',')}</text><text x="360" y="28" text-anchor="end" font-size="10" font-weight="700" style="fill:#1d2a1f">V</text>`+
@@ -2816,7 +2811,7 @@ fm(FC,EC,'Galvanische Zelle & Spannungsreihe','Zwei Halbzellen mit verschiedenen
   /* Mitte unter der Brücke: Pfeile und Zähler */
   h+=TH(320,152,'Salzbrücke (NaNO₃)','t2','middle')+TH(266,182,'NO₃⁻','t2','middle')+ARW(314,177,290,177,AR)+TH(376,182,'Na⁺','t2','middle')+ARW(326,177,350,177,KB);
   if(same)h+=TH(320,212,'Gleiches Metall:','t2','middle')+TH(320,232,'keine Spannung','t2','middle');
-  else if(!on)h+=TH(320,212,'Schalter offen:','t2','middle')+TH(320,232,'kein Strom,','t2','middle')+TH(320,252,'Motor steht','t2','middle');
+  else if(!on)h+=TH(320,212,'Schalter offen:','t2','middle')+TH(320,232,'kein Strom','t2','middle');
   else h+=TH(320,206,'Zeitraffer, bisher:','t2','middle')+TH(320,226,`${nb} ${IA} gelöst`,'t2','middle')+TH(320,246,`${nb*za} e⁻ geflossen`,'t2','middle')+TH(320,266,`${nd} ${ka[0]} abgeschieden`,'t2','middle');
   /* Lösungen, Teilgleichungen, Legende */
   h+=T(140,338,GZS(an),'t2','middle')+T(500,338,GZS(ka),'t2','middle');
