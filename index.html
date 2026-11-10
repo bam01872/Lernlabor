@@ -3527,7 +3527,7 @@ fm(FC,EC,'Blei-Batterie (Akkumulator)','Beim Entladen reagieren Pb (−) und PbO
  h+=TH(150,16,'Pb (−)','t2','start')+TH(266,16,'PbO₂ (+)','t2','end');
  h+=T(205,262,'Entladen: Pb + PbO₂ + 2 H₂SO₄ → 2 PbSO₄ + 2 H₂O','t2','middle').replace(ld?'X':'class="t2"',ld?'X':'class="t2" style="font-weight:700;fill:var(--ink)"')+T(205,282,'Laden: 2 PbSO₄ + 2 H₂O → Pb + PbO₂ + 2 H₂SO₄','t2','middle').replace(ld?'class="t2"':'X',ld?'class="t2" style="font-weight:700;fill:var(--ink)"':'X');
  /* Aräometer (Säureheber mit Schwimmer): je dichter die Säure, desto höher schwimmt er */
- const ax=500,ys=132,rel=d=>8+(d-1.10)/.2*36,ft=ys-rel(rho);
+ const ax=462,ys=132,rel=d=>8+(d-1.10)/.2*36,ft=ys-rel(rho);
  h+=`<ellipse cx="${ax}" cy="40" rx="16" ry="20" fill="#2b2f36" stroke="var(--ink)" stroke-width="1.5"/><ellipse cx="${ax-5}" cy="33" rx="5" ry="8" fill="#fff" opacity=".18"/><rect x="${ax-6}" y="56" width="12" height="10" fill="#2b2f36"/>`+
   `<rect x="${ax-22}" y="64" width="44" height="190" rx="10" fill="url(#g-glas)" stroke="var(--ink)" stroke-width="2"/><rect x="${ax-20}" y="${ys}" width="40" height="120" rx="8" fill="color-mix(in srgb,var(--flow) ${25+q*25}%,transparent)"/><path d="M${ax-20} ${ys}H${ax+20}" stroke="#fff" stroke-width="1.4" opacity=".6"/><path d="M${ax-4} 254V276H${ax+4}V254" fill="url(#g-glas)" stroke="var(--ink)" stroke-width="1.5"/>`+
   `<rect x="${ax-3.5}" y="${f2(ft)}" width="7" height="54" rx="3" fill="#f6f4ea" stroke="var(--ink)" stroke-width="1"/>`+[1.1,1.15,1.2,1.25,1.3].map(d=>`<path d="M${ax-3.5} ${f2(ft+rel(d))}h${d*100%10==0?7:4}" stroke="#c0392b" stroke-width="1"/>`).join('')+
