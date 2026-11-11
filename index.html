@@ -11089,6 +11089,27 @@ Object.assign(EIN,{
  {d:13,t:'Alles zusammen: p = ρ · g · h. Beispiel: 10 m Wasser ergeben 1000 kg/m³ · 9,81 m/s² · 10 m = 98100 Pa, also rund 1 bar.',
   s:'Alles zusammen: p gleich Rho mal g mal h. 10 Meter Wasser ergeben 1000 Kilogramm pro Kubikmeter mal 9,81 Meter pro Sekundequadrat mal 10 Meter, das sind 98100 Pascal, also rund 1 bar.',
   f:k=>EFX(k,[['p = ρ · g · h','h'],['p = 1000 kg/m³ · 9,81 m/s² · 10 m','m'],['p = 98100 Pa ≈ 0,98 bar','r']],['ρ: Dichte in kg/m³','g = 9,81 m/s²','h: Tiefe in m'])},
+ {d:14,t:'Im Flugzeug spüren die Ohren den Unterschied: Die Kabine hat nur rund 0,8 bar. Beim Steigen wölbt sich das Trommelfell nach außen, beim Landen nach innen. Schlucken gleicht aus.',
+  s:'Im Flugzeug spüren die Ohren den Unterschied. Die Kabine hat nur rund 0,8 bar. Beim Steigen wölbt sich das Trommelfell nach außen, beim Landen nach innen. Schlucken gleicht aus.',
+  f:(k,t)=>{/* Flugprofil: Steigen 0–0,4, Reiseflug mit Ausgleich 0,4–0,55, Sinkflug 0,55–0,95 */
+   const q1=EINQ(k/.4),qa=EINQ((k-.42)/.12),q3=EINQ((k-.55)/.4),pK=1-.2*q1+.2*q3,pM=1-.2*qa,b=Math.max(-24,Math.min(24,120*(pK-pM)));
+   const px=k<.4?275+60*q1:k<.55?335+60*((k-.4)/.15):395+60*q3,py=k<.4?70-42*q1:k<.55?28:28+42*q3;
+   let h=`<path d="M270 74H462" stroke="var(--mute)" stroke-width="2"/><path d="M275 70L335 28H395L455 70" fill="none" stroke="var(--mute)" stroke-width="2" stroke-dasharray="5 4"/>`;
+   const ang=k<.4?-22:k<.55?0:22;h+=`<g transform="translate(${px.toFixed(1)} ${py.toFixed(1)}) rotate(${ang})"><path d="M-16 0H14Q20 0 20 3Q20 5 14 5H-16Z M-2 1L-10 -11H-5L6 1Z M-2 4L-10 14H-5L6 4Z M-16 1L-20 -7H-15L-11 1Z" fill="var(--acc)" stroke="var(--ink)" stroke-width="1"/></g>`;
+   h+=EFT(366,100,k<.4?'Steigflug':k<.55?'Reiseflug':'Sinkflug','ein2','middle');
+   /* Ohr: Gehörgang links (Kabinenluft), Trommelfell, Mittelohr rechts, Ohrtrompete nach unten */
+   h+=`<path d="M24 128H140M24 192H140" stroke="var(--ink)" stroke-width="3"/><rect x="24" y="131" width="116" height="58" fill="var(--flow)" opacity=".12"/>`;
+   h+=`<path d="M140 128V100Q140 92 148 92H232Q240 92 240 100V206Q240 214 232 214H222M204 214H148Q140 214 140 206V192" fill="none" stroke="var(--ink)" stroke-width="3"/><rect x="143" y="95" width="94" height="116" rx="6" fill="var(--flow)" opacity=".12"/>`;
+   const ta=k>.42&&k<.56;h+=`<path d="M204 214L214 256M222 214L232 256" stroke="${ta?'var(--amber)':'var(--ink)'}" stroke-width="3"/>`;
+   const dots=(x0,y0,W,H,n,o)=>{let r='';for(let i=0;i<n;i++){const rx=Math.abs(Math.sin(i*12.99+o*7.1)*43758.5)%1,ry=Math.abs(Math.sin(i*78.23+o*3.7)*24634.6)%1,x=x0+W*rx+3*Math.sin(t*3+i*1.7),y=y0+H*ry+3*Math.cos(t*2.6+i*2.3);r+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.5" fill="var(--flow)" stroke="var(--ink)" stroke-width=".8"/>`}return r};
+   h+=dots(32,140,96,42,Math.round(14*pK),5)+dots(154,104,74,98,Math.round(20*pM),11);
+   if(ta)for(let i=0;i<3;i++){const u=((t*.8+i/3)%1);h+=`<circle cx="${(213+10*u).toFixed(1)}" cy="${(216+40*u).toFixed(1)}" r="3.5" fill="var(--flow)" stroke="var(--ink)" stroke-width=".8"/>`}
+   h+=`<path d="M140 128Q${(140+2*b).toFixed(1)} 160 140 192" fill="none" stroke="var(--red)" stroke-width="4"/>`;
+   if(b>4)h+=AR(96,160,Math.round(b*1.4),0,'var(--red)');if(b<-4)h+=AR(184,160,Math.round(b*1.4),0,'var(--red)');
+   h+=EFT(82,118,'Kabine','ein2','middle')+EFT(190,84,'Mittelohr','ein2','middle')+EFT(84,222,'Trommelfell','ein2','middle')+`<path d="M110 206L136 190" stroke="var(--mute)" stroke-width="1.5"/>`+EFT(238,252,'Ohrtrompete','ein2');
+   h+=EFT(280,140,'Kabine: '+pK.toFixed(2).replace('.',',')+' bar','ein1')+EFT(280,170,'Mittelohr: '+pM.toFixed(2).replace('.',',')+' bar','ein1');
+   const z=ta?['Schlucken:','Druck gleicht sich aus']:b<-4?['Trommelfell wölbt sich','nach außen']:b>4?['Trommelfell wölbt sich','nach innen']:['Druck','ausgeglichen'];
+   return h+EFT(280,204,z[0],'ein2')+EFT(280,228,z[1],'ein2')}},
  {d:9,t:'Merke: Je tiefer, desto mehr Druck, 1 bar je 10 m Wasser. Die Gefäßform ist egal, nur die Tiefe zählt.',
   s:'Merke: Je tiefer, desto mehr Druck, 1 bar je 10 Meter Wasser. Die Gefäßform ist egal, nur die Tiefe zählt.',
   f:(k,t)=>EMRK(k,t,EBEC(30,60,180,180)+[1,2,3].map(i=>AR(120-30-14*i,60+45*i,14*i,0,'var(--flow)')+AR(120+30+14*i,60+45*i,-14*i,0,'var(--flow)')).join('')+EFT(120,262,'Druck wächst mit der Tiefe','ein2','middle'),'p = ρ · g · h','10 m Wasser ≈ 1 bar')}
@@ -14502,9 +14523,10 @@ function mcView(){const box=$('#mc');if(!box)return;const a=mcAll(),run=store.ge
 function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="panel"><h2>🧮 Mathe-Check</h2><p class="sub">Noch nicht gemacht. Der Check zeigt Dir in 20 Minuten, wo Du in den Mathe-Grundlagen stehst.</p><div class="pb"><button type="button" class="sbtn2" data-mco="1">Zum Mathe-Check →</button></div></div>`;
  return`<div class="panel"><h2>🧮 Mathe-Check</h2>${mcTable(a)}<div class="pb"><button type="button" class="sbtn2" data-mco="1">Startplan und Lösungswege →</button></div></div>`}
 /* Pilot-Einstellungen: Version, Neuigkeit, Kontakt */
-const APPV=292,NEWS='Wasserhärte-Übung: Einheiten im Lösungsweg stehen jetzt direkt an jeder Zahl, z. B. 10 mg/(l·°dH).';
+const APPV=293,NEWS='Kurz erklärt Druck: neue Folie, warum es im Flugzeug auf die Ohren drückt.';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
+ ['11.11.2026',293,['Kurz erklärt Druck: neue Folie „Druck im Flugzeug“ mit Trommelfell, Mittelohr und Ohrtrompete (Steigflug, Ausgleich durch Schlucken, Sinkflug)']],
  ['11.11.2026',292,['Übung Wasserhärte: Einheiten im Lösungsweg direkt an jeder Zahl (10 mg/(l·°dH), 0,178 mmol/(l·°dH)), Herkunft des Faktors 0,178 ergänzt','Bruchdarstellung: geklammerte Einheiten wie (mg/l)/°dH werden nicht mehr zerrissen']],
 ['11.11.2026',291,['15 weitere Betriebsfälle (jetzt 26): Angebotsvergleich, Liefertermin, Hallenboden, Leiter, Motortausch, offenes Hallentor, Lastspitze, gefallener Messschieber, gemischte Reiniger, Trennscheibe, Förderband, Stapler in der Kurve, Kupferschellen, Geländer beschichten, Zinkschicht blättert ab','Bewertung bei einigen Fällen nicht mehr doppelt genannt']],
 ['10.11.2026',290,['Sechs weitere Betriebsfälle (jetzt elf): Späne mit Druckluft abblasen, Kühlschmierstoff riecht faulig, Sicherung löst immer wieder aus, Maschinenbett mit dem Hallenkran heben, Wälzlager auf die Welle bringen, Kompressor läuft am Wochenende. Lange Formeln in Betriebsfällen machen die Seite auf schmalen Handys nicht mehr breiter, eine im zweiten Anlauf richtige Rechnung steht grün da.']],
