@@ -10185,7 +10185,7 @@ const HW=[
   chk:['Zink ist unedler als Eisen','Galvanisches Element / Opferanode','Aktiv: Eingriff in die Reaktion (2 Beispiele)','Passiv: Trennung vom Medium (2 Beispiele)']}]},
 {id:'k12',k:'Kapitel 1.2',t:'Säuren, Basen und Salze',f:'Chemie',tasks:[
  {id:'k12a',typ:'num',name:'Wasserhärte',gen:()=>{const x=hR.st(48,300,6),dh=x/10,cl=dh<8.4?'weich':dh<=14?'mittel':'hart';
-  return{q:'Ein Laborbericht weist für das Kühlwasser eines Betriebs '+x+' mg CaO pro Liter aus (Calcium- und Magnesiumsalze zusammen als CaO umgerechnet). Wie hoch ist die Gesamthärte in °dH?',a:dh,u:'°dH',d:1,tol:{abs:.05},sol:['1 °dH = 10 mg CaO pro Liter','Härte = '+x+' mg/l / 10 (mg/l)/°dH = '+hf(dh,1)+' °dH','In mmol/l: '+hf(dh,1)+' °dH · 0,178 (mmol/l)/°dH = '+hf(dh*.178,2)+' mmol/l','Einstufung: '+cl+' (weich unter 8,4 °dH, mittel 8,4 bis 14 °dH, hart über 14 °dH)']}}},
+  return{q:'Ein Laborbericht weist für das Kühlwasser eines Betriebs '+x+' mg CaO pro Liter aus (Calcium- und Magnesiumsalze zusammen als CaO umgerechnet). Wie hoch ist die Gesamthärte in °dH?',a:dh,u:'°dH',d:1,tol:{abs:.05},sol:['1 °dH ≙ 10 mg CaO pro Liter','Härte = '+x+' mg/l / 10 mg/(l·°dH) = '+hf(dh,1)+' °dH','Umrechnung: 1 °dH ≙ 0,178 mmol/l','In mmol/l: '+hf(dh,1)+' °dH · 0,178 mmol/(l·°dH) = '+hf(dh*.178,2)+' mmol/l','Einstufung: '+cl+' (weich unter 8,4 °dH, mittel 8,4 bis 14 °dH, hart über 14 °dH)']}}},
  {id:'k12b',typ:'num',name:'Neutralisation',gen:()=>{const m=hR.st(10,120,5),n=m*1000/98,k=n*2*40/1000;
   return{q:'In einem Auffangbecken befinden sich '+m+' kg Schwefelsäure (H₂SO₄, M = 98 g/mol). Sie soll mit Natriumhydroxid (NaOH, M = 40 g/mol) vollständig neutralisiert werden: H₂SO₄ + 2 NaOH → Na₂SO₄ + 2 H₂O. Wie viel kg NaOH werden benötigt?',a:k,u:'kg',d:2,tol:{rel:.01},sol:['n(H₂SO₄) = '+hf(m*1000,0)+' g / 98 g/mol = '+hf(n,1)+' mol','Laut Gleichung braucht 1 mol H₂SO₄ 2 mol NaOH: n(NaOH) = '+hf(2*n,1)+' mol','m(NaOH) = '+hf(2*n,1)+' mol · 40 g/mol = '+hf(k*1000,0)+' g = '+hf(k,2)+' kg']}}},
  {id:'k12c',typ:'txt',name:'Umgang mit Säuren und Laugen',q:'Ein Mitarbeiter soll konzentrierte Schwefelsäure verdünnen. Er will zuerst die Säure in den Eimer geben und dann Wasser dazugießen. Was sagst Du ihm, und warum? Welche Schutzmaßnahmen gelten? Welche Stoffe entstehen, wenn die verdünnte Säure anschließend mit Natronlauge neutralisiert wird?',
@@ -14486,9 +14486,10 @@ function mcView(){const box=$('#mc');if(!box)return;const a=mcAll(),run=store.ge
 function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="panel"><h2>🧮 Mathe-Check</h2><p class="sub">Noch nicht gemacht. Der Check zeigt Dir in 20 Minuten, wo Du in den Mathe-Grundlagen stehst.</p><div class="pb"><button type="button" class="sbtn2" data-mco="1">Zum Mathe-Check →</button></div></div>`;
  return`<div class="panel"><h2>🧮 Mathe-Check</h2>${mcTable(a)}<div class="pb"><button type="button" class="sbtn2" data-mco="1">Startplan und Lösungswege →</button></div></div>`}
 /* Pilot-Einstellungen: Version, Neuigkeit, Kontakt */
-const APPV=291,NEWS='15 neue Betriebsfälle in Begründen & Skizzieren, jetzt 26: mit Mathe, Energie, Geschwindigkeit, Kreisbewegung, Korrosion, Beschichtung und Galvanik.';
+const APPV=292,NEWS='Wasserhärte-Übung: Einheiten im Lösungsweg stehen jetzt direkt an jeder Zahl, z. B. 10 mg/(l·°dH).';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
+ ['11.11.2026',292,['Übung Wasserhärte: Einheiten im Lösungsweg direkt an jeder Zahl (10 mg/(l·°dH), 0,178 mmol/(l·°dH)), Herkunft des Faktors 0,178 ergänzt','Bruchdarstellung: geklammerte Einheiten wie (mg/l)/°dH werden nicht mehr zerrissen']],
 ['11.11.2026',291,['15 weitere Betriebsfälle (jetzt 26): Angebotsvergleich, Liefertermin, Hallenboden, Leiter, Motortausch, offenes Hallentor, Lastspitze, gefallener Messschieber, gemischte Reiniger, Trennscheibe, Förderband, Stapler in der Kurve, Kupferschellen, Geländer beschichten, Zinkschicht blättert ab','Bewertung bei einigen Fällen nicht mehr doppelt genannt']],
 ['10.11.2026',290,['Sechs weitere Betriebsfälle (jetzt elf): Späne mit Druckluft abblasen, Kühlschmierstoff riecht faulig, Sicherung löst immer wieder aus, Maschinenbett mit dem Hallenkran heben, Wälzlager auf die Welle bringen, Kompressor läuft am Wochenende. Lange Formeln in Betriebsfällen machen die Seite auf schmalen Handys nicht mehr breiter, eine im zweiten Anlauf richtige Rechnung steht grün da.']],
 ['10.11.2026',289,['Neue Aufgabenart Betriebsfall in Begründen & Skizzieren (Auswahl „🏭 Nur Betriebsfälle“): Lage einschätzen, nachprüfen oder rechnen, zwischen vier Möglichkeiten entscheiden, begründen, Nachfrage. Fünf Fälle: unbekanntes Fass, Störmeldeleuchte, Schutztür an der Fertigungslinie, lange Kiste auf dem Stapler, Stichprobe vor dem Versand.']],
@@ -15213,7 +15214,8 @@ const CFSTOP=/[\s  „“"‚‘'«»\[\]=≈<>≤≥±+−–|;:!?]/;
 const cfrFind=(v,i=0)=>{for(let k=v.indexOf('/',i);k>=0;k=v.indexOf('/',k+1)){if(k===0||CFSTOP.test(v[k-1])||CFSTOP.test(v[k+1]||' ')||v[k+1]===undefined)continue;
   let s=k-1,d=0;for(;s>=0;s--){const c=v[s];if(c===')')d++;else if(c==='('){if(!d)break;d--}else if(!d&&(CFSTOP.test(c)||c===','&&!/\d/.test(v[s-1]||'')))break}s++;
   let e=k+1;d=0;for(;e<v.length;e++){const c=v[e];if(c==='(')d++;else if(c===')'){if(!d)break;d--}else if(!d&&(CFSTOP.test(c)||c==='/'))break;else if(!d&&/[.,]/.test(c)&&!/\d/.test(v[e+1]||''))break}
-  if(s>=k||e<=k+1)continue;const A=v.slice(s,k),B=v.slice(k+1,e);
+  if(s>=k||e<=k+1)continue;if(s>0&&v[s-1]==='('&&v[e]===')'&&v[e+1]==='/')continue; // „(mg/l)/°dH“: erst der äußere Bruch
+  const A=v.slice(s,k),B=v.slice(k+1,e);
   if(v[e]==='/'||(s>0&&v[s-1]==='/')||/[:#@\\]|\.\w|-$|^-/.test(A)||/\/\/|-/.test(B)||cfrTop(A)||cfrTop(B)||(/^[A-Z][a-z]$/.test(A)||/^[A-Z][a-z]$/.test(B))&&/^[A-Z][a-z]?$/.test(A)&&/^[A-Z][a-z]?$/.test(B)&&!CFU.test(A)&&!CFU.test(B))continue;
   const ta=cfrSide(A),tb=cfrSide(B);if(!ta||!tb)continue;
   if(ta==='u'&&/\d[\u00A0 ]$/.test(v.slice(0,s))&&(tb==='z'||/\d/.test(B)))continue; // „2 kW / 3 h“: Wert mit Einheit geteilt durch Wert, im Quelltext „2 kW / 3 h“ schreiben
