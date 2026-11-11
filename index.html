@@ -14935,9 +14935,10 @@ function mcView(){const box=$('#mc');if(!box)return;const a=mcAll(),run=store.ge
 function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="panel"><h2>🧮 Mathe-Check</h2><p class="sub">Noch nicht gemacht. Der Check zeigt Dir in 20 Minuten, wo Du in den Mathe-Grundlagen stehst.</p><div class="pb"><button type="button" class="sbtn2" data-mco="1">Zum Mathe-Check →</button></div></div>`;
  return`<div class="panel"><h2>🧮 Mathe-Check</h2>${mcTable(a)}<div class="pb"><button type="button" class="sbtn2" data-mco="1">Startplan und Lösungswege →</button></div></div>`}
 /* Pilot-Einstellungen: Version, Neuigkeit, Kontakt */
-const APPV=300,NEWS='Einleitungstexte in allen Fächern am Handy auf zwei Zeilen gekürzt, mit „mehr“ ausklappbar.';
+const APPV=301,NEWS='Einleitungstexte im Blocksatz und am Handy in allen Fächern auf zwei Zeilen gekürzt, mit „mehr“ ausklappbar.';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
+ ['11.11.2026',301,['Einleitungstexte stehen im Blocksatz, lange Wörter werden automatisch getrennt.']],
  ['11.11.2026',300,['Einleitungstexte: Am Handy zeigen jetzt auch Energie, Mathematik, Sicherheit und Umrechnen zuerst zwei Zeilen. „mehr ▾“ oder Tippen auf den Text klappt ihn aus, „weniger ▴“ wieder ein.']],
  ['11.11.2026',299,['Solarthermie: Kollektorfläche bis 120 m² (48 Kollektoren füllen das Dach). Pause und Neustart stehen immer oben links im Bild, die Sonne steht dafür am Vormittag rechts.']],
  ['11.11.2026',298,['Solarthermie neu gezeichnet: G bestimmt den Sonnenstand, A die sichtbare Kollektor- bzw. Spiegelfläche. Bei den Kollektoren heizt der Speicher im Zeitraffer auf, der Vorlauf zeigt die Temperatur.','Parabolrinnen von vorn mit Parabel-Querschnitt, sie drehen sich mit der Sonne. Neu: Solarturm-Kraftwerk mit nachgeführten Spiegeln und Receiver. Beide mit Speicher, Turbine und Generator.']],
@@ -16502,6 +16503,7 @@ body.rfon #auf>details>summary>b:first-of-type::before{content:var(--rfn);displa
 #rfv{margin:0 0 12px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);font-size:15px;line-height:1.45}
 #rfv.ok{border-color:var(--ok)}#rfv.no{border-color:var(--acc)}#rfv b.r{color:var(--ok)}
 /* Handy: Einstiegstext vollständig (Tipp kürzt ihn), „Thema wechseln“ klappt die zwei Wischleisten auf */
+/* v301: Einleitungstext im Blocksatz mit Silbentrennung (Markus 11.11.2026) */#desc{text-align:justify;-webkit-hyphens:auto;hyphens:auto}
 @media(max-width:899px){body.rfnav #desc{margin-bottom:6px;cursor:pointer}body.rfnav #desc.rfcl{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
  body.rfnav:not(.rfsw) .swr{display:none!important}
  body.rfnav #thd .tr{display:flex;align-items:center;gap:8px;flex-wrap:wrap}body.rfnav #thd .tr h2{flex:1 1 auto}}
