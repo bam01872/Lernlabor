@@ -14507,9 +14507,10 @@ function mcView(){const box=$('#mc');if(!box)return;const a=mcAll(),run=store.ge
 function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="panel"><h2>🧮 Mathe-Check</h2><p class="sub">Noch nicht gemacht. Der Check zeigt Dir in 20 Minuten, wo Du in den Mathe-Grundlagen stehst.</p><div class="pb"><button type="button" class="sbtn2" data-mco="1">Zum Mathe-Check →</button></div></div>`;
  return`<div class="panel"><h2>🧮 Mathe-Check</h2>${mcTable(a)}<div class="pb"><button type="button" class="sbtn2" data-mco="1">Startplan und Lösungswege →</button></div></div>`}
 /* Pilot-Einstellungen: Version, Neuigkeit, Kontakt */
-const APPV=292,NEWS='Wasserhärte-Übung: Einheiten im Lösungsweg stehen jetzt direkt an jeder Zahl, z. B. 10 mg/(l·°dH).';
+const APPV=293,NEWS='Kurz erklärt Druck: neue Folie, warum es im Flugzeug auf die Ohren drückt.';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
+ ['11.11.2026',293,['Kurz erklärt Druck: neue Folie „Druck im Flugzeug“ mit Trommelfell, Mittelohr und Ohrtrompete (Steigflug, Ausgleich durch Schlucken, Sinkflug)']],
  ['11.11.2026',292,['Übung Wasserhärte: Einheiten im Lösungsweg direkt an jeder Zahl (10 mg/(l·°dH), 0,178 mmol/(l·°dH)), Herkunft des Faktors 0,178 ergänzt','Bruchdarstellung: geklammerte Einheiten wie (mg/l)/°dH werden nicht mehr zerrissen']],
 ['11.11.2026',291,['15 weitere Betriebsfälle (jetzt 26): Angebotsvergleich, Liefertermin, Hallenboden, Leiter, Motortausch, offenes Hallentor, Lastspitze, gefallener Messschieber, gemischte Reiniger, Trennscheibe, Förderband, Stapler in der Kurve, Kupferschellen, Geländer beschichten, Zinkschicht blättert ab','Bewertung bei einigen Fällen nicht mehr doppelt genannt']],
 ['10.11.2026',290,['Sechs weitere Betriebsfälle (jetzt elf): Späne mit Druckluft abblasen, Kühlschmierstoff riecht faulig, Sicherung löst immer wieder aus, Maschinenbett mit dem Hallenkran heben, Wälzlager auf die Welle bringen, Kompressor läuft am Wochenende. Lange Formeln in Betriebsfällen machen die Seite auf schmalen Handys nicht mehr breiter, eine im zweiten Anlauf richtige Rechnung steht grün da.']],
