@@ -14164,6 +14164,148 @@ BFA.push(
  {a:'n',l:'Nachfrage',q:'Warum ist die Gefahr bei 132,5 m/s mehr als doppelt so groß wie bei 72 m/s?',
   ant:'Die Bewegungsenergie der Bruchstücke und die Fliehkräfte in der Scheibe wachsen mit v². (132,5 ÷ 72)² ≈ 3,4. Die Belastung ist also gut dreimal so groß, obwohl die Geschwindigkeit nicht einmal doppelt so groß ist.'}]}
 );
+/* Betriebsfälle Teil 4 (11.11.2026): Geschwindigkeit, Kreisbewegung, Korrosion, Beschichtung, Galvanik */
+Object.assign(BFIG,{
+ band:()=>BFV(560,270,`  <rect x="30" y="150" width="400" height="26" rx="13" fill="#475569" fill-opacity=".8"/><circle cx="43" cy="163" r="10" fill="var(--card)"/><circle cx="417" cy="163" r="10" fill="var(--card)"/>
+  ${[70,150,230,310,390].map(x=>BFBOX(x-18,122,36,28,10,'#2563eb',.8)).join('')}
+  <path d="M70 196H150M70 190v12M150 190v12" stroke-width="1.5"/>${BFT(110,220,'0,4 m',{a:'middle',s:17})}
+  <path d="M90 104l90 0l-10-7m10 7l-10 7" stroke-width="3"/>${BFT(135,88,'v = 0,5 m/s',{a:'middle',s:19,w:700})}
+  <path d="M250 30h70v34h-70z" fill="#64748b"/><path d="M285 64l-30 56M285 64l30 56" stroke="#f59e0b" stroke-width="2" stroke-dasharray="5 4"/>${BFT(340,46,'Kamera',{s:17,w:700})}
+  <path d="M255 236H315M255 230v12M315 230v12" stroke-width="1.5"/>${BFT(285,262,'Prüffenster 0,3 m',{a:'middle',s:16})}
+  ${BFBOX(450,100,80,80,16,'#16a34a',.6)}${BFT(490,146,'Roboter',{a:'middle',s:16,w:700,c:'#fff'})}`),
+ kurve:()=>BFV(560,300,`<path d="M40 280V170A130 130 0 0 1 170 40H540" stroke-width="60" stroke="#94a3b8" stroke-opacity=".35"/>
+  <path d="M170 170L80 100" stroke-width="1.5" stroke-dasharray="6 5"/><circle cx="170" cy="170" r="4" fill="currentColor"/>${BFT(150,195,'Kurvenmitte',{a:'middle',s:16})}${BFT(146,128,'r = 5 m',{s:19,w:700})}
+  <g transform="rotate(-38 80 100)">${BFBOX(52,80,56,40,10,'#f59e0b',.9)}<path d="M108 88h22M108 112h22" stroke-width="4"/></g>
+  ${BFT(330,110,'Stapler mit Last: 5 000 kg',{a:'middle',s:18,w:700})}${BFT(330,140,'fährt mit 15 km/h um die Ecke',{a:'middle',s:17})}
+  ${BFT(380,230,'Gang zur Montage',{a:'middle',s:17,c:'var(--mute)'})}`),
+ rost:()=>BFV(560,290,`<path d="M10 270H550" stroke-width="2.5"/>
+  <path d="M60 120h440v24H60z" fill="#cbd5e1" stroke-width="2"/><path d="M60 144v120M500 144v120" stroke-width="10" stroke="#cbd5e1"/>${BFT(280,170,'verzinkter Stahlträger',{a:'middle',s:17,w:700})}
+  <path d="M40 92H520" stroke-width="16" stroke="#c2410c" stroke-opacity=".85"/>${BFT(110,70,'Kupferrohr',{a:'middle',s:17,w:700,c:'#c2410c'})}
+  ${[180,380].map(x=>`<path d="M${x-14} 120V84a14 14 0 0 1 28 0V120" stroke="#b45309" stroke-width="6"/><ellipse cx="${x}" cy="128" rx="34" ry="8" fill="#e5e7eb" stroke="none"/><circle cx="${x-20}" cy="132" r="5" fill="#b91c1c" fill-opacity=".7" stroke="none"/>`).join('')}
+  ${BFT(280,220,'weißer Belag und Rost',{a:'middle',s:17,c:'#b91c1c',w:700})}${BFT(280,244,'nur an den Kupferschellen',{a:'middle',s:16})}`),
+ lack:()=>BFV(560,300,`<path d="M10 260H550" stroke-width="2.5"/>
+  <path d="M40 80H520M40 120H520" stroke-width="8" stroke="#16a34a"/>${[60,160,260,360,460].map(x=>`<path d="M${x} 80V260" stroke-width="8" stroke="#16a34a"/>`).join('')}
+  ${[[110,100],[300,82],[420,170],[175,200]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="16" ry="9" fill="#b45309" stroke="none"/>`).join('')}
+  <path d="M300 80l14-14 6 10z" fill="#16a34a" stroke-width="1.5"/>
+  ${BFT(280,40,'Geländer an der Laderampe, 48 m²',{a:'middle',s:18,w:700})}${BFT(280,290,'Lack platzt ab, Rost an vielen Stellen',{a:'middle',s:17,c:'#b45309',w:700})}`),
+ galv:()=>BFV(560,280,`<path d="M10 260H550" stroke-width="2.5"/>
+  ${[[30,'Entfetten','#fde68a'],[150,'Spülen','#bfdbfe'],[270,'Beizen','#fecaca'],[390,'Verzinken','#cbd5e1']].map(([x,t,f])=>`${BFBOX(x,130,100,120,14,f,.85)}${BFT(x+50,200,t,{a:'middle',s:16,w:700})}`).join('')}
+  <path d="M30 60H520" stroke-width="4"/><path d="M440 60v50" stroke-width="2"/><path d="M425 110h30v14h-30z" fill="#64748b"/>
+  ${BFT(80,104,'400 l',{a:'middle',s:18,w:700})}${BFT(280,40,'Halter blättern nach dem Verzinken ab',{a:'middle',s:18,w:700,c:'#dc2626'})}`)
+});
+BFA.push(
+{id:'band',n:'Gleichförmige Bewegung',f:'Physik',ic:'📦',titel:'Förderband schneller stellen',
+ lage:'Auf dem Förderband zur Verpackung liegen die Teile im Abstand von 0,4 m, das Band läuft mit 0,5 m/s. Ab Montag sollen 5 400 Teile pro Stunde durchlaufen. Über dem Band prüft eine Kamera jedes Teil, dafür muss das Teil mindestens 0,4 s im Prüffenster (0,3 m lang) sein. Ein Kollege schlägt vor: „Stell das Band gleich auf 0,8 m/s, dann haben wir Reserve.“',
+ fig:'band',st:[
+ {a:'w',l:'Erste Einschätzung',q:'Was musst Du prüfen, bevor Du die Bandgeschwindigkeit änderst?',o:[
+  ['Welche Geschwindigkeit für 5 400 Teile pro Stunde nötig ist und ob Kamera und Roboter bei dieser Geschwindigkeit noch mitkommen.',2,'Richtig: Eine Linie ist nur so schnell wie ihre langsamste Station.'],
+  ['Nichts, schneller ist immer besser.',0,'Falsch: Ist das Band zu schnell, kann die Kamera nicht mehr sauber prüfen.'],
+  ['Nur, ob der Bandmotor die Geschwindigkeit schafft.',1,'Das gehört dazu, entscheidend sind hier aber die Stationen am Band.'],
+  ['Ob die Teile schwerer werden.',0,'Falsch: Die Masse ändert sich nicht durch die Geschwindigkeit.']]},
+ {a:'z',l:'Rechnen',q:'Welche Bandgeschwindigkeit brauchst Du für 5 400 Teile pro Stunde?',v:.6,u:'m/s',tol:.01,
+  weg:['Teile pro Sekunde: 5 400 ÷ 3 600 s = 1,5 1/s','v = Abstand · Teile pro Sekunde','v = 0,4 m · 1,5 1/s = 0,6 m/s']},
+ {a:'z',l:'Prüfen',q:'Wie lange ist ein Teil bei 0,8 m/s im Prüffenster?',v:.375,u:'s',tol:.01,
+  weg:['t = s ÷ v','t = 0,3 m ÷ 0,8 m/s = 0,375 s','0,375 s < 0,4 s → die Kamera schafft es nicht','Bei 0,6 m/s: 0,3 m ÷ 0,6 m/s = 0,5 s → reicht']},
+ {a:'w',e:1,l:'Entscheiden',q:'Wie stellst Du das Band ein?',o:[
+  ['Auf 0,6 m/s: Das reicht genau für 5 400 Teile pro Stunde, und die Kamera hat 0,5 s je Teil. Vor dem Montag einen Probelauf machen.',2,'Beste Wahl: Die nötige Geschwindigkeit ist berechnet, alle Stationen kommen mit, und der Probelauf zeigt, ob es klappt.'],
+  ['Auf 0,8 m/s, wie vorgeschlagen.',0,'Falsch: Mit 0,375 s im Prüffenster prüft die Kamera nicht mehr sicher. Fehlerteile rutschen durch.'],
+  ['Bei 0,5 m/s bleiben und Überstunden fahren.',1,'Als Notlösung möglich, aber teuer: Das Band schafft ohne Probleme 0,6 m/s.'],
+  ['Die Kamera für schnellere Teile abschalten.',0,'Ungeprüfte Teile gehen zum Kunden, und die Prüfung ist eine Vorgabe.']]},
+ {a:'t',l:'Begründen',q:'Begründe Deine Einstellung in drei bis fünf Sätzen.',
+  mus:'Für 5 400 Teile pro Stunde müssen 1,5 Teile pro Sekunde durchlaufen. Bei 0,4 m Abstand braucht das Band v = 0,4 m · 1,5 1/s = 0,6 m/s. Bei 0,8 m/s wäre ein Teil nur 0,375 s im Prüffenster, die Kamera braucht aber 0,4 s. Bei 0,6 m/s sind es 0,5 s, das reicht. Deshalb stelle ich 0,6 m/s ein und mache vorher einen Probelauf.',
+  chk:['1,5 Teile pro Sekunde aus 5 400 pro Stunde','v = 0,6 m/s','0,8 m/s: nur 0,375 s im Prüffenster','Probelauf vor dem Umstellen']},
+ {a:'n',l:'Nachfrage',q:'Wie könnte man die Menge erhöhen, ohne das Band schneller zu stellen?',
+  ant:'Den Abstand der Teile verkleinern: Bei 0,5 m/s und 0,33 m Abstand laufen auch 1,5 Teile pro Sekunde durch. Das geht aber nur, wenn Kamera und Roboter die Teile dann noch einzeln erkennen und greifen können.'}]},
+{id:'kurve',n:'Kreisbewegung',f:'Physik',ic:'🛞',titel:'Stapler zu schnell in der Kurve',
+ lage:'Ein Staplerfahrer fährt mit Last (zusammen 5 000 kg) mit 15 km/h um eine enge Ecke zum Montagegang. Der Kurvenradius beträgt etwa 5 m. Gestern ist der Stapler dabei auf einer Seite kurz hochgekommen. Der Fahrer sagt: „Das ist ein schwerer Stapler, der kippt nicht.“',
+ fig:'kurve',st:[
+ {a:'w',l:'Erste Einschätzung',q:'Warum kann ein Stapler in der Kurve kippen?',o:[
+  ['In der Kurve wirkt eine Zentripetalkraft. Sie wächst mit v², und weil die Räder sie unten aufbringen, der Schwerpunkt aber höher liegt, kann der Stapler nach außen kippen.',2,'Richtig: Doppelte Geschwindigkeit bedeutet die vierfache Kraft.'],
+  ['Schwere Stapler kippen nie.',0,'Falsch: Die Kraft wächst mit der Masse mit. Die Masse schützt nicht.'],
+  ['Nur wenn der Boden nass ist.',0,'Falsch: Auf griffigem Boden kippt der Stapler sogar eher, weil er nicht rutscht.'],
+  ['Weil die Last nach vorne zieht.',0,'Falsch: Das ist das Kippen nach vorn beim Heben, nicht in der Kurve.']]},
+ {a:'z',l:'Rechnen',q:'Wie groß ist die Zentripetalkraft bei 15 km/h? (F_z = m · v² ÷ r)',v:17.4,u:'kN',tol:.01,
+  weg:['v = 15 km/h ÷ 3,6 = 4,17 m/s','F_z = 5 000 kg · (4,17 m/s)² ÷ 5 m','F_z ≈ 17 400 N = 17,4 kN']},
+ {a:'z',l:'Vergleichen',q:'Wie groß ist sie bei halber Geschwindigkeit (7,5 km/h)?',v:4.34,u:'kN',tol:.01,
+  weg:['v = 7,5 km/h ÷ 3,6 = 2,08 m/s','F_z = 5 000 kg · (2,08 m/s)² ÷ 5 m','F_z ≈ 4 340 N = 4,34 kN','Halbe Geschwindigkeit → ein Viertel der Kraft']},
+ {a:'w',e:1,l:'Entscheiden',q:'Was tust Du als Meister?',o:[
+  ['Mit dem Fahrer sprechen: In Kurven Schrittgeschwindigkeit, Last tief, Gurt anlegen. Die Ecke mit einem Spiegel und einer Bodenmarkierung entschärfen und das Thema in die Staplerunterweisung aufnehmen.',2,'Beste Wahl: Die Ursache ist die Geschwindigkeit. Bei halbem Tempo ist die Kraft nur noch ein Viertel.'],
+  ['Den Stapler drosseln lassen, sodass er nur noch 6 km/h fährt.',1,'Wirksam, aber auch auf geraden Strecken langsamer. Moderne Stapler können die Geschwindigkeit in Kurven automatisch senken.'],
+  ['Mehr Last aufladen, dann steht er stabiler.',0,'Falsch: Mehr Masse heißt auch mehr Kraft in der Kurve. Und eine hohe Last hebt den Schwerpunkt.'],
+  ['Nichts tun, es ist ja nichts passiert.',-1,'Gefährlich: Das Hochkommen war eine Warnung. Ein umkippender Stapler ist eine der häufigsten tödlichen Unfallarten.']]},
+ {a:'t',l:'Begründen',q:'Begründe Deine Entscheidung in drei bis fünf Sätzen für die Unterweisung.',
+  mus:'In der Kurve braucht der Stapler eine Zentripetalkraft F_z = m · v² ÷ r. Bei 15 km/h und 5 m Radius sind das rund 17,4 kN, bei 7,5 km/h nur 4,34 kN, also ein Viertel. Diese Kraft greift unten an den Rädern an, der Schwerpunkt liegt höher, deshalb kippt der Stapler nach außen. Eine schwere Last schützt nicht, die Kraft wächst mit. Deshalb in Kurven langsam fahren, Last tief und Gurt anlegen.',
+  chk:['F_z = m · v² ÷ r','17,4 kN gegen 4,34 kN','Halbe Geschwindigkeit, ein Viertel der Kraft','Langsam in der Kurve, Last tief, Gurt']},
+ {a:'n',l:'Nachfrage',q:'Was soll der Fahrer tun, wenn der Stapler trotzdem kippt?',
+  ant:'Sitzen bleiben, angeschnallt, am Lenkrad festhalten, mit den Füßen abstützen und sich gegen die Kipprichtung lehnen. Nicht abspringen: Wer springt, wird oft vom Schutzdach erschlagen.'}]},
+{id:'rost',n:'Korrosion',f:'Chemie',ic:'🔩',titel:'Rost an den Kupferschellen',
+ lage:'Im überdachten Außenlager wurde vor zwei Jahren eine Kühlwasserleitung aus Kupfer verlegt. Die Kupferschellen sitzen direkt auf den verzinkten Stahlträgern. Jetzt gibt es genau an den Schellen weißen Belag und rote Rostflecken, der Rest der Träger ist einwandfrei. Bei kühlem Wetter ist die Leitung oft nass vom Kondenswasser.',
+ fig:'rost',st:[
+ {a:'w',l:'Erste Einschätzung',q:'Was ist hier passiert?',o:[
+  ['Kontaktkorrosion: Kupfer und Zink bilden mit dem Kondenswasser eine galvanische Zelle. Das unedlere Zink löst sich auf, danach rostet der Stahl.',2,'Richtig: Zwei verschiedene Metalle, leitend verbunden, dazu Wasser. Das ist eine kurzgeschlossene Batterie.'],
+  ['Die Verzinkung war schlecht.',0,'Der Rest der Träger ist einwandfrei, nur die Stellen an den Schellen sind betroffen.'],
+  ['Das Kupfer rostet.',0,'Falsch: Kupfer ist edler und wird geschützt. Der weiße Belag ist Zinkkorrosion, der rote Rost kommt vom Stahl.'],
+  ['Normale Alterung.',0,'Falsch: Dann wären die Träger überall gleich angegriffen.']]},
+ {a:'z',l:'Rechnen',q:'Welche Spannung liegt zwischen Kupfer (+0,34 V) und Zink (−0,76 V)?',v:1.1,u:'V',tol:.01,
+  weg:['ΔU = U_Kupfer − U_Zink','ΔU = 0,34 V − (−0,76 V) = 1,10 V','Zink ist unedler, es ist die Anode und löst sich auf.']},
+ {a:'w',e:1,l:'Entscheiden',q:'Wie sanierst Du die Stellen?',o:[
+  ['Schellen abnehmen, die Stellen säubern und mit Zinkstaubfarbe ausbessern. Danach Schellen mit Kunststoff- oder Gummieinlage verwenden, sodass Kupfer und Stahl sich nicht berühren. Die Leitung gegen Kondenswasser dämmen.',2,'Beste Wahl: Ohne Kontakt und ohne Wasser gibt es keine Zelle mehr.'],
+  ['Nur die Träger an den Schellen streichen.',0,'Falsch: Die Schelle drückt durch die Farbe, und an kleinen Fehlstellen frisst sich die Korrosion umso schneller durch.'],
+  ['Kupferschellen gegen verzinkte Stahlschellen tauschen.',1,'Zwischen Schelle und Träger gibt es dann keinen Unterschied mehr. Die Schelle berührt aber weiter das Kupferrohr, eine Einlage ist trotzdem nötig.'],
+  ['Abwarten, bis die Träger durchgerostet sind, und dann tauschen.',-1,'Gefährlich: Die Träger tragen die Leitung. Durchrostung kann zum Absturz führen.']]},
+ {a:'t',l:'Begründen',q:'Begründe Deine Maßnahmen in drei bis fünf Sätzen.',
+  mus:'Kupfer und Zink haben in der Spannungsreihe 1,10 V Unterschied. Mit dem Kondenswasser als Elektrolyt bilden sie eine galvanische Zelle, und das unedlere Zink löst sich auf. Ist das Zink weg, rostet der Stahl. Deshalb trenne ich die Metalle mit einer isolierenden Einlage, bessere die Verzinkung mit Zinkstaubfarbe aus und dämme die Leitung gegen Kondenswasser.',
+  chk:['Kontaktkorrosion durch zwei Metalle und Wasser','1,10 V, Zink ist die Anode','Metalle elektrisch trennen','Kondenswasser vermeiden, Verzinkung ausbessern']},
+ {a:'n',l:'Nachfrage',q:'Wenn man nur eines der beiden Metalle beschichten kann: welches, und warum?',
+  ant:'Das edlere Metall, also das Kupfer. Beschichtet man das unedle Zink, bleibt an kleinen Fehlstellen eine winzige Anode gegen eine große Kathode. Dort konzentriert sich der ganze Strom, und die Korrosion frisst sich schnell durch (Flächenregel).'}]},
+{id:'lack',n:'Korrosion',f:'Chemie',ic:'🖌️',titel:'Geländer einfach überstreichen?',
+ lage:'Das grüne Stahlgeländer an der Laderampe (48 m²) rostet an vielen Stellen, der Lack platzt ab. Ein Kollege will es am Samstag „schnell mit einem Anstrich Grün drüberrollen“. Laut Beschichtungsplan des Herstellers: Grundierung 60 µm und zwei Deckschichten je 40 µm (Trockenschichtdicke), mindestens 120 µm gesamt. Die Grundierung braucht 0,15 l/m².',
+ fig:'lack',st:[
+ {a:'w',l:'Prüfen',bef:['🔍 Klebeband-Test','Du klebst an mehreren Stellen ein festes Klebeband auf den Lack und reißt es ruckartig ab.','Der Lack bleibt großflächig am Band hängen. Darunter ist Rost, an einigen Stellen blankes Metall.'],q:'Was folgt daraus?',o:[
+  ['Der alte Lack haftet nicht mehr, und der Rost unter dem Lack wächst weiter. Lose Teile und Rost müssen vor dem Streichen herunter.',2,'Richtig: Neue Farbe hält nur so gut wie der Untergrund darunter.'],
+  ['Der neue Anstrich klebt den alten Lack wieder fest.',0,'Falsch: Er löst sich mit dem alten Lack zusammen ab.'],
+  ['Rost ist ein guter Haftgrund.',0,'Falsch: Rost ist porös, hält Feuchtigkeit und wächst unter dem Lack weiter.'],
+  ['Das Klebeband war zu stark.',0,'Falsch: Ein intakter Lack bleibt beim Klebeband-Test haften.']]},
+ {a:'z',l:'Rechnen',q:'Wie dick ist die Beschichtung nach Plan insgesamt (trocken)?',v:140,u:'µm',tol:.01,
+  weg:['Grundierung: 60 µm','Deckschichten: 2 · 40 µm = 80 µm','Gesamt: 60 µm + 80 µm = 140 µm','140 µm ≥ 120 µm → Plan erfüllt']},
+ {a:'z',l:'Rechnen',q:'Wie viel Liter Grundierung brauchst Du für das Geländer?',v:7.2,u:'l',tol:.01,
+  weg:['V = 48 m² · 0,15 l/m² = 7,2 l','Bei Dosen zu 2,5 l: 7,2 l ÷ 2,5 l = 2,9 → 3 Dosen']},
+ {a:'w',e:1,l:'Entscheiden',q:'Wie lässt Du das Geländer sanieren?',o:[
+  ['Losen Lack und Rost bis auf festen Untergrund entfernen (Drahtbürste, Schleifen oder Strahlen), entfetten, dann Grundierung und zwei Deckschichten nach Plan. Samstag reicht nur, wenn es trocken und über 5 °C ist.',2,'Beste Wahl: Untergrund vorbereiten, dann der volle Schichtaufbau mit 140 µm.'],
+  ['Einmal Grün drüberrollen.',0,'Falsch: Ohne Vorbereitung platzt der neue Lack mit dem alten ab, und mit etwa 40 µm fehlen 80 µm zum Plan.'],
+  ['Nur die Roststellen ausbessern, Rest so lassen.',1,'Nur sinnvoll, wenn der übrige Lack noch fest haftet. Hier zeigt der Klebeband-Test aber, dass er großflächig lose ist.'],
+  ['Rostumwandler drauf und gleich überstreichen.',0,'Falsch: Rostumwandler ersetzt nicht das Entfernen des losen Lacks und hält auf dickem Rost schlecht.']]},
+ {a:'t',l:'Begründen',q:'Begründe Dein Vorgehen in drei bis fünf Sätzen.',
+  mus:'Der Klebeband-Test zeigt, dass der alte Lack großflächig nicht mehr haftet und darunter Rost ist. Ein Anstrich darüber würde mit abplatzen, und der Rost würde weiter wachsen. Deshalb entfernen wir losen Lack und Rost, entfetten und bauen die Beschichtung nach Plan auf: 60 µm Grundierung und zwei Deckschichten, zusammen 140 µm. Dafür brauchen wir 7,2 l Grundierung, also 3 Dosen.',
+  chk:['Klebeband-Test: Lack haftet nicht','Untergrund vorbereiten: Rost und losen Lack entfernen, entfetten','Schichtaufbau 140 µm ≥ 120 µm','7,2 l Grundierung, 3 Dosen']},
+ {a:'n',l:'Nachfrage',q:'Warum ist eine dickere Beschichtung besser gegen Rost?',
+  ant:'Jede Beschichtung lässt etwas Wasser und Sauerstoff durch. Je dicker sie ist, desto länger dauert es, bis beides am Stahl ankommt. Mehrere Schichten decken außerdem die kleinen Poren der jeweils anderen Schicht ab.'}]},
+{id:'galv',n:'Elektrolyse',f:'Chemie',ic:'🛁',titel:'Zinkschicht blättert ab',
+ lage:'In der Galvanik werden Stahlhalter verzinkt. Seit einigen Tagen kommen Reklamationen aus der Montage: Beim Biegen blättert die Zinkschicht ab, an manchen Teilen sind Blasen. Das Entfettungsbad (400 l) soll laut Anweisung 5 % Entfetter enthalten. Der Schichtführer meint: „Dann drehen wir den Strom im Zinkbad hoch.“',
+ fig:'galv',st:[
+ {a:'w',l:'Erste Einschätzung',q:'Wo suchst Du die Ursache zuerst?',o:[
+  ['In der Vorbehandlung: Abblättern und Blasen deuten auf schlechte Haftung, meist wegen Fett oder Oxid auf der Oberfläche.',2,'Richtig: Zink haftet nur auf metallisch sauberem Stahl.'],
+  ['Im Zinkbad: zu wenig Strom.',0,'Falsch: Weniger Strom gibt eine dünnere Schicht, aber keine abblätternde.'],
+  ['In der Montage: Die biegen falsch.',0,'Falsch: Eine gut haftende Zinkschicht hält das Biegen aus.'],
+  ['Im Stahl, der ist zu weich.',0,'Der Stahl wurde nicht gewechselt.']]},
+ {a:'w',l:'Prüfen',bef:['🔍 Wasserbruchtest','Du nimmst einen Halter nach dem Entfetten und Spülen heraus und schaust, wie das Wasser abläuft.','Das Wasser zieht sich zu Tropfen und Inseln zusammen statt einen geschlossenen Film zu bilden. Eine Messung im Entfettungsbad ergibt 2 % statt 5 %.'],q:'Was bedeutet das?',o:[
+  ['Auf dem Teil ist noch ein Fettfilm. Das Entfettungsbad ist verbraucht und reinigt nicht mehr richtig.',2,'Richtig: Auf sauberem Metall bildet Wasser einen geschlossenen Film. Tropfen zeigen Fett.'],
+  ['Das Teil ist besonders sauber.',0,'Falsch: Gerade umgekehrt. Sauberes Metall wird gleichmäßig nass.'],
+  ['Das Spülwasser ist zu kalt.',0,'Falsch: Die Temperatur des Spülwassers erklärt die Tropfen nicht.'],
+  ['Der Stahl ist schon verzinkt.',0,'Falsch: Der Test war vor dem Verzinken.']]},
+ {a:'z',l:'Rechnen',q:'Wie viel Liter Entfetter musst Du zugeben, um von 2 % auf 5 % zu kommen? (Volumenänderung vernachlässigen)',v:12,u:'l',tol:.01,
+  weg:['Soll: 400 l · 0,05 = 20 l Entfetter','Ist: 400 l · 0,02 = 8 l Entfetter','Zugabe: 20 l − 8 l = 12 l']},
+ {a:'w',e:1,l:'Entscheiden',q:'Was ordnest Du an?',o:[
+  ['Betroffene Teile sperren, entzinken und neu beschichten. Entfettungsbad auf 5 % nachschärfen oder erneuern, danach bei jeder Charge den Wasserbruchtest machen und die Badkonzentration regelmäßig messen.',2,'Beste Wahl: Fehlerteile kommen nicht zum Kunden, und die Ursache ist abgestellt.'],
+  ['Den Strom im Zinkbad hochdrehen.',0,'Falsch: Auf fettigem Untergrund haftet auch eine dickere Schicht nicht. Zu hohe Stromdichte macht die Schicht außerdem rau und spröde.'],
+  ['Nur das Bad nachschärfen, die schon verzinkten Teile ausliefern.',0,'Falsch: Die schlechten Teile blättern beim Kunden ab.'],
+  ['Die Entfettungszeit verdoppeln und das Bad so lassen.',1,'Als Sofortmaßnahme möglich bis zum Nachschärfen, aber ein verbrauchtes Bad reinigt auch in doppelter Zeit nicht zuverlässig.']]},
+ {a:'t',l:'Begründen',q:'Begründe Deine Anordnung in drei bis fünf Sätzen.',
+  mus:'Abblättern und Blasen zeigen, dass das Zink schlecht haftet. Beim Wasserbruchtest bildet das Wasser Tropfen, auf den Teilen ist also noch Fett. Das Entfettungsbad hat nur 2 % statt 5 %, ich gebe 12 l Entfetter nach. Die fehlerhaften Teile werden gesperrt, entzinkt und neu beschichtet. Mehr Strom im Zinkbad hilft nicht, denn auf Fett haftet keine Schicht.',
+  chk:['Ursache Haftung: Fett auf der Oberfläche','Wasserbruchtest als Nachweis','12 l Entfetter nachgeben','Fehlerteile sperren, Strom erhöhen hilft nicht']},
+ {a:'n',l:'Nachfrage',q:'In welcher Reihenfolge laufen die Teile durch die Badlinie, und warum wird zwischendurch gespült?',
+  ant:'Entfetten, Spülen, Beizen, Spülen, Verzinken, Spülen. Zuerst muss das Fett weg, sonst greift die Beize nicht gleichmäßig an. Gespült wird, damit kein Bad ins nächste verschleppt wird, etwa Lauge aus dem Entfetter in die saure Beize.'}]}
+);
 /* Ablauf */
 const BFR={2:['✅','Beste Wahl','r2'],1:['🟡','Vertretbar','r1'],0:['❌','Falsch','r0'],'-1':['⛔','Gefährlich','rg']};
 const bfaFb=t=>t.replace(/^(Richtig|Falsch|Gefährlich|Beste Wahl|Vertretbar|Teilweise richtig)( und [a-z]+)?: ?/,'');
