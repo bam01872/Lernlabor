@@ -14935,9 +14935,10 @@ function mcView(){const box=$('#mc');if(!box)return;const a=mcAll(),run=store.ge
 function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="panel"><h2>🧮 Mathe-Check</h2><p class="sub">Noch nicht gemacht. Der Check zeigt Dir in 20 Minuten, wo Du in den Mathe-Grundlagen stehst.</p><div class="pb"><button type="button" class="sbtn2" data-mco="1">Zum Mathe-Check →</button></div></div>`;
  return`<div class="panel"><h2>🧮 Mathe-Check</h2>${mcTable(a)}<div class="pb"><button type="button" class="sbtn2" data-mco="1">Startplan und Lösungswege →</button></div></div>`}
 /* Pilot-Einstellungen: Version, Neuigkeit, Kontakt */
-const APPV=301,NEWS='Einleitungstexte im Blocksatz und am Handy in allen Fächern auf zwei Zeilen gekürzt, mit „mehr“ ausklappbar.';
+const APPV=302,NEWS='Eingeklappte Einleitungstexte zeigen am Zeilenende wieder deutlich „…“.';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
+ ['11.11.2026',302,['Eingeklappte Einleitungstexte: Die drei Punkte „…“ am Ende der zweiten Zeile sind auch im Blocksatz zu sehen.']],
  ['11.11.2026',301,['Einleitungstexte stehen im Blocksatz, lange Wörter werden automatisch getrennt.']],
  ['11.11.2026',300,['Einleitungstexte: Am Handy zeigen jetzt auch Energie, Mathematik, Sicherheit und Umrechnen zuerst zwei Zeilen. „mehr ▾“ oder Tippen auf den Text klappt ihn aus, „weniger ▴“ wieder ein.']],
  ['11.11.2026',299,['Solarthermie: Kollektorfläche bis 120 m² (48 Kollektoren füllen das Dach). Pause und Neustart stehen immer oben links im Bild, die Sonne steht dafür am Vormittag rechts.']],
@@ -16504,7 +16505,7 @@ body.rfon #auf>details>summary>b:first-of-type::before{content:var(--rfn);displa
 #rfv.ok{border-color:var(--ok)}#rfv.no{border-color:var(--acc)}#rfv b.r{color:var(--ok)}
 /* Handy: Einstiegstext vollständig (Tipp kürzt ihn), „Thema wechseln“ klappt die zwei Wischleisten auf */
 /* v301: Einleitungstext im Blocksatz mit Silbentrennung (Markus 11.11.2026) */#desc{text-align:justify;-webkit-hyphens:auto;hyphens:auto}
-@media(max-width:899px){body.rfnav #desc{margin-bottom:6px;cursor:pointer}body.rfnav #desc.rfcl{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+@media(max-width:899px){body.rfnav #desc{margin-bottom:6px;cursor:pointer}/* v302: eigene Kürzung statt line-clamp, damit „…“ im Blocksatz sichtbar bleibt (Safari legte den Text darüber) */body.rfnav #desc.rfcl{display:block;max-height:3em;line-height:1.5;overflow:hidden;position:relative}body.rfnav #desc.rfcl.rfov{-webkit-mask-image:linear-gradient(#000,#000),linear-gradient(to right,#000 calc(100% - 2.4em),transparent calc(100% - 1.3em));mask-image:linear-gradient(#000,#000),linear-gradient(to right,#000 calc(100% - 2.4em),transparent calc(100% - 1.3em));-webkit-mask-size:100% 1.5em,100% 1.5em;mask-size:100% 1.5em,100% 1.5em;-webkit-mask-position:0 0,0 1.5em;mask-position:0 0,0 1.5em;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat}#uidots{display:block;position:relative;height:0;pointer-events:none}#uidots::after{content:'…';position:absolute;right:0;bottom:6px;font-size:16px;line-height:24px}body:not(.rfnav) #uidots,#desc:not(.rfcl.rfov)+#uidots{display:none}
  body.rfnav:not(.rfsw) .swr{display:none!important}
  body.rfnav #thd .tr{display:flex;align-items:center;gap:8px;flex-wrap:wrap}body.rfnav #thd .tr h2{flex:1 1 auto}}
 #rfw{display:none}
@@ -16754,9 +16755,9 @@ nav.glab{flex-wrap:wrap!important;overflow:visible!important;row-gap:2px}
  function auf(){const a=q('#auf'),c=q('#ctls');if(!a||!c)return;const rp=c.closest('.panel');if(!rp)return;if(a.nextElementSibling!==c)c.before(a);a.classList.add('uia')}
  /* ---------- N1: Einstiegstext am Handy zweizeilig mit „mehr“ ---------- */
  let lastT=-2;function desc(){const d=q('#desc');if(!d)return;let m=q('#uimore');if(!m){m=document.createElement('button');m.type='button';m.id='uimore';m.onclick=()=>{d.classList.toggle('rfcl');lab()}}
-  if(m.previousElementSibling!==d)d.after(m);const lab=()=>{const cl=d.classList.contains('rfcl');m.textContent=cl?'mehr ▾':'weniger ▴';m.setAttribute('aria-expanded',cl?'false':'true')};
+  let dt=q('#uidots');if(!dt){dt=document.createElement('span');dt.id='uidots';dt.setAttribute('aria-hidden','true')}if(dt.previousElementSibling!==d||m.previousElementSibling!==dt){d.after(dt);dt.after(m)}{const cs=getComputedStyle(d);dt.style.color=cs.color;dt.style.opacity=cs.opacity;dt.style.fontSize=cs.fontSize}const lab=()=>{const cl=d.classList.contains('rfcl');m.textContent=cl?'mehr ▾':'weniger ▴';m.setAttribute('aria-expanded',cl?'false':'true')};
   /* v300: in allen Fächern (auch Energie), nicht nur im roten Faden (Markus 11.11.2026) */const on=cur>=0&&document.body.classList.contains('rfnav')&&!mq.matches;if(!d.dataset.uicl){d.dataset.uicl='1';d.addEventListener('click',()=>{if(document.body.classList.contains('rfnav')&&!document.body.classList.contains('rfon')&&!mq.matches)d.classList.toggle('rfcl')})}if(on)d.title='Tippen zum Ein- und Ausklappen';if(on&&cur!==lastT){d.classList.add('rfcl')}lastT=cur;
-  if(!on){m.hidden=true;return}lab();requestAnimationFrame(()=>{m.hidden=d.classList.contains('rfcl')?d.scrollHeight<=d.clientHeight+2:false})}
+  if(!on){m.hidden=true;return}lab();requestAnimationFrame(()=>{const ov=d.classList.contains('rfcl')&&d.scrollHeight>d.clientHeight+2;d.classList.toggle('rfov',ov);m.hidden=d.classList.contains('rfcl')?!ov:false})}
  document.addEventListener('click',e=>{if(e.target&&e.target.id==='desc')setTimeout(()=>{const m=q('#uimore'),d=q('#desc');if(m&&d){m.textContent=d.classList.contains('rfcl')?'mehr ▾':'weniger ▴';m.hidden=false}},0)});
  /* ---------- N3: Brotkrume öffnet die Gruppenreiter (Laptop) ---------- */
  function crumb(){const c=q('#thc');if(!c||c.dataset.uig)return;c.dataset.uig='1';const t=()=>{if(!mq.matches||!document.body.classList.contains('rfnav'))return;const o=document.body.classList.toggle('uigr');c.setAttribute('aria-expanded',o?'true':'false')};c.addEventListener('click',t);c.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();t()}});}
