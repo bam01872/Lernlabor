@@ -4221,11 +4221,11 @@ function STRIN(s,t,c){
  return d;
 }
 function STTUR(s,t,c){
- const sk=STSKY(s,t,'stt',158),g=sk.g,nH=Math.max(3,Math.min(60,Math.round(s.A/SO[3][5]))),glow=PVMX('#7c2d12','#fff3b0',g),hc=PVMX('#b91c1c','#f97316',g),fl=t*(.2+1.4*g),TX=196,RX=TX,RY=58;
+ const sk=STSKY(s,t,'stt',158),g=sk.g,nH=Math.max(3,Math.min(30,Math.round(s.A/SO[3][5]))),glow=PVMX('#7c2d12','#fff3b0',g),hc=PVMX('#b91c1c','#f97316',g),fl=t*(.2+1.4*g),TX=196,RX=TX,RY=58;
  let d=sk.d+`<defs><linearGradient id="g-stsd2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dcc493"/><stop offset="1" stop-color="#b9965c"/></linearGradient></defs>`
   +`<rect x="0" y="158" width="334" height="142" fill="url(#g-stsd2)"/><line x1="0" x2="334" y1="158" y2="158" stroke="var(--ink)" stroke-width="1" opacity=".4"/>`;
  /* Heliostaten: Plätze im Halbkreis um den Turm, nächste zuerst belegt */
- const HP=[];for(let r=0;r<7;r++){const y=176+r*17+r*r*1.2,k=(y-150)/128,dx=13+15*k;for(let x=8+(r%2)*dx/2;x<326;x+=dx){if(y<252&&x>TX-30&&x<TX+40)continue;if(x>238&&y<236)continue;if(x<176&&y>256)continue;HP.push([x,y,k,Math.hypot((x-TX)/1.6,(y-196)*2.2)])}}
+ const HP=[];for(let r=0;r<7;r++){const y=176+r*17+r*r*1.2,k=(y-150)/128,dx=13+15*k;for(let x=8+(r%2)*dx/2;x<326;x+=dx){if(y<252&&x>TX-30&&x<TX+40)continue;if(x>230&&y<264)continue;if(x<176&&y>256)continue;HP.push([x,y,k,Math.hypot((x-TX)/1.6,(y-196)*2.2)])}}
  HP.sort((a,b)=>a[3]-b[3]);const H=HP.slice(0,nH).sort((a,b)=>a[1]-b[1]);
  /* Turm mit Receiver */
  d+=`<polygon points="${TX-9},214 ${TX+9},214 ${TX+5},${RY+16} ${TX-5},${RY+16}" fill="#e5e7eb"/><polygon points="${TX-9},214 ${TX+9},214 ${TX+5},${RY+16} ${TX-5},${RY+16}" fill="url(#g-cyl)" stroke="var(--ink)" stroke-width="1.3"/>`
@@ -4233,12 +4233,15 @@ function STTUR(s,t,c){
  /* gebündelte Strahlen: jeder Spiegel lenkt sein Licht auf den Receiver */
  let ray='',hel='';
  H.forEach(([x,y,k],i)=>{const my=y-7*k-2;ray+=`<line x1="${f2(x)}" y1="${f2(my)}" x2="${RX}" y2="${RY+6}" stroke="#fbbf24" stroke-width="${f2(.6+.6*k)}" opacity="${(.12+.45*g).toFixed(2)}"/>`;
-  const w=7+7*k,hgt=5+6*k;hel+=`<line x1="${f2(x)}" y1="${f2(y)}" x2="${f2(x)}" y2="${f2(my)}" stroke="#475569" stroke-width="${f2(.8+.8*k)}"/><polygon points="${f2(x-w)},${f2(my+hgt*.3)} ${f2(x+w)},${f2(my-hgt*.3)} ${f2(x+w*.9)},${f2(my-hgt)} ${f2(x-w*1.1)},${f2(my-hgt*.4)}" fill="#cfe0f0" stroke="var(--ink)" stroke-width="${f2(.5+.5*k)}"/>`});
+  /* Heliostat nachgeführt: Spiegelnormale = Winkelhalbierende zwischen Richtung Sonne und Richtung Receiver */
+  const w=7+7*k,hgt=5+6*k,us=[sk.sx-x,sk.sy-my],ur=[RX-x,RY+6-my],ls=Math.hypot(...us),lr=Math.hypot(...ur),nx=us[0]/ls+ur[0]/lr,ny=us[1]/ls+ur[1]/lr,ln=Math.hypot(nx,ny),n=[nx/ln,ny/ln],tg=[-n[1],n[0]],
+   A=[x-tg[0]*w,my-tg[1]*w*.55],B=[x+tg[0]*w,my+tg[1]*w*.55],v=[n[0]*hgt*.5,n[1]*hgt*.5-hgt*.35],pq=a=>a.map(q=>f2(q[0])+','+f2(q[1])).join(' ');
+  hel+=`<line x1="${f2(x)}" y1="${f2(y)}" x2="${f2(x)}" y2="${f2(my)}" stroke="#475569" stroke-width="${f2(.8+.8*k)}"/><polygon points="${pq([A,B,[B[0]+v[0],B[1]+v[1]],[A[0]+v[0],A[1]+v[1]]])}" fill="#cfe0f0" stroke="var(--ink)" stroke-width="${f2(.5+.5*k)}"/><line x1="${f2(A[0]+v[0]*.5)}" y1="${f2(A[1]+v[1]*.5)}" x2="${f2(B[0]+v[0]*.5)}" y2="${f2(B[1]+v[1]*.5)}" stroke="#fff" stroke-width="${f2(.6+.6*k)}" opacity=".7"/>`});
  d+=`<g opacity="${(.3+.6*g).toFixed(2)}">${BEAM(f2(sk.sx),f2(sk.sy),110,236,12,190,t,Math.round(2+8*g),'stt')}</g>`+ray+hel;
  /* heiße Salzschmelze im Turm hinunter zum Speicher */
  d+=PIPE([[RX+7,RY+16],[RX+7,206],[248,206]],hc,fl,1,3)+STBLK(244,182,t,c,hc);
  d+='</g>'+`<rect x="0.5" y="0.5" width="333" height="299" rx="12" fill="none" stroke="var(--wire)" stroke-width="1"/>`;
- d+=STLB(sk,s,-1,124)+PVT(326,242,'ins Netz','t2','end')+PVT(8,274,'A = '+STZ(s.A)+' m² Spiegel','t2')+PVT(8,292,'1 Spiegel im Bild ≈ 10 000 m²','t2')
+ d+=STLB(sk,s,-1,124)+PVT(326,242,'ins Netz','t2','end')+PVT(8,274,'A = '+STZ(s.A)+' m² Spiegel','t2')+PVT(8,292,s.A>300000?'Ausschnitt: 30 Spiegel im Bild':'1 Spiegel im Bild ≈ 10 000 m²','t2')
   +PVT(RX+14,RY+4,'Receiver','t2')+PVT(RX+14,RY+21,'Salz ≈ 565 °C','t2')+PVT(326,178,'Turbine + Generator','t2','end');
  return d;
 }
