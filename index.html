@@ -13894,21 +13894,21 @@ Object.assign(BFIG,{
   <path d="M380 112l90 0" stroke-width="2" stroke-dasharray="6 4"/>${BFT(430,100,'erst ab Tag 3 frei',{a:'middle',s:17,c:'#dc2626',w:700})}
   ${BFT(140,60,'Auftrag 1 200 Gehäuse',{a:'middle',s:19,w:700})}${BFT(140,86,'mit 2 Maschinen: 15 Tage',{a:'middle',s:17})}
   ${BFT(440,40,'Kunde will 10 Tage',{a:'middle',s:18,w:700})}`),
- boden:()=>BFV(560,300,`<rect x="60" y="40" width="440" height="220" fill="#94a3b8" fill-opacity=".25" stroke-width="2.5"/>
+ boden:()=>BFV(580,300,`<rect x="60" y="40" width="440" height="220" fill="#94a3b8" fill-opacity=".25" stroke-width="2.5"/>
   ${[[110,80],[230,80],[350,80]].map(([x,y])=>`<rect x="${x}" y="${y}" width="73" height="46" fill="#475569" fill-opacity=".75"/>`).join('')}${BFT(270,152,'3 Fundamente je 4 m × 2,5 m',{a:'middle',s:16})}
-  <circle cx="420" cy="205" r="30" fill="#ca8a04" fill-opacity=".6"/>${BFT(420,252,'Silo Ø 2 m',{a:'middle',s:16})}
+  <circle cx="420" cy="205" r="30" fill="#ca8a04" fill-opacity=".6"/>${BFT(420,252,'Silo Ø 2 m',{a:'middle',s:16})}
   ${BFT(200,215,'Boden beschichten',{a:'middle',s:19,w:700})}
   <path d="M60 280H500M60 274v12M500 274v12" stroke-width="1.5"/>${BFT(280,296,'24 m',{a:'middle',s:17})}
   <path d="M530 40V260M524 40h12M524 260h12" stroke-width="1.5"/>${BFT(548,156,'15 m',{a:'middle',s:17})}`),
- leiter:()=>BFV(560,320,`<path d="M10 300H550" stroke-width="2.5"/><path d="M420 10V300" stroke-width="6" stroke="#94a3b8"/>
+ leiter:()=>BFV(560,350,`<path d="M10 300H550" stroke-width="2.5"/><path d="M420 10V300" stroke-width="6" stroke="#94a3b8"/>
   <path d="M370 30h50" stroke-width="3"/><path d="M380 30h30l-6 14h-18z" fill="#fbbf24"/>${BFT(360,36,'Leuchte in 5 m',{a:'end',s:18,w:700})}
   <path d="M300 300L414 66M318 300L432 66" stroke-width="4" stroke="#b45309"/>${[...Array(9)].map((_,i)=>{const t=(i+1)/10,x=300+114*t,y=300-234*t;return`<path d="M${x.toFixed(0)} ${y.toFixed(0)}h18" stroke-width="3" stroke="#b45309"/>`}).join('')}
   ${BFT(230,170,'Anlegeleiter 6 m',{a:'end',s:18,w:700})}
   <path d="M300 288A12 12 0 0 1 312 300" stroke-width="2"/>${BFT(270,284,'α',{s:20,w:700})}
-  <path d="M309 314H420" stroke-width="1.5"/>${BFT(365,312,'a = ?',{a:'middle',s:16})}`),
+  <path d="M300 316H420M300 310v12M420 310v12" stroke-width="1.5"/>${BFT(360,342,'Abstand a = ?',{a:'middle',s:17})}`),
  motor:()=>BFV(560,280,`<path d="M10 258H550" stroke-width="2.5"/>
-  ${BFCYL(140,110,70,120,'#64748b')}${BFT(140,190,'alt',{a:'middle',s:20,w:800,c:'#fff'})}${BFT(140,70,'η = 0,90',{a:'middle',s:18,w:700})}
-  <path d="M170 140l-40 40M150 130l-10 30" stroke="#dc2626" stroke-width="3"/>${BFT(140,90,'Lagerschaden',{a:'middle',s:16,c:'#dc2626'})}
+  ${BFCYL(140,110,70,120,'#64748b')}${BFT(140,180,'alt',{a:'middle',s:20,w:800,c:'#fff'})}${BFT(140,70,'η = 0,90',{a:'middle',s:18,w:700})}
+  <path d="M172 132l-24 26M158 128l-8 22" stroke="#fecaca" stroke-width="3"/>${BFT(140,212,'Lagerschaden',{a:'middle',s:16,w:700,c:'#fff'})}
   ${BFCYL(410,110,70,120,'#16a34a')}${BFT(410,190,'IE4',{a:'middle',s:20,w:800,c:'#fff'})}${BFT(410,70,'η = 0,95',{a:'middle',s:18,w:700})}
   ${BFT(275,40,'Lüfterantrieb 22 kW',{a:'middle',s:19,w:700})}${BFT(275,180,'oder',{a:'middle',s:18})}`),
  tor:()=>BFV(560,290,`<path d="M10 268H550" stroke-width="2.5"/><path d="M40 268V70h480v198" stroke-width="3"/>
@@ -13917,15 +13917,15 @@ Object.assign(BFIG,{
   ${[0,1,2].map(i=>`<path d="M${190-i*40} ${110+i*26}h-60l10-8m-10 8l10 8" stroke="#dc2626" stroke-width="3"/>`).join('')}
   ${BFT(110,60,'Halle 18 °C',{a:'middle',s:18,w:700,c:'#dc2626'})}${BFT(460,60,'draußen −2 °C',{a:'middle',s:18,w:700,c:'#2563eb'})}
   ${BFT(280,108,'Tor offen',{a:'middle',s:18,w:700})}${BFT(280,198,'6 000 m³/h',{a:'middle',s:18})}`),
- spitze:()=>BFV(560,290,`<path d="M60 250H530M60 250V30" stroke-width="2"/>${BFT(50,40,'P',{a:'end',s:18,w:700})}${BFT(530,274,'Uhrzeit',{a:'end',s:16})}
+ spitze:()=>BFV(560,290,`<path d="M60 250H530M60 250V30" stroke-width="2"/>${BFT(50,40,'P',{a:'end',s:18,w:700})}${BFT(530,238,'Uhrzeit',{a:'end',s:16})}
   ${['6','7','8','9','10'].map((t,i)=>`${BFT(90+i*100,274,t,{a:'middle',s:16})}<path d="M${90+i*100} 250v6" stroke-width="1.5"/>`).join('')}
   <path d="M90 250V70h100v120h340" stroke="#dc2626" stroke-width="4"/>
-  <path d="M90 140h460" stroke-dasharray="6 5" stroke-width="1.5"/>${BFT(320,132,'Grundlast 90 kW + 3 Öfen',{a:'middle',s:16})}
+  ${BFT(220,100,'alle heizen auf',{s:16})}${BFT(360,178,'alle halten die Temperatur',{a:'middle',s:16})}
   ${BFT(140,60,'Spitze',{a:'middle',s:18,w:700,c:'#dc2626'})}${BFT(330,40,'3 Härteöfen starten um 6 Uhr',{a:'middle',s:18,w:700})}`),
  mess:()=>BFV(560,280,`<path d="M10 258H550" stroke-width="2.5"/>
   <path d="M40 120h340v30H40z" fill="#cbd5e1" stroke-width="2"/>${[...Array(17)].map((_,i)=>`<path d="M${60+i*20} 120v${i%5?8:14}" stroke-width="1.5"/>`).join('')}
   <path d="M40 120v-70h26v70M100 150v70h-26v-70" fill="#cbd5e1" stroke-width="2"/>
-  <rect x="260" y="128" width="90" height="16" rx="3" fill="var(--card)"/>${BFT(305,142,'25,04',{a:'middle',s:15,w:700})}
+  <rect x="250" y="124" width="110" height="23" rx="3" fill="var(--card)"/>${BFT(305,142,'25,04',{a:'middle',s:18,w:800})}
   <path d="M150 70l22 30M180 64l-6 26" stroke="#dc2626" stroke-width="3"/>${BFT(160,50,'um 10 Uhr heruntergefallen',{a:'start',s:17,c:'#dc2626',w:700})}
   ${BFBOX(420,180,90,40,14,'#94a3b8',.8)}${BFT(465,244,'Endmaß 25,00',{a:'middle',s:16})}
   ${BFT(220,210,'240 Teile seit 10 Uhr',{a:'middle',s:18,w:700})}${BFT(220,236,'Toleranz 25,00 ± 0,05 mm',{a:'middle',s:16})}`),
@@ -13935,12 +13935,11 @@ Object.assign(BFIG,{
   <path d="M330 170h120l-14 96h-92z" fill="#94a3b8" fill-opacity=".6"/><ellipse cx="390" cy="170" rx="60" ry="10" fill="#bef264"/>
   ${[0,1,2,3].map(i=>`<path d="M${350+i*26} 150q-10-20 0-40q10-20 0-40" stroke="#65a30d" stroke-width="3"/>`).join('')}
   ${BFT(390,40,'stechender Geruch',{a:'middle',s:18,w:700,c:'#65a30d'})}${BFT(140,84,'zusammen in den Eimer',{a:'middle',s:17})}`),
- scheibe:()=>BFV(560,280,`<path d="M10 258H550" stroke-width="2.5"/>
-  <circle cx="150" cy="150" r="50" fill="#64748b" fill-opacity=".7"/><circle cx="150" cy="150" r="10" fill="var(--card)"/>${BFT(150,226,'Ø 125 mm',{a:'middle',s:17,w:700})}
-  <path d="M200 140h110v26H200z" fill="#2563eb" fill-opacity=".8"/>${BFT(255,190,'11 000 1/min',{a:'middle',s:16})}
-  <circle cx="440" cy="150" r="92" fill="#64748b" fill-opacity=".45"/><circle cx="440" cy="150" r="10" fill="var(--card)"/>${BFT(440,266,'Ø 230 mm',{a:'middle',s:17,w:700})}
+ scheibe:()=>BFV(560,280,`  <circle cx="150" cy="150" r="50" fill="#64748b" fill-opacity=".7"/><circle cx="150" cy="150" r="10" fill="var(--card)"/>${BFT(150,226,'Ø 125 mm',{a:'middle',s:17,w:700})}
+  <path d="M200 140h110v26H200z" fill="#2563eb" fill-opacity=".8"/>${BFT(255,200,'11 000 1/min',{a:'middle',s:18})}
+  <circle cx="440" cy="150" r="92" fill="#64748b" fill-opacity=".45"/><circle cx="440" cy="150" r="10" fill="var(--card)"/>${BFT(440,266,'Ø 230 mm',{a:'middle',s:17,w:700})}
   ${BFT(150,40,'kleiner Winkelschleifer',{a:'middle',s:18,w:700})}${BFT(440,40,'Scheibe aus dem Lager',{a:'middle',s:18,w:700})}
-  <rect x="390" y="112" width="100" height="24" rx="5" fill="var(--card)"/>${BFT(440,130,'max. 80 m/s',{a:'middle',s:15,w:700,c:'#dc2626'})}`)
+  <rect x="372" y="98" width="136" height="38" rx="6" fill="var(--card)"/>${BFT(440,124,'max. 80 m/s',{a:'middle',s:18,w:800,c:'#dc2626'})}`)
 });
 BFA.push(
 {id:'liefer',n:'Prozentrechnung',f:'Mathematik',ic:'🧾',titel:'Zwei Angebote für Spannbacken',
@@ -13988,7 +13987,7 @@ BFA.push(
  {a:'n',l:'Nachfrage',q:'Warum ist das ein umgekehrter Dreisatz, und wo hat er Grenzen?',
   ant:'Je mehr gleiche Maschinen, desto weniger Tage: Maschinen mal Tage bleibt gleich (30). Grenzen: Rüstzeiten, Personal, Material, Prüfplätze oder ein Engpass hinter den Maschinen. Dann bringt eine weitere Maschine weniger als gerechnet.'}]},
 {id:'boden',n:'Flächen und Körper',f:'Mathematik',ic:'🪣',titel:'Hallenboden beschichten',
- lage:'Der Boden einer Halle (24 m × 15 m) soll zweimal beschichtet werden. Ausgespart werden 3 Maschinenfundamente (je 4 m × 2,5 m) und der runde Sockel eines Silos (Ø 2 m). Die Beschichtung braucht 0,3 kg/m² je Anstrich und kostet 189 € je 10-kg-Eimer. Ein Kollege hat schon 11 Eimer bestellt.',
+ lage:'Der Boden einer Halle (24 m × 15 m) soll zweimal beschichtet werden. Ausgespart werden 3 Maschinenfundamente (je 4 m × 2,5 m) und der runde Sockel eines Silos (Ø 2 m). Die Beschichtung braucht 0,3 kg/m² je Anstrich und kostet 189 € je 10-kg-Eimer. Ein Kollege hat schon 11 Eimer bestellt.',
  fig:'boden',st:[
  {a:'w',l:'Erste Einschätzung',q:'Was musst Du für die richtige Menge beachten?',o:[
   ['Hallenfläche minus Fundamente und Silosockel, mal Verbrauch, mal 2 Anstriche, dann auf ganze Eimer aufrunden.',2,'Richtig: Fläche, Abzüge, Anstriche und Aufrunden gehören zusammen.'],
@@ -14075,7 +14074,7 @@ BFA.push(
   chk:['Luftmasse 7 200 kg aus Volumen und Dichte','Q = m · c · ΔT = 40 kWh pro Stunde','Jahreskosten 4 000 €','Maßnahme am Tor statt an der Heizung']},
  {a:'n',l:'Nachfrage',q:'Warum ist es oben unter dem Hallendach wärmer, und was folgt daraus für das Tor?',
   ant:'Warme Luft ist leichter und steigt nach oben. Bei offenem Tor strömt sie oben hinaus, unten kommt kalte Luft herein. Hohe Tore verlieren deshalb besonders viel. Deckenventilatoren, die die warme Luft nach unten drücken, helfen zusätzlich.'}]},
-{id:'spitze',n:'Elektrische Arbeit & Leistung',f:'Energie',ic:'📈',titel:'Lastspitze am Montagmorgen',
+{id:'spitze',n:'Elektrische Arbeit & Leistung',f:'Energie',ic:'📈',titel:'Lastspitze am Morgen',
  lage:'Drei Härteöfen werden jeden Morgen um 6 Uhr gleichzeitig eingeschaltet. Jeder braucht in der ersten Stunde 120 kW zum Aufheizen, danach 40 kW zum Halten. Der restliche Betrieb braucht 90 kW. Der Stromversorger berechnet neben den kWh einen Leistungspreis von 110 € pro kW der höchsten Spitze im Jahr.',
  fig:'spitze',st:[
  {a:'w',l:'Erste Einschätzung',q:'Warum ist der gleichzeitige Start teuer?',o:[
@@ -14143,7 +14142,7 @@ BFA.push(
  {a:'n',l:'Nachfrage',q:'Wo im Sicherheitsdatenblatt findest Du, welche Stoffe man nicht mischen darf?',
   ant:'In Abschnitt 10 „Stabilität und Reaktivität“ stehen gefährliche Reaktionen und unverträgliche Stoffe. Abschnitt 7 „Handhabung und Lagerung“ sagt, was getrennt gelagert werden muss. Erste Hilfe steht in Abschnitt 4.'}]},
 {id:'scheibe',n:'Kreisbewegung',f:'Physik',ic:'🌀',titel:'Große Scheibe auf kleinem Winkelschleifer',
- lage:'Für den kleinen Winkelschleifer (Ø 125 mm, 11 000 1/min) sind keine Trennscheiben mehr da. Ein Kollege will eine 230-mm-Scheibe aus dem Lager aufspannen und dafür die Schutzhaube abbauen: „Die passt auf die Spindel, und schneidet sogar tiefer.“ Auf der Scheibe steht „max. 80 m/s“.',
+ lage:'Für den kleinen Winkelschleifer (Ø 125 mm, 11 000 1/min) sind keine Trennscheiben mehr da. Ein Kollege will eine 230-mm-Scheibe aus dem Lager aufspannen und dafür die Schutzhaube abbauen: „Die passt auf die Spindel, und schneidet sogar tiefer.“ Auf der Scheibe steht „max. 80 m/s“.',
  fig:'scheibe',st:[
  {a:'w',l:'Erste Einschätzung',q:'Worauf kommt es bei einer Trennscheibe an?',o:[
   ['Auf die Umfangsgeschwindigkeit: Sie wächst mit dem Durchmesser. Ist sie zu hoch, kann die Scheibe bersten.',2,'Richtig: Die erlaubte Umfangsgeschwindigkeit steht auf jeder Scheibe.'],
