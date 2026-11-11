@@ -3665,15 +3665,141 @@ fm(FE,E1,'Kraftwerke im Überblick','Alle Kraftwerke wandeln eine Primärenergie
  'Grundlast = dauerhafte Mindestlast, Mittellast = Tagesbedarf, Spitzenlast = kurze Lastspitzen. Windkraft und Photovoltaik liefern wetterabhängig (fluktuierend) und brauchen Speicher oder Regelkraftwerke. Wirkungsgrade und CO₂-Werte sind typische Richtwerte (Folie: PV 11–16 %, Wind bis ca. 50 %, Laufwasser bis 85 %).');
 const SHORT=['Steinkohle-KW','GuD-Kraftwerk','Kernkraftwerk','Laufwasser','Pumpspeicher','Windkraft','Photovoltaik','Solarthermie-KW','Geothermie','Biogas + BHKW','Brennstoffzelle'];
 const BR=[['Steinkohle',32000],['Braunkohle',18000],['Koks',30000]];
-fm(FE,E1,'Dampfkraftwerk (Wärmekraftwerk)','Im Dampferzeuger wird aus Brennstoffwärme Frischdampf (ca. 550 °C, 250 bar). Die Turbine wandelt ihn in Rotation, der Generator in Strom. Im Kondensator wird der Abdampf wieder zu Wasser, die Speisewasserpumpe schließt den Kreislauf.',
- [['b','Stoff','sel',BR.map(x=>x[0]+' (H_i = '+x[1]+' kJ/kg)'),0],['m','ṁ',1,100,1,'kg/s',30],['e1','η Wärme',70,98,1,'%',92],['e2','η therm.',30,50,1,'%',45],['e3','η Turb.',80,98,1,'%',92],['e4','η Gen.',90,99,1,'%',98]],
- (s,t=0)=>{const Hi=BR[s.b][1],Pz=s.m*Hi/1000,c1=s.e1/100,c2=c1*s.e2/100,c3=c2*s.e3/100,c4=c3*s.e4/100,Pe=Pz*c4;
- /* räumlich: Kesselhaus mit Feuerraum und Schornstein, Dampfturbine als weitendes Gehäuse, Generator als liegender Zylinder, Kondensator liegend, Naturzug-Kühlturm, Rohre mit Fließstrichen */
- const steam=[[70,62],[70,36],[172,36],[172,58]],exh=[[236,96],[236,140]],wat=[[206,176],[206,232],[72,232],[72,190]],cw=[[254,158],[342,158]];
- return{d:BOX3(22,70,86,120,12,'#c9d2dc','#e4e9ef','#9aa5b3')+`<rect x="40" y="130" width="44" height="40" rx="3" fill="#1f2937" stroke="var(--ink)" stroke-width="1.2"/><path d="M50 170c-8 -14 10 -18 2 -32 14 6 14 18 16 20 2 -8 7 -10 9 -16 10 12 7 22 -3 28z" fill="#f59e0b"/><path d="M56 170c-5 -9 6 -12 2 -20 8 4 8 12 10 14 1 -5 4 -6 6 -10 6 8 4 14 -2 16z" fill="#fde68a"/>`+T(65,96,'Dampf-','t2','middle')+T(65,110,'erzeuger','t2','middle')+`<path d="M28 70l4 -2.5V26h8v41.5l-4 2.5Z" fill="#8a94a2" stroke="var(--ink)" stroke-width="1"/>`+[0,1,2].map(i=>{const f=((t*.4+i/3)%1);return `<circle cx="${(36+4*Math.sin(f*6)).toFixed(1)}" cy="${(22-f*12).toFixed(1)}" r="${(2.5+3*f).toFixed(1)}" fill="#9ca3af" opacity="${(.6*(1-f)).toFixed(2)}"/>`}).join('')+AR(0,150,16,0,'var(--ink)','')+T(14,206,'Brennstoff + Luft','t2')+
- PIPE(steam,'#dc2626',t,1,6)+PIPE(wat,'#2563eb',t,1,6)+PIPE(exh,'#94a3b8',t,1,7)+PIPE(cw,'#60a5fa',t,1,5)+TURB3(172,40,64,52)+T(204,112,'Turbine','t2','middle')+GEN3(260,54,46,26)+AR(316,66,36,0,'var(--ok)','')+PYL(372,44,1.1)+T(372,108,'Netz','t2','middle')+HCYL(160,140,94,34,'#cbd5e1')+[0,1,2].map(i=>`<line x1="176" y1="${150+i*7}" x2="232" y2="${150+i*7}" stroke="#2563eb" stroke-width="1" opacity=".6"/>`).join('')+TH(207,162,'Kondensator','t2','middle')+PUMP3(132,232,11,t)+T(132,258,'Speisewasserpumpe','t2','middle')+COOL3(364,226,74,t)+
- T(70,30,'Frischdampf 550 °C, 250 bar','t2')+T(242,124,'Abdampf','t2')+T(14,284,'Chemisch → thermisch → mechanisch → elektrisch','t2')
- +CH(420,50,150,[['Brennstoff',1],['nach Wärmeübertragung',c1],['nach Kreisprozess',c2],['nach Turbine',c3],['elektrische Energie',c4]]),
+/* Dampfkraftwerk (v295): Ansicht „Kraftwerk“ = Anlage im Schnitt (Kohlebunker und Mühle, Kessel mit Feuerraum, Verdampferrohren und Überhitzer,
+   Rauchgasfilter und Schornstein, Maschinenhaus mit Turbinentisch, Turbine, Generator, Trafo, Kondensator unter der Turbine, Kühlwasserkreis
+   zum Naturzug-Kühlturm mit Regenzone, Speisewasserpumpe). Flamme und Fließtempo wachsen mit ṁ, Abgas mit 1 − η_Wärme, Schwaden mit der Abwärme.
+   Ansicht „Teilchen-Lupe“ = Wassermoleküle an vier Stellen des Kreislaufs. Energiefluss-Balken (CH) bleiben rechts. Helfer mit Präfix DK. */
+let DKID=0;
+const DKC=['#6b4423','#1f2937','#4b5563'],/* Kohlefarbe je Brennstoff (BR-Reihenfolge Steinkohle, Braunkohle, Koks) */
+ DKR=i=>{const v=Math.sin(i*12.9898+4.1)*43758.5453;return v-Math.floor(v)},
+ DKTRI=u=>{const w=((u%2)+2)%2;return w<1?w:2-w},
+ DKFL=(cx,base,H,t,n=5,sp=10)=>{let o='';for(let i=0;i<n;i++){const x=cx+(i-(n-1)/2)*sp,h=H*(.62+.38*Math.abs(Math.sin(t*7+i*1.9))),w=sp*.8;
+  o+=`<path d="M${f2(x-w)} ${base}Q${f2(x-w*1.1)} ${f2(base-h*.45)} ${f2(x+Math.sin(t*5+i)*3)} ${f2(base-h)}Q${f2(x+w*1.1)} ${f2(base-h*.45)} ${f2(x+w)} ${base}Z" fill="#f97316" opacity=".9"/>`
+   +`<path d="M${f2(x-w*.55)} ${base}Q${f2(x-w*.6)} ${f2(base-h*.3)} ${f2(x+Math.sin(t*5+i)*2)} ${f2(base-h*.62)}Q${f2(x+w*.6)} ${f2(base-h*.3)} ${f2(x+w*.55)} ${base}Z" fill="#fde047"/>`}return o};
+function DKANL(s,t,c){
+ const id='dk'+(++DKID),k=.25+.75*s.m/100,tf=t*(.35+1.1*s.m/100),coal=DKC[s.b==0?1:s.b==1?0:2],
+  lossA=1-c[0],lossK=c[0]-c[1];
+ /* Boden und Maschinenhaus (Schnitt) */
+ let d=`<defs><linearGradient id="${id}t" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#3b82f6"/><stop offset=".55" stop-color="#a855f7"/><stop offset="1" stop-color="#ef4444"/></linearGradient><clipPath id="${id}k"><rect x="372" y="226" width="26" height="30"/></clipPath></defs>`
+  +`<rect x="0" y="262" width="412" height="8" fill="#a3b18a" opacity=".45"/><line x1="0" x2="412" y1="262" y2="262" stroke="var(--ink)" stroke-width="1.2" opacity=".6"/>`
+  +`<path d="M146 262V30L240 18L334 30V262" fill="#94a3b8" fill-opacity=".14" stroke="var(--ink)" stroke-width="1.2" stroke-dasharray="5 3"/>`
+  +SXT(332,41,'Maschinenhaus',9,'end','var(--mute)',600);
+ /* Turbinentisch (Beton) mit Stützen; Kondensator darunter */
+ d+=`<rect x="162" y="112" width="166" height="8" fill="#a8b1bc" stroke="var(--ink)" stroke-width="1.1"/><rect x="166" y="120" width="8" height="142" fill="#b8c0ca" stroke="var(--ink)" stroke-width="1"/><rect x="316" y="120" width="8" height="142" fill="#b8c0ca" stroke="var(--ink)" stroke-width="1"/>`;
+ /* Schornstein mit Abgasfahne (Größe ∝ Abgasverlust) und Rauchgasfilter auf dem Kanal */
+ d+=`<path d="M5 262L8 46H18L21 262Z" fill="#b8bfc8" stroke="var(--ink)" stroke-width="1.2"/><path d="M8 54H18M7.8 66H18.2" stroke="#dc2626" stroke-width="2.4"/>`
+  +[0,1,2,3].map(i=>{const f=((t*.3+i/4)%1),r=(3+lossA*40)*(.5+f);return `<circle cx="${f2(14+f*62)}" cy="${f2(43-f*8)}" r="${f2(r)}" fill="#9ca3af" opacity="${(.55*(1-f)).toFixed(2)}"/>`}).join('')
+  +PIPE([[60,96],[19,96]],'#6b7280',tf,1,7)
+  +`<rect x="26" y="84" width="24" height="24" rx="2" fill="#cbd5e1" stroke="var(--ink)" stroke-width="1.2"/><path d="M30 88v16M34 88v16M38 88v16M42 88v16M46 88v16" stroke="#64748b" stroke-width=".9"/>`
+  +TH(38,120,'Filter','t2','middle');
+ /* Kohlebunker, Mühle, Kohlestaub zum Brenner */
+ d+=`<path d="M22 164H52L42 196H32Z" fill="#cbd5e1" stroke="var(--ink)" stroke-width="1.2"/><path d="M25 172Q37 162 49 172L42 194H32Z" fill="${coal}"/>`
+  +`<rect x="34" y="196" width="6" height="18" fill="#94a3b8" stroke="var(--ink)" stroke-width="1"/>`
+  +BALL(37,226,11,'#9ca3af',1.3)+[0,1,2,3].map(i=>{const a=t*4+i*PI/2;return `<line x1="37" y1="226" x2="${f2(37+8*Math.cos(a))}" y2="${f2(226+8*Math.sin(a))}" stroke="#1f2937" stroke-width="1.6"/>`}).join('')
+  +PL([[48,226],[60,226]],'var(--ink)',6)+PL([[48,226],[60,226]],'#a8a29e',4);
+ for(let i=0;i<Math.round(2+6*s.m/100);i++){const u=(t*1.4+i/7)%1;d+=u<.5?`<circle cx="${f2(37+Math.sin(i*3)*1.5)}" cy="${f2(196+u*2*18)}" r="1.6" fill="${coal}"/>`:`<circle cx="${f2(48+(u-.5)*2*12)}" cy="226" r="1.4" fill="${coal}"/>`}
+ d+=TH(37,252,'Mühle','t2','middle');
+ /* Kessel (Dampferzeuger) im Schnitt: Feuerraum, Verdampferrohre an den Wänden, Überhitzer oben */
+ d+=BOX3(60,74,70,188,10,'#c9d2dc','#e4e9ef','#9aa5b3')+`<rect x="66" y="82" width="58" height="174" fill="#1f2937" stroke="var(--ink)" stroke-width="1"/>`
+  +[69,72.5,76,114,117.5,121].map(x=>`<line x1="${x}" y1="118" x2="${x}" y2="254" stroke="url(#${id}t)" stroke-width="2.2"/>`).join('')
+  +`<path d="M74 88v24h5v-24h5v24h5v-24h5v24h5v-24h5v24h5v-24h5v24h5v-24" fill="none" stroke="#ef4444" stroke-width="2"/>`
+  +SXT(95,126,'Überhitzer',8.5,'middle','#fca5a5',600)
+  +`<g opacity="${(.55+.45*k).toFixed(2)}">${DKFL(95,254,30+70*k,t,5,8)}</g>`
+  +`<ellipse cx="95" cy="${f2(254-20-40*k)}" rx="${f2(16+10*k)}" ry="${f2(20+40*k)}" fill="#f59e0b" opacity="${(.12+.12*k).toFixed(2)}"/>`
+  +`<rect x="60" y="221" width="8" height="10" fill="#64748b" stroke="var(--ink)" stroke-width="1"/>`
+  +SXT(95,144,'Dampf-',10.5,'middle','#e5e7eb',700)+SXT(95,157,'erzeuger',10.5,'middle','#e5e7eb',700);
+ /* Frischdampf zur Turbine */
+ d+=PIPE([[100,88],[100,26],[180,26],[180,58]],'#dc2626',tf,1,6)+T(104,16,'Frischdampf 550 °C, 250 bar','t2');
+ /* Turbine, Kupplung (dreht), Generator, Trafo, Leitung zum Mast; Strom fließt (grüne Striche) */
+ d+=TURB3(174,48,84,60)+TH(216,42,'Turbine','t2','middle')
+  +`<circle cx="270" cy="78" r="5" fill="#cbd5e1" stroke="var(--ink)" stroke-width="1"/><line x1="270" y1="78" x2="${f2(270+5*Math.cos(t*9))}" y2="${f2(78+5*Math.sin(t*9))}" stroke="var(--ink)" stroke-width="1.4"/>`
+  +GEN3(280,64,44,28)+TH(302,54,'Generator','t2','middle')
+  +`<rect x="336" y="66" width="20" height="26" rx="2" fill="#94a3b8" stroke="var(--ink)" stroke-width="1.2"/>`+[0,1,2,3].map(i=>`<line x1="${339+i*4.5}" y1="70" x2="${339+i*4.5}" y2="88" stroke="var(--ink)" stroke-width=".8" opacity=".6"/>`).join('')
+  +`<path d="M342 66v-6M350 66v-6" stroke="var(--ink)" stroke-width="1.4"/>`+TH(346,106,'Trafo','t2','middle')
+  +PYL(390,40,1.4)+TH(390,122,'Netz','t2','middle');
+ const ep=`M324 78H336M350 60V54H370`,es=(-t*(10+50*s.m/100)).toFixed(1);
+ d+=`<path d="${ep}" fill="none" stroke="var(--ink)" stroke-width="3"/><path d="${ep}" fill="none" stroke="#22c55e" stroke-width="1.8" stroke-dasharray="3 4" stroke-dashoffset="${es}"/>`;
+ /* Abdampf nach unten in den Kondensator, Kühlwasser zum Kühlturm (warm hin, kalt zurück) */
+ d+=`<rect x="226" y="108" width="26" height="28" fill="#94a3b8" stroke="var(--ink)" stroke-width="1.2"/>`
+  +[0,1,2].map(i=>{const f=((tf*1.2+i/3)%1);return `<path d="M${232+i*7} ${f2(110+f*22)}v5" stroke="#fff" stroke-width="1.6" opacity="${(.8*(1-f)).toFixed(2)}"/>`}).join('')
+  +TH(258,130,'Abdampf 35 °C','t2')
+  +PIPE([[294,146],[344,146],[344,232],[368,232]],'#f97316',tf,1,5)+PIPE([[368,252],[310,252],[310,164],[294,164]],'#60a5fa',tf,1,5)
+  +HCYL(184,134,110,40,'#cbd5e1')+[0,1,2,3].map(i=>`<line x1="198" y1="${142+i*7}" x2="282" y2="${142+i*7}" stroke="#2563eb" stroke-width="1.2" opacity=".55"/>`).join('')
+  +TH(239,159,'Kondensator','t2','middle')
+  +COOL3(385,262,78,t)
+  +`<g clip-path="url(#${id}k)"><rect x="372" y="226" width="26" height="30" fill="#1f2937" opacity=".75"/>`+[...Array(10)].map((_,i)=>{const f=((t*1.6+DKR(i))%1);return `<line x1="${f2(374+i*2.4)}" y1="${f2(226+f*30)}" x2="${f2(374+i*2.4)}" y2="${f2(231+f*30)}" stroke="#93c5fd" stroke-width="1.2"/>`}).join('')+`<rect x="372" y="251" width="26" height="5" fill="#60a5fa"/></g><rect x="372" y="226" width="26" height="30" fill="none" stroke="var(--ink)" stroke-width="1"/>`
+  +[0,1,2].map(i=>{const f=((t*.3+i/3+.15)%1),r=(4+lossK*28)*(.4+f);return `<circle cx="${f2(385+(i-1)*7+8*Math.sin(f*4+i))}" cy="${f2(176-f*40)}" r="${f2(r)}" fill="#fff" opacity="${(.7*(1-f)).toFixed(2)}" stroke="#cbd5e1" stroke-width=".6"/>`}).join('')
+  +TH(352,198,'warm','t2','start')+TH(338,246,'kalt','t2','end');
+ /* Kondensat zur Speisewasserpumpe und zurück in den Kessel */
+ d+=PIPE([[239,174],[239,240],[124,240]],'#2563eb',tf,1,6)+PUMP3(180,240,11,tf)+TH(186,258,'Speisewasserpumpe','t2','middle')+TH(244,214,'Kondensat','t2');
+ d+=SXT(3,156,BR[s.b][0],9.5,'start','var(--ink)',700)+T(14,284,'Chemisch → thermisch → mechanisch → elektrisch','t2');
+ return d;
+}
+/* Teilchen-Lupe: vier vergrößerte Ausschnitte des Wasser-Dampf-Kreislaufs mit Wassermolekülen (GZW). Schnelle Teilchen haben einen langen Strich. */
+function DKLUPE(s,t,c){
+ const id='dk'+(++DKID),R=50,P=[[118,96],[318,96],[318,244],[118,244]],st=Math.floor(t/3.5)%4,
+  mol=(x,y,a,o=1)=>GZW(x,y,a,o),
+  trail=(x,y,vx,vy,L,col)=>{const v=Math.hypot(vx,vy)||1;return `<line x1="${f2(x)}" y1="${f2(y)}" x2="${f2(x-vx/v*L)}" y2="${f2(y-vy/v*L)}" stroke="${col}" stroke-width="3" stroke-linecap="round" opacity=".45"/>`},
+  /* Gasteilchen im Kasten: Dreieckswelle in x und y */
+  gas=(i,b,sp)=>{const ax=.5+DKR(i)*.8,ay=.5+DKR(i+7)*.8,ux=DKR(i+3)*2+t*sp*ax/(b[1]-b[0])*2,uy=DKR(i+5)*2+t*sp*ay/(b[3]-b[2])*2,
+   x=b[0]+(b[1]-b[0])*DKTRI(ux),y=b[2]+(b[3]-b[2])*DKTRI(uy),sx=(((ux%2)+2)%2)<1?1:-1,sy=(((uy%2)+2)%2)<1?1:-1;return [x,y,sx*ax,sy*ay]},
+  liq=(i,x,y,a=2)=>{const j=GZJ(i,t,a);return mol(x+j[0],y+j[1],DKR(i)*6+t*.5)};
+ let d=`<defs>`+P.map((p,i)=>`<clipPath id="${id}c${i}"><circle cx="${p[0]}" cy="${p[1]}" r="${R}"/></clipPath>`).join('')+`</defs>`;
+ /* Verbindungen zwischen den Ausschnitten */
+ d+=ARW(170,100,266,100,'#dc2626',4)+TH(218,74,'Frischdampf','t2','middle')+TH(218,89,'550 °C, 250 bar','t2','middle')
+  +ARW(318,150,318,192,'#94a3b8',4)+TH(310,188,'Abdampf: 35 °C, 0,05 bar','t2','end')
+  +ARW(266,262,170,262,'#2563eb',4)+TH(218,233,'Kondensat','t2','middle')+TH(218,248,'35 °C, 0,05 bar','t2','middle')
+  +ARW(118,192,118,150,'#2563eb',4)+TH(128,168,'Speisewasser: 250 bar','t2');
+ /* ① Dampferzeuger: unten Wasser (dicht), oben Dampf (schnell), Wärme von unten */
+ {const [x,y]=P[0];let g=`<rect x="${x-R}" y="${y-R}" width="${2*R}" height="${2*R}" fill="#fde2e2" opacity=".55"/><rect x="${x-R}" y="${y+10}" width="${2*R}" height="${R}" fill="#93c5fd" opacity=".45"/>`;
+  [[-36,24],[-12,24],[12,24],[36,24],[-24,42],[0,42],[24,42],[-44,40],[44,40]].forEach((q,i)=>{g+=liq(i+20,x+q[0],y+q[1],2.4)});
+  for(let i=0;i<5;i++){const [gx,gy,vx,vy]=gas(i,[x-48,x+48,y-46,y+2],150);g+=trail(gx,gy,vx,vy,16,'#ef4444')+mol(gx,gy,t*3+i)}
+  const u=(t*.6)%1;g+=`<circle cx="${x+4}" cy="${f2(y+40-u*36)}" r="${f2(7+4*u)}" fill="#fff" fill-opacity=".35" stroke="#2563eb" stroke-width="1.2" opacity="${(1-u).toFixed(2)}"/>`;
+  g+=[-30,0,30].map((dx,i)=>`<path d="M${x+dx} ${y+R}q4 -5 0 -10t0 -10" fill="none" stroke="#f97316" stroke-width="2.4" opacity="${(.5+.5*Math.sin(t*6+i)).toFixed(2)}"/>`).join('');
+  d+=`<g clip-path="url(#${id}c0)">${g}</g>`}
+ /* ② Turbine: Leitschaufeln fest, Laufschaufeln bewegen sich; Teilchen schnell hinein, langsamer hinaus */
+ {const [x,y]=P[1];let g=`<rect x="${x-R}" y="${y-R}" width="${2*R}" height="${2*R}" fill="#fde2e2" opacity=".35"/>`;
+  for(let j=-4;j<=4;j++)g+=`<path d="M${x-22} ${y+j*16-6}q8 4 4 12" fill="none" stroke="#64748b" stroke-width="3.4" stroke-linecap="round"/>`;
+  const off=(t*28)%16;for(let j=-5;j<=4;j++){const yy=y+j*16+off;g+=`<path d="M${x+8} ${f2(yy-6)}q-8 5 0 12" fill="none" stroke="#2f5fb3" stroke-width="3.6" stroke-linecap="round"/>`}
+  g+=`<rect x="${x+16}" y="${y-R}" width="5" height="${2*R}" fill="#94a3b8" opacity=".7"/>`;
+  for(let i=0;i<6;i++){const u=(t*.45+i/6)%1,yy=y-38+DKR(i+30)*76,xx=u<.5?x-R+4+u/.5*(R-4):x+(u-.5)/.5*(R-2),sl=u<.5;g+=trail(xx,yy+(sl?0:Math.sin(u*9+i)*6),1,0,sl?20:6,sl?'#ef4444':'#94a3b8')+mol(xx,yy+(sl?0:Math.sin(u*9+i)*6),t*(sl?4:1.5)+i)}
+  g+=SXT(x-20,y+33,'schnell',10,'middle','#b91c1c',800)+SXT(x+24,y+33,'langsam',10,'middle','var(--mute)',800);
+  d+=`<g clip-path="url(#${id}c1)">${g}</g>`}
+ /* ③ Kondensator: kalte Rohre, Teilchen werden langsam, lagern sich an und tropfen ab */
+ {const [x,y]=P[2],TB=[[x-24,y-6],[x+24,y-6],[x,y+14]];let g=`<rect x="${x-R}" y="${y-R}" width="${2*R}" height="${2*R}" fill="#e2e8f0" opacity=".5"/><rect x="${x-R}" y="${y+34}" width="${2*R}" height="30" fill="#93c5fd" opacity=".5"/>`;
+  TB.forEach(([a,b])=>{g+=`<circle cx="${a}" cy="${b}" r="10" fill="#bfdbfe" stroke="#1d4ed8" stroke-width="2"/><circle cx="${a}" cy="${b}" r="6" fill="#60a5fa"/>`});
+  [[-30,46],[-6,46],[18,46],[40,44]].forEach((q,i)=>{g+=liq(i+50,x+q[0],y+q[1],1.6)});
+  for(let i=0;i<5;i++){const u=(t*.22+i/5)%1,tb=TB[i%3],sx=x-44+DKR(i+60)*88;let mx,my,o=1;
+   if(u<.5){const v=u/.5;mx=sx+(tb[0]-sx)*v;my=y-50+(tb[1]-10-(y-50))*v;g+=trail(mx,my,tb[0]-sx,tb[1]-10-(y-50),6,'#94a3b8')}
+   else if(u<.7){mx=tb[0]+(i%2?5:-5);my=tb[1]-11}
+   else{const v=(u-.7)/.3;mx=tb[0]+(i%2?5:-5);my=tb[1]+10+v*(y+40-tb[1]-10);o=v>.8?(1-v)/.2:1}
+   g+=mol(mx,my,i+t*.6,o)}
+  d+=`<g clip-path="url(#${id}c2)">${g}</g>`}
+ /* ④ Speisewasserpumpe: dichtes Wasser, Laufrad dreht, Druck steigt */
+ {const [x,y]=P[3];let g=`<rect x="${x-R}" y="${y-R}" width="${2*R}" height="${2*R}" fill="#93c5fd" opacity=".45"/>`;
+  [[-36,-30],[-10,-40],[16,-34],[40,-24],[-44,-4],[38,4],[-36,24],[-12,36],[14,40],[40,28],[-20,-16],[24,-12]].forEach((q,i)=>{const u=(t*.25+DKR(i+80))%1;g+=liq(i+70,x+q[0],y+q[1]-u*4,1.8)});
+  g+=BALL(x,y+2,17,'#cbd5e1',1.4)+[0,1,2,3,4].map(i=>{const a=t*3+i*2*PI/5;return `<path d="M${x} ${y+2}Q${f2(x+10*Math.cos(a-.5))} ${f2(y+2+10*Math.sin(a-.5))} ${f2(x+15*Math.cos(a))} ${f2(y+2+15*Math.sin(a))}" fill="none" stroke="#1f2937" stroke-width="2"/>`}).join('');
+  d+=`<g clip-path="url(#${id}c3)">${g}</g>`}
+ /* Kreisränder, Nummern, Namen; aktiver Schritt amber */
+ const NM=['Dampferzeuger','Turbine','Kondensator','Speisewasserpumpe'];
+ d+=P.map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="${R}" fill="none" stroke="${i==st?'var(--amber)':'var(--ink)'}" stroke-width="${i==st?4.5:2.5}"/>`
+  +`<circle cx="${p[0]-R*.72}" cy="${p[1]-R*.72}" r="11" fill="${i==st?'var(--amber)':'var(--card)'}" stroke="var(--ink)" stroke-width="1.6"/>`+SXT(p[0]-R*.72,p[1]-R*.72+4.5,i+1,12,'middle','var(--ink)',800)
+  +TH(p[0],i<2?p[1]-R-8:p[1]+R+17,NM[i],'t2','middle')).join('');
+ /* Erklärfeld rechts */
+ d+=SXT(420,24,'Was passiert mit dem Wasser?',14,'start','var(--ink)',800)
+  +mol(430,44,.3)+SXT(444,48,'Wassermolekül H₂O',11.5,'start','var(--ink)',500)
+  +`<line x1="414" y1="66" x2="430" y2="66" stroke="#ef4444" stroke-width="3" stroke-linecap="round" opacity=".45"/>`+mol(434,66,.3)+SXT(444,70,'langer Strich = schnell (heiß)',11.5,'start','var(--ink)',500);
+ const S=['Dampferzeuger: Wärme macht die Teilchen schnell, Wasser verdampft.','Turbine: Dampfteilchen drücken auf die Schaufeln und werden langsamer.','Kondensator: An kalten Rohren wird Dampf wieder zu Wasser.','Pumpe: drückt das Wasser mit 250 bar zurück in den Kessel.'];
+ let y=94;S.forEach((q,i)=>{const L=SXW((i+1)+' '+q,37),on=i==st,h=L.length*13+5;d+=(on?`<rect x="414" y="${y-11}" width="224" height="${h}" rx="5" fill="var(--amber)" opacity=".25"/>`:'')+L.map((l,j)=>SXT(420,y+j*13,l,11,'start',on?'var(--ink)':'var(--mute)',on?700:500)).join('');y+=h+3});
+ d+=SXT(420,y+10,'Abwärme im Kondensator:',11.5,'start','var(--ink)',700)
+  +SXT(420,y+26,`${nf((c[0]-c[1])*100)} % der Brennstoffenergie`,11.5,'start','var(--ink)',500)
+  +SXT(420,y+42,'gehen über den Kühlturm an die Luft.',11.5,'start','var(--mute)',500)+SXT(420,312,'stark vergrößert, nicht maßstäblich',10.5,'start','var(--mute)',500);
+ return d;
+}
+fm(FE,E1,'Dampfkraftwerk (Wärmekraftwerk)','Im Dampferzeuger wird aus Brennstoffwärme Frischdampf (ca. 550 °C, 250 bar). Die Turbine wandelt ihn in Rotation, der Generator in Strom. Im Kondensator wird der Abdampf wieder zu Wasser, die Speisewasserpumpe schließt den Kreislauf. In der Teilchen-Lupe siehst Du, was dabei mit dem Wasser passiert.',
+ [['v','Ansicht','sel',['Kraftwerk','Teilchen-Lupe'],0],['b','Stoff','sel',BR.map(x=>x[0]+' (H_i = '+x[1]+' kJ/kg)'),0],['m','ṁ',1,100,1,'kg/s',30],['e1','η Wärme',70,98,1,'%',92],['e2','η therm.',30,50,1,'%',45],['e3','η Turb.',80,98,1,'%',92],['e4','η Gen.',90,99,1,'%',98]],
+ (s,t=0)=>{const Hi=BR[s.b][1],Pz=s.m*Hi/1000,c1=s.e1/100,c2=c1*s.e2/100,c3=c2*s.e3/100,c4=c3*s.e4/100,Pe=Pz*c4,C=[c1,c2,c3,c4];
+ return{vb:s.v==1?'0 0 640 320':'0 0 640 300',d:s.v==1?DKLUPE(s,t,C):DKANL(s,t,C)+CH(426,50,150,[['Brennstoff',1],['nach Wärmeübertragung',c1],['nach Kreisprozess',c2],['nach Turbine',c3],['elektrische Energie',c4]]),
  res:[[nf(Pe)+' MW','elektrische Leistung'],[nf(c4*100)+' %','Gesamtwirkungsgrad'],[nf(Pz)+' MW','zugeführte Leistung']],rows:[['Verlustleistung (Abwärme)',nf(Pz-Pe)+' MW'],['Brennstoffverbrauch',nf(s.m*3.6)+' t/h'],['Strom pro Stunde',nf(Pe)+' MWh']],st:[['P_zu = ṁ · H_i',`${s.m} kg/s · ${Hi} kJ/kg = ${nf(Pz)} MW`],['η_ges = η_Wärme · η_th · η_Turbine · η_el',`${s.e1} % · ${s.e2} % · ${s.e3} % · ${s.e4} % = ${nf(c4*100)} %`],['P_el = η_ges · P_zu',nf(Pe)+' MW']]}},
  'Der Gesamtwirkungsgrad ist das Produkt aller Teilwirkungsgrade. Der Kreisprozess (Carnot) begrenzt den Wirkungsgrad grundsätzlich: mehr Dampftemperatur → höherer Wirkungsgrad. 1 kW = 1 kJ/s.',1);
 /* Kernkraftwerk (Druckwasserreaktor), überarbeitet 11.11.2026:
@@ -12543,10 +12669,10 @@ Object.assign(EIN,{
 'Dampfkraftwerk (Wärmekraftwerk)':[
  {d:11,t:'Im Dampfkraftwerk verbrennt Kohle oder Gas im Kessel. Das Wasser wird zu Frischdampf mit rund 550 °C und 250 bar. Dieser Dampf treibt die Turbine, die Turbine den Generator.',
   s:'Im Dampfkraftwerk verbrennt Kohle oder Gas im Kessel. Das Wasser wird zu Frischdampf mit rund 550 Grad und 250 bar. Dieser Dampf treibt die Turbine, die Turbine den Generator.',
-  f:(k,t)=>ESIM('Dampfkraftwerk (Wärmekraftwerk)',{e1:95,e2:45,e3:95,e4:98},t,'0 0 380 270',0,0,300,213)+ECARD(390,120,[['Frischdampf','ein2'],['550 °C','ein1'],['250 bar','ein1']])+ETAG(240,250,'Brennstoff → Dampf → Turbine → Generator','middle','ein1')},
+  f:(k,t)=>ESIM('Dampfkraftwerk (Wärmekraftwerk)',{e1:95,e2:45,e3:95,e4:98},t,'0 0 412 290',0,0,330,232)+ECARD(390,120,[['Frischdampf','ein2'],['550 °C','ein1'],['250 bar','ein1']])+ETAG(240,250,'Brennstoff → Dampf → Turbine → Generator','middle','ein1')},
  {d:11,t:'Der Kreislauf: Hinter der Turbine kommt der Abdampf in den Kondensator und wird mit Kühlwasser wieder flüssig. Die Speisewasserpumpe drückt das Wasser zurück in den Kessel. Das Wasser läuft im Kreis.',
   s:'Der Kreislauf: Hinter der Turbine kommt der Abdampf in den Kondensator und wird mit Kühlwasser wieder flüssig. Die Speisewasserpumpe drückt das Wasser zurück in den Kessel. Das Wasser läuft im Kreis.',
-  f:(k,t)=>ESIM('Dampfkraftwerk (Wärmekraftwerk)',{e1:95,e2:45,e3:95,e4:98},t,'0 0 400 270',30,0,420,270)},
+  f:(k,t)=>ESIM('Dampfkraftwerk (Wärmekraftwerk)',{v:1,e1:95,e2:45,e3:95,e4:98},t,'0 0 640 320',0,0,480,240)},
  {d:11,t:'Die zugeführte Leistung kommt aus dem Brennstoff: P_zu = ṁ · H_i. Kohle hat einen Heizwert H_i von 30 MJ/kg. Bei 10 kg/s sind das 300 MW Wärme.',
   s:'Die zugeführte Leistung kommt aus dem Brennstoff: P zu gleich Massenstrom mal Heizwert. Kohle hat einen Heizwert von 30 Megajoule je Kilogramm. Bei 10 Kilogramm je Sekunde sind das 300 Megawatt Wärme.',
   f:k=>EFX(k,[[ESB('P','zu')+' = ṁ · '+ESB('H','i'),'h'],[ESB('P','zu')+' = 10 kg/s · 30 MJ/kg','m'],[ESB('P','zu')+' = 300 MJ/s = 300 MW','r']],['MJ/s ist MW'])},
@@ -12558,7 +12684,7 @@ Object.assign(EIN,{
   f:k=>EFX(k,[[ESB('P','zu')+' = 10 kg/s · 30 MJ/kg = 300 MW','m'],[ESB('P','el')+' = 0,40 · 300 MW = 120 MW','m'],['Abwärme = 300 MW − 120 MW = 180 MW','m'],['mit Wärmenutzung: η bis 90 %','r']],['Kessel → Turbine → Kondensator → Pumpe'])},
  {d:9,t:'Merke: Wasser läuft im Kreis: Kessel, Turbine, Kondensator, Pumpe. P_zu = ṁ · H_i, P_el = η · P_zu, der Rest ist Abwärme.',
   s:'Merke: Wasser läuft im Kreis: Kessel, Turbine, Kondensator, Pumpe. P zu gleich Massenstrom mal Heizwert, P el gleich Eta mal P zu, der Rest ist Abwärme.',
-  f:(k,t)=>EMRK(k,t,ESIM('Dampfkraftwerk (Wärmekraftwerk)',{e1:95,e2:45,e3:95,e4:98},t,'0 0 380 270',0,40,220,160),'P_zu = ṁ · H_i','P_el = η · P_zu')}
+  f:(k,t)=>EMRK(k,t,ESIM('Dampfkraftwerk (Wärmekraftwerk)',{e1:95,e2:45,e3:95,e4:98},t,'0 0 412 290',0,40,220,155),'P_zu = ṁ · H_i','P_el = η · P_zu')}
 ],
 'Kernkraftwerk (Druckwasserreaktor)':[
  {d:11,t:'Im Reaktor trifft ein langsames Neutron einen Uran-235-Kern. Der Kern spaltet sich, setzt Wärme und zwei bis drei neue Neutronen frei. Die treffen weitere Kerne: Kettenreaktion.',
@@ -13511,7 +13637,7 @@ function einPlay(w,S,n){const RM=matchMedia('(prefers-reduced-motion:reduce)').m
 /* Größen erklärt (v265): kurze Legende unter den Reglern, eingeklappt. Einträge [Zeichen, Name, Einheit, Erklärung]; Zeichen mit @ = Reglerschlüssel (Name und Einheit vom Regler), '#' = Zwischenüberschrift. Bisher nur Fach Energie. */
 const GRZ={
 'Kraftwerke im Überblick':[['@k','Kraftwerkstyp','','Wähle ein Kraftwerk, dann zeigen Bild und Tabelle seine Energiewandlungskette.'],['#','Im Rechenweg'],['η_ges','Gesamtwirkungsgrad','%','Anteil der eingesetzten Primärenergie, der am Ende als Strom herauskommt.'],['η₁, η₂, …','Teilwirkungsgrade','%','Wirkungsgrade der einzelnen Stufen der Kette, z. B. Kessel, Turbine, Generator.'],['P_zu','zugeführte Leistung','MW','Leistung, die als Brennstoff, Wind, Sonne oder Wasser in das Kraftwerk geht.'],['P_el','elektrische Leistung','MW','Leistung, die als Strom ins Netz geht.']],
-'Dampfkraftwerk (Wärmekraftwerk)':[['@b','Brennstoff','','Kohle oder Koks. Dahinter steht der Heizwert H_i.'],['@m','Brennstoff-Massenstrom','kg/s','So viel Brennstoff wird in jeder Sekunde verbrannt.'],['@e1','Kesselwirkungsgrad','%','Anteil der Brennstoffwärme, der im Dampf ankommt. Der Rest geht mit dem Abgas weg.'],['@e2','thermischer Wirkungsgrad','%','Anteil der Dampfwärme, den der Kreisprozess in Bewegung umwandeln kann. Der Rest geht im Kondensator als Abwärme weg.'],['@e3','Turbinenwirkungsgrad','%','Verluste in der Turbine selbst durch Reibung und Strömung.'],['@e4','Generatorwirkungsgrad','%','Anteil der Wellenleistung, der als Strom herauskommt. Im Rechenweg heißt er η_el.'],['#','Im Rechenweg'],['H_i','Heizwert','kJ/kg','Wärme, die 1 kg Brennstoff beim Verbrennen abgibt.'],['P_zu','Brennstoffleistung','MW','Wärmeleistung des verbrannten Brennstoffs: P_zu = ṁ · H_i.'],['η_ges','Gesamtwirkungsgrad','%','Produkt aller vier Teilwirkungsgrade.'],['P_el','elektrische Leistung','MW','Leistung, die als Strom ins Netz geht.']],
+'Dampfkraftwerk (Wärmekraftwerk)':[['@v','Ansicht','','Kraftwerk: Anlage im Schnitt mit Kessel, Turbine, Generator, Kondensator, Kühlturm und Energiefluss. Teilchen-Lupe: Wassermoleküle an vier Stellen des Kreislaufs.'],['@b','Brennstoff','','Kohle oder Koks. Dahinter steht der Heizwert H_i.'],['@m','Brennstoff-Massenstrom','kg/s','So viel Brennstoff wird in jeder Sekunde verbrannt.'],['@e1','Kesselwirkungsgrad','%','Anteil der Brennstoffwärme, der im Dampf ankommt. Der Rest geht mit dem Abgas weg.'],['@e2','thermischer Wirkungsgrad','%','Anteil der Dampfwärme, den der Kreisprozess in Bewegung umwandeln kann. Der Rest geht im Kondensator als Abwärme weg.'],['@e3','Turbinenwirkungsgrad','%','Verluste in der Turbine selbst durch Reibung und Strömung.'],['@e4','Generatorwirkungsgrad','%','Anteil der Wellenleistung, der als Strom herauskommt. Im Rechenweg heißt er η_el.'],['#','Im Rechenweg'],['H_i','Heizwert','kJ/kg','Wärme, die 1 kg Brennstoff beim Verbrennen abgibt.'],['P_zu','Brennstoffleistung','MW','Wärmeleistung des verbrannten Brennstoffs: P_zu = ṁ · H_i.'],['η_ges','Gesamtwirkungsgrad','%','Produkt aller vier Teilwirkungsgrade.'],['P_el','elektrische Leistung','MW','Leistung, die als Strom ins Netz geht.']],
 'Kernkraftwerk (Druckwasserreaktor)':[['@P','elektrische Nennleistung','MW','Größte elektrische Leistung des Kraftwerks bei Volllast.'],['@e','Wirkungsgrad','%','Anteil der Reaktorwärme, der als Strom herauskommt. Der Rest ist Abwärme.'],['@l','Auslastung','%','Wie weit das Kraftwerk hochgefahren ist. 100 % heißt Volllast.'],['#','Im Rechenweg'],['P_th','thermische Leistung','MW','Wärmeleistung des Reaktors: P_th = P_el / η.'],['E_kg','Energie je kg Uran-235','J/kg','Bei vollständiger Spaltung rund 8,2 · 10¹³ J/kg.'],['m','Masse Uran-235','kg','So viel Uran-235 wird an einem Tag gespalten.'],['t','Zeit','s','Hier ein Tag: 86400 s.'],['Δm','Massendefekt','g','Masse, die bei der Spaltung in Energie umgewandelt wird.'],['c','Lichtgeschwindigkeit','m/s','c = 3 · 10⁸ m/s.']],
 'Wasserkraftwerke':[['@w','Kraftwerkstyp','','Laufwasser (Fluss), Speicher (Stausee mit Zufluss) oder Pumpspeicher (zwei Becken, ohne Zufluss).'],['@b','Betrieb','','Nur beim Pumpspeicher: Turbinenbetrieb (Wasser fließt nach unten, Strom ins Netz) oder Pumpbetrieb (Wasser wird hochgepumpt, Strom aus dem Netz).'],['@H','Fallhöhe','m','Höhenunterschied zwischen oberem Wasserspiegel und Turbine. Gezählt wird die nutzbare Fallhöhe, nicht die Höhe der Staumauer.'],['@Q','Volumenstrom','m³/s','So viel Wasser fließt in jeder Sekunde durch die Turbine.'],['@e','Wirkungsgrad','%','Anteil der Wasserleistung, der als Strom herauskommt. Im Pumpbetrieb ist es der Wirkungsgrad der Pumpe.'],['@V','Speichervolumen','Mio m³','Nutzbare Wassermenge im oberen Becken. Im Bild: mehr Volumen, tieferer See. Beim Laufwasserkraftwerk gibt es keinen Speicher.'],['#','Im Rechenweg'],['ρ','Dichte von Wasser','kg/m³','ρ = 1000 kg/m³.'],['g','Fallbeschleunigung','m/s²','g = 9,81 m/s².'],['P','Leistung','MW','Elektrische Leistung der Turbine, im Pumpbetrieb die Leistung, die die Pumpe braucht.'],['E','Energie im Speicher','MWh','Strom, den das volle Becken beim Ablassen liefert.'],['t','Laufzeit','h','So lange reicht der Speicher bei vollem Volumenstrom.']],
 'Windkraftanlage':[['@v','Windgeschwindigkeit','m/s','Geschwindigkeit des Winds auf Nabenhöhe.'],['@D','Rotordurchmesser','m','Durchmesser des Kreises, den die Rotorblätter überstreichen.'],['@cp','Leistungsbeiwert','%','Anteil der Windleistung, den der Rotor nutzt. Höchstens 59,3 % (Betz-Grenze).'],['#','Im Rechenweg'],['A','Rotorfläche','m²','Kreisfläche des Rotors: A = π · D² / 4.'],['ρ','Dichte der Luft','kg/m³','ρ = 1,225 kg/m³ auf Meereshöhe.'],['P','elektrische Leistung','kW','Leistung, die die Anlage abgibt.']],
