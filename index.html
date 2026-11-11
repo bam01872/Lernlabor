@@ -4119,37 +4119,170 @@ fm(FE,E3,'Photovoltaik','Photonen schlagen in der Solarzelle Elektronen los. Am 
  rows:[['Sonnenstand',s.G<=0?'Nacht, kein Licht':'wie um '+PVUHR(h)+' an einem klaren Sommertag'],['Wirkungsgrad Anlage',nf(s.e*s.w/100)+' %'],['Verluste bis zum Netz',nf((1-s.e/100*s.w/100)*100)+' % der Einstrahlung'],['Typisch laut Folie','11–16 % (neue Module bis ≈ 22 %)']],
  st:[['P_DC = A · G · η_Modul',`${s.A} m² · ${s.G} W/m² · ${nf(s.e/100)} = ${nf(Pdc)} W`],['P_AC = P_DC · η_WR',`${nf(Pdc)} W · ${nf(s.w/100)} = ${nf(Pac)} W`],['E = A · H_Jahr · η_Modul · η_WR',`${s.A} m² · ${s.H} kWh/m² · ${nf(s.e/100)} · ${nf(s.w/100)} = ${nf(Y)} kWh`]]}},
  'Nachts liefert PV keinen Strom: Ohne Speicher keine konstante Versorgung. Im Bild bestimmt G den Sonnenstand: Steht die Sonne tief, verteilt sich das Licht auf mehr Fläche und muss mehr Luft durchqueren, Wolken senken G zusätzlich. Die Sonne strahlt jährlich ca. 10.000-mal mehr Energie ein, als die Menschheit benötigt, aber die Energiedichte ist gering (viel Fläche).',1);
-const SO=[['Flachkollektor (Warmwasser)',.55],['Vakuumröhrenkollektor',.68],['Parabolrinnen-Kraftwerk',.60]];
+/* Solarthermie (neu): Anlage im Bild wie bei der Photovoltaik. G bestimmt den Sonnenstand (PVH, Sonne am Nachmittag links), A die sichtbare Fläche.
+   Kollektoren: Haus von Süden, Kollektoren auf dem Süddach (1 Kollektor ≈ 2,5 m², max. 24, darüber „Ausschnitt“), aufgeschnittener Technikraum mit Speicher.
+   Der Speicher heizt im Zeitraffer auf (1 s ≈ 1 h, höchstens 10 h Sonne). Vorlauf = Speichertemperatur + G · η / 46,5 K (Durchfluss ca. 40 l/(h·m²)).
+   Kraftwerke: Parabolrinnen-Reihen bzw. Heliostatenfeld mit Turm; Absorber glüht stärker bei mehr G, Wärmeträger fließt schneller.
+   Kraftwerksblock mit Wärmespeicher (heiß/kalt), Turbine und Generator. STR: Reglerbereich A je Anlage [min, max, Schritt, Standard]. */
+const SO=[['Flachkollektor (Warmwasser)',.55],['Vakuumröhrenkollektor',.68],['Parabolrinnen-Kraftwerk',.60,.35,'Thermoöl',390,100000],['Solarturm-Kraftwerk',.50,.40,'Salzschmelze',565,10000]];
+const STR=[[1,500,1,8],[1,500,1,8],[10000,600000,10000,300000],[10000,600000,10000,300000]];
+const STZ=v=>v>=1e4&&v%1000==0?String(v).replace(/\B(?=(\d{3})+(?!\d))/g,' '):nf(v);
+const STC=th=>{const f=Math.max(0,Math.min(1,(th-10)/80));return f<.5?PVMX('#3b82f6','#f59e0b',f*2):PVMX('#f59e0b','#dc2626',(f-.5)*2)};
+function STSKY(s,t,id,hy){
+ /* Himmel und Sonne; hy = Horizont. Sonnenbahn wie Photovoltaik, aber auf den Horizont bezogen */
+ const g=Math.max(0,Math.min(1,s.G/1000)),h=PVH(s.G),ph=.35+(PI/2-.35)*(18-h)/6,ry=hy-45,sx=178-165*Math.cos(ph),sy=hy-ry*Math.sin(ph),k=Math.min(1,s.G/300);
+ let d=`<defs><clipPath id="${id}c"><rect x="0" y="0" width="334" height="300" rx="12"/></clipPath><linearGradient id="${id}sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${PVMX('#0d1830','#4a9be0',k)}"/><stop offset="1" stop-color="${PVMX('#26385f','#d3ecfb',k)}"/></linearGradient></defs><g clip-path="url(#${id}c)"><rect x="0" y="0" width="334" height="300" fill="url(#${id}sky)"/>`;
+ if(s.G<300)d+=`<ellipse cx="${f2(sx)}" cy="${hy+12}" rx="170" ry="60" fill="#ffb36b" opacity="${(.5*(1-s.G/300)).toFixed(2)}"/>`;
+ d+=`<path d="M343 ${hy}A165 ${ry} 0 0 0 13 ${hy}" fill="none" stroke="#fff" stroke-width="1.2" stroke-dasharray="3 6" opacity=".6"/>`+SUN(f2(sx),f2(sy),12,t);
+ return{d,g,h,sx,sy};
+}
+const STLB=(sk,s,lim,yy=40)=>{/* G und Uhrzeit neben der Sonne, bei tiefer Sonne oben rechts */const gl='G = '+nf(s.G)+' W/m²',ul='≈ '+PVUHR(sk.h);
+ return sk.sy<=lim?PVT(f2(sk.sx+20),f2(sk.sy-2),gl,'t2')+PVT(f2(sk.sx+20),f2(sk.sy+15),ul,'t2'):PVT(326,yy,gl,'t2','end')+PVT(326,yy+17,ul,'t2','end')};
+const STBAR=(y,f,c,lab,val,loss)=>{const BW=268,wv=Math.max(2,BW*f);return T(350,y-6,lab,'t2')+`<rect x="350" y="${y}" width="${BW}" height="15" rx="3" fill="none" stroke="var(--wire)" stroke-dasharray="3 3"/><rect x="350" y="${y}" width="${wv.toFixed(1)}" height="15" rx="3" fill="${c}" stroke="var(--ink)" stroke-width="1"/>`
+ +(f>.6?SXT(350+wv-6,y+12,val,12,'end','#5b3a00',700):SXT(f2(350+wv+6),y+12,val,12,'start','var(--ink)',700))+(loss?SXT(350+BW-4,y+12,loss,12,'end','var(--mute)',500):'')};
+function STKOL(s,t,c){
+ const sk=STSKY(s,t,'stk',262),g=sk.g,vac=s.a==1,n=Math.max(1,Math.min(24,Math.ceil(s.A/2.5))),nc=Math.min(n,8),nr=Math.ceil(n/8),
+  R=(u,v)=>[30+180*u+28*v,208-62*v],P=(u,v)=>R(u,v).map(f2),pq=a=>a.map(p=>p.map(f2).join(',')).join(' '),U0=.04,DU=.117,V0=.08,DV=.29,uR=U0+nc*DU,vT=V0+nr*DV,
+  hot=STC(c.Tv),fl=t*(.3+1.2*g),tk=STC(c.Tn),tb=STC(10+(c.Tn-10)*.5);
+ let d=sk.d;
+ d+=`<defs><linearGradient id="g-stgr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fbf6a"/><stop offset="1" stop-color="#5e8a45"/></linearGradient><linearGradient id="g-sttk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${tk}"/><stop offset=".55" stop-color="${tk}"/><stop offset="1" stop-color="${tb}"/></linearGradient></defs>`
+  +`<rect x="0" y="262" width="334" height="38" fill="url(#g-stgr)"/><line x1="0" x2="334" y1="262" y2="262" stroke="var(--ink)" stroke-width="1.2" opacity=".5"/>`;
+ /* Haus von Süden wie bei der Photovoltaik */
+ d+=`<polygon points="30,208 210,208 210,262 30,262" fill="#efe3cf" stroke="var(--ink)" stroke-width="1.4"/>`
+  +`<polygon points="210,262 266,222 266,168 238,146 210,208" fill="#d6c2a0" stroke="var(--ink)" stroke-width="1.4"/>`
+  +`<polygon points="${pq([R(0,0),R(1,0),R(1,1),R(0,1)])}" fill="#a3402c" stroke="var(--ink)" stroke-width="1.4"/>`
+  +[.2,.4,.6,.8].map(v=>{const a=P(0,v),b=P(1,v);return `<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="#7a2e20" stroke-width="1" opacity=".7"/>`}).join('')
+  +`<polyline points="208,211 238,143 269,170" fill="none" stroke="#7a2e20" stroke-width="4.5" stroke-linejoin="round"/><polyline points="208,211 238,143 269,170" fill="none" stroke="var(--ink)" stroke-width="1" stroke-linejoin="round"/>`
+  +`<line x1="27" x2="212" y1="209.5" y2="209.5" stroke="#64748b" stroke-width="3"/>`
+  +`<rect x="166" y="220" width="20" height="18" fill="#bfdbfe" stroke="var(--ink)" stroke-width="1.2"/><line x1="176" x2="176" y1="220" y2="238" stroke="var(--ink)" stroke-width="1"/>`
+  +`<rect x="191" y="228" width="14" height="34" fill="#8b5e3c" stroke="var(--ink)" stroke-width="1.2"/><circle cx="202" cy="246" r="1.3" fill="var(--ink)"/>`;
+ /* Kollektoren: je ≈ 2,5 m², von der Traufe her belegt */
+ for(let i=0;i<n;i++){const cc=i%8,r=Math.floor(i/8),u0=U0+cc*DU,u1=u0+.108,v0=V0+r*DV,v1=v0+.27,fr=pq([R(u0,v0),R(u1,v0),R(u1,v1),R(u0,v1)]);
+  if(!vac){d+=`<polygon points="${fr}" fill="#1c2a44"/>`+[.2,.4,.6,.8].map(f=>{const a=P(u0+(u1-u0)*f,v0+.02),b=P(u0+(u1-u0)*f,v1-.02);return `<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="#c2410c" stroke-width="1.1"/>`}).join('')
+   +`<polygon points="${pq([R(u0,v0),R(u0+(u1-u0)*.35,v0),R(u0+(u1-u0)*.1,v1),R(u0,v1)])}" fill="#fff" opacity="${(.08+.14*g).toFixed(2)}"/><polygon points="${fr}" fill="none" stroke="#cbd5e1" stroke-width="1.3"/>`}
+  else{d+=`<polygon points="${fr}" fill="#e2e8f0" stroke="#94a3b8" stroke-width=".8"/>`+[.14,.32,.5,.68,.86].map(f=>{const a=P(u0+(u1-u0)*f,v0+.02),b=P(u0+(u1-u0)*f,v1-.04),L=`x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}"`;return `<line ${L} stroke="var(--ink)" stroke-width="3.6" stroke-linecap="round"/><line ${L} stroke="#1e3a8a" stroke-width="2.4" stroke-linecap="round"/>`}).join('')
+   +(()=>{const a=P(u0,v1-.02),b=P(u1,v1-.02);return `<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="var(--ink)" stroke-width="4.4" stroke-linecap="round"/><line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="#94a3b8" stroke-width="2.8" stroke-linecap="round"/>`})()}}
+ /* Solarkreis: kalt unten links hinein, warm oben rechts heraus, außen an der Wand in den Technikraum */
+ const vh=vT+.02,uh=uR+.015,xh=R(uh,0)[0],uc=U0-.018;
+ d+=PIPE([P(U0,vh),P(uh,vh),P(uh,0),[f2(xh),216],[146,216],[146,240],[127,240]],hot,fl,1,3.4)
+  +PIPE([[96,252],[60,252],[34.6,252],P(uc,0),P(uc,V0-.03),P(uR,V0-.03)],'#2563eb',fl,1,3.4);
+ /* Licht von der Sonne auf das Kollektorfeld: Breite und Lichtpunkte wachsen mit G */
+ const fc=R((U0+uR)/2,(V0+vT)/2),fw=Math.max(18,180*(uR-U0));
+ d+=`<clipPath id="stkb"><rect x="0" y="0" width="334" height="209"/></clipPath><g clip-path="url(#stkb)" opacity="${(.35+.65*g).toFixed(2)}">${BEAM(f2(sk.sx),f2(sk.sy),f2(fc[0]),f2(fc[1]),12,fw,t,Math.round(2+8*g),'st')}</g>`;
+ /* Technikraum aufgeschnitten: Speicher mit Wärmetauscher-Wendel unten, Pumpe im Rücklauf */
+ d+=`<rect x="38" y="213" width="118" height="45" fill="#4a3b30" stroke="var(--ink)" stroke-width="1.2"/><rect x="38" y="213" width="118" height="5" fill="#000" opacity=".25"/>`
+  +PIPE([[146,216],[146,240],[127,240]],hot,fl,1,3.4)+PIPE([[96,252],[60,252],[40,252]],'#2563eb',fl,1,3.4)
+  +`<path d="M96 221V252A15 3.5 0 0 0 126 252V221Z" fill="url(#g-sttk)"/><path d="M96 221V252A15 3.5 0 0 0 126 252V221Z" fill="url(#g-cyl)" stroke="var(--ink)" stroke-width="1.6"/><ellipse cx="111" cy="221" rx="15" ry="3.5" fill="${tk}" stroke="var(--ink)" stroke-width="1.4"/>`
+  +[0,1,2].map(i=>`<ellipse cx="111" cy="${241+i*4}" rx="11" ry="2" fill="none" stroke="${hot}" stroke-width="1.6" opacity=".9"/>`).join('')
+  +`<circle cx="56" cy="252" r="5.5" fill="#f1f5f9" stroke="var(--ink)" stroke-width="1.4"/>`+[0,1,2].map(i=>{const a=t*(2+6*g)+i*2*PI/3;return `<line x1="56" y1="252" x2="${f2(56+4.5*Math.cos(a))}" y2="${f2(252+4.5*Math.sin(a))}" stroke="var(--ink)" stroke-width="1.3"/>`}).join('');
+ d+='</g>'+`<rect x="0.5" y="0.5" width="333" height="299" rx="12" fill="none" stroke="var(--wire)" stroke-width="1"/>`;
+ /* Beschriftungen */
+ const lv=P(uh,vh);
+ d+=STLB(sk,s,150)+PVT(328,92,'A = '+STZ(s.A)+' m²','t2','end')+PVT(328,109,s.A>60?'Ausschnitt':n+(n>1?' Kollektoren':' Kollektor'),'t2','end')
+  +(lv[0]>160?PVT(326,f2(lv[1]-24),'Vorlauf ≈ '+nf(Math.round(c.Tv))+' °C','t2','end'):PVT(f2(R(uh,.12)[0]+9),f2(R(uh,.12)[1]+4),'Vorlauf ≈ '+nf(Math.round(c.Tv))+' °C','t2'))
+  +PVT(46,284,'Pumpe','t2','middle')+PVT(80,284,'Speicher: ϑ = '+nf(Math.round(c.Tn))+' °C','t2')
+  +PVT(f2(R(U0,vT)[0]+4),f2(R(U0,vT)[1]-12),vac?'Vakuumröhrenkollektor':'Flachkollektor','t2');
+ return d;
+}
+/* Kraftwerksblock: Wärmespeicher heiß/kalt, Maschinenhaus aufgeschnitten mit Dampfturbine und Generator, Leitung ins Netz */
+function STBLK(x,y,t,c,hot){
+ const lw=(1.4+3*Math.min(1,c.fe)).toFixed(1),osc=(4*Math.sin(t*9)).toFixed(1);
+ return VES(x,y+20,16,30,hot)+VES(x+19,y+24,16,26,'#64748b')
+  +BOX3(x+38,y+4,44,32,7,'#e5e7eb','#f1f5f9','#cbd5e1',1.3)+`<rect x="${x+40}" y="${y+8}" width="40" height="24" fill="#334155"/>`+TURB3(x+44,y+13,17,13)+GEN3(x+66,y+15,13,9)
+  +`<path d="M${x+60} ${y+36}V${y+66}H334" fill="none" stroke="var(--ink)" stroke-width="3"/>`+(c.Pel>0?`<path d="M${x+60} ${y+36}V${y+66}H334" fill="none" stroke="var(--amber)" stroke-width="${lw}" stroke-dasharray="3 4" stroke-dashoffset="${osc}"/>`:'');
+}
+function STRIN(s,t,c){
+ /* Parabolrinnen von vorn gesehen: Querschnitt (Parabel) vorn, Rinne läuft nach hinten zum Fluchtpunkt. Die Rinnen drehen sich mit der Sonne (einachsige Nachführung),
+    das Absorberrohr liegt in der Brennlinie. Mehr Fläche = mehr Rinnen nebeneinander (1 Rinne im Bild ≈ 100 000 m²). */
+ const sk=STSKY(s,t,'str',158),g=sk.g,nR=Math.max(1,Math.min(6,Math.round(s.A/SO[2][5]))),glow=PVMX('#7c2d12','#ffb347',g),hc=PVMX('#b91c1c','#f97316',g),fl=t*(.2+1.4*g),
+  VP=[170,140],SB=.45,FO=8.6,yF=248,BK=p=>[VP[0]+(p[0]-VP[0])*SB,VP[1]+(p[1]-VP[1])*SB];
+ let d=sk.d+`<defs><linearGradient id="g-stsd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dcc493"/><stop offset="1" stop-color="#b9965c"/></linearGradient><linearGradient id="g-stmr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eef3f8"/><stop offset=".6" stop-color="#9fb4c8"/><stop offset="1" stop-color="#dbe4ee"/></linearGradient></defs>`
+  +`<rect x="0" y="158" width="334" height="142" fill="url(#g-stsd)"/><line x1="0" x2="334" y1="158" y2="158" stroke="var(--ink)" stroke-width="1" opacity=".4"/>`;
+ const cx0=Math.max(32,150-(nR-1)*24),TR=[];
+ for(let i=0;i<nR;i++){const cx=cx0+i*48,dx=sk.sx-cx,dy=sk.sy-yF,an=Math.max(-.9,Math.min(.9,Math.atan2(dx,-dy))),co=Math.cos(an),si=Math.sin(an),
+   W=(x,y)=>[cx+x*co-(y+FO)*si,yF+x*si+(y+FO)*co],/* lokal: Scheitel (0,0), Brennpunkt (0,−FO); gedreht um den Brennpunkt */
+   U=Array.from({length:12},(_,j)=>{const x=-22+j*4;return W(x,-x*x/(4*FO))});TR.push({cx,W,U})}
+ /* hintere Enden, Rinnenflächen, Sammelleitung hinten */
+ let back='',surf='',front='',tube='',ray='';
+ TR.forEach(({cx,W,U})=>{const Ub=U.map(BK),F=W(0,-FO),Fb=BK(F);
+  back+=`<polyline points="${Ub.map(p=>p.map(f2).join(',')).join(' ')}" fill="none" stroke="var(--ink)" stroke-width="1"/>`;
+  surf+=`<polygon points="${[...U,...Ub.slice().reverse()].map(p=>p.map(f2).join(',')).join(' ')}" fill="url(#g-stmr)" stroke="var(--ink)" stroke-width=".8"/>`;
+  front+=`<path d="M${f2(cx)} ${f2(yF+4)}V272M${f2(cx-8)} 272H${f2(cx+8)}" stroke="#475569" stroke-width="2.4"/><polyline points="${U.map(p=>p.map(f2).join(',')).join(' ')}" fill="none" stroke="var(--ink)" stroke-width="4.2" stroke-linecap="round"/><polyline points="${U.map(p=>p.map(f2).join(',')).join(' ')}" fill="none" stroke="#e2e8f0" stroke-width="2.2" stroke-linecap="round"/>`;
+  tube+=`<line x1="${f2(F[0])}" y1="${f2(F[1])}" x2="${f2(Fb[0])}" y2="${f2(Fb[1])}" stroke="#ff9f1c" stroke-width="8" stroke-linecap="round" opacity="${(.12+.45*g).toFixed(2)}"/><line x1="${f2(F[0])}" y1="${f2(F[1])}" x2="${f2(Fb[0])}" y2="${f2(Fb[1])}" stroke="var(--ink)" stroke-width="4" stroke-linecap="round"/><line x1="${f2(F[0])}" y1="${f2(F[1])}" x2="${f2(Fb[0])}" y2="${f2(Fb[1])}" stroke="${glow}" stroke-width="2.4" stroke-linecap="round"/>`
+   +`<circle cx="${f2(F[0])}" cy="${f2(F[1])}" r="2.8" fill="${glow}" stroke="var(--ink)" stroke-width="1"/>`;
+  /* parallele Sonnenstrahlen (achsparallel, weil die Rinne nachgeführt wird) → Spiegel → Brennlinie */
+  const o=(.3+.7*g).toFixed(2);ray+=[-17,-8,8,17].map(x=>{const A=W(x,-42),B=W(x,-x*x/(4*FO));return `<path d="M${f2(A[0])} ${f2(A[1])}L${f2(B[0])} ${f2(B[1])}L${f2(F[0])} ${f2(F[1])}" fill="none" stroke="#fbbf24" stroke-width="3.2" opacity="${(o*.3).toFixed(2)}"/><path d="M${f2(A[0])} ${f2(A[1])}L${f2(B[0])} ${f2(B[1])}L${f2(F[0])} ${f2(F[1])}" fill="none" stroke="#f59e0b" stroke-width="1.1" opacity="${o}"/>`}).join('')});
+ const hb=TR.map(r=>BK(r.W(0,-FO)));
+ d+=back+surf+PIPE([[f2(hb[0][0]),f2(hb[0][1])],[f2(hb[hb.length-1][0]),f2(hb[hb.length-1][1])],[f2(Math.max(hb[hb.length-1][0]+10,226)),f2(hb[hb.length-1][1])],[226,186],[248,186]],hc,fl,1,3.2)
+  +tube+front+ray+STBLK(244,150,t,c,hc);
+ d+='</g>'+`<rect x="0.5" y="0.5" width="333" height="299" rx="12" fill="none" stroke="var(--wire)" stroke-width="1"/>`;
+ d+=STLB(sk,s,100)+PVT(326,92,'A = '+STZ(s.A)+' m² Spiegel','t2','end')+PVT(326,109,'1 Rinne im Bild ≈ 100 000 m²','t2','end')
+  +PVT(240,172,'Thermoöl ≈ 390 °C','t2','end')+PVT(262,214,'Speicher','t2','middle')+PVT(326,146,'Turbine + Generator','t2','end')+PVT(326,232,'ins Netz','t2','end');
+ return d;
+}
+function STTUR(s,t,c){
+ const sk=STSKY(s,t,'stt',158),g=sk.g,nH=Math.max(3,Math.min(60,Math.round(s.A/SO[3][5]))),glow=PVMX('#7c2d12','#fff3b0',g),hc=PVMX('#b91c1c','#f97316',g),fl=t*(.2+1.4*g),TX=196,RX=TX,RY=58;
+ let d=sk.d+`<defs><linearGradient id="g-stsd2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dcc493"/><stop offset="1" stop-color="#b9965c"/></linearGradient></defs>`
+  +`<rect x="0" y="158" width="334" height="142" fill="url(#g-stsd2)"/><line x1="0" x2="334" y1="158" y2="158" stroke="var(--ink)" stroke-width="1" opacity=".4"/>`;
+ /* Heliostaten: Plätze im Halbkreis um den Turm, nächste zuerst belegt */
+ const HP=[];for(let r=0;r<7;r++){const y=176+r*17+r*r*1.2,k=(y-150)/128,dx=13+15*k;for(let x=8+(r%2)*dx/2;x<326;x+=dx){if(y<252&&x>TX-30&&x<TX+40)continue;if(x>238&&y<236)continue;if(x<176&&y>256)continue;HP.push([x,y,k,Math.hypot((x-TX)/1.6,(y-196)*2.2)])}}
+ HP.sort((a,b)=>a[3]-b[3]);const H=HP.slice(0,nH).sort((a,b)=>a[1]-b[1]);
+ /* Turm mit Receiver */
+ d+=`<polygon points="${TX-9},214 ${TX+9},214 ${TX+5},${RY+16} ${TX-5},${RY+16}" fill="#e5e7eb"/><polygon points="${TX-9},214 ${TX+9},214 ${TX+5},${RY+16} ${TX-5},${RY+16}" fill="url(#g-cyl)" stroke="var(--ink)" stroke-width="1.3"/>`
+  +`<circle cx="${RX}" cy="${RY+6}" r="${f2(10+14*g)}" fill="#ffd166" opacity="${(.15+.5*g).toFixed(2)}"/><rect x="${RX-8}" y="${RY-4}" width="16" height="20" rx="2" fill="${glow}" stroke="var(--ink)" stroke-width="1.4"/><rect x="${RX-8}" y="${RY-4}" width="16" height="20" rx="2" fill="url(#g-cyl)"/><rect x="${RX-10}" y="${RY-8}" width="20" height="5" fill="#64748b" stroke="var(--ink)" stroke-width="1"/>`;
+ /* gebündelte Strahlen: jeder Spiegel lenkt sein Licht auf den Receiver */
+ let ray='',hel='';
+ H.forEach(([x,y,k],i)=>{const my=y-7*k-2;ray+=`<line x1="${f2(x)}" y1="${f2(my)}" x2="${RX}" y2="${RY+6}" stroke="#fbbf24" stroke-width="${f2(.6+.6*k)}" opacity="${(.12+.45*g).toFixed(2)}"/>`;
+  const w=7+7*k,hgt=5+6*k;hel+=`<line x1="${f2(x)}" y1="${f2(y)}" x2="${f2(x)}" y2="${f2(my)}" stroke="#475569" stroke-width="${f2(.8+.8*k)}"/><polygon points="${f2(x-w)},${f2(my+hgt*.3)} ${f2(x+w)},${f2(my-hgt*.3)} ${f2(x+w*.9)},${f2(my-hgt)} ${f2(x-w*1.1)},${f2(my-hgt*.4)}" fill="#cfe0f0" stroke="var(--ink)" stroke-width="${f2(.5+.5*k)}"/>`});
+ d+=`<g opacity="${(.3+.6*g).toFixed(2)}">${BEAM(f2(sk.sx),f2(sk.sy),110,236,12,190,t,Math.round(2+8*g),'stt')}</g>`+ray+hel;
+ /* heiße Salzschmelze im Turm hinunter zum Speicher */
+ d+=PIPE([[RX+7,RY+16],[RX+7,206],[248,206]],hc,fl,1,3)+STBLK(244,182,t,c,hc);
+ d+='</g>'+`<rect x="0.5" y="0.5" width="333" height="299" rx="12" fill="none" stroke="var(--wire)" stroke-width="1"/>`;
+ d+=STLB(sk,s,-1,124)+PVT(326,242,'ins Netz','t2','end')+PVT(8,274,'A = '+STZ(s.A)+' m² Spiegel','t2')+PVT(8,292,'1 Spiegel im Bild ≈ 10 000 m²','t2')
+  +PVT(RX+14,RY+4,'Receiver','t2')+PVT(RX+14,RY+21,'Salz ≈ 565 °C','t2')+PVT(326,178,'Turbine + Generator','t2','end');
+ return d;
+}
 fm(FE,E3,'Solarthermie','Kollektoren fangen Sonnenwärme ein und erwärmen Wasser oder Thermoöl: Q = m · c · ΔT. Im Kraftwerk bündeln Spiegel die direkte Strahlung so stark, dass Dampf für eine Turbine entsteht.',
  [['a','Anlage','sel',SO.map(x=>x[0]),0],['A','A',1,500,1,'m²',8],['G','G',100,1000,10,'W/m²',700],['m','m',100,3000,50,'kg',300],['T','ϑ_Ziel',40,90,1,'°C',60]],
- (s,t=0)=>{const eta=SO[s.a][1],Pth=s.A*s.G*eta,Q=s.m*4190*(s.T-10),h=Q/Pth/3600,Pe=Pth*.35,kra=s.a==2;
- /* Sonne mit Glühen und Lichtbündel; Kollektor räumlich auf dem Dach (Flach: Absorber mit Kupferrohren unter Glas, Vakuum: Glasröhren am Sammelrohr); Speicher als Zylinder mit Wärmetauscher-Wendel; Rohre mit fließenden Strichen */
- let img;
- if(!kra){const C=[[92,140],[214,78],[252,100],[130,162]],bi=(u,v)=>[C[0][0]+(C[1][0]-C[0][0])*u+(C[3][0]-C[0][0])*v,C[0][1]+(C[1][1]-C[0][1])*u+(C[3][1]-C[0][1])*v],pq=a=>a.map(q=>q.map(v=>v.toFixed(1)).join(',')).join(' '),vac=s.a==1;
-  let col='';if(!vac){col=`<polygon points="${pq(C)}" fill="#1f2937"/>`;for(let j=1;j<10;j++){const v=j/10;col+=`<line x1="${bi(.03,v)[0]}" y1="${bi(.03,v)[1]}" x2="${bi(.97,v)[0]}" y2="${bi(.97,v)[1]}" stroke="#c2410c" stroke-width="1.6"/>`}col+=`<polygon points="${pq([bi(0,0),bi(1,0),bi(1,1),bi(0,1)])}" fill="#bfdbfe" opacity=".18"/><polygon points="${pq([bi(.1,0),bi(.35,0),bi(.25,1),bi(0,1)])}" fill="#fff" opacity=".2"/><polygon points="${pq(C)}" fill="none" stroke="#94a3b8" stroke-width="3"/><polygon points="${pq(C)}" fill="none" stroke="var(--ink)" stroke-width="1.2"/>`}
-  else{for(let j=0;j<8;j++){const v=.07+j*.123,a0=bi(.04,v),a1=bi(.98,v),L=`x1="${a0[0].toFixed(1)}" y1="${a0[1].toFixed(1)}" x2="${a1[0].toFixed(1)}" y2="${a1[1].toFixed(1)}"`;col+=`<line ${L} stroke="var(--ink)" stroke-width="10" stroke-linecap="round"/><line ${L} stroke="#dbeafe" stroke-width="8" stroke-linecap="round"/><line ${L} stroke="#1e3a8a" stroke-width="3.4"/><line ${L} stroke="#fff" stroke-width="1.4" opacity=".8" transform="translate(-1 -2)"/>`}const h0=bi(1,0),h1=bi(1,1);col+=`<line x1="${h0[0]}" y1="${h0[1]}" x2="${h1[0]}" y2="${h1[1]}" stroke="var(--ink)" stroke-width="9" stroke-linecap="round"/><line x1="${h0[0]}" y1="${h0[1]}" x2="${h1[0]}" y2="${h1[1]}" stroke="#94a3b8" stroke-width="6.5" stroke-linecap="round"/>`}
-  const coil=[0,1,2,3].map(i=>`<ellipse cx="326" cy="${190+i*7}" rx="22" ry="3.5" fill="none" stroke="#c2410c" stroke-width="2" opacity=".85"/>`).join('');
-  const pr=t*5,pump=[0,1,2].map(i=>{const a=pr+i*2*PI/3;return `<line x1="236" y1="236" x2="${(236+6*Math.cos(a)).toFixed(1)}" y2="${(236+6*Math.sin(a)).toFixed(1)}" stroke="var(--ink)" stroke-width="2"/>`}).join('');
-  img=`<defs><linearGradient id="gTank" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ef4444"/><stop offset=".55" stop-color="#f59e0b"/><stop offset="1" stop-color="#3b82f6"/></linearGradient><linearGradient id="g-roof" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c2410c"/><stop offset="1" stop-color="#7c2d12"/></linearGradient></defs>`
-  +`<polygon points="62,172 226,82 280,112 116,202" fill="url(#g-roof)" stroke="var(--ink)" stroke-width="1.5"/>`+[1,2,3,4,5].map(i=>{const f=i/6;return `<line x1="${62+164*f}" y1="${172-90*f}" x2="${116+164*f}" y2="${202-90*f}" stroke="#000" opacity=".18"/>`}).join('')+`<polygon points="116,202 280,112 280,120 116,210" fill="#7c2d12" stroke="var(--ink)" stroke-width="1.2"/>`
-  +`<polygon points="${pq([[C[3][0],C[3][1]],[C[2][0],C[2][1]],[C[2][0],C[2][1]+5],[C[3][0],C[3][1]+5]])}" fill="#64748b" stroke="var(--ink)"/>`+col
-  +BEAM(34,30,172,120,12,110,t,4,'st')+SUN(30,26,12,t)
-  +PIPE([[240,94],[288,94],[288,190],[304,190]],'#dc2626',t,1,6)+PIPE([[304,211],[286,211],[286,236],[136,236],[136,174],[118,154]],'#2563eb',t,1,6)
-  +`<path d="M296 122V224A30 8 0 0 0 356 224V122Z" fill="url(#gTank)"/><path d="M296 122V224A30 8 0 0 0 356 224V122Z" fill="url(#g-cyl)" stroke="var(--ink)" stroke-width="2"/>`+coil+`<ellipse cx="326" cy="122" rx="30" ry="8" fill="#fca5a5" stroke="var(--ink)" stroke-width="2"/>`
-  +PIPE([[326,116],[326,92],[376,92]],'#dc2626',t,1,5)+PIPE([[396,222],[356,222]],'#2563eb',t,1,5)+`<circle cx="236" cy="236" r="10" fill="#f1f5f9" stroke="var(--ink)" stroke-width="2"/>`+pump
-  +T(366,84,'Warmwasser','t2','middle')+T(380,244,'Kaltwasser','t2','middle')+T(326,262,'Warmwasserspeicher','t2','middle')+T(224,262,'Pumpe','t2','end')+TH(60,222,vac?'Vakuumröhren':'Flachkollektor','t2')+TH(212,150,'Solarkreis','t2')
-  +T(452,100,'Kollektor fängt Sonne ein','t2')+T(452,118,'Pumpe: Solarflüssigkeit','t2')+T(452,136,'Wärmetauscher → Speicher','t2')+T(452,154,'Warmwasser steigt auf','t2')+T(452,184,'Q = m · c · ΔT','t1')
- }else{const par=(dx,dy)=>Array.from({length:21},(_,i)=>{const x=-80+i*8;return `${170+x+dx},${200-x*x/160+dy}`}).join(' '),fy=160,DX=64,DY=-34;
-  const back=par(DX,DY),front=par(0,0),surf=front+' '+back.split(' ').reverse().join(' ');
-  img=`<defs><linearGradient id="g-mir" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f8fafc"/><stop offset=".5" stop-color="#9fb4c8"/><stop offset="1" stop-color="#e2e8f0"/></linearGradient></defs>`
-  +`<path d="M170 200V236M${170+DX} ${200+DY}V236" stroke="#64748b" stroke-width="5"/><line x1="40" x2="400" y1="236" y2="236" stroke="var(--ink)" stroke-width="2"/>`
-  +`<polygon points="${surf}" fill="url(#g-mir)" stroke="var(--ink)" stroke-width="1.4"/><polyline points="${back}" fill="none" stroke="var(--ink)" stroke-width="2"/>`
-  +[-64,-32,32,64].map((x,i)=>{const y=200-x*x/160;return `<path d="M${170+x} 40L${170+x} ${y}L170 ${fy}" fill="none" stroke="#fbbf24" stroke-width="5" opacity=".28"/><path d="M${170+x} 40L${170+x} ${y}L170 ${fy}" fill="none" stroke="#f59e0b" stroke-width="1.4" opacity=".8"/>`}).join('')
-  +`<polyline points="${front}" fill="none" stroke="var(--ink)" stroke-width="3"/><line x1="170" y1="${fy}" x2="${170+DX}" y2="${fy+DY}" stroke="#dc2626" stroke-width="12" stroke-linecap="round" opacity=".35"/><line x1="170" y1="${fy}" x2="${170+DX}" y2="${fy+DY}" stroke="var(--ink)" stroke-width="7.5" stroke-linecap="round"/><line x1="170" y1="${fy}" x2="${170+DX}" y2="${fy+DY}" stroke="#ef4444" stroke-width="5" stroke-linecap="round"/>`
-  +SUN(40,26,12,t)+TH(250,fy-8,'Absorberrohr (Brennlinie)','t2')+T(170,256,'Parabolspiegel','t2','middle')+PIPE([[170+DX,fy+DY],[330,fy+DY],[330,120]],'#dc2626',t,1,6)+EB(300,64,70,50,'Dampf-|turbine')+GEN_(410,89,20)+PYL(470,66)+T(14,280,'Spiegel bündeln Direktstrahlung → Thermoöl → Dampf → Strom','t2')}
- return{d:img,
- res:[[nf(Pth/1000)+' kW','Nutzwärmeleistung'],[kra?nf(Pe/1000)+' kW':nf(h)+' h',kra?'elektrisch (η ≈ 35 %)':'Aufheizzeit des Speichers'],[nf(eta*100)+' %','Kollektorwirkungsgrad']],rows:[['Wärmebedarf Speicher',nf(Q/3.6e6)+' kWh (10 °C → '+s.T+' °C)'],['Strahlungsleistung gesamt',nf(s.A*s.G/1000)+' kW'],['Standort Kraftwerke','hohe Direktstrahlung, ca. 30–40° Breite']],st:[['P = A · G · η',`${s.A} m² · ${s.G} W/m² · ${nf(eta)} = ${nf(Pth)} W`],['Q = m · c · ΔT',`${s.m} kg · 4190 J/(kg·K) · ${s.T-10} K = ${nf(Q/1e6)} MJ`],['t = Q / P',nf(h)+' h']]}},
- 'Niedertemperatur-Solarthermie (Dach) erwärmt Brauchwasser, Parabolrinnen und Solarturm-Kraftwerke erzeugen Hochtemperaturwärme für Dampfturbinen. 1 l Wasser ≈ 1 kg, c = 4190 J/(kg·K).',1);
+ (s,t=0)=>{const so=SO[s.a],eta=so[1],kra=s.a>1,Pth=s.A*s.G*eta,Q=s.m*4190*(s.T-10),h=Q/Pth/3600,hs=PVH(s.G),son=['Sonnenstand','wie um '+PVUHR(hs)+' an einem klaren Sommertag'];
+ if(!kra){/* Zeitraffer: 1 s ≈ 1 h, höchstens 10 h Sonne, danach kurz halten */
+  const L=Math.min(h,10),ts=Math.min(L,t%(L+1.5)),Tn=10+(s.T-10)*ts/h,Tv=Tn+s.G*eta/46.5,Te=10+(s.T-10)*L/h,c={Tn,Tv};
+  let d=STKOL(s,t,c);
+  d+=STBAR(22,1,'#fcd34d','Sonnenlicht auf die Kollektoren',nf(s.A*s.G/1000)+' kW (100 %)','')+STBAR(64,eta,'#ef4444','Wärme ins Wasser',nf(Pth/1000)+' kW ('+nf(eta*100)+' %)','')+T(618,58,'Verluste '+nf(100-eta*100)+' %','t2','end');
+  /* Speichertemperatur über der Zeit, Punkt läuft mit dem Zeitraffer */
+  const Xm=Math.max(1,Math.ceil(L*1.15)),X=x=>380+x/Xm*240,Y=v=>276-v/100*110,yT=Y(s.T);
+  d+=`<line x1="380" x2="622" y1="276" y2="276" stroke="var(--wire)"/><line x1="380" x2="380" y1="160" y2="276" stroke="var(--wire)"/>`
+   +[0,50,100].map(v=>T(374,Y(v)+4,v,'t2','end')).join('')+[0,Xm/2,Xm].map(x=>T(X(x),294,nf(x)+' h','t2','middle')).join('')
+   +`<line x1="380" x2="620" y1="${f2(yT)}" y2="${f2(yT)}" stroke="var(--red)" stroke-dasharray="4 4"/>`+TH(618,f2(yT-5),'ϑ_Ziel = '+s.T+' °C','t2','end')
+   +`<polyline fill="none" stroke="var(--amber)" stroke-width="3" points="380,${f2(Y(10))} ${f2(X(L))},${f2(Y(Te))} 620,${f2(Y(Te))}"/>`
+   +`<circle cx="${f2(X(ts))}" cy="${f2(Y(Tn))}" r="6" fill="var(--red)" stroke="var(--card)" stroke-width="1.5"/>`
+   +T(350,140,'ϑ_Speicher in °C','t2')+T(622,140,'Zeitraffer: 1 s ≈ 1 h','t2','end')
+   +(h>10?SXT(350,114,'Ein Sonnentag reicht nicht: nach 10 h erst '+nf(Math.round(Te))+' °C',12,'start','var(--red)',700):'');
+  return{d,res:[[nf(Pth/1000)+' kW','Wärmeleistung'],[nf(h)+' h','Aufheizzeit des Speichers'],[nf(eta*100)+' %','Kollektorwirkungsgrad']],
+   rows:[son,['Wärmebedarf Speicher',nf(Q/3.6e6)+' kWh (10 °C → '+s.T+' °C)'],['Vorlauf vom Kollektor','etwa '+nf(Math.round(s.G*eta/46.5))+' K wärmer als der Speicher'],['Strahlungsleistung gesamt',nf(s.A*s.G/1000)+' kW']],
+   st:[['P = A · G · η',`${s.A} m² · ${s.G} W/m² · ${nf(eta)} = ${nf(Pth)} W`],['Q = m · c · ΔT',`${s.m} kg · 4190 J/(kg·K) · ${s.T-10} K = ${nf(Q/1e6)} MJ`],['t = Q / P',`${nf(Q/1e6)} MJ / ${nf(Pth)} W = ${nf(Q/Pth)} s = ${nf(h)} h`]]}}
+ /* Kraftwerke: Tagesverlauf wie Photovoltaik (klarer Sommertag, G = 1000 · sin^1,3) */
+ const ek=so[2],Pel=Pth*ek,fn=hh=>hh<6||hh>18?0:Math.sin(PI*(hh-6)/12)**1.3,pk=s.A*1000*eta*ek/1e6;let Ed=0;for(let i=0;i<240;i++)Ed+=fn(6+(i+.5)*12/240)*12/240;Ed*=pk;
+ const c={Pel,fe:Pel/1e6/Math.max(1,s.A*1000*eta*ek/1e6)};
+ let d=s.a==2?STRIN(s,t,c):STTUR(s,t,c);
+ d+=STBAR(22,1,'#fcd34d','Sonnenlicht auf die Spiegel',nf(s.A*s.G/1e6)+' MW (100 %)','')+STBAR(64,eta,'#ef4444','Wärme im '+(s.a==2?'Thermoöl':'Salz'),nf(Pth/1e6)+' MW ('+nf(eta*100)+' %)','')
+  +STBAR(106,eta*ek,'#22a06b','Strom ins Netz',nf(Pel/1e6)+' MW ('+nf(eta*ek*100)+' %)','Abwärme '+nf(eta*(1-ek)*100)+' %');
+ const ym=PVNM(pk),X=hh=>380+hh/24*240,Y=p=>276-p/ym*104,pts=Array.from({length:97},(_,i)=>`${X(i/4).toFixed(1)},${Y(fn(i/4)*pk).toFixed(1)}`);
+ d+=`<line x1="380" x2="622" y1="276" y2="276" stroke="var(--wire)"/><line x1="380" x2="380" y1="166" y2="276" stroke="var(--wire)"/><line x1="376" x2="622" y1="${Y(ym)}" y2="${Y(ym)}" stroke="var(--wire)" stroke-dasharray="2 4"/>`
+  +`<polygon points="380,276 ${pts.join(' ')} 620,276" fill="var(--amber)" opacity=".18"/><polyline fill="none" stroke="var(--amber)" stroke-width="3" points="${pts.join(' ')}"/>`
+  +T(374,Y(ym)+5,nf(ym),'t2','end')+T(374,280,'0','t2','end')+[6,12,18].map(hh=>T(X(hh),294,hh+' Uhr','t2','middle')).join('')
+  +T(350,154,'P_el in MW','t2')+T(622,154,'Tag: ≈ '+nf(Math.round(Ed))+' MWh','t2','end');
+ const mx=X(hs),my=Y(Pel/1e6);
+ d+=`<line x1="${f2(mx)}" x2="${f2(mx)}" y1="${f2(my)}" y2="276" stroke="var(--red)" stroke-dasharray="3 3"/><circle cx="${f2(mx)}" cy="${f2(my)}" r="6" fill="var(--red)" stroke="var(--card)" stroke-width="1.5"/>`+(hs>12.8?TH(f2(mx+10),f2(Math.max(178,my-6)),'jetzt','t2'):TH(f2(mx-10),f2(Math.max(178,my-8)),'jetzt','t2','end'));
+ return{d,res:[[nf(Pel/1e6)+' MW','elektrische Leistung'],[nf(Pth/1e6)+' MW','Wärmeleistung'],[nf(eta*ek*100)+' %','Gesamtwirkungsgrad']],
+  rows:[son,['Wärmeträger',so[3]+', etwa '+so[4]+' °C'],['Strom an einem klaren Sommertag','≈ '+nf(Math.round(Ed))+' MWh'],['Mit Wärmespeicher','Strom auch nach Sonnenuntergang'],['Standort','hohe Direktstrahlung, z. B. Spanien, Nordafrika']],
+  st:[['P_th = A · G · η_Feld',`${STZ(s.A)} m² · ${s.G} W/m² · ${nf(eta)} = ${nf(Pth/1e6)} MW`],['P_el = P_th · η_KW',`${nf(Pth/1e6)} MW · ${nf(ek)} = ${nf(Pel/1e6)} MW`]]}},
+ 'Im Bild bestimmt G den Sonnenstand: Steht die Sonne hoch, trifft mehr Strahlung auf jeden Quadratmeter, der Kollektor liefert mehr Wärme und der Speicher wird schneller warm. Niedertemperatur-Solarthermie (Dach) erwärmt Brauchwasser. Parabolrinnen- und Solarturm-Kraftwerke bündeln die direkte Strahlung mit Spiegeln und erzeugen Hochtemperaturwärme für Dampfturbinen; bei Wolken bündeln die Spiegel fast nichts. 1 l Wasser ≈ 1 kg, c = 4190 J/(kg·K).',1);
+{const m=M[M.length-1],RG=(o,k)=>{/* Reglerbereich A je Anlage; k='a': neue Anlage → Standardwert, sonst nur begrenzen */
+  const r=STR[o.a|0],q=m.p.find(z=>z[0]=='A');let ch=0;if(q[2]!=r[0]||q[3]!=r[1]){q[2]=r[0];q[3]=r[1];q[4]=r[2];q[6]=r[3];ch=1}
+  if(k=='a'&&ch)o.A=r[3];else o.A=Math.min(r[1],Math.max(r[0],o.A));return ch};
+ m.sync=(o,k)=>{if(k=='a'&&RG(o,'a'))build()};m.init=o=>{if(RG(o,''))build()};
+ m.vis2=(o,UI)=>['m','T'].forEach(k=>(UI[k]||[]).forEach(e=>{const c=e.closest('.ctl');if(c)c.hidden=o.a>1}))}
 
 fm(FE,E3,'Geothermie','Mit der Tiefe steigt die Temperatur (in Deutschland im Mittel ca. 3 K je 100 m). Oberflächennahe Erdwärme (bis 400 m) braucht eine Wärmepumpe, tiefe Geothermie kann Wärme und Strom liefern.',
  [['z','z',50,5000,50,'m',3000],['g','Grad.',2,5,.1,'K/100m',3],['m','ṁ',5,150,1,'kg/s',60],['R','ϑ_Rück',20,80,1,'°C',50],['e','η_el',5,20,1,'%',10]],
@@ -12818,7 +12951,7 @@ Object.assign(EIN,{
 'Solarthermie':[
  {d:11,t:'Auf dem Werksdach liegen 20 m² Sonnenkollektoren. Sie sollen 300 Liter Wasser für die Duschen von 20 auf 40 °C erwärmen. Hier entsteht Wärme, kein Strom.',
   s:'Auf dem Werksdach liegen 20 Quadratmeter Sonnenkollektoren. Sie sollen 300 Liter Wasser für die Duschen von 20 auf 40 Grad erwärmen. Hier entsteht Wärme, kein Strom.',
-  f:(k,t)=>ESIM('Solarthermie',{a:0},t,'0 0 420 270',10,0,460,270)},
+  f:(k,t)=>ESIM('Solarthermie',{a:0,A:20,G:800,m:300,T:40},t,'0 0 334 300',0,0,300,270)+ECARD(390,120,[['A = 20 m²','ein1'],['G = 800 W/m²','ein2'],['m = 300 kg','ein2']])},
  {d:11,t:'Der Kollektor fängt Strahlung ein: P = A · G · η. Bei 800 W/m² und einem Kollektorwirkungsgrad von 0,60 sind das 20 m² · 800 W/m² · 0,60 = 9600 W = 9,6 kW Wärme.',
   s:'Der Kollektor fängt Strahlung ein: P gleich A mal G mal Eta. Bei 800 Watt je Quadratmeter und einem Kollektorwirkungsgrad von 0,60 sind das 20 mal 800 mal 0,60 gleich 9600 Watt gleich 9,6 Kilowatt Wärme.',
   f:k=>EFX(k,[['P = A · G · η','h'],['P = 20 m² · 800 W/m² · 0,60','m'],['P = 9600 W = 9,6 kW','r']],['Wärmeleistung, kein Strom'])},
@@ -12833,7 +12966,7 @@ Object.assign(EIN,{
   f:k=>EFX(k,[['P = 20 m² · 800 W/m² · 0,60 = 9,6 kW','m'],['Q = 300 kg · 4,19 kJ/(kg·K) · 20 K = 25140 kJ','m'],['t = Q/P = 2619 s ≈ 44 min','r'],['Kraftwerk: Spiegel → Dampf → Turbine','m']],['Wärme speichern ist leichter als Strom speichern'])},
  {d:9,t:'Merke: Kollektor macht Wärme, nicht Strom. P = A · G · η, Q = m · c · ΔT, und die Zeit ist Q durch P.',
   s:'Merke: Kollektor macht Wärme, nicht Strom. P gleich A G Eta, Q gleich m c Delta T, Zeit t gleich Q durch P.',
-  f:(k,t)=>EMRK(k,t,ESIM('Solarthermie',{a:0},t,'0 0 440 270',0,40,220,150),'P = A · G · η','Q = m · c · ΔT')}
+  f:(k,t)=>EMRK(k,t,ESIM('Solarthermie',{a:0,A:20,G:800,m:300,T:40},t,'0 0 334 300',0,30,220,198),'P = A · G · η','Q = m · c · ΔT')}
 ],
 'Geothermie':[
  {d:11,t:'Unter unseren Füßen wird es wärmer: In Deutschland steigt die Temperatur im Mittel um 3 K je 100 m Tiefe. Wie warm ist es in 3 000 m, wenn oben 10 °C herrschen?',
@@ -13691,7 +13824,7 @@ const GRZ={
 'Wasserkraftwerke':[['@w','Kraftwerkstyp','','Laufwasser (Fluss), Speicher (Stausee mit Zufluss) oder Pumpspeicher (zwei Becken, ohne Zufluss).'],['@b','Betrieb','','Nur beim Pumpspeicher: Turbinenbetrieb (Wasser fließt nach unten, Strom ins Netz) oder Pumpbetrieb (Wasser wird hochgepumpt, Strom aus dem Netz).'],['@H','Fallhöhe','m','Höhenunterschied zwischen oberem Wasserspiegel und Turbine. Gezählt wird die nutzbare Fallhöhe, nicht die Höhe der Staumauer.'],['@Q','Volumenstrom','m³/s','So viel Wasser fließt in jeder Sekunde durch die Turbine.'],['@e','Wirkungsgrad','%','Anteil der Wasserleistung, der als Strom herauskommt. Im Pumpbetrieb ist es der Wirkungsgrad der Pumpe.'],['@V','Speichervolumen','Mio m³','Nutzbare Wassermenge im oberen Becken. Im Bild: mehr Volumen, tieferer See. Beim Laufwasserkraftwerk gibt es keinen Speicher.'],['#','Im Rechenweg'],['ρ','Dichte von Wasser','kg/m³','ρ = 1000 kg/m³.'],['g','Fallbeschleunigung','m/s²','g = 9,81 m/s².'],['P','Leistung','MW','Elektrische Leistung der Turbine, im Pumpbetrieb die Leistung, die die Pumpe braucht.'],['E','Energie im Speicher','MWh','Strom, den das volle Becken beim Ablassen liefert.'],['t','Laufzeit','h','So lange reicht der Speicher bei vollem Volumenstrom.']],
 'Windkraftanlage':[['@v','Windgeschwindigkeit','m/s','Geschwindigkeit des Winds auf Nabenhöhe.'],['@D','Rotordurchmesser','m','Durchmesser des Kreises, den die Rotorblätter überstreichen.'],['@cp','Leistungsbeiwert','%','Anteil der Windleistung, den der Rotor nutzt. Höchstens 59,3 % (Betz-Grenze).'],['#','Im Rechenweg'],['A','Rotorfläche','m²','Kreisfläche des Rotors: A = π · D² / 4.'],['ρ','Dichte der Luft','kg/m³','ρ = 1,225 kg/m³ auf Meereshöhe.'],['P','elektrische Leistung','kW','Leistung, die die Anlage abgibt.']],
 'Photovoltaik':[['@v','Ansicht','','Anlage: Hausdach mit Modulen, Sonne, Energiefluss und Tagesverlauf. Teilchen-Lupe: stark vergrößerter Blick in die Solarzelle am p-n-Übergang.'],['@A','Modulfläche','m²','Gesamtfläche aller Solarmodule. Im Bild steht ein Modul für etwa 2 m².'],['@e','Modulwirkungsgrad','%','Anteil der Sonnenstrahlung, den die Module in Gleichstrom umwandeln. Im Rechenweg heißt er η_Modul.'],['@G','Bestrahlungsstärke','W/m²','Sonnenleistung, die gerade auf 1 m² trifft. Klarer Mittag ca. 1000 W/m², bedeckter Himmel ca. 100 bis 300 W/m². Im Bild steht die Sonne so hoch wie an einem klaren Sommertag bei diesem G.'],['@w','Wirkungsgrad des Wechselrichters','%','Anteil des Gleichstroms, der als Wechselstrom ins Netz geht.'],['@H','Jahreseinstrahlung','kWh/m²','Sonnenenergie, die in einem Jahr auf 1 m² fällt. In Deutschland ca. 950 bis 1250 kWh/m².'],['#','Im Rechenweg'],['P_DC','Gleichstromleistung','W','Leistung, die die Module abgeben.'],['P_AC','Wechselstromleistung','W','Leistung nach dem Wechselrichter, die ins Netz geht.'],['E','Jahresertrag','kWh/a','Strom, den die Anlage in einem Jahr liefert.']],
-'Solarthermie':[['@a','Anlagenart','','Flachkollektor, Vakuumröhrenkollektor oder Parabolrinne. Jede Art hat einen eigenen Wirkungsgrad η.'],['@A','Kollektorfläche','m²','Fläche der Kollektoren oder Spiegel.'],['@G','Bestrahlungsstärke','W/m²','Sonnenleistung, die gerade auf 1 m² trifft.'],['@m','Wassermasse im Speicher','kg','1 l Wasser hat etwa 1 kg.'],['@T','Zieltemperatur','°C','Auf diese Temperatur soll das Wasser im Speicher steigen. Es startet bei 10 °C.'],['#','Im Rechenweg'],['η','Kollektorwirkungsgrad','%','Anteil der Strahlung, der als Wärme im Wasser ankommt. Er hängt von der Anlagenart ab.'],['P','Wärmeleistung','W','Wärme, die die Kollektoren je Sekunde liefern.'],['c','spezifische Wärmekapazität','J/(kg·K)','Wasser: c = 4190 J/(kg·K).'],['ΔT','Temperaturerhöhung','K','Zieltemperatur minus 10 °C Starttemperatur.'],['Q','Wärmemenge','J','Wärme, die das Wasser bis zur Zieltemperatur braucht.'],['t','Aufheizzeit','h','So lange dauert das Aufheizen bei gleichbleibender Sonne.']],
+'Solarthermie':[['@a','Anlagenart','','Flachkollektor, Vakuumröhrenkollektor, Parabolrinnen- oder Solarturm-Kraftwerk. Jede Art hat einen eigenen Wirkungsgrad η.'],['@A','Kollektorfläche','m²','Fläche der Kollektoren oder Spiegel. Im Bild wächst das Kollektor- bzw. Spiegelfeld mit.'],['@G','Bestrahlungsstärke','W/m²','Sonnenleistung, die gerade auf 1 m² trifft. Im Bild bestimmt G den Sonnenstand.'],['@m','Wassermasse im Speicher','kg','1 l Wasser hat etwa 1 kg. Nur bei Kollektoren.'],['@T','Zieltemperatur','°C','Auf diese Temperatur soll das Wasser im Speicher steigen. Es startet bei 10 °C. Nur bei Kollektoren.'],['#','Im Rechenweg'],['η','Kollektorwirkungsgrad','%','Anteil der Strahlung, der als Wärme im Wasser ankommt. Er hängt von der Anlagenart ab.'],['P','Wärmeleistung','W','Wärme, die die Kollektoren je Sekunde liefern.'],['c','spezifische Wärmekapazität','J/(kg·K)','Wasser: c = 4190 J/(kg·K).'],['ΔT','Temperaturerhöhung','K','Zieltemperatur minus 10 °C Starttemperatur.'],['Q','Wärmemenge','J','Wärme, die das Wasser bis zur Zieltemperatur braucht.'],['t','Aufheizzeit','h','So lange dauert das Aufheizen bei gleichbleibender Sonne.'],['η_Feld','Wirkungsgrad Spiegelfeld','%','Kraftwerke: Anteil der Strahlung, der als Wärme im Thermoöl oder Salz ankommt.'],['η_KW','Wirkungsgrad Kraftwerksblock','%','Kraftwerke: Anteil dieser Wärme, den Turbine und Generator zu Strom machen.'],['P_el','elektrische Leistung','W','Kraftwerke: Strom, der ins Netz geht.']],
 'Geothermie':[['@z','Bohrtiefe','m','So tief reicht die Bohrung in die Erde.'],['@g','geothermischer Gradient','K/100 m','So viel wärmer wird es je 100 m Tiefe. In Deutschland im Mittel ca. 3 K.'],['@m','Massenstrom','kg/s','So viel Thermalwasser wird in jeder Sekunde gefördert.'],['@R','Rücklauftemperatur','°C','Temperatur des abgekühlten Wassers, das zurück in die Tiefe gepumpt wird.'],['@e','elektrischer Wirkungsgrad','%','Anteil der geförderten Wärme, der als Strom herauskommt. Strom gibt es erst ab ca. 100 °C.'],['#','Im Rechenweg'],['ϑ₀','Temperatur an der Oberfläche','°C','ϑ₀ = 10 °C.'],['ϑ','Temperatur in der Tiefe','°C','So heiß ist das Gestein in der Bohrtiefe.'],['c','spezifische Wärmekapazität','kJ/(kg·K)','Wasser: c = 4,19 kJ/(kg·K).'],['ΔT','Temperaturdifferenz','K','Temperatur in der Tiefe minus Rücklauftemperatur.'],['P_th','Wärmeleistung','kW','Wärme, die das Wasser je Sekunde nach oben bringt.'],['P_el','elektrische Leistung','kW','Strom aus der Wärme: P_el = η · P_th.']],
 'Brennstoffzelle (Wasserstoff)':[['@v','Ansicht','','Zelle im Schnitt: Platten mit Gaskanal, Kohlefaser-Lage, Platin-Katalysator und Membran, links die Wasserstoffflasche, rechts das Luftgebläse, oben die Lampe. Teilchen-Lupe: stark vergrößerter Blick auf Katalysator und Membran.'],['@n','Zahl der Zellen','-','So viele Zellen sind im Stack in Reihe geschaltet. Ihre Spannungen addieren sich.'],['@I','Stromstärke','A','Strom, der durch jede Zelle und den ganzen Stack fließt.'],['@U','Zellspannung','V','Spannung einer einzelnen Zelle im Betrieb, meist 0,6 bis 0,8 V.'],['#','Im Rechenweg'],['P','elektrische Leistung','W','Leistung des ganzen Stacks: P = n · U · I.'],['η','Wirkungsgrad','%','Zellspannung im Vergleich zur theoretischen Spannung von 1,23 V.'],['ṅ(H₂)','Wasserstoffverbrauch','mol/s','Stoffmenge Wasserstoff, die je Sekunde umgesetzt wird.'],['F','Faraday-Konstante','C/mol','Ladung von 1 mol Elektronen: F = 96485 C/mol. Je H₂-Molekül fließen 2 Elektronen.']],
 'Biogasanlage mit BHKW':[['@s','Substrat','','Futter für die Biogasanlage. Jedes Substrat hat eine eigene Gasausbeute und einen eigenen Methananteil.'],['@t','Substratmenge','t/Tag','So viel Substrat kommt jeden Tag in den Fermenter.'],['@ee','elektrischer Wirkungsgrad','%','Anteil der Methanenergie, den das BHKW als Strom abgibt.'],['@et','thermischer Wirkungsgrad','%','Anteil der Methanenergie, den das BHKW als nutzbare Wärme abgibt.'],['#','Im Rechenweg'],['Gasausbeute','Biogas je Tonne Substrat','m³/t','Gülle ca. 25 m³/t, Mais ca. 200 m³/t.'],['V_Biogas','Biogasmenge','m³/d','Biogas, das pro Tag entsteht.'],['V_CH₄','Methanmenge','m³/d','Methananteil im Biogas, nur er liefert Energie.'],['H_i','Heizwert von Methan','kWh/m³','H_i ≈ 9,97 kWh/m³.'],['E','Energie pro Tag','kWh/d','Energieinhalt des Methans eines Tages.'],['P_el','elektrische Leistung','kW','Strom aus dem BHKW: P_el = η_el · E / 24 h.']],
