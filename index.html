@@ -14623,9 +14623,10 @@ function mcView(){const box=$('#mc');if(!box)return;const a=mcAll(),run=store.ge
 function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="panel"><h2>🧮 Mathe-Check</h2><p class="sub">Noch nicht gemacht. Der Check zeigt Dir in 20 Minuten, wo Du in den Mathe-Grundlagen stehst.</p><div class="pb"><button type="button" class="sbtn2" data-mco="1">Zum Mathe-Check →</button></div></div>`;
  return`<div class="panel"><h2>🧮 Mathe-Check</h2>${mcTable(a)}<div class="pb"><button type="button" class="sbtn2" data-mco="1">Startplan und Lösungswege →</button></div></div>`}
 /* Pilot-Einstellungen: Version, Neuigkeit, Kontakt */
-const APPV=294,NEWS='Begründen & Skizzieren: drei neue Aufgaben zum Skizzieren von v-t- und s-t-Diagrammen.';
+const APPV=295,NEWS='Kernkraftwerk: Anlage im Schnitt, Regelstäbe mit Einfahrtiefe und Kernspaltung als kleine Animation.';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
+ ['11.11.2026',295,['Kernkraftwerk neu gezeichnet: Reaktor mit Brennstäben, Regelstäben samt Antrieben und Druckhalter, Dampferzeuger mit U-Rohren, Pumpen und Kühlwasserkreis.','Der Regler Last fährt die Regelstäbe sichtbar in den Kern, eine Skala zeigt, wie viel Prozent eingefahren sind.','Rechts eine kleine Kernspaltung: Neutron trifft U-235, Ba und Kr fliegen auseinander, drei neue Neutronen. Eins fängt der Regelstab, eins spaltet den nächsten Kern.']],
  ['11.11.2026',294,['Begründen & Skizzieren: drei neue Skizzieraufgaben zu Bewegungsdiagrammen mit Musterskizze. Stapler A und B (s-t- und v-t-Diagramm), Reh auf der Landstraße (Anhalteweg als Fläche im v-t-Diagramm) und Aufzug (Anfahren, Fahren, Bremsen als Trapez, dazu das s-t-Diagramm).']],
  ['11.11.2026',293,['Kurz erklärt Druck: neue Folie „Druck im Flugzeug“ mit Trommelfell, Mittelohr und Ohrtrompete (Steigflug, Ausgleich durch Schlucken, Sinkflug)']],
  ['11.11.2026',292,['Übung Wasserhärte: Einheiten im Lösungsweg direkt an jeder Zahl (10 mg/(l·°dH), 0,178 mmol/(l·°dH)), Herkunft des Faktors 0,178 ergänzt','Bruchdarstellung: geklammerte Einheiten wie (mg/l)/°dH werden nicht mehr zerrissen']],
