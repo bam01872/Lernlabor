@@ -4339,26 +4339,137 @@ fm(FE,E5,'Wärmepumpe','Eine Wärmepumpe arbeitet wie ein Kühlschrank, nur umge
    ['K = W_el · Strompreis',`${WDN(K.W)} kWh · 0,30 €/kWh = ${WDN(K.K)} €`]]}},
  'Ansicht Kreislauf: Der Verdampfer nimmt Umweltwärme auf, der Verdichter hebt sie mit Strom auf ein höheres Temperaturniveau, der Verflüssiger gibt sie an das Heizwasser ab, das Expansionsventil senkt den Druck wieder. Ansicht Energiefluss: Strom plus Umweltwärme ergibt die Heizwärme. Annahmen: Gütegrad 0,5 (Hälfte des Carnot-Werts), Strom 0,30 €/kWh und 0,36 kg CO₂/kWh, Erdgas 0,11 €/kWh und 0,20 kg CO₂/kWh, Gaskessel 95 %. Erdsonde: Sole etwa 5 °C, Grundwasser etwa 10 °C.',1);
 {const m=M[M.length-1];m.knb='v';m.vis=s=>s.q==0?['T','V','Q']:['V','Q']}
-fm(FE,E4,'Brennstoffzelle (Wasserstoff)','Die Brennstoffzelle wandelt die chemische Energie von Wasserstoff und Sauerstoff direkt in Strom um, ohne den Umweg über Wärme und Mechanik. Als Abfall entsteht Wasser. Sie ist ein Energiewandler, kein Speicher.',
- [['n','n',1,200,1,'Zellen',50],['I','I',1,200,1,'A',60],['U','U',.5,.95,.01,'V',.7]],
- (s,t=0)=>{const P=s.n*s.U*s.I,etav=s.U/1.23,nH=s.n*s.I/(2*96485),gH=nH*2.016*3600,gW=nH*18.015*3600,Q=s.n*s.I*(1.23-s.U),h2=[[60,120],[60,150],[150,150]],ox=[[500-60,120],[500-60,150]];
- /* Zelle räumlich im Aufbau: Platte mit Gaskanälen | Gasdiffusionslage | Membran mit Katalysator | Gasdiffusionslage | Platte; H₂- und O₂-Moleküle in den Kanälen, H⁺ wandern durch die Membran, Elektronen über die Lampe */
- const y0=66,h=150,dz=20,lum=Math.min(1,P/20000),xa=110,wa=40,xg=xa+wa,xm=xg+16,wm=66,xc=xm+wm,xk=xc+16,cx=(xm+xm+wm)/2,ch=x=>[0,1,2,3,4].map(k=>`<rect x="${x+4+k*7}" y="${y0+6}" width="4" height="${h-12}" rx="2" fill="#475569" opacity=".55"/>`).join('');
- const mol=(x,c,k)=>{const f=((t*.4+k/3)%1),y=y0+12+f*(h-24);return BALL(x,y,3.6,c,1)+BALL(x+6,y+1,3.6,c,1)};
- const ip=[0,1,2,3,4].map(k=>{const f=((t*.35+k/5)%1),x=xm+6+f*(wm-12),y=y0+20+(k*29)%(h-36);return BALL(x,y,5,'#ef4444',1)+SXT(x,y+3.5,'+',10,'middle','#fff',800)}).join('');
- const wire=[[xa+wa/2,y0-6],[xa+wa/2,30],[xk+wa/2,30],[xk+wa/2,y0-6]],el=FLO(wire,t,6,'var(--flow)',3.2,50);
- return{d:PIPE([[40,110],[xa,110]],'#93c5fd',t,1,9)+PIPE([[400,110],[xk+wa,110]],'#86efac',t,1,9)
- +BOX3(xa,y0,wa,h,dz,'#cbd5e1','#e2e8f0','#94a3b8')+ch(xa+2)+[0,1,2].map(k=>mol(xa+12+(k%2)*8,'#3b82f6',k)).join('')
- +BOX3(xg,y0,16,h,dz,'#374151','#4b5563','#1f2937',1.2)
- +BOX3(xm,y0,wm,h,dz,'#fde68a','#fef3c7','#e5c76b')+`<rect x="${xm}" y="${y0}" width="4" height="${h}" fill="#111"/><rect x="${xc-4}" y="${y0}" width="4" height="${h}" fill="#111"/>`+ip
- +BOX3(xc,y0,16,h,dz,'#374151','#4b5563','#1f2937',1.2)
- +BOX3(xk,y0,wa,h,dz,'#cbd5e1','#e2e8f0','#94a3b8')+ch(xk+2)+[0,1,2].map(k=>mol(xk+12+(k%2)*8,'#16a34a',k+.5)).join('')
- +PIPE([[xk+wa/2,y0+h],[xk+wa/2,y0+h+22],[xk+wa+40,y0+h+22]],'#60a5fa',t,1,7)
- +T(14,100,'H₂','t1')+T(14,138,'Wasserstoff','t2')+T(410,100,'O₂ / Luft','t1')+T(xk+wa+46,y0+h+27,'H₂O + Wärme','t2')
- +T(xa-6,y0+6,'Anode (−)','t2','end')+T(xk+wa+dz+6,y0+6,'Kathode (+)','t2')+T(cx,y0+h+18,'Membran (PEM)','t2','middle')+T(xa-6,y0+h-6,'Gaskanäle','t2','end')+T(cx,y0+h+36,'Katalysator (Pt) an beiden Seiten','t2','middle')+TH(cx,y0+16,'H⁺','t2','middle')
- +PL(wire,'var(--ink)',2.5)+`<circle cx="${cx}" cy="30" r="${(12+10*lum).toFixed(1)}" fill="#fde047" opacity="${(.6*lum).toFixed(2)}"/><circle cx="${cx}" cy="28" r="10" fill="#fef9c3" stroke="var(--ink)" stroke-width="1.6"/><path d="M${cx-5} 30q5 -7 10 0" fill="none" stroke="#b45309" stroke-width="1.4"/><rect x="${cx-5}" y="37" width="10" height="7" fill="#94a3b8" stroke="var(--ink)" stroke-width="1.2"/>`+el+T(xa+wa/2-8,22,'e⁻ (Strom)','t2','end')+
- T(14,278,'Anode:  H₂ → 2 H⁺ + 2 e⁻','t2')+T(14,296,'Kathode: ½ O₂ + 2 H⁺ + 2 e⁻ → H₂O','t2')+T(14,314,'Gesamt: 2 H₂ + O₂ → 2 H₂O   (U_theor. ≈ 1,23 V je Zelle)','t2'),vb:'0 0 640 324', res:[[nf(P/1000)+' kW','elektrische Leistung'],[Math.round(etav*100)+' %','elektr. Wirkungsgrad'],[nf(gH)+' g/h','Wasserstoffverbrauch']],rows:[['Spannung Stack',nf(s.n*s.U)+' V'],['Abwärme',nf(Q/1000)+' kW'],['Wasser entsteht',nf(gW)+' g/h']],st:[['P = n · U · I',`${s.n} · ${nf(s.U)} V · ${s.I} A = ${nf(P)} W`],['η ≈ U / 1,23 V',`${nf(s.U)} V / 1,23 V = ${Math.round(etav*100)} %`],['ṅ(H₂) = n · I / (2 · F)',nf(nH*1000)+' mmol/s ⇒ '+nf(gH)+' g/h']]}},
- 'Eine Zelle liefert im Betrieb nur ca. 0,6–0,8 V (Leerlauf theoretisch 1,23 V); für nutzbare Spannungen schaltet man viele Zellen in Reihe (Stack). Wirkungsgrad 40–60 %, mit Abwärmenutzung mehr. Der Wasserstoff muss zuvor hergestellt werden (z. B. durch Elektrolyse).',1);
+/* ---- Brennstoffzelle mit Teilchen-Lupe (11.11.2026): PEM-Zelle im Schnitt (Platte mit Gaskanal, Kohlefaser-Lage, Platin-Katalysator, Membran), Teilchen wie bei Elektrolyse (GZ-, KO-, LP-Helfer), eigene Helfer mit Präfix BZ ---- */
+const BZC={pt:'#8fa3b8',c:'#4a4f57',mem:'#f5d76e',n:'#5b7bd5'};
+/* Teilchen, s = Maßstab (Lupe 1, Zelle im Schnitt kleiner): H weiß, O rot, N blau */
+const BZH2=(x,y,a,o=1,s=1)=>`<g${KOA(o)}>${KOAT(x-4.6*s*Math.cos(a),y-4.6*s*Math.sin(a),5*s,KOHC)}${KOAT(x+4.6*s*Math.cos(a),y+4.6*s*Math.sin(a),5*s,KOHC)}</g>`,
+ BZO2=(x,y,a,o=1,s=1)=>`<g${KOA(o)}>${KOAT(x-6.8*s*Math.cos(a),y-6.8*s*Math.sin(a),8*s,KOO)}${KOAT(x+6.8*s*Math.cos(a),y+6.8*s*Math.sin(a),8*s,KOO)}</g>`,
+ BZN2=(x,y,a,o=1,s=1)=>`<g${KOA(o)}>${KOAT(x-6.2*s*Math.cos(a),y-6.2*s*Math.sin(a),7.4*s,BZC.n)}${KOAT(x+6.2*s*Math.cos(a),y+6.2*s*Math.sin(a),7.4*s,BZC.n)}</g>`,
+ /* Wasser: a zeigt zu den beiden H (Winkel 104,5°) */
+ BZW=(x,y,a,o=1,s=1)=>`<g${KOA(o)}>${KOAT(x+10.5*s*Math.cos(a+.91),y+10.5*s*Math.sin(a+.91),5*s,KOHC)}${KOAT(x+10.5*s*Math.cos(a-.91),y+10.5*s*Math.sin(a-.91),5*s,KOHC)}${KOAT(x,y,8*s,KOO)}</g>`,
+ BZHP=(x,y,o=1,s=1)=>`<g${KOA(o)}>${KOAT(x,y,5.4*s,KOHC)}${s>.7?KOQ(x+7,y-7,'+',11).replace('fill:#fff','fill:var(--red)').replace('stroke:#0008','stroke:var(--card)'):''}</g>`,
+ BZSO=(x,y,a,o=1)=>{let h='';for(let k=0;k<3;k++){const w=a+k*2.094;h+=KOAT(x+6.4*Math.cos(w),y+6.4*Math.sin(w),4.3,KOO)}return`<g${KOA(o)}>${h}${KOAT(x,y,4,LPC.S)}</g>`},
+ BZE=(x,y,o=1,r=4)=>`<circle cx="${f2(x)}" cy="${f2(y)}" r="${r}" fill="var(--flow)" stroke="var(--ink)" stroke-width=".8"${KOA(o)}/>`,
+ BZLAMP=(x,y,lum)=>(lum>0?`<circle cx="${x}" cy="${y}" r="${(12+12*lum).toFixed(1)}" fill="#fde047" opacity="${(.2+.45*lum).toFixed(2)}"/>`:'')+`<circle cx="${x}" cy="${y-2}" r="10" fill="${lum>0?'#fef08a':'#e5e7eb'}" stroke="var(--ink)" stroke-width="1.6"/><path d="M${x-5} ${y}q5 -7 10 0" fill="none" stroke="#b45309" stroke-width="1.4"/><rect x="${x-5}" y="${y+7}" width="10" height="7" fill="#94a3b8" stroke="var(--ink)" stroke-width="1.2"/>`,
+ BZST=(L,a,x,y)=>L.map((l,i)=>`<text class="t2" x="${x}" y="${y+i*22}"${i===a?' style="fill:var(--ink);font-weight:700"':''}>${i+1}. ${l}</text>`+(i===a?`<circle cx="${x-10}" cy="${y-5+i*22}" r="4" fill="var(--flow)"/>`:'')).join('');
+
+/* Ansicht 1: Zelle im Schnitt. Links H₂-Flasche, rechts Luftgebläse, oben Lampe. Schichten von links:
+   Platte mit Gaskanal | Kohlefaser-Lage (GDL) | Katalysator | Membran | Katalysator | GDL | Platte mit Gaskanal */
+function BZZELLE(s,t){
+ const P=s.n*s.U*s.I,lum=Math.min(1,P/20000),sp=.3+1.7*s.I/200,y0=110,h=170,yb=y0+h,dz=18,
+  xa=226,xg1=268,xc1=282,xm=287,xc2=353,xg2=358,xk=372,cx=320,kA=250,kK=374,ta=t*sp;
+ let d='';
+ /* H₂-Flasche (rote Schulter = Wasserstoff), Leitung in die Anodenplatte */
+ d+=`<rect x="44" y="150" width="44" height="130" rx="9" fill="#cbd5e1" stroke="var(--ink)" stroke-width="1.6"/><rect x="50" y="156" width="8" height="118" rx="4" fill="#fff" opacity=".45"/>`
+  +`<path d="M44 162Q44 134 66 134Q88 134 88 162Z" fill="#dc2626" stroke="var(--ink)" stroke-width="1.6"/><rect x="60" y="118" width="12" height="17" rx="2" fill="#475569" stroke="var(--ink)" stroke-width="1.3"/><rect x="72" y="122" width="8" height="8" fill="#475569" stroke="var(--ink)" stroke-width="1.1"/>`
+  +TH(66,222,'H₂','t1','middle')+TH(66,104,'Wasserstoff','t2','middle');
+ d+=PIPE([[80,126],[xa,126]],'#93c5fd',ta,1,8)+PIPE([[xa,yb-16],[120,yb-16],[120,300]],'#93c5fd',ta,1,8)+ARW(120,296,120,308,'var(--ink)',2)+TH(120,324,'Rest-H₂ zurück','t3','middle');
+ /* Luftgebläse rechts, Abluft mit Wasser */
+ const fa=t*sp*6;let bl='';for(let k=0;k<4;k++){const w=fa+k*1.571;bl+=`<path d="M600 126L${f2(600+13*Math.cos(w))} ${f2(126+13*Math.sin(w))}L${f2(600+11*Math.cos(w+.6))} ${f2(126+11*Math.sin(w+.6))}Z" fill="#94a3b8" stroke="var(--ink)" stroke-width=".8"/>`}
+ d+=PIPE([[584,126],[xk+42,126]],'#a7f3d0',ta,1,8)+`<circle cx="600" cy="126" r="16" fill="var(--card)" stroke="var(--ink)" stroke-width="1.8"/>`+bl+`<circle cx="600" cy="126" r="3" fill="var(--ink)"/>`
+  +TH(628,162,'Luft (Gebläse)','t2','end')+TH(628,178,'21 % O₂, 78 % N₂','t3','end');
+ d+=PIPE([[xk+42,yb-16],[520,yb-16],[520,300]],'#a7f3d0',ta,1,8)+TH(532,312,'Luft + Wasser','t3');
+ for(let k=0;k<2;k++){const f=(ta*.5+k/2)%1;d+=`<path d="M${520} ${f2(304+f*24)}q-3.5 5 0 7q3.5 -2 0 -7Z" fill="#60a5fa" opacity="${(1-f).toFixed(2)}"/>`}
+ /* Schichten */
+ const PLT=(x)=>BOX3(x,y0,42,h,dz,'#6b7280','#9ca3af','#4b5563',1.4);
+ d+=PLT(xa)+`<rect x="${kA}" y="${y0+10}" width="16" height="${h-20}" rx="3" fill="#0f172a" opacity=".85"/><rect x="${xa}" y="122" width="${kA-xa+4}" height="8" fill="#0f172a" opacity=".85"/><rect x="${xa}" y="${yb-20}" width="${kA-xa+4}" height="8" fill="#0f172a" opacity=".85"/>`;
+ const GDL=(x)=>BOX3(x,y0,14,h,dz,'#3f3f46','#52525b','#27272a',1.2)+[0,1,2,3,4,5,6,7,8].map(k=>`<line x1="${x+2}" y1="${y0+8+k*18}" x2="${x+12}" y2="${y0+18+k*18}" stroke="#a1a1aa" stroke-width=".9" opacity=".6"/>`).join('');
+ d+=GDL(xg1)+BOX3(xc1,y0,5,h,dz,'#111','#333','#000',1)+[0,1,2,3,4,5,6,7,8,9,10].map(k=>`<circle cx="${xc1+2.5}" cy="${y0+8+k*15.4}" r="1.6" fill="${BZC.pt}"/>`).join('');
+ d+=BOX3(xm,y0,66,h,dz,'#fde68a','#fef3c7','#e5c76b',1.4);
+ d+=BOX3(xc2,y0,5,h,dz,'#111','#333','#000',1)+[0,1,2,3,4,5,6,7,8,9,10].map(k=>`<circle cx="${xc2+2.5}" cy="${y0+8+k*15.4}" r="1.6" fill="${BZC.pt}"/>`).join('')+GDL(xg2);
+ d+=PLT(xk)+`<rect x="${kK}" y="${y0+10}" width="16" height="${h-20}" rx="3" fill="#0f172a" opacity=".85"/><rect x="${kK+12}" y="122" width="${xk+42-kK-12}" height="8" fill="#0f172a" opacity=".85"/><rect x="${kK+12}" y="${yb-20}" width="${xk+42-kK-12}" height="8" fill="#0f172a" opacity=".85"/>`;
+ /* Teilchen: H₂ strömt im Anodenkanal nach unten, ein Teil wandert zum Katalysator */
+ for(let k=0;k<6;k++){const f=(ta*.22+k/6)%1;d+=BZH2(kA+8+(k%2?2.5:-2.5),y0+16+f*(h-32),t*1.5+k,Math.min(1,f*8,(1-f)*8),.55)}
+ for(let k=0;k<3;k++){const f=(ta*.35+k/3)%1;d+=BZH2(kA+12+f*(xc1-kA-10),y0+38+k*50,t+k,Math.min(1,(1-f)*5),.55)}
+ /* Luft im Kathodenkanal: meist N₂ (blau), dazu O₂ (rot); O₂ wandert zum Katalysator */
+ for(let k=0;k<6;k++){const f=(ta*.22+k/6+.08)%1,x=kK+8+(k%2?2.5:-2.5),y=y0+16+f*(h-32),o=Math.min(1,f*8,(1-f)*8);d+=k%3==1?BZO2(x,y,t*1.5+k,o,.5):BZN2(x,y,t*1.5+k,o,.5)}
+ for(let k=0;k<2;k++){const f=(ta*.35+k/2+.2)%1;d+=BZO2(kK+4-f*(kK-xc2-6),y0+50+k*72,t+k,Math.min(1,(1-f)*5),.5)}
+ /* Wasser entsteht an der Kathode und geht mit der Abluft hinaus */
+ for(let k=0;k<3;k++){const f=(ta*.3+k/3)%1,yy=y0+30+k*48,p=PW([[xc2+6,yy],[kK+8,yy],[kK+8,yb-16],[xk+42,yb-16]],f);d+=BZW(p[0],p[1],Math.PI+t+k,Math.min(1,f*6,(1-f)*6),.5)}
+ /* H⁺ wandern durch die Membran, Zahl ∝ I */
+ const nh=Math.max(2,Math.round(2+s.I/50));for(let k=0;k<nh;k++){const f=(ta*.3+k/nh)%1,y=y0+16+((k*47)%(h-32))+4*Math.sin(t*3+k);d+=BZHP(xm+6+f*54,y,Math.min(1,f*8,(1-f)*8),.85)}
+ /* äußerer Stromkreis: Elektronen von der Anode (−) über die Lampe zur Kathode (+) */
+ const wire=[[240,y0-8],[240,50],[310,50]],wire2=[[330,50],[400,50],[400,y0-8]];
+ d+=PL(wire,'var(--ink)',2.6)+PL(wire2,'var(--ink)',2.6)+BZLAMP(cx,50,lum)+FLO([...wire,[330,50],[400,50],[400,y0-8]],t,8,'var(--flow)',3.4,15+60*s.I/200)
+  +TH(cx,26,'Lampe','t2','middle')+TH(272,42,'e⁻','t2','middle')+ARW(258,58,290,58,'var(--flow)',2)+ARW(350,58,382,58,'var(--flow)',2)+TH(cx,84,`U = ${nf(s.U)} V je Zelle`,'t3','middle');
+ d+=TH(232,72,'Anode (−)','t1','end')+TH(232,92,'H₂ → 2 H⁺ + 2 e⁻','t2','end')+TH(412,72,'Kathode (+)','t1')+TH(412,92,'½ O₂ + 2 H⁺ + 2 e⁻ → H₂O','t2');
+ /* Schichtnamen unten */
+ d+=TH(cx,yb+18,'Membran (PEM)','t2','middle')+TH(cx,yb+34,'Katalysator (Pt)','t3','middle')
+  +`<path d="M${kA+8} ${yb-4}L210 340" stroke="var(--mute)" stroke-width="1" fill="none"/><path d="M${xg2+7} ${yb+4}L440 340" stroke="var(--mute)" stroke-width="1" fill="none"/>`
+  +TH(206,352,'Gaskanal','t3','end')+TH(444,352,'Kohlefaser-Lage','t3');
+ d+=TH(cx,382,'Gesamt: 2 H₂ + O₂ → 2 H₂O   (Leerlauf 1,23 V je Zelle)','t2','middle');
+ return d}
+
+/* Ansicht 2: Teilchen-Lupe. Ausschnitt quer durch Kohlefaser, Katalysator, Membran, Katalysator, Kohlefaser.
+   Je Runde (Q s): 2 H₂ → 4 H⁺ + 4 e⁻ an der Anode, O₂ + 4 H⁺ + 4 e⁻ → 2 H₂O an der Kathode */
+function BZLUPE(t){
+ const X0=30,X1=610,Y0=72,Y1=402,HY=100,xc1=112,xm1=196,xm2=444,xc2=528,Q=9,ph=(t%Q)/Q,S=LPS,PI=Math.PI;
+ const A=[[186,178],[186,326]],K=[[456,204],[456,300]],BH=[[52,150],[60,352]],
+  HP=(i,k)=>[A[i][0]-2,A[i][1]+(k?9:-9)],
+  WH=(i,k)=>[K[i][0]+10.5*Math.cos(PI+(k?.91:-.91)),K[i][1]+10.5*Math.sin(PI+(k?.91:-.91))];
+ let d=`<defs><clipPath id="bzlc"><rect x="${X0}" y="${Y0}" width="${X1-X0}" height="${Y1-Y0}" rx="22"/></clipPath></defs><g clip-path="url(#bzlc)">`
+  +`<rect x="${X0}" y="${Y0}" width="${X1-X0}" height="${Y1-Y0}" fill="var(--card)"/>`
+  +`<rect x="${X0}" y="${Y0}" width="${xc1-X0}" height="${Y1-Y0}" fill="#71717a" opacity=".14"/><rect x="${xc2}" y="${Y0}" width="${X1-xc2}" height="${Y1-Y0}" fill="#71717a" opacity=".14"/>`
+  +`<rect x="${xc1}" y="${Y0}" width="${xm1-xc1}" height="${Y1-Y0}" fill="#52525b" opacity=".16"/><rect x="${xm2}" y="${Y0}" width="${xc2-xm2}" height="${Y1-Y0}" fill="#52525b" opacity=".16"/>`
+  +`<rect x="${xm1}" y="${Y0}" width="${xm2-xm1}" height="${Y1-Y0}" fill="${BZC.mem}" opacity=".3"/>`
+  +[xc1,xm1,xm2,xc2].map(x=>`<line x1="${x}" x2="${x}" y1="${Y0}" y2="${Y1}" stroke="var(--mute)" stroke-dasharray="4 3"/>`).join('');
+ /* Kohlefasern (GDL) */
+ [[X0,xc1,3],[xc2,X1,9]].forEach(([a,b,sd])=>{for(let i=0;i<7;i++){const x=a+8+GZH(i*3.3+sd)*(b-a-16),y=HY+20+GZH(i*5.1+sd)*(Y1-HY-40),w=1.2+GZH(i+sd)*.7,L=34;
+  d+=`<line x1="${f2(x-L*Math.cos(w))}" y1="${f2(y-L*Math.sin(w))}" x2="${f2(x+L*Math.cos(w))}" y2="${f2(y+L*Math.sin(w))}" stroke="#71717a" stroke-width="9" stroke-linecap="round" opacity=".45"/>`}});
+ /* Katalysator: Kohlenstoff-Körner mit Platin-Teilchen; an den Reaktionsstellen sitzt immer Pt */
+ const CAT=(x0,sd,R)=>{let g='';for(let c=0;c<3;c++)for(let r=0;r<11;r++){const x=x0+14+c*28+(GZH(r*7+c+sd)-.5)*6,y=HY+16+r*28+(c%2?14:0)+(GZH(r*3+c*5+sd)-.5)*6;if(y>Y1-8)continue;
+  if(R.some(p=>Math.hypot(p[0]-x,p[1]-y)<24)||GZH(r*13+c*7+sd)>.6)continue;g+=KOAT(x,y,10,BZC.c);for(let k=0;k<2;k++){const w=GZH(r*11+c*3+k+sd)*6.28;g+=`<circle cx="${f2(x+10*Math.cos(w))}" cy="${f2(y+10*Math.sin(w))}" r="3" fill="${BZC.pt}" stroke="#0008" stroke-width=".7"/>`}}
+  R.forEach(p=>{const q=[p[0]+(x0<300?-16:16),p[1]];g+=KOAT(q[0],q[1],10,BZC.c)+`<circle cx="${f2(p[0]+(x0<300?-5:5))}" cy="${p[1]}" r="6.5" fill="${BZC.pt}" stroke="var(--ink)" stroke-width="1"/>`});return g};
+ d+=CAT(xc1,1,A)+CAT(xm2,5,K);
+ /* Membran: Kunststoffketten mit festen SO₃⁻-Gruppen, dazu Wasser (feucht, sonst leitet sie nicht) */
+ [140,252,364].forEach((y,j)=>{let p=`M${xm1} ${y}`;for(let x=xm1;x<=xm2;x+=12)p+=`L${x} ${f2(y+4*Math.sin(x/9+j))}`;d+=`<path d="${p}" fill="none" stroke="#a16207" stroke-width="2.4" opacity=".55"/>`;
+  [236,300,364,412].forEach((x,k)=>{const yy=y+4*Math.sin(x/9+j),dy=(k+j)%2?16:-16;d+=`<line x1="${x}" y1="${f2(yy)}" x2="${x}" y2="${f2(yy+dy)}" stroke="#a16207" stroke-width="1.6" opacity=".55"/>`+BZSO(x,yy+dy,dy>0?1.57:-1.57,.9)+`<text x="${x+9}" y="${f2(yy+dy+(dy>0?14:-6))}" font-size="10" font-weight="800" style="fill:var(--red)">−</text>`})});
+ for(let i=0;i<8;i++){const x=xm1+18+GZH(i*4.7+2)*(xm2-xm1-36),y=HY+20+GZH(i*6.1+3)*(Y1-HY-40),j=GZJ(i+70,t,3);d+=GZW(x+j[0],y+j[1],GZH(i)*6.28+.5*Math.sin(t*.7+i),.5)}
+ /* Gase, die gerade nicht reagieren: H₂ links, O₂ und N₂ (Luft) rechts */
+ [[66,240],[84,110],[48,388]].forEach((p,i)=>{const j=GZJ(i+80,t,5);d+=BZH2(p[0]+j[0],p[1]+j[1],t*.9+i)});
+ [[572,140,'N'],[586,250,'O'],[560,372,'N'],[590,330,'N']].forEach((p,i)=>{const j=GZJ(i+90,t,5);d+=(p[2]=='N'?BZN2:BZO2)(p[0]+j[0],p[1]+j[1],t*.8+i)});
+ /* aktive Reaktionsstellen leicht hervorheben */
+ {const oa=S(ph,.12,.22)*(1-S(ph,.42,.5)),ok=S(ph,.14,.24)*(1-S(ph,.84,.92));A.forEach(p=>{if(oa>0)d+=`<circle cx="${p[0]}" cy="${p[1]}" r="24" fill="#fbbf24" opacity="${(.3*oa).toFixed(2)}"/>`});K.forEach(p=>{if(ok>0)d+=`<circle cx="${p[0]}" cy="${p[1]}" r="24" fill="#fbbf24" opacity="${(.3*ok).toFixed(2)}"/>`})}
+ /* ---------- Anode: H₂ kommt, zerfällt am Pt, gibt e⁻ ab ---------- */
+ A.forEach((a,i)=>{const ap=S(ph,0,.22),j=GZJ(i+10,t,4*(1-ap)),[bx,by]=GZL(BH[i],[a[0]-4,a[1]],ap),sp=S(ph,.22,.3),o=S(ph,0,.06);
+  if(ph<.22)d+=BZH2(bx+j[0],by+j[1],PI/2+(1-ap)*(t*.8+i),o);
+  else [0,1].forEach(k=>{const hp=HP(i,k),st=[a[0]-4,a[1]+(k?4.6:-4.6)],[x,y]=GZL(st,hp,sp);
+   const c0=.38+k*.05+i*.02,u=S(ph,c0,c0+.3);
+   if(ph<c0)d+=ph<.36?KOAT(x,y,5,KOHC):BZHP(x,y);
+   else if(u<1){const w=WH(i,k),p=PW([hp,[250,hp[1]+(k?14:-14)],[300,GZL(hp,w,.45)[1]-(k?-10:10)],[360,GZL(hp,w,.7)[1]+(k?12:-12)],[410,w[1]+(k?-8:8)],w],u);d+=BZHP(p[0],p[1])}})});
+ /* ---------- Kathode: O₂ kommt, zerfällt am Pt, O + 2 H⁺ + 2 e⁻ → H₂O ---------- */
+ {const ap=S(ph,0,.22),j=GZJ(33,t,4*(1-ap)),[bx,by]=GZL([588,190],[476,252],ap),sp=S(ph,.22,.32),o=S(ph,0,.06);
+  if(ph<.22)d+=BZO2(bx+j[0],by+j[1],PI/2+(1-ap)*(t*.7+1),o);
+  else K.forEach((k,i)=>{const st=[476,252+(i?6.8:-6.8)],mv=S(ph,.8,1),fd=1-S(ph,.92,1);
+   if(ph<.76){const[x,y]=GZL(st,k,sp);d+=KOAT(x,y,8,KOO)}
+   else{const x=k[0]+120*mv,y=k[1]+(i?40:-40)*mv;d+=BZW(x,y,PI,fd)+(mv>.15&&i==0?`<g${KOA(fd)}>`+TH(f2(x+14),f2(y-12),'H₂O','t2')+'</g>':'')}})}
+ /* Elektronen: vom H durch Katalysator und Kohlefaser, außen über die Lampe, zur Kathode bis zum O */
+ let ext='';const WT=[[71,Y0],[71,40],[569,40],[569,Y0]];
+ A.forEach((a,i)=>[0,1].forEach(k=>{const c0=.32+k*.03+i*.05,u=S(ph,c0,c0+.36);if(ph<c0||ph>.78)return;const hp=HP(i,k),ko=K[i],P=[hp,[130,hp[1]-30],[71,HY+20],...WT,[569,HY+20],[510,ko[1]-28],[ko[0]+9,ko[1]+(k?7:-7)]];
+  const[x,y]=PW(P,u);const e=BZE(x,y)+(!i&&!k?TH(f2(x+7),f2(y-7),'e⁻','t2'):'');if(y<Y0+1&&u>.1&&u<.9)ext+=e;else d+=e}));
+ d+='</g>'+`<rect x="${X0}" y="${Y0}" width="${X1-X0}" height="${Y1-Y0}" rx="22" fill="none" stroke="var(--ink)" stroke-width="3"/>`;
+ /* Kopfzeile mit Schichtnamen */
+ d+=`<rect x="${X0+1.5}" y="${Y0+1.5}" width="${X1-X0-3}" height="${HY-Y0-2}" rx="20" fill="var(--card)" opacity=".85"/>`
+  +T((X0+xc1)/2,92,'Kohlefaser','t3','middle')+T((xc1+xm1)/2,92,'Katalysator','t3','middle')+TH(320,92,'Membran (PEM): nur H⁺ kommt durch','t2','middle')+T((xm2+xc2)/2,92,'Katalysator','t3','middle')+T((xc2+X1)/2,92,'Kohlefaser','t3','middle');
+ /* äußerer Stromkreis */
+ d+=PL(WT.slice(0,2).concat([[308,40]]),'var(--ink)',2.6)+PL([[332,40],[569,40],[569,Y0]],'var(--ink)',2.6)+BZLAMP(320,40,ph>.42&&ph<.72?1:.35)+ext
+  +TH(84,64,'Anode (−)','t1')+TH(556,64,'Kathode (+)','t1','end')+TH(320,18,'Lampe','t2','middle')+ARW(200,52,240,52,'var(--flow)',2)+ARW(392,52,432,52,'var(--flow)',2)+TH(190,30,'e⁻ zum Verbraucher','t3','middle')+TH(450,30,'e⁻ vom Verbraucher','t3','middle');
+ /* Gleichungen und Schritte */
+ const ik=ph<.22?0:ph<.32?1:ph<.4?2:3,ia=ph<.22?0:ph<.32?1:ph<.76?2:3;
+ d+=TH(171,430,'Anode: 2 H₂ → 4 H⁺ + 4 e⁻','t1','middle')+TH(469,430,'Kathode: O₂ + 4 H⁺ + 4 e⁻ → 2 H₂O','t1','middle');
+ d+=BZST(['H₂ kommt durch die Kohlefaser','H₂ zerfällt am Platin in 2 H','jedes H gibt 1 e⁻ ab: H⁺','H⁺ wandert durch die Membran'],ik,34,458)
+  +BZST(['O₂ kommt aus der Luft','O₂ zerfällt am Platin in 2 O','e⁻ kommen über die Lampe','O + 2 H⁺ + 2 e⁻ → H₂O'],ia,344,458);
+ /* Legende */
+ const lg=[[(x,y)=>BZH2(x,y,0,1,.7),'H₂'],[(x,y)=>BZHP(x,y,1,.7),'H⁺'],[(x,y)=>BZE(x,y,1,3.4),'e⁻'],[(x,y)=>BZO2(x,y,0,1,.6),'O₂'],[(x,y)=>BZN2(x,y,0,1,.6),'N₂ (reagiert nicht)'],
+  [(x,y)=>BZW(x,y,0,1,.6),'H₂O'],[(x,y)=>`<circle cx="${x}" cy="${y}" r="5" fill="${BZC.pt}" stroke="var(--ink)" stroke-width="1"/>`,'Platin'],[(x,y)=>KOAT(x,y,6,BZC.c),'Kohlenstoff'],[(x,y)=>BZSO(x,y,-1.57),'SO₃⁻ (fest)']];
+ d+=KOLEG(560,lg.slice(0,5))+KOLEG(584,lg.slice(5));
+ d+=T(320,608,'Stark vergrößert, nicht maßstäblich. Die Membran ist nur etwa 0,02 mm dick.','t3','middle');
+ return d}
+fm(FE,E4,'Brennstoffzelle (Wasserstoff)','Die Brennstoffzelle wandelt die chemische Energie von Wasserstoff und Sauerstoff direkt in Strom um, ohne den Umweg über Wärme und Mechanik. Als Abfall entsteht Wasser. Sie ist ein Energiewandler, kein Speicher. In der Teilchen-Lupe siehst Du, was am Katalysator und in der Membran passiert.',
+ [['v','Ansicht','sel',['Zelle im Schnitt','Teilchen-Lupe'],0],['n','n',1,200,1,'Zellen',50],['I','I',1,200,1,'A',60],['U','U',.5,.95,.01,'V',.7]],
+ (s,t=0)=>{const P=s.n*s.U*s.I,etav=s.U/1.23,nH=s.n*s.I/(2*96485),gH=nH*2.016*3600,gW=nH*18.015*3600,Q=s.n*s.I*(1.23-s.U);
+ return{d:s.v==1?BZLUPE(t):BZZELLE(s,t),vb:s.v==1?'0 0 640 620':'0 0 640 392',res:[[nf(P/1000)+' kW','elektrische Leistung'],[Math.round(etav*100)+' %','elektr. Wirkungsgrad'],[nf(gH)+' g/h','Wasserstoffverbrauch']],rows:[['Spannung Stack',nf(s.n*s.U)+' V'],['Abwärme',nf(Q/1000)+' kW'],['Wasser entsteht',nf(gW)+' g/h']],st:[['P = n · U · I',`${s.n} · ${nf(s.U)} V · ${s.I} A = ${nf(P)} W`],['η ≈ U / 1,23 V',`${nf(s.U)} V / 1,23 V = ${Math.round(etav*100)} %`],['ṅ(H₂) = n · I / (2 · F)',nf(nH*1000)+' mmol/s ⇒ '+nf(gH)+' g/h']]}},
+ 'Eine Zelle liefert im Betrieb nur ca. 0,6–0,8 V (Leerlauf theoretisch 1,23 V); für nutzbare Spannungen schaltet man viele Zellen in Reihe (Stack). Wirkungsgrad 40–60 %, mit Abwärmenutzung mehr. Der Wasserstoff muss zuvor hergestellt werden (z. B. durch Elektrolyse). Zelle im Schnitt: Je größer I, desto mehr Wasserstoff und Sauerstoff werden umgesetzt und desto mehr Wasser entsteht. Luft ist zu 78 % Stickstoff, er strömt nur durch. Teilchen-Lupe: Was am Platin-Katalysator und in der Membran passiert, Schritt für Schritt.',1);
 const BS=[['Gülle',25,60],['Maissilage',200,52],['Bioabfall',100,60],['Speisereste',150,62]];
 fm(FE,E4,'Biogasanlage mit BHKW','Mikroorganismen zersetzen Biomasse ohne Luft (anaerob) im Fermenter zu Biogas (Methan + CO₂). Das Methan treibt einen Motor mit Generator an: Das Blockheizkraftwerk (BHKW) liefert Strom und Wärme.',
  [['s','Substrat','sel',BS.map(x=>x[0]),1],['t','Menge',1,100,1,'t/Tag',20],['ee','η_el',28,45,1,'%',38],['et','η_th',30,55,1,'%',45]],
@@ -12750,7 +12861,7 @@ Object.assign(EIN,{
   f:(k,t)=>EBOX(60,70,80,'H₂','Tank')+EBOX(200,70,100,'Zelle','','var(--ok)')+EBOX(360,70,80,'Motor','')+AR(140,92,55,0,'var(--flow)')+AR(300,92,55,0,'var(--ok)')+AR(250,40,0,25,'var(--flow)')+EFT(250,30,'O₂ aus der Luft','ein2','middle')+AR(250,114,0,30,'var(--flow)')+EFT(250,165,'H₂O','ein1','middle')+EFT(240,215,'chemische Energie → Strom','ein1','middle')+EFT(240,243,'ohne Flamme, ohne Drehung','ein2','middle')},
  {d:11,t:'Die Reaktion ist die Knallgasreaktion, nur kontrolliert: 2 H₂ + O₂ → 2 H₂O. An der Anode gibt Wasserstoff Elektronen ab, sie fließen über den Verbraucher zur Kathode, wo Sauerstoff sie aufnimmt. Die Protonen wandern durch die Membran.',
   s:'Die Reaktion ist die Knallgasreaktion, nur kontrolliert: 2 H2 plus O2 ergibt 2 H2O. An der Anode gibt Wasserstoff Elektronen ab, sie fließen über den Verbraucher zur Kathode, wo Sauerstoff sie aufnimmt. Die Protonen wandern durch die Membran.',
-  f:(k,t)=>ESIM('Brennstoffzelle (Wasserstoff)',{},t,'0 0 640 324',20,0,440,223)+ETAG(240,250,'2 H₂ + O₂ → 2 H₂O','middle','ein1')},
+  f:(k,t)=>ESIM('Brennstoffzelle (Wasserstoff)',{v:1},t,'0 4 640 402',55,0,370,232)+ETAG(240,258,'2 H₂ + O₂ → 2 H₂O','middle','ein1')},
  {d:11,t:'Eine Zelle liefert theoretisch 1,23 V, im Betrieb etwa 0,7 V. Darum stapelt man viele Zellen. 100 Zellen bei 200 A: P = n · U · I = 100 · 0,7 V · 200 A = 14 000 W = 14 kW.',
   s:'Eine Zelle liefert theoretisch 1,23 Volt, im Betrieb etwa 0,7 Volt. Darum stapelt man viele Zellen. 100 Zellen bei 200 Ampere: P gleich n mal U mal I gleich 100 mal 0,7 Volt mal 200 Ampere gleich 14000 Watt gleich 14 Kilowatt.',
   f:k=>EFX(k,[['P = n · U · I','h'],['P = 100 · 0,7 V · 200 A','m'],['P = 14 000 W = 14 kW','r']],['Stack: viele Zellen in Reihe'])},
@@ -12762,7 +12873,7 @@ Object.assign(EIN,{
   f:k=>EFX(k,[['2 H₂ + O₂ → 2 H₂O','h'],['P = 100 · 0,7 V · 200 A = 14 kW','m'],['η ≈ 0,7 V / 1,23 V = 57 %','r'],['Zelle = Wandler, Tank = Speicher','m']],['Umkehr: Elektrolyse macht aus Strom wieder H₂'])},
  {d:9,t:'Merke: Brennstoffzelle macht aus Wasserstoff direkt Strom, Abfall Wasser. P = n · U · I, η aus 0,7 V zu 1,23 V, rund 57 %.',
   s:'Merke: Brennstoffzelle macht aus Wasserstoff direkt Strom, Abfall Wasser. P gleich n U I, Eta aus 0,7 Volt zu 1,23 Volt, rund 57 Prozent.',
-  f:(k,t)=>EMRK(k,t,ESIM('Brennstoffzelle (Wasserstoff)',{},t,'0 0 640 324',0,50,220,111),'P = n · U · I','η ≈ U / 1,23 V')}
+  f:(k,t)=>EMRK(k,t,ESIM('Brennstoffzelle (Wasserstoff)',{},t,'0 0 640 392',0,44,220,135),'P = n · U · I','η ≈ U / 1,23 V')}
 ],
 'Biogasanlage mit BHKW':[
  {d:11,t:'Ein Landwirt füllt 1 000 t Maissilage im Jahr in den Fermenter. Dort zersetzen Mikroorganismen die Biomasse ohne Luft zu Biogas. Wie viel Strom und Wärme wird daraus?',
@@ -13582,7 +13693,7 @@ const GRZ={
 'Photovoltaik':[['@v','Ansicht','','Anlage: Hausdach mit Modulen, Sonne, Energiefluss und Tagesverlauf. Teilchen-Lupe: stark vergrößerter Blick in die Solarzelle am p-n-Übergang.'],['@A','Modulfläche','m²','Gesamtfläche aller Solarmodule. Im Bild steht ein Modul für etwa 2 m².'],['@e','Modulwirkungsgrad','%','Anteil der Sonnenstrahlung, den die Module in Gleichstrom umwandeln. Im Rechenweg heißt er η_Modul.'],['@G','Bestrahlungsstärke','W/m²','Sonnenleistung, die gerade auf 1 m² trifft. Klarer Mittag ca. 1000 W/m², bedeckter Himmel ca. 100 bis 300 W/m². Im Bild steht die Sonne so hoch wie an einem klaren Sommertag bei diesem G.'],['@w','Wirkungsgrad des Wechselrichters','%','Anteil des Gleichstroms, der als Wechselstrom ins Netz geht.'],['@H','Jahreseinstrahlung','kWh/m²','Sonnenenergie, die in einem Jahr auf 1 m² fällt. In Deutschland ca. 950 bis 1250 kWh/m².'],['#','Im Rechenweg'],['P_DC','Gleichstromleistung','W','Leistung, die die Module abgeben.'],['P_AC','Wechselstromleistung','W','Leistung nach dem Wechselrichter, die ins Netz geht.'],['E','Jahresertrag','kWh/a','Strom, den die Anlage in einem Jahr liefert.']],
 'Solarthermie':[['@a','Anlagenart','','Flachkollektor, Vakuumröhrenkollektor oder Parabolrinne. Jede Art hat einen eigenen Wirkungsgrad η.'],['@A','Kollektorfläche','m²','Fläche der Kollektoren oder Spiegel.'],['@G','Bestrahlungsstärke','W/m²','Sonnenleistung, die gerade auf 1 m² trifft.'],['@m','Wassermasse im Speicher','kg','1 l Wasser hat etwa 1 kg.'],['@T','Zieltemperatur','°C','Auf diese Temperatur soll das Wasser im Speicher steigen. Es startet bei 10 °C.'],['#','Im Rechenweg'],['η','Kollektorwirkungsgrad','%','Anteil der Strahlung, der als Wärme im Wasser ankommt. Er hängt von der Anlagenart ab.'],['P','Wärmeleistung','W','Wärme, die die Kollektoren je Sekunde liefern.'],['c','spezifische Wärmekapazität','J/(kg·K)','Wasser: c = 4190 J/(kg·K).'],['ΔT','Temperaturerhöhung','K','Zieltemperatur minus 10 °C Starttemperatur.'],['Q','Wärmemenge','J','Wärme, die das Wasser bis zur Zieltemperatur braucht.'],['t','Aufheizzeit','h','So lange dauert das Aufheizen bei gleichbleibender Sonne.']],
 'Geothermie':[['@z','Bohrtiefe','m','So tief reicht die Bohrung in die Erde.'],['@g','geothermischer Gradient','K/100 m','So viel wärmer wird es je 100 m Tiefe. In Deutschland im Mittel ca. 3 K.'],['@m','Massenstrom','kg/s','So viel Thermalwasser wird in jeder Sekunde gefördert.'],['@R','Rücklauftemperatur','°C','Temperatur des abgekühlten Wassers, das zurück in die Tiefe gepumpt wird.'],['@e','elektrischer Wirkungsgrad','%','Anteil der geförderten Wärme, der als Strom herauskommt. Strom gibt es erst ab ca. 100 °C.'],['#','Im Rechenweg'],['ϑ₀','Temperatur an der Oberfläche','°C','ϑ₀ = 10 °C.'],['ϑ','Temperatur in der Tiefe','°C','So heiß ist das Gestein in der Bohrtiefe.'],['c','spezifische Wärmekapazität','kJ/(kg·K)','Wasser: c = 4,19 kJ/(kg·K).'],['ΔT','Temperaturdifferenz','K','Temperatur in der Tiefe minus Rücklauftemperatur.'],['P_th','Wärmeleistung','kW','Wärme, die das Wasser je Sekunde nach oben bringt.'],['P_el','elektrische Leistung','kW','Strom aus der Wärme: P_el = η · P_th.']],
-'Brennstoffzelle (Wasserstoff)':[['@n','Zahl der Zellen','-','So viele Zellen sind im Stack in Reihe geschaltet. Ihre Spannungen addieren sich.'],['@I','Stromstärke','A','Strom, der durch jede Zelle und den ganzen Stack fließt.'],['@U','Zellspannung','V','Spannung einer einzelnen Zelle im Betrieb, meist 0,6 bis 0,8 V.'],['#','Im Rechenweg'],['P','elektrische Leistung','W','Leistung des ganzen Stacks: P = n · U · I.'],['η','Wirkungsgrad','%','Zellspannung im Vergleich zur theoretischen Spannung von 1,23 V.'],['ṅ(H₂)','Wasserstoffverbrauch','mol/s','Stoffmenge Wasserstoff, die je Sekunde umgesetzt wird.'],['F','Faraday-Konstante','C/mol','Ladung von 1 mol Elektronen: F = 96485 C/mol. Je H₂-Molekül fließen 2 Elektronen.']],
+'Brennstoffzelle (Wasserstoff)':[['@v','Ansicht','','Zelle im Schnitt: Platten mit Gaskanal, Kohlefaser-Lage, Platin-Katalysator und Membran, links die Wasserstoffflasche, rechts das Luftgebläse, oben die Lampe. Teilchen-Lupe: stark vergrößerter Blick auf Katalysator und Membran.'],['@n','Zahl der Zellen','-','So viele Zellen sind im Stack in Reihe geschaltet. Ihre Spannungen addieren sich.'],['@I','Stromstärke','A','Strom, der durch jede Zelle und den ganzen Stack fließt.'],['@U','Zellspannung','V','Spannung einer einzelnen Zelle im Betrieb, meist 0,6 bis 0,8 V.'],['#','Im Rechenweg'],['P','elektrische Leistung','W','Leistung des ganzen Stacks: P = n · U · I.'],['η','Wirkungsgrad','%','Zellspannung im Vergleich zur theoretischen Spannung von 1,23 V.'],['ṅ(H₂)','Wasserstoffverbrauch','mol/s','Stoffmenge Wasserstoff, die je Sekunde umgesetzt wird.'],['F','Faraday-Konstante','C/mol','Ladung von 1 mol Elektronen: F = 96485 C/mol. Je H₂-Molekül fließen 2 Elektronen.']],
 'Biogasanlage mit BHKW':[['@s','Substrat','','Futter für die Biogasanlage. Jedes Substrat hat eine eigene Gasausbeute und einen eigenen Methananteil.'],['@t','Substratmenge','t/Tag','So viel Substrat kommt jeden Tag in den Fermenter.'],['@ee','elektrischer Wirkungsgrad','%','Anteil der Methanenergie, den das BHKW als Strom abgibt.'],['@et','thermischer Wirkungsgrad','%','Anteil der Methanenergie, den das BHKW als nutzbare Wärme abgibt.'],['#','Im Rechenweg'],['Gasausbeute','Biogas je Tonne Substrat','m³/t','Gülle ca. 25 m³/t, Mais ca. 200 m³/t.'],['V_Biogas','Biogasmenge','m³/d','Biogas, das pro Tag entsteht.'],['V_CH₄','Methanmenge','m³/d','Methananteil im Biogas, nur er liefert Energie.'],['H_i','Heizwert von Methan','kWh/m³','H_i ≈ 9,97 kWh/m³.'],['E','Energie pro Tag','kWh/d','Energieinhalt des Methans eines Tages.'],['P_el','elektrische Leistung','kW','Strom aus dem BHKW: P_el = η_el · E / 24 h.']],
 'Verbrennungsmotor (Viertakt)':[['@a','Motorart','','Otto- oder Dieselmotor. Davon hängen Dichte und Heizwert des Kraftstoffs ab.'],['@n','Drehzahl','1/min','Umdrehungen der Kurbelwelle je Minute. Im Rechenweg in 1/s: 3000 1/min = 50 1/s.'],['@M','Drehmoment','N·m','Drehende Wirkung an der Kurbelwelle.'],['@V','Kraftstoffverbrauch','l/h','So viel Liter Kraftstoff verbraucht der Motor in einer Stunde.'],['#','Im Rechenweg'],['P','Leistung an der Welle','W','Mechanische Leistung: P = M · 2π · n.'],['ṁ','Kraftstoff-Massenstrom','kg/s','Verbrauch mal Dichte, z. B. Benzin 0,74 kg/l.'],['H_i','Heizwert','MJ/kg','Wärme, die 1 kg Kraftstoff beim Verbrennen abgibt.'],['P_zu','zugeführte Leistung','W','Wärmeleistung des Kraftstoffs: P_zu = ṁ · H_i.'],['η','Wirkungsgrad','%','Anteil der Kraftstoffenergie, der als Arbeit an der Welle ankommt.']]};
 Object.assign(GRZ,{
@@ -14687,9 +14798,10 @@ function mcView(){const box=$('#mc');if(!box)return;const a=mcAll(),run=store.ge
 function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="panel"><h2>🧮 Mathe-Check</h2><p class="sub">Noch nicht gemacht. Der Check zeigt Dir in 20 Minuten, wo Du in den Mathe-Grundlagen stehst.</p><div class="pb"><button type="button" class="sbtn2" data-mco="1">Zum Mathe-Check →</button></div></div>`;
  return`<div class="panel"><h2>🧮 Mathe-Check</h2>${mcTable(a)}<div class="pb"><button type="button" class="sbtn2" data-mco="1">Startplan und Lösungswege →</button></div></div>`}
 /* Pilot-Einstellungen: Version, Neuigkeit, Kontakt */
-const APPV=296,NEWS='Dampfkraftwerk: Anlage im Schnitt mit Kessel, Feuerraum, Turbine, Kondensator und Kühlturm, der Energiefluss bleibt.';
+const APPV=297,NEWS='Dampfkraftwerk: Anlage im Schnitt mit Kessel, Feuerraum, Turbine, Kondensator und Kühlturm, der Energiefluss bleibt.';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
+ ['11.11.2026',297,['Brennstoffzelle neu gezeichnet: Zelle im Schnitt mit Wasserstoffflasche, Luftgebläse, Platten mit Gaskanal, Kohlefaser-Lage, Platin-Katalysator und Membran; das Wasser geht mit der Abluft hinaus. Neue Teilchen-Lupe: Wasserstoff zerfällt am Platin, gibt Elektronen ab, H⁺ wandert durch die Membran, an der Kathode entsteht Wasser. Kurz erklärt zeigt die Lupe.']],
  ['11.11.2026',296,['Dampfkraftwerk neu gezeichnet: Kohlebunker und Mühle, Kessel mit Feuerraum, Verdampferrohren und Überhitzer, Rauchgasfilter und Schornstein, Maschinenhaus mit Turbine, Generator und Trafo, Kondensator unter der Turbine, Kühlwasser zum Kühlturm.','Das Bild folgt den Reglern: mehr Brennstoff gibt eine größere Flamme und schnelleres Fließen, mehr Verluste eine dickere Abgasfahne und größere Schwaden am Kühlturm. Die Energiefluss-Balken bleiben.']],
  ['11.11.2026',295,['Kernkraftwerk neu gezeichnet: Reaktor mit Brennstäben, Regelstäben samt Antrieben und Druckhalter, Dampferzeuger mit U-Rohren, Pumpen und Kühlwasserkreis.','Der Regler Last fährt die Regelstäbe sichtbar in den Kern, eine Skala zeigt, wie viel Prozent eingefahren sind.','Rechts eine kleine Kernspaltung: Neutron trifft U-235, Ba und Kr fliegen auseinander, drei neue Neutronen. Eins fängt der Regelstab, eins spaltet den nächsten Kern.']],
  ['11.11.2026',294,['Begründen & Skizzieren: drei neue Skizzieraufgaben zu Bewegungsdiagrammen mit Musterskizze. Stapler A und B (s-t- und v-t-Diagramm), Reh auf der Landstraße (Anhalteweg als Fläche im v-t-Diagramm) und Aufzug (Anfahren, Fahren, Bremsen als Trapez, dazu das s-t-Diagramm).']],
