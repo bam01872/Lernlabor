@@ -25,6 +25,9 @@ const srv=http.createServer((q,r)=>{let p=decodeURIComponent(q.url.split('?')[0]
   // v258: kein Auftrag-Knopf oben neben „Kurz erklärt“, der Auftrag steht nur bei den Reglern
   {await p.evaluate(x=>location.hash=x,'thema/hydraulik');await p.waitForTimeout(300);const r=await p.evaluate(()=>({g:!!document.querySelector('#uig'),a:!!document.querySelector('.panel>#auf+#ctls,.panel #auf.uia')}));if(r.g)bad(vp.width+'px: Auftrag-Knopf oben ist wieder da');if(!r.a)bad(vp.width+'px: Auftrag steht nicht bei den Reglern')}
   for(const h of ['ueben','pruefung','muendlich','']){errs.length=0;await p.evaluate(x=>location.hash=x,h);await p.waitForTimeout(150);if(errs.length)bad(`${vp.width}px #${h}: ${errs[0]}`)}
+  // v303: Tutorial unter Ich, 7 Kapitel, Mini-Simulation mit Auftrag
+  {errs.length=0;await p.evaluate(()=>location.hash='tutorial/4');await p.waitForTimeout(300);const r=await p.evaluate(()=>{const n=document.querySelectorAll('#tut .tunav button').length,u=document.querySelector('#tut [data-v="U"]');if(!u)return{n};u.value=24;u.dispatchEvent(new Event('input'));return{n,ok:!!document.querySelector('#tut .tuauf.ok'),vis:!document.querySelector('#tut').hidden}});
+   if(r.n!==7||!r.ok||!r.vis)bad(vp.width+'px: Tutorial '+JSON.stringify(r));if(errs.length)bad(vp.width+'px #tutorial: '+errs[0])}
   console.log(`${vp.width}px: ${sn.length} Themen geprüft`);await p.close()}}
  catch(e){bad(e.stack)}await b.close();srv.close();
  console.log(fail?`${fail} Fehler`:'Alles grün');process.exit(fail?1:0)});
