@@ -17110,6 +17110,7 @@ if($('#home')&&!$('#home').hidden){try{nav()}catch(e){homeView()}}
 .tuq{font-size:1.05em;margin:0 0 8px}.tuin{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.tuin input{width:9em;font:inherit;padding:9px 10px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink)}
 .tufb{margin:8px 0 0;padding:8px 12px;border-radius:10px;font-weight:600}.tufb.ok{background:color-mix(in srgb,var(--ok) 12%,var(--card));color:var(--ok)}.tufb.no{background:color-mix(in srgb,var(--red,#dc2626) 10%,var(--card))}
 .tulw{margin:8px 0 0;padding:8px 12px;border-radius:10px;background:var(--card);border:1px solid var(--line)}.tulw p{margin:4px 0}
+.tubet{display:block;margin:10px 0 2px;padding:10px 12px;border-radius:12px;border:1px solid color-mix(in srgb,var(--amber) 55%,var(--line));background:color-mix(in srgb,var(--amber) 13%,var(--card));line-height:1.45}.tubet b{display:block;margin-bottom:2px}
 .tust{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 0}.tust span{border-radius:999px;padding:4px 10px;font-size:.88em;font-weight:600;border:1px solid var(--line);background:var(--card)}
 /* Kapitel 6: Aufgabentypen */
 .tuty{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px;margin:4px 0 10px}
@@ -17224,7 +17225,7 @@ if($('#home')&&!$('#home').hidden){try{nav()}catch(e){homeView()}}
   box.innerHTML=`<div class="panel"><div class="tuh"><div><h2>🗺️ Tutorial</h2><p class="sub" style="margin:0">Freiwillig: sieben kurze Kapitel, je etwa eine Minute. Spring hin und her, wie Du magst, oder entdecke die App einfach selbst.</p></div></div>
   <div class="tunav" role="tablist" aria-label="Kapitel">${K.map((x,j)=>`<button type="button" role="tab" data-k="${j}" aria-current="${j===k}" aria-selected="${j===k}" class="${s.includes(j)&&j!==k?'dn':''}"><i>${s.includes(j)&&j!==k?'✓':j+1}</i>${x.t}</button>`).join('')}</div>
   <div class="tuk" role="tabpanel"><h3>${c.i} ${c.t}</h3><p class="tuz">${c.z}</p>
-  ${c.p?`<ul class="tupt">${c.p.map(x=>`<li><span aria-hidden="true">${x[0]}</span><span>${x[1]}${c.st&&x[0]==='📶'?'<span class="tust"><span>🟢 Grundlagen</span><span>🟡 Anwenden</span><span>🔴 Prüfungsniveau</span></span>':''}</span></li>`).join('')}</ul>`:''}
+  ${c.p?`<ul class="tupt">${c.p.map(x=>`<li><span aria-hidden="true">${x[0]}</span><span>${x[1]}${c.st&&x[0]==='📶'?'<span class="tust"><span>🟢 Grundlagen</span><span>🟡 Anwenden</span><span>🔴 Prüfungsniveau</span></span><span class="tubet"><b>🏭 Besonders lohnend: Aufgaben „Im Betrieb“.</b> Viele Aufgaben spielen in Werkhalle, Werkstatt oder Labor, genau wie in der Prüfung. Jedes Thema hat dazu ein Beispiel „🏭 Im Betrieb“ unter Nachschlagen, Begründen & Skizzieren hat die 🏭 Betriebsfälle.</span>':''}</span></li>`).join('')}</ul>`:''}
   <div class="${c.d==='ty'?'':'tudemo'}" id="tudm"></div>
   ${GO[k].length?`<div class="tugo">${GO[k].map((g,j)=>`<button type="button" class="sbtn2" data-go="${j}">${g[0]}</button>`).join('')}</div>`:''}
   <div class="tubt"><button type="button" class="sbtn2" id="tupv"${k?'':' disabled'}>‹ Zurück</button><span class="sub">${k+1} von ${K.length}</span><button type="button" class="sbtn" id="tunx">${k<K.length-1?'Weiter ›':'Fertig ✓'}</button></div></div></div>`;
