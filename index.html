@@ -3380,9 +3380,96 @@ const mk=s=>()=>{s=(s*1664525+1013904223)%4294967296;return s/4294967296},rg=(r,
 const SR='Steuern & Regeln';
 const BOX=(x,y,w,h,txt,col='var(--ink)')=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="6" fill="var(--bg)" stroke="${col}" stroke-width="2"/>`+T(x+w/2,y+h/2+5,txt,'t2','middle');
 const WK=[['S235 · Baustahl',235,'S = Stahl für den Stahlbau, 235 = Mindeststreckgrenze in N/mm²'],['S355 · Baustahl, höherfest',355,'S = Stahl für den Stahlbau, 355 = Mindeststreckgrenze in N/mm²'],['E295 · Maschinenbaustahl',295,'E = Maschinenbaustahl, 295 = Mindeststreckgrenze in N/mm²'],['C45 · Vergütungsstahl',490,'C = unlegierter Stahl, 45 = 0,45 % Kohlenstoff (vergütet R_e ≈ 490 N/mm²)']];
+/* Zugversuch (Ansicht 2 von „Zug-/Druckspannung & Sicherheit“, Markus 13.11.2026): Rundprobe d₀ = 10 mm, l₀ = 50 mm in der Prüfmaschine.
+   Die Traverse zieht den Stab um Δl länger, rechts läuft das Spannungs-Dehnungs-Diagramm mit (σ = F / A₀ mit dem Anfangsquerschnitt).
+   Werte typisch für Lehrbuchkurven (Mindestwerte R_e nach DIN EN 10025-2 bzw. 10083-2, R_m und A gerundete Mittelwerte). */
+const ZVW=[{Re:235,Rm:400,eL:1.8,eg:18,eA:26,au:1},{Re:355,Rm:520,eL:1.5,eg:15,eA:22,au:1},{Re:295,Rm:500,eL:1.2,eg:13,eA:20,au:1},{Re:490,Rm:750,eL:0,eg:8,eA:14,au:0}];
+const ZVE=210000,ZVL0=50,ZVD0=10,ZVA0=Math.PI/4*ZVD0*ZVD0;
+/* σ in N/mm² bei der Dehnung e in % (technische Spannung, Anfangsquerschnitt) */
+const ZVS=(W,e)=>{const ee=W.Re/ZVE*100;if(e<=0)return 0;if(e>W.eA)return 0;
+ if(W.au){if(e<=ee)return ZVE*e/100;if(e<W.eL)return W.Re*(1+.008*Math.sin((e-ee)/(W.eL-ee)*Math.PI*7));
+  if(e<=W.eg){const q=(e-W.eL)/(W.eg-W.eL);return W.Re+(W.Rm-W.Re)*(1-Math.pow(1-q,2.2))}}
+ else{const sp=.8*W.Re,ep=sp/ZVE*100;if(e<=ep)return ZVE*e/100;if(e<=W.eg){const k=.77,N=1-Math.exp(-(W.eg-ep)/k);return sp+(W.Rm-sp)*(1-Math.exp(-(e-ep)/k))/N}}
+ const r=(e-W.eg)/(W.eA-W.eg);return W.Rm-(.22*W.Rm)*Math.pow(r,1.8)};
+/* Bereich: 0 unbelastet, 1 elastisch, 2 Fließen, 3 Verfestigen, 4 Einschnüren, 5 gerissen */
+const ZVZ=(W,e)=>{if(e<=0)return 0;if(e>W.eA)return 5;const ee=(W.au?W.Re:.8*W.Re)/ZVE*100;if(e<=ee)return 1;if(W.au&&e<W.eL)return 2;if(e<=W.eg)return 3;return 4};
+const ZVTX=['Unbelastet','Elastisch: federt ganz zurück','Fließen: länger ohne mehr Kraft','Verfestigen: Kraft steigt wieder','Einschnüren: Kraft sinkt','Gerissen'];
+const ZVC=['var(--mute)','#2f7fd8','#c9861a','#c9861a','#d8462f','var(--red)'];
+let ZVT=-1;/* letzte Zeit des Versuchs (Abspielen) */
+function ZV(s,t=0){const W=ZVW[s.w]||ZVW[0],live=typeof S!=='undefined'&&cur>=0&&S[cur]===s;
+ /* Abspielen: Die Traverse fährt von selbst weiter, langsam durch den elastischen Bereich und das Fließen, dann schneller */
+ if(live){if(t<ZVT-1e-6){s.dl=0}else if(play&&ZVT>=0){const dt=Math.min(.1,t-ZVT),e=s.dl/ZVL0*100,ee=W.Re/ZVE*100,v=e<ee*1.05?.02:W.au&&e<W.eL?.25:1.1;if(s.dl<15&&dt>0){s.dl=Math.min(15,+(s.dl+v*dt).toFixed(4));if(UI.dl){UI.dl[0].value=s.dl;UI.dl[1].value=+s.dl.toFixed(2)}}}ZVT=t}
+ const dl=s.dl,e=dl/ZVL0*100,sg=ZVS(W,e),z=ZVZ(W,e),F=sg*ZVA0,br=z===5,eB=W.eA,sB=ZVS(W,eB-1e-9),Ae=eB-sB/ZVE*100;
+ const ym=Math.ceil(W.Rm*1.15/100)*100,lab=W.au?'R_e':'R<tspan baseline-shift="sub" style="font-size:70%">p0,2</tspan>',ztx=W.au||z!==3?ZVTX[z]:'Plastisch: Kraft steigt weiter';
+ /* ---------- Prüfmaschine mit Probe ---------- */
+ const P=2.2,cx=96,eu=Math.min(e,W.eg),eN=Math.max(0,Math.min(e,eB)-W.eg),Lc=60,Lp=Lc*(1+eu/100)+eN/100*ZVL0,gap=br?6+(dl-eB/100*ZVL0)*P:0;
+ const yP=132,yB=yP+Lp*P,yL=yB+13+gap,yT=yL+61,du=ZVD0/Math.sqrt(1+eu/100),r=br?1:e>W.eg?(e-W.eg)/(eB-W.eg):0,dep=(1-.63*Math.sqrt(1+W.eg/100))*Math.pow(r,1.3),yc=yP+Lp*P*.52,sw=(5+5*r)*P;
+ const wd=y=>du*P*(1-dep*Math.exp(-Math.pow((y-yc)/sw,2)));
+ const steel='#9aa5b1',hd=16*P;
+ /* Umriss der Probe (Kopf oben, Übergang, Messteil, Übergang, Kopf unten); nach dem Bruch zwei Teile mit Lücke und Trichter-Bruchkante */
+ const f1=v=>v.toFixed(1),ed=(ya,yb,sg_,off)=>Array.from({length:41},(_,i)=>{const y=ya+(yb-ya)*i/40;return `L${f1(cx+sg_*wd(y)/2)} ${f1(y+off)}`}).join('');
+ const yE=yB+gap,top=`M${cx-hd/2} 64V119Q${cx-hd/2} ${yP} ${f1(cx-wd(yP)/2)} ${yP}`,topR=`Q${cx+hd/2} ${yP} ${cx+hd/2} 119V64Z`;
+ const capLR=`Q${cx-hd/2} ${f1(yE)} ${cx-hd/2} ${f1(yL)}V${f1(yL+55)}H${cx+hd/2}V${f1(yL)}Q${cx+hd/2} ${f1(yE)} ${f1(cx+wd(yB)/2)} ${f1(yE)}`,capRL=`Q${cx+hd/2} ${f1(yE)} ${cx+hd/2} ${f1(yL)}V${f1(yL+55)}H${cx-hd/2}V${f1(yL)}Q${cx-hd/2} ${f1(yE)} ${f1(cx-wd(yB)/2)} ${f1(yE)}`;
+ const wc=wd(yc)/2,jag=(y,dir)=>dir>0?`L${f1(cx-wc*.4)} ${f1(y+3)}L${f1(cx+wc*.4)} ${f1(y+3)}L${f1(cx+wc)} ${f1(y)}`:`L${f1(cx-wc)} ${f1(y-3)}L${f1(cx-wc*.4)} ${f1(y)}L${f1(cx+wc*.4)} ${f1(y)}`;
+ const shape=br?[top+ed(yP,yc,-1,0)+jag(yc,1)+ed(yc,yP,1,0)+topR,`M${f1(cx+wc)} ${f1(yc+gap-3)}`+ed(yc,yB,1,gap)+capRL+ed(yB,yc,-1,gap)+jag(yc+gap,-1)+'Z']
+  :[top+ed(yP,yB,-1,0)+capLR+ed(yB,yP,1,0)+topR];
+ /* Getönt: plastisch verformter Bereich (beim Fließen wandert die Grenze von oben nach unten, wie ein Lüdersband) */
+ const ee=(W.au?W.Re:.8*W.Re)/ZVE*100,pf=z<2?0:W.au&&z===2?(e-ee)/(W.eL-ee):1,yF=yP+(yB+gap-yP)*pf;
+ const tint=pf>0?`<rect x="${cx-hd/2}" y="${yP}" width="${hd}" height="${(yF-yP).toFixed(1)}" fill="#e0a23a" opacity=".42"/>`+(W.au&&z===2?`<path d="M${cx-14} ${(yF-6).toFixed(1)}L${cx+14} ${(yF+6).toFixed(1)}" stroke="#b7791f" stroke-width="2"/>`:''):'';
+ const neck=r>0?`<ellipse cx="${cx}" cy="${(yc+gap/2).toFixed(1)}" rx="${hd/2}" ry="${(sw*1.1+gap/2).toFixed(1)}" fill="#d8462f" opacity="${(.15+.35*r).toFixed(2)}"/>`:'';
+ const cid='zvc'+(live?'L':'E');
+ let d=`<defs><clipPath id="${cid}">${shape.map(x=>`<path d="${x}"/>`).join('')}</clipPath></defs>`;
+ /* Säulen, Querhaupt, Grundplatte */
+ d+=`<ellipse cx="96" cy="${430}" rx="96" ry="5" fill="url(#g-shad)"/>`+[8,170].map(x=>`<rect x="${x}" y="22" width="16" height="388" fill="#7b8794"/><rect x="${x}" y="22" width="16" height="388" fill="url(#g-cyl)" stroke="var(--ink)" stroke-width="1.5"/>`).join('')
+  +BAR3(2,14,188,26,'#5b6b7d',7)+BAR3(2,408,188,20,'#5b6b7d',7)
+  +`<rect x="${cx-20}" y="40" width="40" height="18" rx="3" fill="#cbd5e1" stroke="var(--ink)" stroke-width="1.5"/><rect x="${cx-20}" y="40" width="40" height="18" rx="3" fill="url(#g-cyl)"/>`
+  /* Spannbacken oben */
+  +`<path d="M${cx-34} 58H${cx+34}L${cx+28} 124H${cx-28}Z" fill="#64748b" stroke="var(--ink)" stroke-width="1.5"/>`;
+ /* Probe */
+ d+=shape.map(x=>`<path d="${x}" fill="${steel}"/>`).join('')+`<g clip-path="url(#${cid})">${tint}${neck}<rect x="${cx-hd/2}" y="60" width="${hd}" height="${(yL+60).toFixed(1)}" fill="url(#g-cyl)"/></g>`+shape.map(x=>`<path d="${x}" fill="none" stroke="var(--ink)" stroke-width="1.5" stroke-linejoin="round"/>`).join('');
+ /* Spannbacken unten + Traverse (bewegt sich mit) */
+ d+=`<path d="M${cx-28} ${(yL-6).toFixed(1)}H${cx+28}L${cx+34} ${(yT+2).toFixed(1)}H${cx-34}Z" fill="#64748b" stroke="var(--ink)" stroke-width="1.5"/>`+BAR3(18,yT+2,152,22,'#3b82f6',6)+(play&&dl<15&&live?'':'');
+ /* Messmarken l₀ und Klammer */
+ const m0=yP+5*P*(1+eu/100),m1=m0+(Lp-10*(1+eu/100))*P+gap,bx=cx+hd/2+6;
+ d+=[m0,m1].map(y=>`<path d="M${(cx-wd(y)/2).toFixed(1)} ${y.toFixed(1)}H${(cx+wd(y)/2).toFixed(1)}" stroke="var(--ink)" stroke-width="2"/>`).join('')+`<path d="M${bx-3} ${m0.toFixed(1)}H${bx+3}M${bx} ${m0.toFixed(1)}V${m1.toFixed(1)}M${bx-3} ${m1.toFixed(1)}H${bx+3}" stroke="var(--ink)" stroke-width="1.5" fill="none"/>`;
+ /* Beschriftungen rechts der Maschine */
+ const ly=(m0+m1)/2,lead=(x1,y1,y2)=>`<path d="M${x1} ${y1}L196 ${y2}" stroke="var(--mute)" stroke-width="1" fill="none"/>`;
+ d+=T(200,34,'F = '+nf(F/1000,3)+' kN','t1')+lead(cx+21,50,56)+T(200,60,'Kraftmessdose','t2')+lead(cx+31,96,96)+T(200,100,'Spannbacke','t2')
+  +lead(bx+4,ly,ly)+T(200,ly-4,'l₀ + Δl','t2')+T(200,ly+16,'Δl = '+(dl<.1?dl.toFixed(3):dl.toFixed(2)).replace(/0+$/,'').replace(/\.$/,'').replace('.',',')+' mm','t2')
+  +lead(170,yT+12,yT+12)+T(200,yT+16,'Traverse ↓','t2');
+ /* ---------- Diagramm ---------- */
+ const x0=346,x1=626,yt=86,yb=250,X=v=>x0+(x1-x0)*v/30,Y=v=>yb-(yb-yt)*v/ym;
+ let g=`<rect x="${x0}" y="${yt}" width="${x1-x0}" height="${yb-yt}" fill="var(--card)" stroke="none"/>`;
+ for(let v=100;v<=ym;v+=100)g+=`<path d="M${x0} ${Y(v).toFixed(1)}H${x1}" stroke="var(--wire)" stroke-width=".6" opacity=".6"/>`+T(x0-6,Y(v)+5,v,'t2','end');
+ for(let v=10;v<=30;v+=10)g+=`<path d="M${X(v)} ${yt}V${yb}" stroke="var(--wire)" stroke-width=".6" opacity=".6"/>`;
+ g+=[0,10,20,30].map(v=>T(X(v),yb+17,v,'t2','middle')).join('')+`<path d="M${x0} ${yt-8}V${yb}H${x1+6}" stroke="var(--ink)" stroke-width="1.6" fill="none"/>`+T(x0-6,yt-16,'σ in N/mm²','t2')+T(x1,yb+36,'ε in %','t2','end');
+ /* Kurve bis zum aktuellen Punkt */
+ const pts=[],eM=Math.min(e,eB),add=v=>pts.push([v,ZVS(W,v)]);add(0);add(Math.min(eM,ee));for(let v=ee;v<eM;v+=v<Math.max(W.eL,.6)?.02:.1)add(v);if(eM>ee)add(eM);
+ const path=(fx,fy,lim)=>pts.filter(p=>p[0]<=lim).map((p,i)=>(i?'L':'M')+fx(p[0]).toFixed(1)+' '+fy(p[1]).toFixed(1)).join('');
+ const reach=v=>pts.some(p=>p[1]>=v-.5);
+ if(reach(W.Re))g+=`<path d="M${x0} ${Y(W.Re).toFixed(1)}H${x1}" stroke="#c9861a" stroke-width="1.4" stroke-dasharray="5 4"/>`+T(X(11),Y(W.Re)+20,lab+' = '+W.Re+' N/mm²','t2');
+ if(e>=W.eg)g+=`<path d="M${x0} ${Y(W.Rm).toFixed(1)}H${x1}" stroke="#d8462f" stroke-width="1.4" stroke-dasharray="5 4"/>`+T(x0+10,Y(W.Rm)-20,'R_m = '+W.Rm+' N/mm²','t2');
+ g+=`<path d="${path(X,Y,99)}" fill="none" stroke="#3b82f6" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>`;
+ if(br){const xb=X(eB),yb2=Y(sB);g+=`<path d="M${xb-5} ${yb2-5}L${xb+5} ${yb2+5}M${xb+5} ${yb2-5}L${xb-5} ${yb2+5}" stroke="var(--red)" stroke-width="2.5"/><path d="M${xb.toFixed(1)} ${(yb2+8).toFixed(1)}L${X(Ae).toFixed(1)} ${yb}" stroke="var(--red)" stroke-width="1.4" stroke-dasharray="4 3"/>`+T(X(Ae)-6,yb-8,'A = '+nf(Ae,2)+' %','t2','end')}
+ else if(dl>0)g+=`<circle cx="${X(e).toFixed(1)}" cy="${Y(sg).toFixed(1)}" r="6" fill="${ZVC[z]}" stroke="var(--ink)" stroke-width="1.5"/>`;
+ /* Lupe: der Anfang bis ε = 1 % stark gestreckt */
+ const lx0=x0,lx1=x1,lyt=318,lyb=412,LX=v=>lx0+(lx1-lx0)*v,LY=v=>lyb-(lyb-lyt)*v/ym;
+ g+=`<rect x="${lx0-4}" y="${lyt-24}" width="${lx1-lx0+8}" height="${lyb-lyt+28}" rx="8" fill="var(--card)" stroke="var(--wire)" stroke-width="1.2"/>`+T(lx0+2,lyt-8,'🔍 Lupe: Anfang bis ε = 1 %','t2')
+  +`<path d="M${lx0} ${lyt}V${lyb}H${lx1}" stroke="var(--ink)" stroke-width="1.2" fill="none"/>`+T(lx0,lyb+17,'0','t2','middle')+T(LX(.5),lyb+17,'0,5','t2','middle')+T(lx1,lyb+17,'1 %','t2','end');
+ if(reach(W.Re*.99))g+=`<path d="M${lx0} ${LY(W.Re).toFixed(1)}H${lx1}" stroke="#c9861a" stroke-width="1.2" stroke-dasharray="5 4"/>`+T(lx1-4,LY(W.Re)+17,lab,'t2','end');
+ g+=`<path d="${path(LX,LY,1)}" fill="none" stroke="#3b82f6" stroke-width="2.6" stroke-linejoin="round"/>`;
+ if(!br&&dl>0&&e<=1)g+=`<circle cx="${LX(e).toFixed(1)}" cy="${LY(sg).toFixed(1)}" r="5" fill="${ZVC[z]}" stroke="var(--ink)" stroke-width="1.5"/>`;
+ if(e>0&&z>=1)g+=T(LX(Math.min(ee,1))+8,(LY(0)+LY(W.Re))/2+12,'elastisch','t2')+(W.au&&e>ee?T(LX(Math.min(1,W.eL)/2+ee/2),LY(W.Re)+24,'Fließen','t2','middle'):'');
+ /* Zustand oben */
+ g+=T(x0+10,yb-12,ztx,'t1').replace('class="t1"',`class="t1" style="fill:${ZVC[z]};paint-order:stroke;stroke:var(--card);stroke-width:4px"`);
+ d+=g;
+ const bl=br?Ae/100*ZVL0:Math.max(0,dl-sg/ZVE*ZVL0),el=br?0:sg/ZVE*ZVL0;
+ return{d,vb:'0 0 640 440',res:[[br?'–':nf(sg,4)+' N/mm²','Spannung σ'],[nf(e,3)+' %','Dehnung ε'],[br?'0 kN':nf(F/1000,3)+' kN','Zugkraft F']],
+  rows:[['Bereich',ztx],['federt beim Loslassen zurück',nf(el,2)+' mm'],['bleibt länger',nf(bl,3)+' mm'],[W.au?'Streckgrenze R_e':'0,2-%-Dehngrenze R_p0,2',W.Re+' N/mm²'],['Zugfestigkeit R_m',W.Rm+' N/mm²'],['Bruchdehnung A',nf(Ae,2)+' %']],
+  st:[['A₀ = π/4 · d₀²',`π/4 · (${ZVD0} mm)² = ${nf(ZVA0)} mm²`],['σ = F / A₀',br?'gerissen: F = 0 N':`${nf(F,4)} N / ${nf(ZVA0)} mm² = ${nf(sg,4)} N/mm²`],['ε = Δl / l₀',`${nf(dl,3)} mm / ${ZVL0} mm = ${nf(e/100,3)} = ${nf(e,3)} %`]]}}
 fm(FP,MF,'Zug-/Druckspannung & Sicherheit','Die Spannung σ = F / A ist die Kraft je Querschnittsfläche. Sie darf die zulässige Spannung σ_zul = R_e / ν nicht überschreiten. Eine Querbohrung (Durchmesser d_B) verkleinert den tragenden Querschnitt und erhöht die Spannung. Im Schnitt durch die Bohrung fehlt ein Rechteck aus Bohrungsdurchmesser mal Stabdicke, vereinfacht gilt A = π/4 · d² − d_B · d. Die Näherung gilt für d_B ≤ 0,5 · d, darum ist d_B auf die halbe Stabdicke begrenzt.',
- [['w','Werkstoff','sel',WK.map(x=>x[0]),0],['F','F',1,300,1,'kN',60],['d','d',6,60,1,'mm',20],['di','d_B',0,30,1,'mm',0],['nu','ν',1,4,.1,'',1.5]],
- s=>{const Re=WK[s.w][1],di=Math.min(s.di,Math.floor(s.d*.5)),A=PI/4*s.d*s.d-di*s.d,sg=s.F*1000/A,sz=Re/s.nu,nv=Re/sg,ok=A>0&&sg<=sz,mx=Math.max(Re,sg)*1.08,col=ok?'var(--ok)':'var(--red)',bw=v=>Math.max(2,v/mx*300);
+ [['v','Ansicht','sel',['Bauteil berechnen','Zugversuch'],0],['w','Werkstoff','sel',WK.map(x=>x[0]),0],['F','F',1,300,1,'kN',60],['d','d',6,60,1,'mm',20],['di','d_B',0,30,1,'mm',0],['nu','ν',1,4,.1,'',1.5],['dl','Δl',0,15,.05,'mm',0]],
+ (s,t)=>{if(s.v==1)return ZV(s,t);const Re=WK[s.w][1],di=Math.min(s.di,Math.floor(s.d*.5)),A=PI/4*s.d*s.d-di*s.d,sg=s.F*1000/A,sz=Re/s.nu,nv=Re/sg,ok=A>0&&sg<=sz,mx=Math.max(Re,sg)*1.08,col=ok?'var(--ok)':'var(--red)',bw=v=>Math.max(2,v/mx*300);
  /* Rundstab räumlich: Breite ~ d, Farbe zeigt die Auslastung σ / σ_zul, Querbohrung als Loch, Schnittfläche A in der Mitte, Pfeillänge ~ √F */
  const w=10+s.d*1.35,ry=w*.17,x0=100-w/2,u=Math.min(1.4,sg/sz),tc=u<.7?'#94a3b8':u<=1?'#e0a23a':'#dc2626',hw=di/s.d*w,fl=20+42*Math.sqrt(s.F/300);
  return{d:`<ellipse cx="104" cy="${212+ry}" rx="${w*.7}" ry="6" fill="url(#g-shad)"/><path d="M${x0} 95V205A${w/2} ${ry} 0 0 0 ${x0+w} 205V95Z" fill="${tc}"/><path d="M${x0} 95V205A${w/2} ${ry} 0 0 0 ${x0+w} 205V95Z" fill="url(#g-cyl)" stroke="var(--ink)" stroke-width="2"/><ellipse cx="100" cy="95" rx="${w/2}" ry="${ry}" fill="color-mix(in srgb,${tc} 55%,#fff)" stroke="var(--ink)" stroke-width="2"/>`
@@ -3393,6 +3480,14 @@ fm(FP,MF,'Zug-/Druckspannung & Sicherheit','Die Spannung σ = F / A ist die Kraf
  [['σ vorhanden',sg,col],['σ_zul = R_e/ν',sz,'var(--amber)'],['Streckgrenze R_e',Re,'var(--mute)']].map((q,i)=>T(200,83+i*64-(i==1?5:0),q[0],'t2')+BAR3(200,96+i*64,bw(q[1]),24,q[2],8)+T(214+bw(q[1]),114+i*64,nf(q[1])+' N/mm²','t2')).join('')+`<line x1="20" x2="620" y1="296" y2="296" stroke="var(--wire)"/>`+T(20,320,WK[s.w][0].replace(' · ',' = '),'t2')+T(20,342,WK[s.w][2],'t2'),vb:'0 0 640 356',
  res:[[nf(sg)+' N/mm²','Spannung σ'],[nf(sz)+' N/mm²','zulässig σ_zul'],[nf(nv),'vorhandene Sicherheit']],rows:[['Querschnitt A',nf(A)+' mm²'],['Zustand',ok?'ausreichend sicher':'Bauteil überlastet'],['max. Kraft',nf(sz*A/1000)+' kN']],st:[['A = π/4 · d² − d_B · d',di>0?`π/4 · (${s.d} mm)² − ${di} mm · ${s.d} mm = ${nf(A)} mm²`:`π/4 · (${s.d} mm)² = ${nf(A)} mm²`],['σ = F / A',`${s.F*1000} N / ${nf(A)} mm² = ${nf(sg)} N/mm²`],['ν_vorh = R_e / σ',`${Re} N/mm² / ${nf(sg)} N/mm² = ${nf(nv)}`]]}},
  'Die Streckgrenze R_e ist die Spannung, ab der sich der Werkstoff bleibend verformt. Die Sicherheit ν muss mindestens so groß sein wie gefordert. Kurznamen nach DIN EN 10027: Kennbuchstabe + Zahl. Bei S (Stahlbau) und E (Maschinenbau) ist die Zahl die Mindeststreckgrenze in N/mm². Steht C vorn, ist es ein unlegierter Stahl, und die Zahl ist der Kohlenstoffgehalt × 100 (C45 = 0,45 % Kohlenstoff).');
+/* Ansicht Zugversuch: eigene Texte, eigener Auftrag, Vermuten und Kurz erklärt (Schlüssel „Zugversuch“), Abspielen nur in dieser Ansicht */
+{const m=M[M.length-1],D0=m.desc,L0=m.leg,pv=()=>{try{return S[M.indexOf(m)].v==1}catch(e){return false}};
+ Object.assign(m,{knb:'v',knbB:1,knbTop:1,vis:s=>s.v==1?['dl']:['F','d','di','nu'],vk:s=>s.v==1?'Zugversuch':null,init:()=>{ZVT=-1},
+  sync:(o,k)=>{if(k==='dl'&&o.v==1&&play){play=false;const p=document.querySelector('.simp');if(p){p.textContent='▶';p.setAttribute('aria-label','Abspielen');p.title='Abspielen'}}}});
+ Object.defineProperties(m,{anim:{get:()=>pv()?1:0},
+  desc:{get:()=>pv()?'Im Zugversuch zieht eine Prüfmaschine eine genormte Rundprobe langsam auseinander, bis sie reißt. Sie misst dabei die Kraft F und die Verlängerung Δl. Daraus entsteht das Spannungs-Dehnungs-Diagramm: die Spannung σ = F / A₀ über der Dehnung ε = Δl / l₀. Daran liest man ab, was der Werkstoff aushält: bis zur Streckgrenze R_e federt er zurück, darüber bleibt er länger, bei der Zugfestigkeit R_m ist Schluss.':D0},
+  leg:{get:()=>pv()?'Probe d₀ = 10 mm, Messlänge l₀ = 50 mm, typische Werte des Werkstoffs. Blau: Spannungs-Dehnungs-Kurve. Gelb getönt: Teil der Probe, der schon bleibend verformt ist, beim Fließen wandert die Grenze durch die Probe. Rot: Einschnürung. Die Lupe unten zeigt den Anfang bis ε = 1 %, dort liegen der elastische Bereich und das Fließen. ▶ spielt den Versuch ab, ↺ startet von vorn. Der vergütete C45 hat keine ausgeprägte Streckgrenze, dort nimmt man die 0,2-%-Dehngrenze: die Spannung, nach der 0,2 % bleibende Dehnung übrig bleiben.':L0}})}
+document.addEventListener('click',e=>{if(e.target&&e.target.closest&&e.target.closest('.simp'))setTimeout(()=>{try{aufTick()}catch(x){}},0)});
 {const m=M[M.length-1],DI=(o,k,UI)=>{const mx=Math.floor(o.d*.5);if(o.di>mx)o.di=mx;if(UI.di)UI.di.forEach(e=>{e.max=mx;e.value=o.di})};m.sync=DI;m.init=(o,UI)=>DI(o,'',UI)}/* Querbohrung höchstens halbe Stabdicke (Gültigkeit der Näherung) */
 /* Reglergrenzen: Gleitreibungszahl höchstens Haftreibungszahl (μ_Gleit ≤ μ₀), Rampenhöhe höchstens Rampenlänge (h ≤ l) */
 {const LIM=(o,UI,k,mx)=>{if(o[k]>mx)o[k]=mx;if(UI[k])UI[k].forEach(e=>{e.max=mx;e.value=o[k]})};
@@ -8805,7 +8900,7 @@ const ERK={
 'Schmelz- & Verdampfungswärme':['Beim Schmelzen und Verdampfen gilt Q = m · q. Die Temperatur bleibt während des Wechsels konstant. Die Siedetemperatur hängt vom Druck ab.',['Nur m · c · ΔT rechnen und die Umwandlungswärme vergessen.','Bei Eis unter 0 °C nur Q = m · q rechnen und das Erwärmen bis 0 °C vergessen. Richtig: erst auf 0 °C erwärmen, dann schmelzen, dann weiter erwärmen.','q und c verwechseln.']],
 'Mischungstemperatur':['Die abgegebene Wärme gleich der aufgenommenen: m₁ · c₁ · (ϑ₁ − ϑ_m) = m₂ · c₂ · (ϑ_m − ϑ₂). Die Mischtemperatur liegt immer zwischen den beiden Ausgangstemperaturen.',['Die Differenzen mit falschem Vorzeichen bilden.','Verschiedene spezifische Wärmekapazitäten ignorieren.','Ein Ergebnis außerhalb der beiden Ausgangstemperaturen nicht als Fehler erkennen.']],
 'Steuerung oder Regelung (Heizung)':['Eine Steuerung wirkt in einer offenen Kette ohne Messung des Ergebnisses. Eine Regelung misst den Istwert, vergleicht ihn mit dem Sollwert und korrigiert in einem geschlossenen Kreis.',['Steuerung und Regelung verwechseln.','Stellgröße und Störgröße verwechseln.','Sollwert und Istwert vertauschen.']],
-'Zug-/Druckspannung & Sicherheit':['σ = F / A. Die Sicherheit ist ν = R_e / σ und muss größer als 1 sein, in der Praxis meist 1,5 bis 3.',['Bei einer Bohrung mit dem vollen Querschnitt rechnen, statt die Bohrung abzuziehen.','Durchmesser und Radius in A = π · d² / 4 verwechseln.','N/mm² und MPa als verschieden ansehen. Beide sind gleich.']],
+'Zug-/Druckspannung & Sicherheit':['σ = F / A. Die Sicherheit ist ν = R_e / σ und muss größer als 1 sein, in der Praxis meist 1,5 bis 3.',['Bei einer Bohrung mit dem vollen Querschnitt rechnen, statt die Bohrung abzuziehen.','Durchmesser und Radius in A = π · d² / 4 verwechseln.','N/mm² und MPa als verschieden ansehen. Beide sind gleich.','Streckgrenze R_e und Zugfestigkeit R_m verwechseln: Ab R_e verformt sich der Stahl bleibend, R_m ist die höchste Spannung kurz vor dem Einschnüren.']],
 'Scherung & Flächenpressung':['Scherspannung τ = F / A_s mit der Scherfläche, Flächenpressung p = F / (d · t) mit der projizierten Fläche. Bei zweischnittigen Verbindungen verteilt sich die Kraft auf zwei Flächen.',['Die Anzahl der Scherflächen (einschnittig oder zweischnittig) falsch ansetzen.','Bei der Flächenpressung die Bohrungsfläche statt d · t nehmen.','N, kN und mm² mischen.']],
 'Kräfteparallelogramm':['Zwei Kräfte ergeben als Resultierende die Diagonale des Parallelogramms. Die Beträge dürfen nur bei gleicher Richtung einfach addiert werden.',['Die Beträge der Kräfte einfach addieren.','Den falschen Winkel zwischen den Kräften einsetzen.','Den Kosinussatz mit dem Pythagoras verwechseln.']],
 'Kräftezerlegung (Seilkräfte)':['Eine schräge Kraft wird in zwei Komponenten zerlegt: F_x = F · cos α, F_y = F · sin α (α zur Waagerechten). Je flacher ein Seil hängt, desto größer ist die Seilkraft.',['sin und cos vertauschen.','Den Winkel zur falschen Achse messen.','Bei zwei Seilen das Gewicht einfach halbieren, obwohl die Winkel unterschiedlich sind.']],
@@ -10821,28 +10916,28 @@ BEW.push([AEL,'u','Erkläre einer neuen Kollegin den Unterschied zwischen Energi
  ['Energie als Vorrat mit Beispiel','Arbeit als übertragene Energie, W = F · s','Leistung als Arbeit pro Zeit, P = W / t','Einheiten J und W richtig zugeordnet','Gleiche Arbeit bei verschiedener Zeit erklärt']]);
 /* TEST-THEMEN: freigeschaltete Aufgaben aus archiv/test-themen/ kommen hier hin (python3 archiv/test-themen/freischalten.py <datei>) */
 let AUFAUTO={};const aufQ=k=>M[cur].p.find(x=>x[0]===k),aufLab=k=>{const q=aufQ(k);return q?q[1]:k},aufVal=(k,v)=>{const q=aufQ(k);return q&&q[2]=='sel'?q[3][v]:nf(v,4)+(q&&q[5]?' '+q[5]:'')},aufFix=(A,s)=>Object.keys(A.st).filter(k=>!A.fr.includes(k)&&Math.abs(s[k]-A.st[k])>1e-6*Math.max(1,Math.abs(A.st[k])));
-function aufShow(n){let b=$('#auf');const A=AUF[n];if(n!=='Hydraulik')window.PROBEOK=false;/* nach dem Start-Ziel bleibt der Hydraulik-Auftrag bis zum Themenwechsel zu (widersprüchliche Ziele) */
+function aufShow(n,k=n){let b=$('#auf');const A=AUF[k];/* k: Ansicht mit eigenem Auftrag (z. B. „Zugversuch“), n: Thema */if(n!=='Hydraulik')window.PROBEOK=false;/* nach dem Start-Ziel bleibt der Hydraulik-Auftrag bis zum Themenwechsel zu (widersprüchliche Ziele) */
  if(!A||(typeof PROBE!=='undefined'&&(PROBE||window.PROBEOK)&&n==='Hydraulik')){if(b)b.hidden=true;return}
  if(!b){b=document.createElement('div');b.id='auf';b.className='pred auf';$('#ein').after(b)}
- const D=store.get('ll_auf',{})[n]||{};/* Standard eingeklappt (v209); beim Neuaufbau desselben Themas bleibt auf/zu erhalten */const op=b.dataset.n===n&&!!b.querySelector('details[open]');b.hidden=false;b.dataset.n=n;b.dataset.ok=D.ok?'1':'';
+ const D=store.get('ll_auf',{})[k]||{};/* Standard eingeklappt (v209); beim Neuaufbau desselben Themas bleibt auf/zu erhalten */const op=b.dataset.n===n&&b.dataset.k===k&&!!b.querySelector('details[open]');b.hidden=false;b.dataset.n=n;b.dataset.k=k;b.dataset.ok=D.ok?'1':'';
  /* Erledigt: schmale Leiste, aufgeklappt nur Auftrag, eigene Begründung und Musterantwort */
  b.classList.toggle('aufdone',!!D.ok);b.classList.remove('aufok','aufflash');b.dataset.fl='';
  if(D.ok){const dt=/^\d{4}-\d\d-\d\d$/.test(D.d||'')?' · '+(+D.d.slice(8))+'.'+(+D.d.slice(5,7))+'.':'';
   b.innerHTML=`<details${op?' open':''}><summary><b>🎯 Auftrag</b><span class="aufsm okt" title="${dt.replace(' · ','')}">✓ geschafft</span></summary><p>${A.t}</p><p><b>Frage:</b> ${A.q}</p>${D.txt?`<p><b>Deine Begründung:</b> ${rEsc(D.txt)}</p>`:''}<p><b>Musterantwort:</b> ${A.a}</p><p><button type="button" class="chip" data-ar>↺ Nochmal versuchen</button></p></details>`;
-  b.querySelector('[data-ar]').onclick=()=>{const X=store.get('ll_auf',{});delete X[n];store.set('ll_auf',X);AUFAUTO[n]=0;Object.assign(S[cur],A.st);aufShow(n);build();b.querySelector('details').open=true};
+  b.querySelector('[data-ar]').onclick=()=>{const X=store.get('ll_auf',{});delete X[k];store.set('ll_auf',X);AUFAUTO[k]=0;Object.assign(S[cur],A.st);aufShow(n,k);build();b.querySelector('details').open=true};
   return}
  b.innerHTML=`<details${op?' open':''}><summary><b>🎯 Auftrag</b><span class="okt aufdn"${D.ok?'':' hidden'}> ✓ geschafft</span><span class="aufsm"></span></summary><p>${A.t}</p><p class="aufst" aria-live="polite"></p><p class="aufhi"></p><div class="aufw" hidden><p><b>Begründe in einem Satz:</b> ${A.q}</p><textarea class="stxa" rows="3" placeholder="Dein Satz …" aria-label="Begründung">${rEsc(D.txt||'')}</textarea><p><button type="button" class="chip" data-am>Musterantwort zeigen</button></p><p class="aufm" hidden><b>Musterantwort:</b> ${A.a}</p><p class="aufm" hidden><button type="button" class="chip pri" data-ac>✓ Fertig, einklappen</button></p></div><p><button type="button" class="chip" data-a0>Startwerte einstellen</button></p></details>`;
  b.querySelector('[data-a0]').onclick=()=>{Object.assign(S[cur],A.st);build()};
- b.querySelector('[data-am]').onclick=()=>{const t=b.querySelector('textarea').value.trim();const X=store.get('ll_auf',{});X[n]=Object.assign(X[n]||{},{txt:t.slice(0,600)});store.set('ll_auf',X);b.querySelectorAll('.aufm').forEach(x=>x.hidden=false)};
- b.querySelector('[data-ac]').onclick=()=>{b.querySelector('details').open=false;aufShow(n);b.scrollIntoView({block:'nearest'})};
+ b.querySelector('[data-am]').onclick=()=>{const t=b.querySelector('textarea').value.trim();const X=store.get('ll_auf',{});X[k]=Object.assign(X[k]||{},{txt:t.slice(0,600)});store.set('ll_auf',X);b.querySelectorAll('.aufm').forEach(x=>x.hidden=false)};
+ b.querySelector('[data-ac]').onclick=()=>{b.querySelector('details').open=false;aufShow(n,k);b.scrollIntoView({block:'nearest'})};
  /* Beim ersten Öffnen mit den Startwerten beginnen, wenn die festen Werte nicht passen */
- /* auch wenn die Grundeinstellung das Ziel schon erfüllt (z. B. Mischungstemperatur m₂ = 2 kg), mit den Startwerten beginnen */if(!D.ok&&!AUFAUTO[n]&&(aufFix(A,S[cur]).length||A.ok(S[cur]))){AUFAUTO[n]=2;Object.assign(S[cur],A.st);build();return}AUFAUTO[n]=1;
+ /* auch wenn die Grundeinstellung das Ziel schon erfüllt (z. B. Mischungstemperatur m₂ = 2 kg), mit den Startwerten beginnen */if(!D.ok&&!AUFAUTO[k]&&(aufFix(A,S[cur]).length||A.ok(S[cur]))){AUFAUTO[k]=2;Object.assign(S[cur],A.st);build();return}AUFAUTO[k]=1;
  aufTick()}
-function aufTick(){const b=$('#auf');if(!b||b.hidden||cur<0||b.dataset.n!==M[cur].name||!b.querySelector('.aufst'))return;const n=b.dataset.n,A=AUF[n],s=S[cur],fx=aufFix(A,s),ok=!fx.length&&A.ok(s),st=b.querySelector('.aufst'),hi=b.querySelector('.aufhi');
+function aufTick(){const b=$('#auf');if(!b||b.hidden||cur<0||b.dataset.n!==M[cur].name||!b.querySelector('.aufst'))return;const n=b.dataset.n,k=b.dataset.k||n,A=AUF[k],s=S[cur],fx=aufFix(A,s),ok=!fx.length&&A.ok(s),st=b.querySelector('.aufst'),hi=b.querySelector('.aufhi');
  st.className='aufst '+(ok?'okt':'');if(ok&&!b.classList.contains('aufok')&&b.dataset.fl){b.classList.remove('aufflash');void b.offsetWidth;b.classList.add('aufflash')}b.classList.toggle('aufok',ok);b.dataset.fl='1';st.textContent=(ok?'✓ Erreicht: ':'Noch nicht erreicht: ')+A.v(s)+(ok?'':' · Ziel: '+A.z);
- hi.innerHTML=fx.length?`⚠️ Für den Auftrag ${fx.length>1?'müssen':'muss'} ${fx.map(k=>`<b>${aufLab(k)} = ${aufVal(k,A.st[k])}</b>`).join(', ')} bleiben (gerade ${fx.map(k=>aufVal(k,s[k])).join(', ')}). Tippe auf „Startwerte einstellen“.`:ok?'':(AUFAUTO[n]===2?'Die Regler stehen jetzt auf den Startwerten des Auftrags. ':'')+'💡 '+A.h(s)+(A.fr.some(k=>{const q=aufQ(k);return q&&q[2]!=='sel'})?' Tipp: Du kannst den Wert auch direkt ins Zahlenfeld tippen.':'');hi.hidden=!hi.innerHTML;
+ hi.innerHTML=fx.length?`⚠️ Für den Auftrag ${fx.length>1?'müssen':'muss'} ${fx.map(k=>`<b>${aufLab(k)} = ${aufVal(k,A.st[k])}</b>`).join(', ')} bleiben (gerade ${fx.map(k=>aufVal(k,s[k])).join(', ')}). Tippe auf „Startwerte einstellen“.`:ok?'':(AUFAUTO[k]===2?'Die Regler stehen jetzt auf den Startwerten des Auftrags. ':'')+'💡 '+A.h(s)+(A.fr.some(k=>{const q=aufQ(k);return q&&q[2]!=='sel'})?' Tipp: Du kannst den Wert auch direkt ins Zahlenfeld tippen.':'');hi.hidden=!hi.innerHTML;
  b.querySelector('.aufw').hidden=!ok&&!b.dataset.ok;{const sm=b.querySelector('.aufsm');sm.className='aufsm'+(ok?' okt':'');sm.textContent=ok?'✓ Erreicht':'Ziel: '+A.z}
- if(ok&&!b.dataset.ok){b.dataset.ok='1';b.querySelector('.aufdn').hidden=false;const X=store.get('ll_auf',{});if(!(X[n]&&X[n].ok)){X[n]=Object.assign(X[n]||{},{ok:1,d:mToday()});store.set('ll_auf',X);memRec(n,true,null,'auf')}}}
+ if(ok&&!b.dataset.ok){b.dataset.ok='1';b.querySelector('.aufdn').hidden=false;const X=store.get('ll_auf',{});if(!(X[k]&&X[k].ok)){X[k]=Object.assign(X[k]||{},{ok:1,d:mToday()});store.set('ll_auf',X);memRec(n,true,null,'auf')}}}
 // Bildausschnitt v146: engerer viewBox, wo die Zeichnung nur einen Teil der Fläche nutzt (Name|Original-viewBox → Ausschnitt).
 // Ermittelt aus allen Reglerstellungen (Handy und Laptop), Seitenverhältnis nie höher als vorher; tests/check.js prüft, dass nichts abgeschnitten wird.
 const VBC={"Ausmultiplizieren & Ausklammern|0 0 640 300":'-8 12 556 261',"Drehstrom (Stern & Dreieck)|0 0 640 300":'-35 22 549 258',"Gemischt (R₁+R₂)∥(R₃+R₄)|0 0 640 300":'38 61 601 218',"Gemischt (R₁+R₂)∥R₃|0 0 640 300":'38 61 583 218',"Gemischt R₁+(R₂∥R₃)+R₄|0 0 640 300":'35 24 560 263',"Histogramm|0 0 640 300":'24 0 590 270',"Kräfteparallelogramm|0 0 640 300":'0 26 524 243',"Mischungstemperatur|0 0 640 300":'8 87 538 193',"Mittelwert, Median & Modalwert|0 0 640 300":'26 2 588 262',"Ohmsches Gesetz|0 0 640 300":'53 28 580 272',"Oxidationszahlen|0 0 640 300":'35 53 570 247',"Parallel|0 0 640 300":'38 61 602 218',"Pneumatik: Luftverbrauch|0 0 640 300":'16 57 596 215',"Reihe|0 0 640 300":'38 24 566 250',"Schmelz- & Verdampfungswärme|0 0 640 300":'6 48 608 242',"Spannweite, Varianz & Standardabweichung|0 0 640 300":'26 12 589 219',"Wirkungsgrad|0 0 640 300":'26 66 525 202',"Wärmekapazität|0 0 640 300":'16 26 523 238'};
@@ -11173,6 +11268,12 @@ const AUF_PC={
  q:'Warum reicht Abkochen nicht?',a:'Abkochen entfernt nur die Carbonathärte, Sulfate bleiben gelöst. Destillation entfernt alles, verdampft aber das Wasser und braucht viel Energie. Der Ionentauscher tauscht Ca²⁺ und Mg²⁺ gegen Na⁺ aus.'}
 };
 Object.assign(PRED,PRED_PC);Object.assign(AUF,AUF_PC);
+/* Zugversuch (Ansicht von „Zug-/Druckspannung & Sicherheit“) */
+PRED['Zugversuch']=['Ein Stahlstab wird über die Streckgrenze hinaus gezogen und dann losgelassen. Was passiert?',['Er bleibt fast um die ganze Verlängerung länger','Er federt wieder auf seine alte Länge zurück','Er wird kürzer als vorher','Er reißt beim Loslassen'],'Über der Streckgrenze verformt sich Stahl plastisch. Beim Loslassen federt nur der kleine elastische Anteil zurück, bei S235 etwa 0,06 mm auf 50 mm. Der Rest bleibt.'];
+AUF['Zugversuch']={t:'Ein Stab aus <b>S235</b> soll <b>fließen</b>: Er soll bleibend länger werden, die Spannung soll aber noch auf der Streckgrenze liegen und nicht wieder steigen. Halte den Versuch dort an (❚❚) oder stell Δl passend ein. Verändere nur Δl.',st:{v:1,w:0,dl:0},fr:['dl'],
+ ok:s=>ZVZ(ZVW[0],s.dl/ZVL0*100)===2&&!(play&&s.dl<15),v:s=>'Δl = '+aufNf(s.dl)+' mm, '+ZVTX[ZVZ(ZVW[0],s.dl/ZVL0*100)].split(':')[0],z:'Fließen an der Streckgrenze',
+ h:s=>{const z=ZVZ(ZVW[0],s.dl/ZVL0*100);return z===2?'Jetzt fließt er: Versuch anhalten (❚❚).':z<2?(play?'Der Versuch läuft, warte auf das Fließen.':'Noch elastisch: Δl etwas größer machen.'):'Zu weit, er verfestigt schon: Δl kleiner machen.'},
+ q:'Woran erkennst Du im Diagramm, dass der Stahl fließt, und was bleibt nach dem Loslassen?',a:'Die Kurve läuft waagerecht auf R_e = 235 N/mm²: Der Stab wird länger, ohne dass die Kraft steigt. Die Kraft ist F = R_e · A₀ = 235 N/mm² · 78,54 mm² = 18 457 N ≈ 18,5 kN. Beim Loslassen federt nur der elastische Anteil zurück, Δl_el = R_e / E · l₀ = 235 N/mm² / 210 000 N/mm² · 50 mm = 0,056 mm. Alles darüber bleibt.'};
 /* Heizen & Dämmen (v268): Vermuten und Auftrag */
 Object.assign(PRED,{
 'Wärmedämmung':['Eine Ziegelwand bekommt 14 cm Dämmung. Wie viel Wärme geht danach noch durch?',['Etwa ein Fünftel','Etwa die Hälfte','Gar keine mehr','Etwa 90 %'],'Ohne Dämmung ist U = 1,00 W/(m²·K), mit 14 cm Mineralwolle nur noch 0,20 W/(m²·K). Es geht noch etwa ein Fünftel durch. Ganz aufhalten lässt sich Wärme nie.'],
@@ -13800,6 +13901,31 @@ const EINU=[
   f:(k,t)=>EMRK(k,t,EFT(110,100,'2,5 km','ein1','middle')+AR(110,115,0,40,'var(--ink)')+EFT(110,185,'2500 m','ein1','middle')+EFT(150,145,'· 1 000','ein2'),'Wert · Faktor','Einheit kleiner, Zahl größer')}
 ];
 ['Länge','Fläche','Volumen','Masse','Dichte','Zeit','Geschwindigkeit','Kraft','Druck','Energie','Leistung','Temperatur','Winkel','Währung'].forEach(n=>{EIN[n+' ⇄']=EINU});
+/* Kurz erklärt: Zugversuch (Ansicht von „Zug-/Druckspannung & Sicherheit“) */
+{const ZN='Zug-/Druckspannung & Sicherheit',zm=(dl,t,x,y,w,h)=>ESIM(ZN,{v:1,w:0,dl},t,'0 0 300 440',x,y,w,h),zd=(dl,t,x,y,w,h)=>ESIM(ZN,{v:1,w:0,dl},t,'330 0 310 290',x,y,w,h),zl=(dl,t)=>ESIM(ZN,{v:1,w:0,dl},t,'330 292 310 148',0,24,480,229);
+EIN['Zugversuch']=[
+ {d:12,t:'Im Zugversuch zieht eine Maschine eine genormte Probe aus Stahl langsam auseinander, bis sie reißt. Sie misst dabei die Kraft F und die Verlängerung Δl.',
+  s:'Im Zugversuch zieht eine Maschine eine genormte Probe aus Stahl langsam auseinander, bis sie reißt. Sie misst dabei die Kraft F und die Verlängerung Delta l.',
+  f:(k,t)=>zm(4*EINQ(k/.8),t,10,0,184,270)+EFT(220,70,'Rundprobe aus S235','ein1')+EFT(220,110,'d₀ = 10 mm','ein2')+EFT(220,140,'Messlänge l₀ = 50 mm','ein2')+EFT(220,190,'gemessen: F und Δl','ein1')},
+ {d:12,t:'Damit dicke und dünne Proben vergleichbar sind, rechnet man um: Spannung σ = F / A₀ und Dehnung ε = Δl / l₀. Aufgetragen ergibt das das Spannungs-Dehnungs-Diagramm.',
+  s:'Damit dicke und dünne Proben vergleichbar sind, rechnet man um: Spannung Sigma gleich F durch A null und Dehnung Epsilon gleich Delta l durch l null. Aufgetragen ergibt das das Spannungs-Dehnungs-Diagramm.',
+  f:k=>EFX(k,[['σ = F / A₀ | Spannung','h'],['ε = Δl / l₀ | Dehnung','h'],['A₀ = π/4 · d₀² = 78,54 mm²','m']],['A₀ ist der Querschnitt vor dem Versuch'])},
+ {d:12,t:'Zuerst ist der Stahl elastisch wie eine Feder: Spannung und Dehnung wachsen gleichmäßig. Lässt man los, geht der Stab ganz auf seine alte Länge zurück.',
+  s:'Zuerst ist der Stahl elastisch wie eine Feder: Spannung und Dehnung wachsen gleichmäßig. Lässt man los, geht der Stab ganz auf seine alte Länge zurück.',
+  f:(k,t)=>zl(.056*EINQ(k/.7),t)},
+ {d:13,t:'An der Streckgrenze R_e beginnt der Stahl zu fließen: Er wird länger, ohne dass die Kraft steigt. Diese Verformung bleibt. Streckgrenze und Fließgrenze meinen denselben Punkt, bei S235 ist R_e = 235 N/mm².',
+  s:'An der Streckgrenze R e beginnt der Stahl zu fließen: Er wird länger, ohne dass die Kraft steigt. Diese Verformung bleibt. Streckgrenze und Fließgrenze meinen denselben Punkt, bei S 235 ist R e gleich 235 Newton pro Quadratmillimeter.',
+  f:(k,t)=>zl(.06+.84*EINQ(k/.8),t)},
+ {d:12,t:'Danach verfestigt sich der Stahl, die Kraft steigt wieder bis zur Zugfestigkeit R_m, der höchsten Spannung. Bis dahin wird der Stab überall gleichmäßig länger und dünner.',
+  s:'Danach verfestigt sich der Stahl, die Kraft steigt wieder bis zur Zugfestigkeit R m, der höchsten Spannung. Bis dahin wird der Stab überall gleichmäßig länger und dünner.',
+  f:(k,t)=>{const dl=.9+8.1*EINQ(k/.8);return zm(dl,t,0,0,170,262)+zd(dl,t,170,0,310,262)}},
+ {d:13,t:'Dann schnürt sich der Stab an einer Stelle ein. Die Kraft sinkt, bis er reißt. Was nach dem Bruch an Verlängerung bleibt, ist die Bruchdehnung A, bei S235 rund 26 %.',
+  s:'Dann schnürt sich der Stab an einer Stelle ein. Die Kraft sinkt, bis er reißt. Was nach dem Bruch an Verlängerung bleibt, ist die Bruchdehnung A, bei S 235 rund 26 Prozent.',
+  f:(k,t)=>{const dl=9+4.6*EINQ(k/.8);return zm(dl,t,0,0,170,262)+zd(dl,t,170,0,310,262)}},
+ {d:10,t:'Merke: Bis R_e federt der Stahl zurück, darüber bleibt er länger. R_m ist die höchste Spannung. Bauteile legt man unter R_e aus: σ_zul = R_e / ν.',
+  s:'Merke: Bis R e federt der Stahl zurück, darüber bleibt er länger. R m ist die höchste Spannung. Bauteile legt man unter R e aus: Sigma zulässig gleich R e durch Nü.',
+  f:(k,t)=>EMRK(k,t,zd(13.6,t,0,44,220,170),'σ = F / A₀','σ_zul = R_e / ν')}]}
+
 
 let einP=null;
 function einShow(n){const w=$('#ein'),S=EIN[n];if(einP)einP.stop();einP=null;if(!w)return;w.innerHTML='';w.hidden=!S;if(!S)return;
@@ -13862,6 +13988,7 @@ Object.assign(GRZ,{
 'Wärmepumpe':[['@v','Ansicht','','Kreislauf: die vier Bauteile und der Weg des Kältemittels. Energiefluss: Strom plus Umweltwärme ergibt Heizwärme, mit Vergleich zu Gaskessel und Heizstab.'],['@q','Wärmequelle','','Außenluft (Temperatur am Regler), Erdreich über eine Erdsonde (Sole etwa 5 °C) oder Grundwasser (etwa 10 °C).'],['@T','Außenluft','°C','Luft, aus der die Wärmepumpe Wärme holt. Für das ganze Jahr rechnet man mit dem Mittel der Heizzeit, etwa 2 bis 4 °C.'],['@V','Vorlauftemperatur','°C','So warm ist das Heizwasser, das ins Haus fließt. Fußbodenheizung etwa 35 °C, alte Heizkörper 55 bis 70 °C.'],['@Q','Wärmebedarf','kWh','So viel Wärme braucht das Haus im Jahr, ein Einfamilienhaus etwa 15 000 kWh.'],
  ['#','Im Rechenweg'],['T','absolute Temperatur','K','T = ϑ + 273 K. Für den Carnot-Wert immer in Kelvin rechnen.'],['ΔT','Temperaturhub','K','Unterschied zwischen Vorlauf und Quelle. Je kleiner, desto besser.'],['ε_C','Carnot-Leistungszahl','-','Höchstwert einer idealen Wärmepumpe: ε_C = T_V / ΔT.'],['η_G','Gütegrad','-','Echte Geräte schaffen etwa die Hälfte des Carnot-Werts, hier η_G = 0,5.'],['ε','Leistungszahl (COP)','-','ε = Wärme / Strom in einem Betriebspunkt. Über das ganze Jahr heißt sie Jahresarbeitszahl (JAZ).'],['W_el','elektrische Arbeit','kWh','Strom, den der Verdichter im Jahr braucht.'],['Q_U','Umweltwärme','kWh','Wärme aus Luft, Erde oder Wasser. Sie kostet nichts.'],['K','Stromkosten','€','K = W_el · Strompreis, hier 0,30 €/kWh.']]
 });
+GRZ['Zugversuch']=[['@v','Ansicht','','Bauteil berechnen: Zugstab mit Sicherheit. Zugversuch: Die Prüfmaschine zieht eine Probe bis zum Bruch.'],['@w','Werkstoff','','Baustahl S235 oder S355, Maschinenbaustahl E295 oder vergüteter C45. Jeder hat eigene Kennwerte.'],['@dl','Verlängerung','mm','Um so viel ist die Messlänge l₀ = 50 mm länger geworden. Die Traverse fährt dafür nach unten.'],['#','Im Diagramm'],['σ','Spannung','N/mm²','Kraft durch Anfangsquerschnitt: σ = F / A₀. Gerechnet wird immer mit dem Querschnitt vor dem Versuch.'],['ε','Dehnung','%','Verlängerung bezogen auf die Anfangslänge: ε = Δl / l₀.'],['A₀','Anfangsquerschnitt','mm²','Querschnitt der Probe vor dem Versuch: A₀ = π/4 · d₀² = 78,54 mm².'],['R_e','Streckgrenze','N/mm²','Ab hier fließt der Stahl: Er wird bleibend länger, ohne dass die Kraft steigt. Früher sagte man auch Fließgrenze, gemeint ist derselbe Punkt.'],['R<sub>p0,2</sub>','0,2-%-Dehngrenze','N/mm²','Für Stähle ohne ausgeprägte Streckgrenze (hier C45): Spannung, nach der 0,2 % bleibende Dehnung übrig bleiben. Sie ersetzt R_e.'],['R_m','Zugfestigkeit','N/mm²','Höchste Spannung im Versuch. Danach schnürt sich die Probe ein und reißt.'],['A','Bruchdehnung','%','Bleibende Verlängerung nach dem Bruch, bezogen auf l₀. Großes A heißt zäh. Nicht mit dem Querschnitt A₀ verwechseln.']];
 function grzShow(m){let d=$('#grz');const L=GRZ[m.name];if(!L){if(d)d.hidden=true;return}
  if(!d){d=document.createElement('details');d.id='grz';d.className='grz';$('#ctls').after(d)}
  const op=d.dataset.n===m.name&&d.open;d.dataset.n=m.name;d.hidden=false;
@@ -13870,13 +13997,13 @@ function grzShow(m){let d=$('#grz');const L=GRZ[m.name];if(!L){if(d)d.hidden=tru
  d.innerHTML=`<summary>ℹ️ Was bedeuten die Größen?</summary>${rows}`;d.open=op;subify(d)}
 function build(){
  const m=M[cur];UI={};$('#ctls').innerHTML='';$('#btns').innerHTML='';
- m.p.forEach(q=>ctl(S[cur],q));grzShow(m);$('#gsw').innerHTML='';$('#gsw').hidden=true;if(isGem(cur))gemCtl();if(m.knb)knbCtl(m);{const w=$('#gsw'),pn=$('#svg').closest('.panel'),t=!!(m.knb&&m.knbTop);if(t)pn.before(w);else pn.after(w);w.classList.toggle('gtop',t)}pvis();if(m.init)m.init(S[cur],UI);
+ m.p.forEach(q=>ctl(S[cur],q));grzShow(m.vk&&m.vk(S[cur])?{name:m.vk(S[cur]),p:m.p}:m);$('#gsw').innerHTML='';$('#gsw').hidden=true;if(isGem(cur))gemCtl();if(m.knb)knbCtl(m);{const w=$('#gsw'),pn=$('#svg').closest('.panel'),t=!!(m.knb&&m.knbTop);if(t)pn.before(w);else pn.after(w);w.classList.toggle('gtop',t)}pvis();if(m.init)m.init(S[cur],UI);
  const add=(l,fn)=>{const b=document.createElement('button');b.type='button';b.textContent=l;b.onclick=fn;$('#btns').appendChild(b);return b};
  (m.btn||[]).forEach(([l,fn])=>add(l,()=>{fn(S[cur]);build()}));
  const fb=add(FAV.includes(m.name)?'★ Favorit':'☆ Favorit',()=>{toggleFav(m.name);fb.textContent=FAV.includes(m.name)?'★ Favorit':'☆ Favorit'});
  if(hasPr(m))add('✏️ Üben',()=>openPractice('M:'+m.name));$('#tq').hidden=!hasPr(m);$('#tqb').onclick=()=>openPractice('M:'+m.name);
  if(m.anim){const b=add(play?'Pause':'Start',()=>{play=!play;b.textContent=play?'Pause':'Start'})}
- predShow(m.name);aufShow(m.name);einShow(m.name);{const E=ERK[m.name];$('#erk').hidden=!E;if(E){$('#erk').innerHTML='<summary>💡 Verstehen und typische Fehler</summary><p>'+E[0]+'</p>'+(BET[m.name]?'<p><b>🏭 Im Betrieb:</b> '+BET[m.name]+'</p>':'')+'<p><b>Hier passieren die meisten Fehler:</b></p><ul>'+E[1].map(x=>`<li>${x}</li>`).join('')+'</ul>'+(FEH.some(x=>x[0]===m.name)?'<p class="erkp"><button type="button" class="sbtn" id="erkgo">✏️ Diese Fehler üben →</button></p>':'');if($('#erkgo'))$('#erkgo').onclick=()=>openPractice('M:'+m.name,'fehl');{const rb=KI.readBtn((E[0]+(BET[m.name]?' Im Betrieb: '+BET[m.name]:'')+' Hier passieren die meisten Fehler: '+E[1].join('. ')).replace(/<[^>]+>/g,' '));if(rb)$('#erk').append(rb)}$('#erk').open=innerWidth>=900&&!(memGet().t[m.name]&&memGet().t[m.name].n)}}$('#fx').hidden=!FX[m.name];$('#fx').innerHTML=FX[m.name]?'<b>📜 Grundgleichungen</b><br>'+FX[m.name].map(x=>`<span>${x}</span>`).join(''):'';$('#desc').textContent=m.desc;{const L=$('#leg');L.textContent=m.leg;L.classList.add('cl');L.setAttribute('aria-expanded','false');L.title='Tippen für den ganzen Text';L.onclick=()=>{const o=L.classList.toggle('cl');L.setAttribute('aria-expanded',String(!o))}}render();
+ {const vk=(m.vk&&m.vk(S[cur]))||m.name;predShow(vk);aufShow(m.name,vk);einShow(vk)}{const E=ERK[m.name];$('#erk').hidden=!E;if(E){$('#erk').innerHTML='<summary>💡 Verstehen und typische Fehler</summary><p>'+E[0]+'</p>'+(BET[m.name]?'<p><b>🏭 Im Betrieb:</b> '+BET[m.name]+'</p>':'')+'<p><b>Hier passieren die meisten Fehler:</b></p><ul>'+E[1].map(x=>`<li>${x}</li>`).join('')+'</ul>'+(FEH.some(x=>x[0]===m.name)?'<p class="erkp"><button type="button" class="sbtn" id="erkgo">✏️ Diese Fehler üben →</button></p>':'');if($('#erkgo'))$('#erkgo').onclick=()=>openPractice('M:'+m.name,'fehl');{const rb=KI.readBtn((E[0]+(BET[m.name]?' Im Betrieb: '+BET[m.name]:'')+' Hier passieren die meisten Fehler: '+E[1].join('. ')).replace(/<[^>]+>/g,' '));if(rb)$('#erk').append(rb)}$('#erk').open=innerWidth>=900&&!(memGet().t[m.name]&&memGet().t[m.name].n)}}$('#fx').hidden=!FX[m.name];$('#fx').innerHTML=FX[m.name]?'<b>📜 Grundgleichungen</b><br>'+FX[m.name].map(x=>`<span>${x}</span>`).join(''):'';$('#desc').textContent=m.desc;{const L=$('#leg');L.textContent=m.leg;L.classList.add('cl');L.setAttribute('aria-expanded','false');L.title='Tippen für den ganzen Text';L.onclick=()=>{const o=L.classList.toggle('cl');L.setAttribute('aria-expanded',String(!o))}}render();
 
 }
 const store={get(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
@@ -15860,7 +15987,7 @@ addEventListener('popstate',e=>{ROUTING=true;try{openRoute(location.hash)}finall
 const nav0=nav;nav=function(){nav0.apply(this,arguments);const hm=!$('#home').hidden;document.body.classList.toggle('subpg',!hm);
  thd.hidden=cur<0;note.hidden=cur<0;if(cur<0)PROBE=false;
  /* Auftrag nur im Fachreiter beim Thema, nie in Üben, Prüfen, Lernstand usw. */
- {const au=$('#auf');if(au&&(cur<0||$('#app').hidden||au.dataset.n!==M[cur].name||((PROBE||window.PROBEOK)&&au.dataset.n==='Hydraulik')))au.hidden=true;else if(au&&AUF[au.dataset.n])au.hidden=false}
+ {const au=$('#auf');if(au&&(cur<0||$('#app').hidden||au.dataset.n!==M[cur].name||((PROBE||window.PROBEOK)&&au.dataset.n==='Hydraulik')))au.hidden=true;else if(au&&AUF[au.dataset.k||au.dataset.n])au.hidden=false}
 tLock(cur>=0&&!prac&&!!M[cur].test);
  if(cur>=0)requestAnimationFrame(()=>['#gs','#ms'].forEach(s=>{const b=$(s+' [aria-pressed="true"]'),r=$(s);if(b&&r&&r.scrollWidth>r.clientWidth)r.scrollLeft=b.offsetLeft-(r.clientWidth-b.offsetWidth)/2}));
  if(UPD&&!(SIM&&!SIM.done&&SIMV))upShow();
