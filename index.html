@@ -17164,9 +17164,11 @@ nav.glab{flex-wrap:wrap!important;overflow:visible!important;row-gap:2px}
  if(document.getElementById('mem')&&!document.getElementById('mem').hidden)try{lay()}catch(e){}
 })();</script>
 <!-- Ansicht im Bild (v255) -->
+<script>/* Themen, bei denen der Ansicht-Umschalter über der Skizze steht; 'alle' = überall */var PFTOP=['Zug-/Druckspannung & Sicherheit'];</script>
 <style>/* Ansicht-/Beispiel-/Schaltungs-Umschalter klein unten rechts in der Skizzenkarte, neben „mehr ▾“ */
 #pft{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;margin:6px 0 0}
 #pft>.legm{margin-right:auto}
+#pft.pftop{margin:0 0 8px}html body #pft.pftop>#gsw.gsw{margin:0}
 html body #pft>#gsw.gsw{position:static;order:0;margin:0 0 0 auto;padding:0;max-width:100%;background:none;border:0;border-radius:0;box-shadow:none}
 #pft #gsw h3{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 #pft #gsw .gsb{display:inline-flex;flex-wrap:nowrap;gap:2px;margin:0;padding:3px;border:1px solid var(--line);border-radius:999px;background:var(--bg)}
@@ -17182,8 +17184,11 @@ html body #pft>#gsw.gsw{position:static;order:0;margin:0 0 0 auto;padding:0;max-
  function place(){const w=$('#gsw'),L=$('#leg');if(!w||!L)return;const old=$('#pft');
   if(w.hidden||!w.querySelector('.gsb')){if(old){const lb=old.querySelector('.legm');if(lb)old.before(lb);if(old.contains(w))old.after(w);old.remove()}return}
   const f=old||document.createElement('div');f.id='pft';const lb=$('#legm');
-  const anchor=(lb&&lb.parentElement===L.parentElement)?lb:L;if(f.parentElement!==L.parentElement||f.previousElementSibling!==anchor)anchor.after(f);
-  if(lb&&lb.parentElement!==f)f.prepend(lb);if(w.parentElement!==f)f.append(w);
+  /* v308: Umschalter über der Skizze, damit die Regler näher an der Animation sind (Markus 13.11.2026) */
+  const top=PFTOP==='alle'||(cur>=0&&PFTOP.includes(M[cur].name)),sv=$('#svg');f.classList.toggle('pftop',top);
+  if(top&&sv){if(lb&&lb.parentElement===f)f.after(lb);if(f.nextElementSibling!==sv)sv.before(f)}
+  else{const anchor=(lb&&lb.parentElement===L.parentElement)?lb:L;if(f.parentElement!==L.parentElement||f.previousElementSibling!==anchor)anchor.after(f);
+  if(lb&&lb.parentElement!==f)f.prepend(lb)}if(w.parentElement!==f)f.append(w);
   const g=w.querySelector('.gsb'),bs=[...g.querySelectorAll('button')];{const o=w.querySelector('.pfts');if(o)o.remove()}g.classList.remove('pftsel');
   if(bs.length>2){/* mehr als zwei Möglichkeiten: Auswahlliste statt Knopfreihe */
    const h=w.querySelector('h3'),t=(h?h.textContent:'').replace(/^Art der /,'').trim()||'Ansicht';
@@ -17297,7 +17302,7 @@ const vbx=()=>{const s=document.getElementById('svg'),e=EX[cur];if(!s||!e)return
 function edge(){const s=document.getElementById('svg');if(!s)return false;const S=s.getBoundingClientRect(),m=s.getScreenCTM(),k=m?Math.hypot(m.a,m.b):0;if(!k||!S.width)return false;
  let l=0,t=0,r=0,b=0;s.querySelectorAll('text').forEach(x=>{const R=x.getBoundingClientRect();if(!R.width)return;l=Math.max(l,S.left-R.left);t=Math.max(t,S.top-R.top);r=Math.max(r,R.right-S.right);b=Math.max(b,R.bottom-S.bottom)});
  const d=[l,t,r,b].map(x=>x>.5?Math.ceil(x/k)+3:0);if(!d.some(Boolean))return false;const e=EX[cur]||[0,0,0,0];EX[cur]=e.map((x,i)=>x+d[i]);vbx();return true}
-function place(){const s=document.getElementById('svg');if(!s)return;const pn=s.parentElement,c=pn&&pn.querySelector(':scope>.simc');if(!c)return;
+function place(){const s=document.getElementById('svg');if(!s)return;const pn=s.parentElement,c=pn&&pn.querySelector(':scope>.simc');if(!c){s.style.marginTop='';return}
  s.style.marginTop='';c.style.top=c.style.left='';c.style.right='';const P=pn.getBoundingClientRect(),S=s.getBoundingClientRect(),bw=c.offsetWidth,bh=c.offsetHeight;if(!S.width||!bw)return;
  const R=[...s.querySelectorAll('text')].filter(t=>t.textContent.trim()).map(t=>t.getBoundingClientRect()).filter(r=>r.width>0);
  const cand=[[S.right-8-bw,S.top+8],[S.left+8,S.top+8],[S.right-8-bw,S.bottom-8-bh],[S.left+8,S.bottom-8-bh]];
