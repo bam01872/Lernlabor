@@ -17164,7 +17164,7 @@ nav.glab{flex-wrap:wrap!important;overflow:visible!important;row-gap:2px}
  if(document.getElementById('mem')&&!document.getElementById('mem').hidden)try{lay()}catch(e){}
 })();</script>
 <!-- Ansicht im Bild (v255) -->
-<script>/* Themen mit kleinem Ansicht-Umschalter in der Zeile von „mehr“ */var PFTK=['Zug-/Druckspannung & Sicherheit'];</script>
+<script>/* Themen mit kleinem Ansicht-Umschalter in der Zeile von „mehr“ ('alle' = überall, Markus 13.11.2026) */var PFTK='alle';</script>
 <style>/* Ansicht-/Beispiel-/Schaltungs-Umschalter klein unten rechts in der Skizzenkarte, neben „mehr ▾“ */
 #pft{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;margin:6px 0 0}
 #pft>.legm{margin-right:auto}
@@ -17185,7 +17185,7 @@ html body #pft>#gsw.gsw{position:static;order:0;margin:0 0 0 auto;padding:0;max-
   if(w.hidden||!w.querySelector('.gsb')){if(old){const lb=old.querySelector('.legm');if(lb)old.before(lb);if(old.contains(w))old.after(w);old.remove()}return}
   const f=old||document.createElement('div');f.id='pft';const lb=$('#legm');
   /* v309: kleiner Umschalter in derselben Zeile wie „mehr“, damit die Regler näher an der Animation sind (Markus 13.11.2026) */
-  f.classList.toggle('pftk',cur>=0&&PFTK.includes(M[cur].name));
+  f.classList.toggle('pftk',PFTK==='alle'||(cur>=0&&PFTK.includes(M[cur].name)));
   const anchor=(lb&&lb.parentElement===L.parentElement)?lb:L;if(f.parentElement!==L.parentElement||f.previousElementSibling!==anchor)anchor.after(f);
   if(lb&&lb.parentElement!==f)f.prepend(lb);if(w.parentElement!==f)f.append(w);
   const g=w.querySelector('.gsb'),bs=[...g.querySelectorAll('button')];{const o=w.querySelector('.pfts');if(o)o.remove()}g.classList.remove('pftsel');
