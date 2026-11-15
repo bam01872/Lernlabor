@@ -11733,10 +11733,12 @@ const EENR=(a,o={})=>{const ss=q=>q<=0?0:q>=1?1:q*q*(3-2*q),Y=x=>70+150*ss((x-30
  return `<path d="M10 240H470" stroke="var(--ink)" stroke-width="2"/>`+gr+`<path d="${tr}" fill="none" stroke="#475569" stroke-width="9" stroke-linecap="round"/><path d="${tr}" fill="none" stroke="#cbd5e1" stroke-width="3"/>`+
   `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="13" fill="var(--amber)" stroke="var(--ink)" stroke-width="2"/>`+(v>.08?AR(+cx.toFixed(1),+cy.toFixed(1),vx*60*v,vy*60*v,'var(--red)'):'')+
   (o.nb?'':bar(bx,H*hf,'var(--amber)','E_pot',Ep+' J')+bar(bx+60,H*(1-hf),'var(--red)','E_kin',Ek+' J')+BAR3(bx+120,160-H*hf,28,Math.max(1,H*hf),'var(--amber)',6)+BAR3(bx+120,160-H,28,Math.max(1,H*(1-hf)),'var(--red)',6)+EFT(bx+134,182,'Summe','ein2','middle')+EFT(bx+134,44,E+' J','ein1','middle'))};
-const ELAD=(deg,L,lc,la,lb,a=1,xw=330)=>{const c=Math.cos(deg*PI/180),s=Math.sin(deg*PI/180),fy=226,x0=xw-L*c,y1=fy-L*s,nx=s*9,ny=c*9,F=v=>v.toFixed(1);let r='';for(let i=1;i<10;i++){const q=i/10,x=x0+(xw-x0)*q,y=fy+(y1-fy)*q;r+=`<path d="M${F(x-nx)} ${F(y-ny)}L${F(x+nx)} ${F(y+ny)}" stroke="#8a6d43" stroke-width="3"/>`}
+/* Leiter (v316): im gedrehten Bild gezeichnet, Sprossen nur zwischen den Holmen, Holme am Boden und an der Wand sauber abgeschnitten */
+const ELAD=(deg,L,lc,la,lb,a=1,xw=330)=>{const c=Math.cos(deg*PI/180),s=Math.sin(deg*PI/180),fy=226,x0=xw-L*c,y1=fy-L*s,F=v=>v.toFixed(1),hw=8;let r='';for(let i=1;i<10;i++)r+=`<path d="M${F(L*i/10)} ${-hw+2}V${hw-2}" stroke="#8a6d43" stroke-width="3"/>`;
+ const lad=`<clipPath id="eladc"><rect x="0" y="0" width="${xw}" height="${fy}"/></clipPath><g clip-path="url(#eladc)"><g transform="translate(${F(x0)} ${fy}) rotate(${-deg})">${r}<g stroke="#b5884f" stroke-width="5"><path d="M${F(-hw*c/s-3)} ${-hw}H${L}"/><path d="M-3 ${hw}H${L+3}"/></g></g></g>`;
  const mx=(x0+xw)/2-18*s,my=(fy+y1)/2-18*c;
  return `<rect x="${xw}" y="16" width="26" height="${fy-16}" fill="#e7d3c0" stroke="var(--ink)" stroke-width="2"/>`+[0,1,2,3,4,5,6,7,8].map(i=>`<path d="M${xw} ${34+i*24}h26" stroke="#b9967a" stroke-width="1.2"/>`).join('')+`<path d="M10 ${fy}H${xw+40}" stroke="var(--ink)" stroke-width="3"/><path d="M10 ${fy}h${xw+30}v10H10Z" fill="var(--line)" opacity=".5"/>`+
- `<g stroke="#b5884f" stroke-width="5" stroke-linecap="round"><path d="M${F(x0-nx)} ${F(fy-ny)}L${F(xw-nx)} ${F(y1-ny)}"/><path d="M${F(x0+nx)} ${F(fy+ny)}L${F(xw+nx-6)} ${F(y1+ny-4)}"/></g>`+r+
+ lad+
  `<path d="M${F(x0+40)} ${fy}A40 40 0 0 0 ${F(x0+40*c)} ${F(fy-40*s)}" fill="none" stroke="var(--ink)" stroke-width="1.6"/>`+EFT(x0+46,fy-10,deg+'°','ein2')+
  `<g transform="rotate(${-deg} ${F(mx)} ${F(my)})">${EFT(F(mx),F(my),lc,'ein1','middle')}</g>`+
  `<g opacity="${a.toFixed(2)}">`+AR(xw+52,fy,0,-(fy-y1),'var(--red)')+EFT(xw+62,(fy+y1)/2+8,la,'ein1')+AR(x0,fy+28,xw-x0,0,'var(--flow)')+EFT(x0-8,fy+34,lb,'ein1','end')+'</g>'};
@@ -13317,7 +13319,7 @@ Object.assign(EIN,{
   f:k=>EFX(k,[['a = c · sin α = 10 m · sin 40° = 10 m · 0,643','m'],['a = 6,43 m','r'],['b = c · cos α = 10 m · cos 40° = 10 m · 0,766','m'],['b = 7,66 m','r']],['Probe: a² + b² = 41,3 m² + 58,7 m² = 100 m² = c²'])},
  {d:9,t:'Merke: sin α = Gegenkathete / Hypotenuse, cos α = Ankathete / Hypotenuse. Taschenrechner auf DEG stellen.',
   s:'Merke: Sinus Alpha gleich Gegenkathete durch Hypotenuse, Kosinus Alpha gleich Ankathete durch Hypotenuse. Taschenrechner auf DEG stellen.',
-  f:(k,t)=>EMRK(k,t,ESIM('Sinus & Kosinus',{a:40,c:10},0,'10 30 230 260',0,30,190,215),'sin α = a / c','cos α = b / c')}
+  f:(k,t)=>EMRK(k,t,ESIM('Sinus & Kosinus',{a:40,c:10},0,'0 30 250 260',4,24,205,213),'sin α = a / c','cos α = b / c')}
 ],
 'Energieformen & Erhaltung':[
  {d:11,t:'Eine Kugel von 2 kg liegt 10 m hoch auf einer Rampe. Sie rollt los: Je tiefer sie kommt, desto schneller wird sie. Lageenergie wird zu Bewegungsenergie.',
