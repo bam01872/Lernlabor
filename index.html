@@ -16227,7 +16227,7 @@ function fsList(){const el=$('#fsl');if(!el)return;const q=nz(FSS.q).replace(/_/
  el.innerHTML=h||'<div class="panel"><p class="sub">Nichts gefunden. Versuche es mit dem Namen der Größe (z. B. Leistung) oder dem Zeichen (z. B. F_G).</p></div>';
  el.querySelectorAll('[data-gi]').forEach(b=>b.onclick=()=>{go(+b.dataset.gi);window.scrollTo(0,0)})}
 // Indizes tiefstellen: F_G wird als F mit tiefgestelltem G angezeigt (Quelltext bleibt F_G)
-const SUBRX=/(^|[^A-Za-z0-9_À-ɏͰ-Ͽ])([A-Za-zͰ-Ͽ])_([A-Za-z0-9äöüÄÖÜß]+)/g,SUBSKIP=/^(SCRIPT|STYLE|TEXTAREA|OPTION|TITLE|INPUT|SUB)$/,SVGNS='http://www.w3.org/2000/svg';
+const SUBRX=/(^|[^A-Za-z0-9_À-ɏͰ-Ͽ]|Δ)([A-Za-zͰ-Ͽ])_([A-Za-z0-9äöüÄÖÜß]+)/g,SUBSKIP=/^(SCRIPT|STYLE|TEXTAREA|OPTION|TITLE|INPUT|SUB)$/,SVGNS='http://www.w3.org/2000/svg';
 const subTxt=t=>{const pa=t.parentNode;if(!pa||SUBSKIP.test(pa.nodeName.toUpperCase())||(pa.closest&&pa.closest('.sx')))return;const v=t.nodeValue;SUBRX.lastIndex=0;if(!SUBRX.test(v))return;
  const svg=pa.namespaceURI===SVGNS,f=document.createDocumentFragment();let last=0,m,up=false;SUBRX.lastIndex=0;
  const add=x=>{if(!x)return;if(svg&&up){const r=document.createElementNS(SVGNS,'tspan');r.setAttribute('dy','-0.2em');r.textContent=x;f.appendChild(r);up=false}else f.appendChild(document.createTextNode(x))};
@@ -17849,6 +17849,57 @@ if($('#home')&&!$('#home').hidden){try{nav()}catch(e){homeView()}}
   const a=box.querySelector('.tunav [aria-current="true"]'),n=box.querySelector('.tunav');if(a&&n){const ar=a.getBoundingClientRect(),nr=n.getBoundingClientRect();if(ar.right>nr.right||ar.left<nr.left)n.scrollLeft+=ar.left-nr.left-8}};
  /* Direktlink #tutorial/n: Ansicht wurde schon vor diesem Skript geöffnet */
  if(TUV)tutView();
+})();</script>
+
+<!-- Mehrstufige Aufgaben: zu gelösten Teilschritten zurückblättern, am Ende Gesamtlösung -->
+<style>
+#pq .pvb{margin:0 0 6px 8px;vertical-align:middle}
+#pvw{margin-top:12px}
+#pvw .pvh{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:6px}
+#pvw .pvc{display:inline-block;font-size:13px;font-weight:700;line-height:1;padding:5px 9px;border-radius:999px;background:#1d4ed8;color:#fff}
+#pvw .pvok{font-size:13px;font-weight:700;color:var(--ok)}
+#pvw .pvq{display:block;font-size:1.05em;margin:2px 0 10px}
+#pvw .pvs,#pgl .pgs{border-left:3px solid var(--line);padding:2px 0 2px 12px;font-size:15px}
+#pvw .pvs p,#pgl .pgs p{margin:4px 0}
+#pvw .pvn{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+#pvw .pvn .sbtn{background:var(--acc);color:#fff;font-weight:700}
+#practice .panel.pvon #pq,#practice .panel.pvon #popts,#practice .panel.pvon .pa,#practice .panel.pvon #ptol,#practice .panel.pvon #pfb,#practice .panel.pvon #pmot,#practice .panel.pvon #plvs,#practice .panel.pvon #ptipt,#practice .panel.pvon .pb,#practice .panel.pvon #psol,#practice .panel.pvon #pzt,#practice .panel.pvon #pbg,#practice .panel.pvon #pwj,#practice .panel.pvon #pfw,#practice .panel.pvon #ptr,#practice .panel.pvon #pohn,#practice .panel.pvon #pohs,#practice .panel.pvon #pgl{display:none!important}
+#pgl{margin-top:12px;border:1px solid var(--line);border-radius:12px;background:var(--card);padding:10px 12px}
+#pgl>summary{cursor:pointer;color:var(--acc);font-weight:700;min-height:28px;display:list-item}
+#pgl .pgi{margin:8px 0 4px;color:var(--mute);font-size:14px}
+#pgl h4{margin:14px 0 4px;font-size:15px}
+#pgl h4 .pvc2{display:inline-block;font-size:12px;font-weight:700;line-height:1;padding:4px 8px;border-radius:999px;background:#1d4ed8;color:#fff;margin-right:6px;vertical-align:1px}
+#pgl .pgr{font-weight:700}
+</style>
+<script>(()=>{
+ const P=()=>$('#practice .panel');
+ const stepIt=s=>({a:s[1],u:s[2],t:tolOf(s[4],s[2],s[1]),s:s[3]||[]});
+ /* Lösungsweg eines Teilschritts wie unter „Lösungsweg“ */
+ const solHtml=(c,k)=>{const s=c.steps[k];if(s.txt)return`<p><b>Musterlösung:</b> ${s.txt.mus}</p>`;const it=stepIt(s);
+  return it.s.map(x=>`<p>${x}</p>`).join('')+`<p><b>Ergebnis: ${keyTxt(it.a,it.u,it.t)}${it.t&&it.t.ch?'':sciTxt(it.a,it.u)}</b></p>`};
+ const solved=c=>{const d=c.dn||{},L=[];for(let k=0;k<c.i;k++)if(d[k])L.push(k);return L};
+ const off=()=>{const p=P();if(p)p.classList.remove('pvon');const w=$('#pvw');if(w)w.remove()};
+ /* Zurückblättern: nur Teilschritte vor dem aktuellen, die schon erledigt sind */
+ function view(k){const c=PS.cur;if(!c||c.k!=='steps')return;const L=solved(c),j=L.indexOf(k);if(j<0)return;const p=P();let w=$('#pvw');
+  if(!w){w=document.createElement('div');w.id='pvw';w.setAttribute('role','region');w.setAttribute('aria-label','Gelöster Teilschritt');$('#pq').after(w)}
+  const N=c.steps.length,prv=j>0?L[j-1]:null,nxt=j<L.length-1?L[j+1]:null,s=c.steps[k];
+  w.innerHTML=`<div class="pvh"><span class="pvc nofr">Schritt ${k+1} von ${N}</span><span class="pvok">✓ erledigt</span></div><b class="pvq">${s[0]}</b><div class="pvs"><b>Lösungsweg</b>${solHtml(c,k)}</div>`+
+   `<div class="pvn">${prv!=null?`<button type="button" class="sbtn2" data-k="${prv}">‹ Schritt ${prv+1}</button>`:''}${nxt!=null?`<button type="button" class="sbtn2" data-k="${nxt}">Schritt ${nxt+1} ›</button>`:''}<button type="button" class="sbtn" id="pvbk">Zurück zu Schritt ${c.i+1} ▶</button></div>`;
+  w.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>view(+b.dataset.k));
+  $('#pvbk').onclick=()=>{off();requestAnimationFrame(()=>{const q=$('#pq .pstq')||$('#pq');if(q)seeMid(q,$('#pck'))})};
+  p.classList.add('pvon');requestAnimationFrame(()=>{const r=w.getBoundingClientRect();if(r.top<0||r.top>innerHeight*.5)w.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})})}
+ function backBtn(){const c=PS.cur;if(!c||c.k!=='steps'||c.ohne)return;const L=solved(c),ch=$('#pq .pstc');if(!L.length||!ch||$('#pq .pvb'))return;
+  const k=L[L.length-1],b=document.createElement('button');b.type='button';b.className='sbtn2 prbtn pvb';b.textContent=`‹ Schritt ${k+1} ansehen`;b.title='Lösungsweg der erledigten Schritte noch einmal ansehen';b.onclick=e=>{e.preventDefault();view(k)};ch.after(b)}
+ /* Gesamtlösung nach dem letzten Teilschritt */
+ function total(){const c=PS.cur;if(!c||c.k!=='steps'||!c.done||c.i!==c.steps.length-1||c.steps.length<2||$('#pgl'))return;
+  const d=document.createElement('details');d.id='pgl';const N=c.steps.length;
+  d.innerHTML=`<summary>📋 Gesamtlösung aller ${N} Schritte</summary><p class="pgi">${c.intro}</p>`+c.steps.map((s,k)=>`<h4><span class="pvc2 nofr">Schritt ${k+1}</span>${s[0]}</h4><div class="pgs">${solHtml(c,k)}</div>`).join('');
+  ($('#psol')||$('#pfb')).after(d)}
+ const fs0=finishStep;finishStep=function(c){if(c&&c.k==='steps')(c.dn||(c.dn={}))[c.i]=1;return fs0.apply(this,arguments)};
+ const rq0=renderQ;renderQ=function(){off();{const g=$('#pgl');if(g)g.remove()}const r=rq0.apply(this,arguments);try{backBtn()}catch(e){console.error(e)}return r};
+ const ck0=checkQ;checkQ=function(){const r=ck0.apply(this,arguments);try{backBtn();total()}catch(e){console.error(e)}return r};
+ const ss0=showSol;showSol=function(){const r=ss0.apply(this,arguments);try{total()}catch(e){console.error(e)}return r};
+ $('#pck').onclick=checkQ;$('#psh').onclick=showSol;$('#pin').onkeydown=e=>{if(e.key==='Enter')checkQ()};
 })();</script>
 
 </body>
