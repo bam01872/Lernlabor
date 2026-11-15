@@ -2880,7 +2880,7 @@ const RGWAAGE=(sp,nr,ms,mE,mP)=>{const mx=Math.max(mE,mP),ang=Math.max(-10,Math.
  const eq=Math.abs(mP-mE)<1e-6*mx;h+=T(20,58,eq?'Gleichgewicht: Die Masse bleibt erhalten.':'Die Waage kippt: Die Gleichung ist nicht ausgeglichen.','t2').replace('class="t2"','class="t2" style="fill:'+(eq?'var(--ok)':'var(--red)')+';font-weight:700"');
  return h};
 fm(FC,RS,'Reaktionsgleichungen & Mol','Eine Reaktionsgleichung muss ausgeglichen sein: Von jeder Atomsorte steht links und rechts gleich viel (Erhaltung der Masse). n = m / M verbindet Masse und Stoffmenge. In der Teilchen-Lupe siehst Du, wie sich die Atome neu ordnen, auf der Waage, dass die Masse erhalten bleibt.',
- [['a','Ansicht','sel',['Teilchen-Lupe','Waage'],0],['r','Reakt.','sel',RX.map(r=>eqs(r.slice(1),r[0],r.slice(1).map(x=>x[0]))),0],['m','m',1,1000,1,'g',10],['v','Koeff.','sel',['ausgeglichen','alle = 1'],0]],
+ [['a','Ansicht','sel',['Teilchen-Lupe','Waage'],0],['r','Reakt.','sel',RX.map(r=>eqs(r.slice(1),r[0],r.slice(1).map(x=>x[0]))),0],['m','m',1,300,1,'g',10],['v','Koeff.','sel',['ausgeglichen','alle = 1'],0]],
  (s,t=0)=>{const r=RX[s.r],nr=r[0],sp=r.slice(1),co=sp.map(x=>s.v?1:x[0]),n1=s.m/MM(sp[0][1]),xi=n1/co[0],ms=sp.map((x,i)=>xi*co[i]*MM(x[1])),L={},R={};
  sp.forEach((x,i)=>{const a=AT(x[1]),q=i<nr?L:R;for(const e in a)q[e]=(q[e]||0)+a[e]*co[i]});
  const sm=(a,b)=>ms.slice(a,b).reduce((p,q)=>p+q,0),mE=sm(0,nr),mP=sm(nr,sp.length),els=[...new Set([...Object.keys(L),...Object.keys(R)])],ok=els.every(e=>(L[e]||0)==(R[e]||0));
@@ -15287,9 +15287,10 @@ function mcView(){const box=$('#mc');if(!box)return;const a=mcAll(),run=store.ge
 function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="panel"><h2>🧮 Mathe-Check</h2><p class="sub">Noch nicht gemacht. Der Check zeigt Dir in 20 Minuten, wo Du in den Mathe-Grundlagen stehst.</p><div class="pb"><button type="button" class="sbtn2" data-mco="1">Zum Mathe-Check →</button></div></div>`;
  return`<div class="panel"><h2>🧮 Mathe-Check</h2>${mcTable(a)}<div class="pb"><button type="button" class="sbtn2" data-mco="1">Startplan und Lösungswege →</button></div></div>`}
 /* Pilot-Einstellungen: Version, Neuigkeit, Kontakt */
-const APPV=311,NEWS='Bindungstypen: Metall und Nichtmetall bilden jetzt immer eine Ionenbindung, auch unter ΔEN 1,7 (z. B. CuO, Fe₂O₃).';
+const APPV=312,NEWS='Reaktionsgleichungen & Mol: Die Masse m geht jetzt bis 300 g statt 1000 g.';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
+ ['15.11.2026',312,['Reaktionsgleichungen & Mol: Der Regler für die Masse m geht jetzt bis 300 g statt bis 1000 g. Das reicht für 1 mol jedes ersten Edukts (auch 1 mol Eisen mit 56 g) und lässt sich feiner einstellen.']],
  ['15.11.2026',311,['Erklärvideos Atommodell, Periodensystem und Bindungstypen: Schrift in den Kästen hat wieder Abstand zum Rand, keine Zeile läuft mehr aus dem Bild, der Pfeil beim Chlor zeigt von außen auf die äußere Schale.']],
  ['13.11.2026',310,['Steuern & Regeln: Die Themen heißen kurz „Heizung“ und „Ampel“. Alte Links und der gespeicherte Lernstand bleiben erhalten. Die Suche zeigt bei jedem Treffer Fach und Gruppe.']],
  ['13.11.2026',309,['Ansicht-Umschalter (z. B. Bauteil berechnen / Zugversuch, Kreislauf / Energiefluss) ist kleiner und steht rechts in der Zeile von „mehr“. So rücken die Regler näher an das Bild. Kein leerer Streifen mehr über dem Bild nach einem Ansichtswechsel.']],
