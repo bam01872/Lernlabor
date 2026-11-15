@@ -15473,9 +15473,10 @@ function mcView(){const box=$('#mc');if(!box)return;const a=mcAll(),run=store.ge
 function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="panel"><h2>🧮 Mathe-Check</h2><p class="sub">Noch nicht gemacht. Der Check zeigt Dir in 20 Minuten, wo Du in den Mathe-Grundlagen stehst.</p><div class="pb"><button type="button" class="sbtn2" data-mco="1">Zum Mathe-Check →</button></div></div>`;
  return`<div class="panel"><h2>🧮 Mathe-Check</h2>${mcTable(a)}<div class="pb"><button type="button" class="sbtn2" data-mco="1">Startplan und Lösungswege →</button></div></div>`}
 /* Pilot-Einstellungen: Version, Neuigkeit, Kontakt */
-const APPV=314,NEWS='Neue Prüfungsaufgabe: Spülbad aus Stahl aufheizen (Wärmeausdehnung von Wasser und Behälter).';
+const APPV=315,NEWS='Neue Prüfungsaufgabe: Arbeitsboot im Salzwasser mit Opferanode, Motorleistung und Abdrift.';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
+ ['15.11.2026',315,['Neue Prüfungsaufgabe „Arbeitsboot im Salzwasser: Opferanode, Motorleistung und Abdrift“ mit drei Skizzen: Anodenmetall über die Spannungsreihe, Lack und Opferanode, Anodenwechsel, Motorleistung mit und ohne Gegenwind, Kraftzerlegung mit cos und sin, Abdrift im Tidenstrom mit Tangens. Zwei Lösungsskizzen erklären, wann sin, cos und tan passen.']],
  ['15.11.2026',314,['Neue Prüfungsaufgabe „Spülbad aus Stahl aufheizen: Wasserstand, Ausdehnung und Schrumpfen“ mit Skizze: Volumen aus den Abmessungen, Ausdehnung des Wassers mit Tabellen-Mittelwert für den Temperaturbereich, Ausdehnung des Stahlbehälters in Länge und Volumen, Pegelanstieg am Schauglas, Schrumpfen beim Abkühlen und Ausdehnungsgefäß am Heizkessel.']],
  ['15.11.2026',313,['Neue Prüfungsaufgabe „Ölplattform im Meer: Korrosionsschutz und Förderpumpe“ mit Skizze: gefährdete Stellen, Kontaktkorrosion am Geländer, Lackmenge für die Spritzwasserzone, Korrosionszuschlag, Schutz je Zone (auch Fremdstrom) sowie Hubleistung und elektrische Leistung der Förderpumpe. Auch im Üben beim Thema Korrosion.']],
  ['15.11.2026',312,['Reaktionsgleichungen & Mol: Der Regler für die Masse m geht jetzt bis 300 g statt bis 1000 g. Das reicht für 1 mol jedes ersten Edukts (auch 1 mol Eisen mit 56 g) und lässt sich feiner einstellen.']],
