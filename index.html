@@ -15530,9 +15530,10 @@ function mcView(){const box=$('#mc');if(!box)return;const a=mcAll(),run=store.ge
 function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="panel"><h2>🧮 Mathe-Check</h2><p class="sub">Noch nicht gemacht. Der Check zeigt Dir in 20 Minuten, wo Du in den Mathe-Grundlagen stehst.</p><div class="pb"><button type="button" class="sbtn2" data-mco="1">Zum Mathe-Check →</button></div></div>`;
  return`<div class="panel"><h2>🧮 Mathe-Check</h2>${mcTable(a)}<div class="pb"><button type="button" class="sbtn2" data-mco="1">Startplan und Lösungswege →</button></div></div>`}
 /* Pilot-Einstellungen: Version, Neuigkeit, Kontakt */
-const APPV=318,NEWS='Mehrstufige Aufgaben: zu erledigten Schritten zurückblättern und am Ende die Gesamtlösung ansehen.';
+const APPV=319,NEWS='Prüfungsaufgaben mit Drehmoment: Der Lösungsweg zeigt mit kleinem Drehpfeil, welche Kraft links- und welche rechtsdrehend wirkt.';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
+ ['15.11.2026',319,['Prüfungsaufgaben mit Drehmoment (Traktor, Spannpratze, Riemenspanner, Schnellmontagekran, Werkzeugschrank, Arbeitsplatte, Werbeschild, Schweißroboter, Pyramidenbau, Brücke mit LKW, Sesselbahn, Plattenwender, Anhängerkupplung, Auslegerkran): Im Lösungsweg steht vor der Momentengleichung je Kraft, ob sie linksdrehend (gegen den Uhrzeigersinn) oder rechtsdrehend (im Uhrzeigersinn) um den Drehpunkt wirkt, mit kleinem Drehpfeil.']],
  ['15.11.2026',318,['Mehrstufige Aufgaben: Mit dem kleinen Knopf „‹ Schritt n ansehen“ neben der Schrittmarke blätterst Du zu erledigten Schritten zurück und siehst deren Lösungsweg, Deine Eingabe bleibt stehen. Nach dem letzten Schritt zeigt „📋 Gesamtlösung“ alle Schritte mit Lösungsweg. Δs_A und Δl_max sind im Lösungsweg jetzt tiefgestellt.']],
  ['15.11.2026',317,['Prüfungsaufgabe „Traktor mit Palettengabel: Hinterachse, Zwillingsreifen und Kippgrenze“ ersetzt die Gabelstapler-Aufgabe: neue Skizze, Flächenpressung einfach und mit Zwillingsbereifung, Lösungsweg mit Drehrichtung und Vorzeichen jeder Kraft.']],
  ['15.11.2026',316,['Erklärvideo Sinus & Kosinus: Die Leiter ist sauber gezeichnet (auch im Video Pythagoras), der Einheitskreis in der letzten Szene ist ganz zu sehen.']],
