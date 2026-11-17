@@ -15622,9 +15622,10 @@ function mcView(){const box=$('#mc');if(!box)return;const a=mcAll(),run=store.ge
 function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="panel"><h2>🧮 Mathe-Check</h2><p class="sub">Noch nicht gemacht. Der Check zeigt Dir in etwa 30 Minuten, wo Du in den Mathe-Grundlagen stehst.</p><div class="pb"><button type="button" class="sbtn2" data-mco="1">Zum Mathe-Check →</button></div></div>`;
  return`<div class="panel"><h2>🧮 Mathe-Check</h2>${mcTable(a)}<div class="pb"><button type="button" class="sbtn2" data-mco="1">Startplan und Lösungswege →</button></div></div>`}
 /* Pilot-Einstellungen: Version, Neuigkeit, Kontakt */
-const APPV=326,NEWS='Mathe-Check überarbeitet: 15 anspruchsvollere Aufgaben, unter anderem mit Wurzel, Brüchen mit kgV und Pythagoras.';
+const APPV=327,NEWS='Neue Hausaufgaben in Kapitel 1.5, 2, 3 und 4: jetzt fünf Aufgaben pro Einheit.';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
+ ['17.11.2026',327,['Hausaufgaben Kapitel 1.5: neu „Volumenstrom für einen Hydraulikzylinder“ und „Schutzleiter und RCD“.','Hausaufgaben Kapitel 2: neu „Jahresertrag einer Photovoltaikanlage“ und „Kraftwerke vergleichen“.','Hausaufgaben Kapitel 3: neu „Stanzkraft“ und „Bewegung und Bremsweg“.','Hausaufgaben Kapitel 4: neu „Unterfüllte Packungen“ und „Mittelwert, Median und Ausreißer“.']],
  ['17.11.2026',326,['„Lernfortschritt senden“ (unter Ich und auf der Startseite) öffnet jetzt direkt den Kasten zum Senden, auch wenn „Einstellungen und Daten“ zugeklappt war.','Dozentenversion: Die Kursübersicht bleibt nach dem Neuladen sichtbar.']],
  ['17.11.2026',325,['Mathe-Check 1 und 2 überarbeitet: Formeln umstellen jetzt auch mit Wurzel und Bruchgleichung (Geschwindigkeit aus der Bewegungsenergie, Kolbendurchmesser, Parallelwiderstand), Wirkungsgrad, Brüche mit kgV und Pythagoras. Bereiche unterschiedlich groß, die Ampel richtet sich nach dem Anteil richtiger Aufgaben (grün ab 80 %, gelb ab 50 %). Etwa 30 Minuten.']],
  ['17.11.2026',324,['Hausaufgaben Kapitel 1.3: neu „Wärmemenge zum Aufheizen“ und „Volumenänderung im Hydrauliktank“.','Hausaufgaben Kapitel 1.4: neu „Kiste auf der Rampe“ und „Zwei Seile, eine Kraft“.']],
