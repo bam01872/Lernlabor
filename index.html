@@ -15592,9 +15592,10 @@ function mcView(){const box=$('#mc');if(!box)return;const a=mcAll(),run=store.ge
 function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="panel"><h2>🧮 Mathe-Check</h2><p class="sub">Noch nicht gemacht. Der Check zeigt Dir in 20 Minuten, wo Du in den Mathe-Grundlagen stehst.</p><div class="pb"><button type="button" class="sbtn2" data-mco="1">Zum Mathe-Check →</button></div></div>`;
  return`<div class="panel"><h2>🧮 Mathe-Check</h2>${mcTable(a)}<div class="pb"><button type="button" class="sbtn2" data-mco="1">Startplan und Lösungswege →</button></div></div>`}
 /* Pilot-Einstellungen: Version, Neuigkeit, Kontakt */
-const APPV=322,NEWS='Prüfungsaufgaben: Gerechnete Aufgaben tragen jetzt ein ✓ in der Auswahlliste, dazu gibt es eine Übersicht mit Filter und „Zufällige offene Aufgabe“.';
+const APPV=323,NEWS='Hausaufgaben: Kapitel 1.1 und 1.2 haben je zwei neue Aufgaben, jetzt fünf pro Einheit.';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
+ ['17.11.2026',323,['Hausaufgaben Kapitel 1.1: neu „Wasser: Aggregatzustände und Dichteanomalie“ und „Stoffgemische im Betrieb zuordnen“.','Hausaufgaben Kapitel 1.2: neu „pH-Wert beim Verdünnen“ und „Starke und schwache Säure“.']],
  ['16.11.2026',322,['Prüfungsaufgaben: Das Lernlabor merkt sich (nur in diesem Browser), welche Aufgaben zu Ende gerechnet (✓) oder begonnen (✎) sind. Die Auswahlliste zeigt die Zeichen, bei der Aufgabe steht, wann sie zuletzt gerechnet wurde, und die neue Übersicht lässt sich nach offen, begonnen und gerechnet filtern.']],
  ['15.11.2026',321,['Prüfungsaufgaben mit sin, cos oder tan (64 Teilaufgaben, z. B. schiefe Ebene, Kräfte zerlegen, wirksamer Hebelarm, Steigung in Prozent): Im Lösungsweg zeigt ein kleines rechtwinkliges Dreieck, welche Seite Hypotenuse, Ankathete und Gegenkathete ist und warum sin, cos oder tan passt.']],
  ['15.11.2026',320,['Praxisaufgaben mit Drehmoment (Flaschenwagenheber, Kompaktlader, Minibagger, Werkstattkran, Sackkarre, Umzug mit Klavier Teil 3): Im Lösungsweg steht je Kraft mit kleinem Drehpfeil, ob sie links- oder rechtsdrehend wirkt.']],
