@@ -11888,32 +11888,32 @@ const EIN={
 'Wärmekapazität':[
  {d:12,t:'Gleiche Herdplatte, gleiche Zeit, je 1 kg: Das Eisen wird viel schneller heiß als das Wasser.',
   s:'Gleiche Herdplatte, gleiche Zeit, je ein Kilogramm. Das Eisen wird viel schneller heiß als das Wasser.',
-  f:(k,t)=>{const ts=30*Math.min(1,k/.85),Tw=20+ts*1000/4182,Te=20+ts*1000/449;
+  f:(k,t)=>{const ts=30*Math.min(1,k/.85),Tw=20+ts*1000/4190,Te=20+ts*1000/449;
    return EFT(240,28,'P = 1 kW je Platte · t = '+Math.round(ts)+' s','ein2','middle')+
     EPLT(40,222,150,1,t)+EGL(70,108,90,104,{lv:78})+ETHM(200,82,120,Tw)+
     EPLT(270,222,150,1,t)+BAR3(290,160,100,56,'#8a96a1',14)+`<path d="M396 180H${434-10}" stroke="var(--ink)" stroke-width="1.5"/>`+ETHM(434,82,120,Te)+
     EFT(115,264,'1 kg Wasser','ein2','middle')+EFT(345,264,'1 kg Eisen','ein2','middle')}},
  {d:11,t:'Die Platte gibt Wärme Q ab, gemessen in kJ. Dadurch steigt die Temperatur um ΔT.',
   s:'Die Platte gibt Wärme Q ab, gemessen in Kilojoule. Dadurch steigt die Temperatur um Delta T.',
-  f:(k,t)=>{const dT=50*EINQ(k/.9),Tc=20+dT,Q=4.182*dT; 
+  f:(k,t)=>{const dT=50*EINQ(k/.9),Tc=20+dT,Q=4.19*dT; 
    const y20=226-14-(150-30)*.2,yT=226-14-(150-30)*Tc/100;
    return EPLT(60,226,170,1,t)+EGL(95,94,110,122,{lv:92})+EQAR(145,214,150,t)+ETHM(270,76,150,Tc)+
     (dT>1?`<path d="M290 ${y20.toFixed(1)}h12V${yT.toFixed(1)}h-12" fill="none" stroke="var(--red)" stroke-width="2"/>`+EFT(310,((y20+yT)/2+5).toFixed(1),'ΔT = '+Math.round(dT)+' K','ein1'):'')+
-    EFT(310,250,'Q = '+Math.round(Q)+' kJ','ein1')+EFT(150,264,'1 kg Wasser','ein2','middle')}},
+    EFT(310,250,'Q = '+String(Math.round(Q*10)/10).replace('.',',')+' kJ','ein1')+EFT(150,264,'1 kg Wasser','ein2','middle')}},
  {d:10,t:'Doppelte Masse braucht doppelte Wärme: 2 kg Wasser brauchen für die gleichen 50 K doppelt so viel Q.',
   s:'Doppelte Masse braucht doppelte Wärme. Zwei Kilogramm Wasser brauchen für die gleichen fünfzig Kelvin doppelt so viel Wärme.',
   f:k=>{const a=EINQ(k/.5),b=EINQ((k-.3)/.5);
    return EGL(30,128,70,100,{lv:48})+EGL(120,108,70,120,{lv:96})+EFT(65,256,'1 kg','ein1','middle')+EFT(155,256,'2 kg','ein1','middle')+
-    EFT(230,40,'Wärme Q für ΔT = 50 K','ein2')+EFT(230,86,'1 kg','ein2')+BAR3(270,68,100*a,26,'var(--amber)')+(a>.05?EFT(290+100*a,88,Math.round(209*a)+' kJ','ein2'):'')+
-    EFT(230,146,'2 kg','ein2')+BAR3(270,128,200*b,26,'var(--amber)')+(b>.05?EFT(290+200*b,148,Math.round(418*b)+' kJ','ein2'):'')+
+    EFT(230,40,'Wärme Q für ΔT = 50 K','ein2')+EFT(230,86,'1 kg','ein2')+BAR3(270,68,100*a,26,'var(--amber)')+(a>.05?EFT(290+100*a,88,String(Math.round(2095*a)/10).replace('.',',')+' kJ','ein2'):'')+
+    EFT(230,146,'2 kg','ein2')+BAR3(270,128,200*b,26,'var(--amber)')+(b>.05?EFT(290+200*b,148,Math.round(419*b)+' kJ','ein2'):'')+
     (k>.8?EFT(270,200,'2 · m  →  2 · Q','ein1'):'')}},
  {d:11,t:'Der Stoff entscheidet: Die spezifische Wärmekapazität c sagt, wie viel Wärme 1 kg um 1 K erwärmt. Wasser hat den höchsten Wert.',
   s:'Der Stoff entscheidet. Die spezifische Wärmekapazität c sagt, wie viel Wärme ein Kilogramm um ein Kelvin erwärmt. Wasser hat den höchsten Wert.',
-  f:k=>{const L=[['Wasser',4.18],['Öl',2],['Aluminium',.9],['Eisen',.45],['Kupfer',.39]];
-   return EFT(20,30,'c in kJ/(kg·K)','ein2')+L.map(([n,c],i)=>{const g=EINQ((k-i*.1)/.45),w=c/4.18*230*g,y=58+i*42;
+  f:k=>{const L=[['Wasser',4.19],['Öl',2],['Aluminium',.9],['Eisen',.45],['Kupfer',.39]];
+   return EFT(20,30,'c in kJ/(kg·K)','ein2')+L.map(([n,c],i)=>{const g=EINQ((k-i*.1)/.45),w=c/4.19*230*g,y=58+i*42;
     return EFT(20,y+20,n,'ein2')+BAR3(125,y,w,24,i?'var(--wire)':'var(--amber)')+(g>.05?EFT(139+w,y+18,(c*g).toFixed(2).replace('.',','),'ein2'):'')}).join('')}},
- {d:13,t:'Alles zusammen: Q = m · c · ΔT. Beispiel: 1 kg Wasser um 50 K erwärmen braucht 209 kJ.',
-  s:'Alles zusammen: Q gleich m mal c mal Delta T. Ein Kilogramm Wasser um fünfzig Kelvin erwärmen braucht zweihundertneun Kilojoule.',
+ {d:13,t:'Alles zusammen: Q = m · c · ΔT. Beispiel: 1 kg Wasser um 50 K erwärmen braucht 209,5 kJ.',
+  s:'Alles zusammen: Q gleich m mal c mal Delta T. Ein Kilogramm Wasser um fünfzig Kelvin erwärmen braucht zweihundertneun Komma fünf Kilojoule.',
   f:k=>{const L=['Q = m · c · ΔT','Q = 1 kg · 4,19 kJ/(kg·K) · 50 K','Q = 209,5 kJ'],F=['m: Masse in kg','c: spezifische Wärmekapazität in kJ/(kg·K)','ΔT: Temperaturänderung in K'];
    return L.map((x,i)=>{const o=Math.min(1,Math.max(0,(k-i*.25)/.15));return`<g opacity="${o.toFixed(2)}">${EQFMT(30,60+i*44,x,i==1?19:24,700,i==2?'var(--ok)':'var(--ink)','start',`style="font-size:${i==1?19:24}px;font-weight:700${i==2?';fill:var(--ok)':''}"`)}</g>`}).join('')+
     F.map((x,i)=>`<g opacity="${Math.min(1,Math.max(0,(k-.15-i*.08)/.15)).toFixed(2)}">${EFT(30,196+i*24,x,'ein2')}</g>`).join('')}},
@@ -11924,7 +11924,7 @@ const EIN={
    for(let i=0;i<4;i++){const ph=(t*.35+i/4)%1;h+=AR(40+ph*150,82,14,0,'var(--flow)')}
    h+=EFT(115,252,'Heizung: warmes Wasser','ein2','middle');
    const p=1+.04*Math.sin(t*4);
-   h+=`<g transform="translate(345 120) scale(${p.toFixed(3)})"><rect x="-120" y="-38" width="240" height="76" rx="12" fill="var(--card)" stroke="var(--amber)" stroke-width="3"/><text x="0" y="-6" text-anchor="middle" style="font-size:24px;font-weight:800">Q = m · c · ΔT</text></g>`+`<g transform="translate(345 120) scale(${p.toFixed(3)})">${EFT(0,24,'Wasser: c = 4,18 kJ/(kg·K)','ein2','middle')}</g>`;
+   h+=`<g transform="translate(345 120) scale(${p.toFixed(3)})"><rect x="-120" y="-38" width="240" height="76" rx="12" fill="var(--card)" stroke="var(--amber)" stroke-width="3"/><text x="0" y="-6" text-anchor="middle" style="font-size:24px;font-weight:800">Q = m · c · ΔT</text></g>`+`<g transform="translate(345 120) scale(${p.toFixed(3)})">${EFT(0,24,'Wasser: c = 4,19 kJ/(kg·K)','ein2','middle')}</g>`;
    if(k>.4)h+=EFT(345,206,'Selbst ausprobieren','ein1','middle')+AR(345,218,0,36,'var(--acc)');
    return h}}
 ]};
