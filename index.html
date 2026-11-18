@@ -59,6 +59,7 @@ svg text{fill:var(--ink);font-family:inherit}
 .ctl input[type=number]{}.ctl:not(.rg){grid-template-columns:var(--lws,var(--lw,3.6em)) minmax(0,1fr) 7em}.ctl select{grid-column:2/4;width:100%;min-width:0;contain:paint;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:5px 6px}
 .fx{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--amber);border-radius:8px;padding:8px 12px;margin:0 0 14px;font-size:15px}.fx>span{display:inline-block;background:var(--bg);border-radius:6px;padding:2px 8px;margin:4px 6px 0 0}.ctl input.tx{grid-column:2/4;width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:5px 6px}[hidden]{display:none!important}.hc{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}.hc h2{font-size:20px}.hc p{margin:8px 0}.chip{font:inherit;font-size:14px;font-weight:600;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:5px 10px;margin:4px 6px 0 0;cursor:pointer}
 .btns{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+/* v335: Themenknöpfe (z. B. „Arme ausstrecken“ / „Arme anziehen“) etwas kleiner, Favorit und Mehr nur als Zeichen, damit alles in eine Zeile passt. Reicht der Platz nicht (Handy), stehen die Themenknöpfe allein nebeneinander in der ersten Zeile (mfit setzt .mwrap) */#btns:has(.mbtn) .lb{display:none}#btns:has(.mbtn) [aria-pressed],#btns:has(.mbtn) .more>summary{min-width:44px;justify-content:center;padding:6px 10px}.btns button.mbtn{font-size:14px;padding:6px 10px!important;white-space:nowrap}.mbrk{display:none}.btns.mwrap .mbrk{display:block;flex-basis:100%;height:0}.btns.mwrap button.mbtn{flex:1 1 0;min-width:0;justify-content:center;padding:6px 8px!important}.mbrk{display:none}@media(max-width:599px){.btns .mbrk{display:block}}
 .btns button{font:inherit;font-weight:600;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 12px;cursor:pointer}
 .res{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:4px 0 14px}
 .res div{background:var(--bg);border-radius:8px;padding:8px 10px}
@@ -14549,6 +14550,9 @@ Object.assign(GRZ,{
 'Lineare Gleichungen lösen':[['#','Die Gleichung heißt a · x + b = c · x + d'],['@a','Zahl vor dem x, links','-','Steht kein Malpunkt da, ist trotzdem „mal“ gemeint: 3x = 3 · x.'],['@b','Zahl ohne x, links','-','Negativ heißt: Sie wird abgezogen.'],['@c','Zahl vor dem x, rechts','-','Bei 0 steht rechts kein x.'],['@d','Zahl ohne x, rechts','-','Negativ heißt: Sie wird abgezogen.'],
  ['#','Im Rechenweg'],['x','gesuchte Zahl','-','Die Zahl, für die beide Seiten gleich groß sind.'],['Probe','Kontrolle','','x links und rechts einsetzen. Kommt auf beiden Seiten dasselbe heraus, stimmt die Lösung.']]
 });
+/* v335: Knopfzeile prüfen: bricht sie um, stehen die Themenknöpfe allein in der ersten Zeile */
+function mfit(){const c=$('#btns');if(!c)return;c.classList.remove('mwrap');if(!c.querySelector('.mbtn'))return;const k=[...c.children].filter(e=>e.offsetWidth&&!e.classList.contains('mbrk')).map(e=>e.getBoundingClientRect().top);if(Math.max(...k)-Math.min(...k)>10)c.classList.add('mwrap')}
+addEventListener('resize',()=>requestAnimationFrame(mfit));
 function grzShow(m){let d=$('#grz');const L=GRZ[m.name];if(!L){if(d)d.hidden=true;return}
  if(!d){d=document.createElement('details');d.id='grz';d.className='grz';$('#btns').after(d)}
  const op=d.dataset.n===m.name&&d.open;d.dataset.n=m.name;d.hidden=false;
@@ -14561,7 +14565,7 @@ function build(){
  const m=M[cur];UI={};$('#ctls').innerHTML='';$('#btns').innerHTML='';
  m.p.forEach(q=>ctl(S[cur],q));grzShow(m.vk&&m.vk(S[cur])?{name:m.vk(S[cur]),p:m.p}:m);$('#gsw').innerHTML='';$('#gsw').hidden=true;if(isGem(cur))gemCtl();if(m.knb)knbCtl(m);{const w=$('#gsw'),pn=$('#svg').closest('.panel'),t=!!(m.knb&&m.knbTop);if(t)pn.before(w);else pn.after(w);w.classList.toggle('gtop',t)}pvis();if(m.init)m.init(S[cur],UI);
  const add=(l,fn)=>{const b=document.createElement('button');b.type='button';b.textContent=l;b.onclick=fn;$('#btns').appendChild(b);return b};
- (m.btn||[]).forEach(([l,fn])=>add(l,()=>{fn(S[cur]);build()}));
+ (m.btn||[]).forEach(([l,fn])=>add(l,()=>{fn(S[cur]);build()}).classList.add('mbtn'));if((m.btn||[]).length>1){const r=document.createElement('span');r.className='mbrk';$('#btns').appendChild(r)}
  const fb=add(FAV.includes(m.name)?'★ Favorit':'☆ Favorit',()=>{toggleFav(m.name);fb.textContent=FAV.includes(m.name)?'★ Favorit':'☆ Favorit'});
  if(hasPr(m))add('✏️ Üben',()=>openPractice('M:'+m.name));$('#tq').hidden=!hasPr(m);$('#tqb').onclick=()=>openPractice('M:'+m.name);
  if(m.anim){const b=add(play?'Pause':'Start',()=>{play=!play;b.textContent=play?'Pause':'Start'})}
@@ -15656,9 +15660,10 @@ function mcView(){const box=$('#mc');if(!box)return;const a=mcAll(),run=store.ge
 function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="panel"><h2>🧮 Mathe-Check</h2><p class="sub">Noch nicht gemacht. Der Check zeigt Dir in etwa 30 Minuten, wo Du in den Mathe-Grundlagen stehst.</p><div class="pb"><button type="button" class="sbtn2" data-mco="1">Zum Mathe-Check →</button></div></div>`;
  return`<div class="panel"><h2>🧮 Mathe-Check</h2>${mcTable(a)}<div class="pb"><button type="button" class="sbtn2" data-mco="1">Startplan und Lösungswege →</button></div></div>`}
 /* Pilot-Einstellungen: Version, Neuigkeit, Kontakt */
-const APPV=334,NEWS='Blocksatz ohne Lücken: Neben Formeln wird keine Zeile mehr auseinandergezogen, „Ziel:“ im Auftrag steht in einer eigenen Zeile.';
+const APPV=335,NEWS='Eiskunstlauf: „Arme ausstrecken“, „Arme anziehen“, Favorit und Mehr stehen am Laptop in einer Zeile, am Handy die beiden Arme-Knöpfe nebeneinander.';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
+ ['18.11.2026',335,['Themenknöpfe wie „Arme ausstrecken“ und „Arme anziehen“ (Eiskunstlauf) etwas kleiner: Am Laptop stehen sie mit Favorit und Mehr in einer Zeile, am Handy nebeneinander in einer eigenen Zeile.']],
  ['18.11.2026',334,['Blocksatz: Rutscht eine Formel in die nächste Zeile, wird die Zeile davor nicht mehr auseinandergezogen. „Ziel: …“ im Auftrag und „Rot: …“ nach einer Gleichung stehen in einer eigenen Zeile.','Grundgleichungen wieder linksbündig, Galvanische Zelle: Anode und Kathode je in einem eigenen Kasten.']],
  ['18.11.2026',333,['Die Knöpfe „Üben“, „Favorit“ und „Mehr“ stehen jetzt mittig unter den Ergebnis-Kästen. Regler und Ergebnisse stehen damit ohne Unterbrechung untereinander, der Kasten „Was bedeuten die Größen?“ folgt nach den Knöpfen.','Laufende Simulationen: Ergebnis-Kästen und Rechenweg behalten ihre Höhe und Schriftgröße, darunter springt nichts mehr. Die Schrift in den Kästen wird während des Laufs nicht mehr größer und kleiner.']],
  ['18.11.2026',332,['Blocksatz mit Silbentrennung in allen Textboxen aller Reiter: Verstehen und typische Fehler, Im Betrieb, Bildunterschriften, Auftrag, Hausaufgaben, Üben, Tutorial und Hinweise.','Überschriften, Knöpfe, Tabellen, Reglerzeilen und die Fußzeile bleiben linksbündig.']],
@@ -17203,7 +17208,7 @@ nm.addEventListener('focusin',()=>{nm.dataset.kf='1'});nm.addEventListener('poin
 const uOf=r=>{const n=r.parentElement.querySelector('.n');return n?n.textContent.trim():''};
 const vt=r=>{const u=uOf(r);r.setAttribute('aria-valuetext',String(+r.value).replace('.',',')+(u?' '+u:''))};
 const lab=()=>document.querySelectorAll('#ctls .ctl.rg:not(.gsl) input[type=range]').forEach(r=>{const l=r.parentElement.querySelector('label'),u=uOf(r);if(l)r.setAttribute('aria-label',l.textContent.trim()+(u?' in '+u:''));vt(r)});
-const b=build;build=function(){const x=b.apply(this,arguments);lab();return x};lab();
+const b=build;build=function(){const x=b.apply(this,arguments);lab();return x};lab();{const bt=document.getElementById('btns');let q=0;const go=()=>{if(q)return;q=requestAnimationFrame(()=>{q=0;mfit()})};if(bt&&typeof MutationObserver!=='undefined')new MutationObserver(go).observe(bt,{childList:true});if(bt&&typeof ResizeObserver!=='undefined')new ResizeObserver(go).observe(bt);try{document.fonts.ready.then(go)}catch(e){}const b2=build;build=function(){const x=b2.apply(this,arguments);go();return x}}
 const ct=document.getElementById('ctls');if(ct)ct.addEventListener('input',()=>ct.querySelectorAll('.ctl.rg:not(.gsl) input[type=range]').forEach(vt));
 const r0=render;render=function(){const x=r0.apply(this,arguments);if(ct)ct.querySelectorAll('.ctl.rg:not(.gsl) input[type=range]').forEach(vt);return x};
 const q=document.getElementById('q'),sr=document.getElementById('sr');if(!q||!sr)return;
