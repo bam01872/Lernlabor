@@ -12758,10 +12758,15 @@ Object.assign(EIN,{
 'Aggregatzustand':[
  {d:11,t:'Ein Eiswürfel im Topf auf der Herdplatte: Er schmilzt zu Wasser, das Wasser wird heiß und verdampft. Dreimal derselbe Stoff, drei Zustände.',
   s:'Ein Eiswürfel im Topf auf der Herdplatte: Er schmilzt zu Wasser, das Wasser wird heiß und verdampft. Dreimal derselbe Stoff, drei Zustände.',
-  f:(k,t)=>{const a=Math.min(1,k/.9);const P=ETOPF(90,140,140,88,{lv:a<.4?0:50*Math.min(1,(a-.4)/.3)});let h=EPLT(80,230,160,1,t)+P.b;
-   if(a<.4)h+=BAR3(135,180-100*a,50,46,'#cfe4f5',8);h+=P.f;
+  f:(k,t)=>{const a=Math.min(1,k/.9),m=Math.min(1,a/.5),F=n=>(+n).toFixed(1),lv=m>0?14+36*m-(a>.7?14*(a-.7)/.3:0):0,ys=228-lv,P=ETOPF(90,140,140,88,{lv:lv>=14?lv:0});let h=EPLT(80,230,160,1,t)+P.b;
+   /* Eiswürfel schrumpft beim Schmelzen, schwimmt auf dem Schmelzwasser; Tropfen laufen ab */
+   const sz=50*Math.pow(1-m,.7);if(sz>4){const hh=sz*.92,yb=Math.min(226,ys+hh*.85),x0=160-sz/2-3,y0=yb-hh;h+=BAR3(+F(x0),+F(y0),+F(sz),+F(hh),'#cfe4f5',Math.max(3,sz*.16));
+    if(lv>=14)h+=`<rect x="${F(x0)}" y="${F(ys)}" width="${F(sz+Math.max(3,sz*.16))}" height="${F(Math.max(0,yb-ys))}" fill="var(--flow)" opacity=".28"/>`;
+    if(m>0&&m<.97)[0,1].forEach(i=>{const p=(t*1.3+i*.5)%1,dx=i?x0+sz+1:x0+2,dy=y0+hh*.55+p*Math.max(6,ys-(y0+hh*.55));h+=`<path d="M${F(dx)} ${F(dy-8)}Q${F(dx+4.5)} ${F(dy)} ${F(dx)} ${F(dy+3)}Q${F(dx-4.5)} ${F(dy)} ${F(dx)} ${F(dy-8)}Z" fill="var(--flow)" stroke="var(--ink)" stroke-width=".8" opacity="${F(.9*(1-p*.6))}"/>`})}
+   if(a>.55)h+=[0,1,2,3].map(i=>{const p=(t*.9+i*.27)%1;return`<circle cx="${F(112+i*28+4*Math.sin(t*3+i))}" cy="${F(222-p*(222-ys-4))}" r="${F(1.5+p*2.5)}" fill="none" stroke="#fff" stroke-width="1.2" opacity="${F(Math.min(1,(a-.55)/.1)*.85)}"/>`}).join('');
+   h+=P.f;if(a>.06&&a<.5)h+=`<path d="M300 ${F(ys+6)}H236" stroke="var(--ink)" stroke-width="1.2" opacity=".6"/>`+EFT(306,ys+11,'Schmelzwasser','ein2','start');
    if(a>.7)h+=[0,1,2].map(i=>`<circle cx="${130+i*30}" cy="${(120-60*((a-.7)/.3)-i*8).toFixed(1)}" r="${6+i*2}" fill="var(--line)" opacity=".7"/>`).join('');
-   return h+EFT(360,100,a<.4?'fest':a<.7?'flüssig':'gasförmig','ein1','middle')+EFT(360,134,'Eis → Wasser → Dampf','ein2','middle')}},
+   return h+EFT(360,100,a<.06?'fest':a<.5?'Eis schmilzt':a<.7?'flüssig':'gasförmig','ein1','middle')+EFT(360,134,'Eis → Wasser → Dampf','ein2','middle')}},
  {d:11,t:'Im Teilchenmodell: Fest sitzen die Teilchen auf festen Plätzen und zittern nur. Flüssig rutschen sie aneinander vorbei. Gasförmig fliegen sie frei und weit auseinander.',
   s:'Im Teilchenmodell: Fest sitzen die Teilchen auf festen Plätzen und zittern nur. Flüssig rutschen sie aneinander vorbei. Gasförmig fliegen sie frei und weit auseinander.',
   f:(k,t)=>{let h='';[['fest',0],['flüssig',1],['gasförmig',2]].forEach(([n,i])=>{const x=30+i*150;h+=`<rect x="${x}" y="60" width="120" height="140" rx="6" fill="none" stroke="var(--line)" stroke-width="2"/>`+EFT(x+60,230,n,'ein1','middle');
@@ -15660,9 +15665,10 @@ function mcView(){const box=$('#mc');if(!box)return;const a=mcAll(),run=store.ge
 function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="panel"><h2>🧮 Mathe-Check</h2><p class="sub">Noch nicht gemacht. Der Check zeigt Dir in etwa 30 Minuten, wo Du in den Mathe-Grundlagen stehst.</p><div class="pb"><button type="button" class="sbtn2" data-mco="1">Zum Mathe-Check →</button></div></div>`;
  return`<div class="panel"><h2>🧮 Mathe-Check</h2>${mcTable(a)}<div class="pb"><button type="button" class="sbtn2" data-mco="1">Startplan und Lösungswege →</button></div></div>`}
 /* Pilot-Einstellungen: Version, Neuigkeit, Kontakt */
-const APPV=338,NEWS='Wasserhärte: Die Ionen im Becherglas haben dieselben Farben wie im Erklärvideo und bewegen sich leicht.';
+const APPV=339,NEWS='Aggregatzustand: Im Erklärvideo schmilzt der Eiswürfel jetzt sichtbar, er wird kleiner und Schmelzwasser entsteht.';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
+ ['18.11.2026',339,['Kurz erklärt Aggregatzustand: Der Eiswürfel wandert nicht mehr nach oben, sondern schmilzt sichtbar. Er wird kleiner, schwimmt auf dem steigenden Schmelzwasser, Tropfen laufen ab. Beim Erhitzen steigen Bläschen auf, beim Verdampfen sinkt der Wasserstand.']],
  ['18.11.2026',338,['Wasserhärte: Im Becherglas beim Regler sind Ca²⁺ jetzt blau und Mg²⁺ grün wie im Erklärvideo, und die Ionen bewegen sich leicht im Wasser. Im Erklärvideo sind die Na⁺-Ionen am Ionentauscher violett, damit sie nicht mit Mg²⁺ verwechselt werden.']],
  ['18.11.2026',337,['Gasdichte (Normzustand → Betrieb): Die doppelte Zeile ρ₂ im Rechenweg ist weg. Die Ergebniskachel „von ρ_Normzustand“ heißt jetzt „Anteil von ρ₁“ und bricht nicht mehr mitten im Wort um.']],
  ['18.11.2026',336,['Eiskunstlauf am Handy: „Arme ausstrecken“, „Arme anziehen“, ☆ und ⋯ stehen in einer Zeile, die Arme-Knöpfe dafür mit kleinerer Schrift. Auf sehr schmalen Handys stehen die Wörter im Knopf untereinander.']],
