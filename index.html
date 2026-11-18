@@ -10714,7 +10714,7 @@ function memView(msg){const M_=memGet(),T0=mToday(),P=memPlan(),U=memUniv(),due=
  weak+=`</div>`;
  /* Wiederholung */
  const nxt=[];for(let i=1;i<=7;i++){const k=addDays(T0,i),c=Object.keys(M_.t).filter(n=>M_.t[n].due===k).length;if(c)nxt.push(`${dshow(k)}: ${c} ${c===1?"Thema":"Themen"}`)}
- let rep=`<div class="panel"><h2>🔁 Wiederholung</h2><p class="sub">Themen kommen in wachsenden Abständen wieder: ${MEMINT.join(' → ')} Tage. Wer an einem Tag mindestens 3 Aufgaben zu etwa 70 % richtig löst, rückt eine Stufe weiter. Bei weniger als 50 % geht es morgen von vorn los.</p>`;
+ let rep=`<div class="panel"><h2>🔁 Wiederholung</h2><p class="sub">Themen kommen in wachsenden Abständen wieder:<br><span style="white-space:nowrap">${MEMINT.join('\u00A0→ ')}\u00A0Tage</span>. Wer an einem Tag mindestens 3 Aufgaben zu etwa 70 % richtig löst, rückt eine Stufe weiter. Bei weniger als 50 % geht es morgen von vorn los.</p>`;
  if(!due.length)rep+=`<p class="sub">Heute ist nichts fällig.${nxt.length?' Als Nächstes: '+nxt.join(' · ')+'.':''}</p>`;
  else{const dd=due.filter(n=>U.includes(n));rep+=`<ul class="mplan">${due.map(n=>`<li><span class="mk kW">fällig ${M_.t[n].due<T0?'seit '+dayDiff(M_.t[n].due,T0)+' T.':'heute'}</span><b>${n}</b><button type="button" class="chip" data-go="${q(n)}">Üben →</button></li>`).join('')}</ul>${dd.length>1?`<div class="pb"><button type="button" class="sbtn" id="mdue">Alle fälligen Themen mischen</button></div>`:''}${nxt.length?`<p class="sub">Danach: ${nxt.join(' · ')}</p>`:''}`}
  rep+=`</div>`;
@@ -17308,6 +17308,8 @@ body.rfon #auf>details>summary>b:first-of-type::before{content:var(--rfn);displa
 :where(main,.tour,dialog) :where(td,th,button,label,summary,nav,footer,.crumb,.ctl) :where(p,li){text-align:start;-webkit-hyphens:manual;hyphens:manual}
 :where(main,.tour,dialog) :where(input,textarea,select,code,pre){-webkit-hyphens:manual;hyphens:manual}
 :where(main) :where(p.big){text-align:start}
+main .nojust{text-align:start!important}main .crumb{text-align:start}/* Blocksatz-Wächter: Absatz mit stark gedehnter Zeile linksbündig */
+.rlist small{white-space:nowrap}#mem :where(p,li),#home .hc.qk p{text-align:start}/* Lernstand-Seite und Start-Kasten Lernstand: kurze Zahlenzeilen linksbündig (Markus 18.11.2026) *//* Prüfungsreife: „0 von 48 sicher“ in einer Zeile, der Balken wird schmaler */
 @media(max-width:899px){body.rfnav #desc{margin-bottom:6px;cursor:pointer}/* v302: eigene Kürzung statt line-clamp, damit „…“ im Blocksatz sichtbar bleibt (Safari legte den Text darüber) */body.rfnav #desc.rfcl{display:block;max-height:3em;line-height:1.5;overflow:hidden;position:relative}body.rfnav #desc.rfcl.rfov{-webkit-mask-image:linear-gradient(#000,#000),linear-gradient(to right,#000 calc(100% - 2.4em),transparent calc(100% - 1.3em));mask-image:linear-gradient(#000,#000),linear-gradient(to right,#000 calc(100% - 2.4em),transparent calc(100% - 1.3em));-webkit-mask-size:100% 1.5em,100% 1.5em;mask-size:100% 1.5em,100% 1.5em;-webkit-mask-position:0 0,0 1.5em;mask-position:0 0,0 1.5em;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat}#uidots{display:block;position:relative;height:0;pointer-events:none}#uidots::after{content:'…';position:absolute;right:0;bottom:6px;font-size:16px;line-height:24px}body:not(.rfnav) #uidots,#desc:not(.rfcl.rfov)+#uidots{display:none}
  body.rfnav:not(.rfsw) .swr{display:none!important}
  body.rfnav #thd .tr{display:flex;align-items:center;gap:8px;flex-wrap:wrap}body.rfnav #thd .tr h2{flex:1 1 auto}}
@@ -18133,7 +18135,17 @@ if($('#home')&&!$('#home').hidden){try{nav()}catch(e){homeView()}}
    if(!fr||fr.left-L>4||!rs.length)continue;
    const top=Math.max(...rs.map(r=>r.top)),rr=Math.max(...rs.filter(r=>Math.abs(r.top-top)<4).map(r=>r.right));
    if((R-rr)/(R-L)>.22){const b=document.createElement('br');b.className='jbr';f.before(b)}}};
- const doEl=el=>{if(el.querySelector('.fml')){sepFix(el);loose(el)}};
+ /* 3) Wird eine Zeile trotzdem stark gedehnt (wenige Wörter über die ganze Breite, z. B. vor einem Knopf),
+    steht dieser Absatz linksbündig (Markus 18.11.2026). Gemessen wird jede Zeile einmal linksbündig und einmal im Blocksatz. */
+ const lines=el=>{const w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT),rg=document.createRange(),R=[];let n;
+  while((n=w.nextNode())){if(!n.nodeValue.trim()||n.parentElement.closest('button,svg,.fml'))continue;rg.selectNodeContents(n);for(const r of rg.getClientRects())if(r.width>0)R.push(r)}
+  el.querySelectorAll('.fml').forEach(f=>{const r=f.getBoundingClientRect();if(r.width)R.push(r)});
+  R.sort((a,b)=>a.top-b.top);const out=[];for(const r of R){const l=out[out.length-1];if(l&&r.top<l.b-3){l.l=Math.min(l.l,r.left);l.r=Math.max(l.r,r.right);l.b=Math.max(l.b,r.bottom)}else out.push({l:r.left,r:r.right,b:r.bottom})}return out};
+ const stretch=el=>{el.classList.remove('nojust');if(!el.isConnected||!el.offsetParent||getComputedStyle(el).textAlign!=='justify')return;
+  const cs=getComputedStyle(el),bx=el.getBoundingClientRect(),Rr=bx.right-parseFloat(cs.paddingRight);
+  const J=lines(el);if(J.length<2&&!el.querySelector('button'))return;const ta=el.style.textAlign;el.style.textAlign='left';const Lf=lines(el);el.style.textAlign=ta;if(Lf.length!==J.length)return;
+  for(let i=0;i<J.length;i++){const w=Rr-Lf[i].l;if(w<80)continue;if(J[i].r>=Rr-2&&(Lf[i].r-Lf[i].l)/w<.8){el.classList.add('nojust');return}}};
+ const doEl=el=>{if(el.querySelector('.fml')){sepFix(el);loose(el)}stretch(el)};
  let tm=0;const all=()=>{tm=0;M.querySelectorAll(BLK).forEach(doEl);ob.takeRecords()},later=()=>{if(!tm)tm=setTimeout(all,80)};
  const ob=new MutationObserver(rs=>{const S=new Set();let full=0;
   for(const r of rs){const t=r.target.nodeType===1?r.target:r.target.parentElement;if(!t||t.closest('svg,canvas'))continue;
