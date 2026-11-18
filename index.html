@@ -15656,9 +15656,10 @@ function mcView(){const box=$('#mc');if(!box)return;const a=mcAll(),run=store.ge
 function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="panel"><h2>🧮 Mathe-Check</h2><p class="sub">Noch nicht gemacht. Der Check zeigt Dir in etwa 30 Minuten, wo Du in den Mathe-Grundlagen stehst.</p><div class="pb"><button type="button" class="sbtn2" data-mco="1">Zum Mathe-Check →</button></div></div>`;
  return`<div class="panel"><h2>🧮 Mathe-Check</h2>${mcTable(a)}<div class="pb"><button type="button" class="sbtn2" data-mco="1">Startplan und Lösungswege →</button></div></div>`}
 /* Pilot-Einstellungen: Version, Neuigkeit, Kontakt */
-const APPV=331,NEWS='Regler kompakter: Formelzeichen, Regler und Zahl stehen in einer Zeile, die Bedeutung steht im Kasten „Was bedeuten die Größen?“.';
+const APPV=332,NEWS='Blocksatz überall: Alle Texte und Kästen stehen jetzt im Blocksatz mit Silbentrennung, auf allen Reitern.';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
+ ['18.11.2026',332,['Blocksatz mit Silbentrennung in allen Textboxen aller Reiter: Verstehen und typische Fehler, Im Betrieb, Bildunterschriften, Auftrag, Hausaufgaben, Üben, Tutorial und Hinweise.','Überschriften, Knöpfe, Tabellen, Reglerzeilen und die Fußzeile bleiben linksbündig.']],
  ['18.11.2026',331,['Regler: Links steht nur noch das Formelzeichen (z. B. n statt „Scherflächen n“), Regler, Zahl und Einheit stehen in derselben Zeile. Auswahlfelder wie „Werkstoff“ schieben die Regler nicht mehr unter den Namen.','Kasten „Was bedeuten die Größen?“ jetzt auch in Flaschenzug, Reibung, Zugspannung, Scherung, Hydraulik-Leistung, Pneumatik, Titration und Linearen Gleichungen. Bezeichnungen stehen im Index (d_Kolben statt „d Kolben“).','Heizung: Beschriftungen in der Skizze laufen nicht mehr über den Rand. Atommodell startet mit „N = Z gekoppelt“.']],
  ['18.11.2026',330,['Statistik: aufklappbarer Kasten „Was bedeuten die Größen?“ in allen neun Themen, mit Reglern und Kürzeln aus dem Rechenweg.','Energie und Physik: Im Kasten „Was bedeuten die Größen?“ steht der Reglername nicht mehr doppelt (z. B. „Ansicht Ansicht“).']],
  ['18.11.2026',329,['Hausaufgaben: Maschinenfähigkeit (c_m, c_mk ab 1,67) und Prozessfähigkeit (c_p, c_pk ab 1,33) einheitlich bewertet, Toleranzgrenzen heißen OSG/USG.','Hausaufgaben: Zugstange mit sinnvolleren Kräften, unterfüllte Packungen als ganze Zahl, Mischungstemperatur mit 1 L ≈ 1 kg, Zahnkranz mit Mindesttemperatur.','Erklärvideos Photovoltaik, Windkraft, Geothermie, Schmelzwärme, Schutzleiter & RCD und Prozessfähigkeit sprachlich und fachlich präzisiert.']],
@@ -17292,7 +17293,7 @@ body.rfon #auf>details>summary>b:first-of-type::before{content:var(--rfn);displa
 #rfv.ok{border-color:var(--ok)}#rfv.no{border-color:var(--acc)}#rfv b.r{color:var(--ok)}
 /* Handy: Einstiegstext vollständig (Tipp kürzt ihn), „Thema wechseln“ klappt die zwei Wischleisten auf */
 /* v301: Einleitungstext im Blocksatz mit Silbentrennung (Markus 11.11.2026) */#desc{text-align:justify;-webkit-hyphens:auto;hyphens:auto}
-/* v331: Blocksatz mit Silbentrennung in allen Textboxen aller Reiter (Markus 18.11.2026), wie Lernlabor Pro */
+/* v332: Blocksatz mit Silbentrennung in allen Textboxen aller Reiter (Markus 18.11.2026), wie Lernlabor Pro */
 :where(main,.tour,dialog) :where(p,li,dd,blockquote,.legend,.fx,#probe,.tumbl .sub,.tiph>span){text-align:justify;-webkit-hyphens:auto;hyphens:auto;overflow-wrap:break-word}
 :where(main,.tour,dialog) :where(td,th,button,label,summary,nav,footer,.crumb,.ctl) :where(p,li){text-align:start;-webkit-hyphens:manual;hyphens:manual}
 :where(main,.tour,dialog) :where(input,textarea,select,code,pre){-webkit-hyphens:manual;hyphens:manual}
