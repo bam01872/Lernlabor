@@ -17272,6 +17272,10 @@ body.rfon #auf>details>summary>b:first-of-type::before{content:var(--rfn);displa
 #rfv.ok{border-color:var(--ok)}#rfv.no{border-color:var(--acc)}#rfv b.r{color:var(--ok)}
 /* Handy: Einstiegstext vollständig (Tipp kürzt ihn), „Thema wechseln“ klappt die zwei Wischleisten auf */
 /* v301: Einleitungstext im Blocksatz mit Silbentrennung (Markus 11.11.2026) */#desc{text-align:justify;-webkit-hyphens:auto;hyphens:auto}
+/* v331: Blocksatz mit Silbentrennung in allen Textboxen aller Reiter (Markus 18.11.2026), wie Lernlabor Pro */
+:where(main,.tour,dialog) :where(p,li,dd,blockquote,.legend){text-align:justify;-webkit-hyphens:auto;hyphens:auto;overflow-wrap:break-word}
+:where(main,.tour,dialog) :where(td,th,button,label,summary,nav,footer,.crumb,.ctl) :where(p,li){text-align:start;-webkit-hyphens:manual;hyphens:manual}
+:where(main,.tour,dialog) :where(input,textarea,select,code,pre){-webkit-hyphens:manual;hyphens:manual}
 @media(max-width:899px){body.rfnav #desc{margin-bottom:6px;cursor:pointer}/* v302: eigene Kürzung statt line-clamp, damit „…“ im Blocksatz sichtbar bleibt (Safari legte den Text darüber) */body.rfnav #desc.rfcl{display:block;max-height:3em;line-height:1.5;overflow:hidden;position:relative}body.rfnav #desc.rfcl.rfov{-webkit-mask-image:linear-gradient(#000,#000),linear-gradient(to right,#000 calc(100% - 2.4em),transparent calc(100% - 1.3em));mask-image:linear-gradient(#000,#000),linear-gradient(to right,#000 calc(100% - 2.4em),transparent calc(100% - 1.3em));-webkit-mask-size:100% 1.5em,100% 1.5em;mask-size:100% 1.5em,100% 1.5em;-webkit-mask-position:0 0,0 1.5em;mask-position:0 0,0 1.5em;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat}#uidots{display:block;position:relative;height:0;pointer-events:none}#uidots::after{content:'…';position:absolute;right:0;bottom:6px;font-size:16px;line-height:24px}body:not(.rfnav) #uidots,#desc:not(.rfcl.rfov)+#uidots{display:none}
  body.rfnav:not(.rfsw) .swr{display:none!important}
  body.rfnav #thd .tr{display:flex;align-items:center;gap:8px;flex-wrap:wrap}body.rfnav #thd .tr h2{flex:1 1 auto}}
