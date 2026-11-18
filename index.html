@@ -5670,7 +5670,7 @@ Object.assign(FX,{
 'Reaktionsgleichungen & Mol':['n = m / M','V = n · V_m  (V_m = 22,4 l/mol bei 0 °C, ≈ 24 l/mol bei 20 °C)','c = n / V','Atome links = Atome rechts'],
 'Neutralisation & Titration':['Säure + Base → Salz + Wasser','n(H₃O⁺) = n(OH⁻) am Äquivalenzpunkt','c₁ · V₁ · z₁ = c₂ · V₂ · z₂'],
 'Oxidationszahlen':['Summe der Oxidationszahlen = Ladung','O meist −II, H meist +I','Oxidation: Oxidationszahl steigt','Reduktion: Oxidationszahl sinkt'],
-'Galvanische Zelle & Spannungsreihe':['U = E(Kathode) − E(Anode)','Anode (−): Oxidation, Kathode (+): Reduktion','Das unedlere Metall ist die Anode'],
+'Galvanische Zelle & Spannungsreihe':['U = E(Kathode) − E(Anode)','Anode (−): Oxidation','Kathode (+): Reduktion','Das unedlere Metall ist die Anode'],
 'Elektrolyse':['Q = I · t','m = Q · Abscheiderate  (Kupfer ≈ 1,19 g/Ah)','Doppelte Ladung → doppelte Masse','Kathode (−): Reduktion, Anode (+): Oxidation'],
 'Wasserhärte':['°dH = (c(Ca²⁺) + c(Mg²⁺)) in mmol/l · 5,6','1 °dH ≈ 0,18 mmol/l Erdalkali-Ionen','weich < 8,4 °dH, mittel 8,4–14, hart > 14 °dH','Entkalken: CaCO₃ + 2 H⁺ → Ca²⁺ + H₂O + CO₂↑']
 });
@@ -11433,7 +11433,7 @@ function aufShow(n,k=n){let b=$('#auf');const A=AUF[k];/* k: Ansicht mit eigenem
  /* auch wenn die Grundeinstellung das Ziel schon erfüllt (z. B. Mischungstemperatur m₂ = 2 kg), mit den Startwerten beginnen */if(!D.ok&&!AUFAUTO[k]&&(aufFix(A,S[cur]).length||A.ok(S[cur]))){AUFAUTO[k]=2;Object.assign(S[cur],A.st);build();return}AUFAUTO[k]=1;
  aufTick()}
 function aufTick(){const b=$('#auf');if(!b||b.hidden||cur<0||b.dataset.n!==M[cur].name||!b.querySelector('.aufst'))return;const n=b.dataset.n,k=b.dataset.k||n,A=AUF[k],s=S[cur],fx=aufFix(A,s),ok=!fx.length&&A.ok(s),st=b.querySelector('.aufst'),hi=b.querySelector('.aufhi');
- st.className='aufst '+(ok?'okt':'');if(ok&&!b.classList.contains('aufok')&&b.dataset.fl){b.classList.remove('aufflash');void b.offsetWidth;b.classList.add('aufflash')}b.classList.toggle('aufok',ok);b.dataset.fl='1';st.textContent=(ok?'✓ Erreicht: ':'Noch nicht erreicht: ')+A.v(s)+(ok?'':' · Ziel: '+A.z);
+ st.className='aufst '+(ok?'okt':'');if(ok&&!b.classList.contains('aufok')&&b.dataset.fl){b.classList.remove('aufflash');void b.offsetWidth;b.classList.add('aufflash')}b.classList.toggle('aufok',ok);b.dataset.fl='1';st.textContent=(ok?'✓ Erreicht: ':'Noch nicht erreicht: ')+A.v(s);if(!ok)st.append(document.createElement('br'),'Ziel: '+A.z);/* Ziel in eigener Zeile statt „ · “ (Blocksatz, Markus 18.11.2026) */
  hi.innerHTML=fx.length?`⚠️ Für den Auftrag ${fx.length>1?'müssen':'muss'} ${fx.map(k=>`<b>${aufLab(k)} = ${aufVal(k,A.st[k])}</b>`).join(', ')} bleiben (gerade ${fx.map(k=>aufVal(k,s[k])).join(', ')}). Tippe auf „Startwerte einstellen“.`:ok?'':(AUFAUTO[k]===2?'Die Regler stehen jetzt auf den Startwerten des Auftrags. ':'')+'💡 '+A.h(s)+(A.fr.some(k=>{const q=aufQ(k);return q&&q[2]!=='sel'})?' Tipp: Du kannst den Wert auch direkt ins Zahlenfeld tippen.':'');hi.hidden=!hi.innerHTML;
  b.querySelector('.aufw').hidden=!ok&&!b.dataset.ok;{const sm=b.querySelector('.aufsm');sm.className='aufsm'+(ok?' okt':'');sm.textContent=ok?'✓ Erreicht':'Ziel: '+A.z}
  if(ok&&!b.dataset.ok){b.dataset.ok='1';b.querySelector('.aufdn').hidden=false;const X=store.get('ll_auf',{});if(!(X[k]&&X[k].ok)){X[k]=Object.assign(X[k]||{},{ok:1,d:mToday()});store.set('ll_auf',X);memRec(n,true,null,'auf')}}}
@@ -15656,9 +15656,10 @@ function mcView(){const box=$('#mc');if(!box)return;const a=mcAll(),run=store.ge
 function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="panel"><h2>🧮 Mathe-Check</h2><p class="sub">Noch nicht gemacht. Der Check zeigt Dir in etwa 30 Minuten, wo Du in den Mathe-Grundlagen stehst.</p><div class="pb"><button type="button" class="sbtn2" data-mco="1">Zum Mathe-Check →</button></div></div>`;
  return`<div class="panel"><h2>🧮 Mathe-Check</h2>${mcTable(a)}<div class="pb"><button type="button" class="sbtn2" data-mco="1">Startplan und Lösungswege →</button></div></div>`}
 /* Pilot-Einstellungen: Version, Neuigkeit, Kontakt */
-const APPV=333,NEWS='Knöpfe Üben, Favorit und Mehr stehen unter den Ergebnissen; die Ergebnis-Kästen ruckeln nicht mehr, während eine Simulation läuft.';
+const APPV=334,NEWS='Blocksatz ohne Lücken: Neben Formeln wird keine Zeile mehr auseinandergezogen, „Ziel:“ im Auftrag steht in einer eigenen Zeile.';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
+ ['18.11.2026',334,['Blocksatz: Rutscht eine Formel in die nächste Zeile, wird die Zeile davor nicht mehr auseinandergezogen. „Ziel: …“ im Auftrag und „Rot: …“ nach einer Gleichung stehen in einer eigenen Zeile.','Grundgleichungen wieder linksbündig, Galvanische Zelle: Anode und Kathode je in einem eigenen Kasten.']],
  ['18.11.2026',333,['Die Knöpfe „Üben“, „Favorit“ und „Mehr“ stehen jetzt mittig unter den Ergebnis-Kästen. Regler und Ergebnisse stehen damit ohne Unterbrechung untereinander, der Kasten „Was bedeuten die Größen?“ folgt nach den Knöpfen.','Laufende Simulationen: Ergebnis-Kästen und Rechenweg behalten ihre Höhe und Schriftgröße, darunter springt nichts mehr. Die Schrift in den Kästen wird während des Laufs nicht mehr größer und kleiner.']],
  ['18.11.2026',332,['Blocksatz mit Silbentrennung in allen Textboxen aller Reiter: Verstehen und typische Fehler, Im Betrieb, Bildunterschriften, Auftrag, Hausaufgaben, Üben, Tutorial und Hinweise.','Überschriften, Knöpfe, Tabellen, Reglerzeilen und die Fußzeile bleiben linksbündig.']],
  ['18.11.2026',331,['Regler: Links steht nur noch das Formelzeichen (z. B. n statt „Scherflächen n“), Regler, Zahl und Einheit stehen in derselben Zeile. Auswahlfelder wie „Werkstoff“ schieben die Regler nicht mehr unter den Namen.','Kasten „Was bedeuten die Größen?“ jetzt auch in Flaschenzug, Reibung, Zugspannung, Scherung, Hydraulik-Leistung, Pneumatik, Titration und Linearen Gleichungen. Bezeichnungen stehen im Index (d_Kolben statt „d Kolben“).','Heizung: Beschriftungen in der Skizze laufen nicht mehr über den Rand. Atommodell startet mit „N = Z gekoppelt“.']],
@@ -17295,7 +17296,7 @@ body.rfon #auf>details>summary>b:first-of-type::before{content:var(--rfn);displa
 /* Handy: Einstiegstext vollständig (Tipp kürzt ihn), „Thema wechseln“ klappt die zwei Wischleisten auf */
 /* v301: Einleitungstext im Blocksatz mit Silbentrennung (Markus 11.11.2026) */#desc{text-align:justify;-webkit-hyphens:auto;hyphens:auto}
 /* v332: Blocksatz mit Silbentrennung in allen Textboxen aller Reiter (Markus 18.11.2026), wie Lernlabor Pro */
-:where(main,.tour,dialog) :where(p,li,dd,blockquote,.legend,.fx,#probe,.tumbl .sub,.tiph>span){text-align:justify;-webkit-hyphens:auto;hyphens:auto;overflow-wrap:break-word}
+:where(main,.tour,dialog) :where(p,li,dd,blockquote,.legend,.fx>span:only-of-type,#probe,.tumbl .sub,.tiph>span){text-align:justify;-webkit-hyphens:auto;hyphens:auto;overflow-wrap:break-word}
 :where(main,.tour,dialog) :where(td,th,button,label,summary,nav,footer,.crumb,.ctl) :where(p,li){text-align:start;-webkit-hyphens:manual;hyphens:manual}
 :where(main,.tour,dialog) :where(input,textarea,select,code,pre){-webkit-hyphens:manual;hyphens:manual}
 :where(main) :where(p.big){text-align:start}
@@ -18106,5 +18107,34 @@ if($('#home')&&!$('#home').hidden){try{nav()}catch(e){homeView()}}
  document.addEventListener('change',e=>{if(e.target.closest&&e.target.closest('#ctls,#gsw,#btns'))reset()},true);
  addEventListener('resize',()=>{if(innerWidth!==w){w=innerWidth;reset()}});
 })();</script>
+<script>
+/* Blocksatz-Wächter (Markus 18.11.2026): Blocksatz darf neben Formeln keine Lücken reißen.
+   1) „ · Rot:“ als Trenner direkt nach einer Gleichung wird zur neuen Zeile.
+   2) Rutscht eine Formel (bleibt immer in einer Zeile) in die nächste Zeile und wäre die Zeile davor stark gedehnt,
+      kommt vor die Formel ein Zeilenumbruch: die Zeile davor bleibt linksbündig statt auseinandergezogen.
+   Läuft gleich nach jeder Textänderung (vor dem Zeichnen, also ohne Flackern) und bei neuer Breite für alle Absätze. */
+(()=>{const M=document.querySelector('main');if(!M)return;const BLK='p,li,.legend,dd',SEP=/^\s*·\s+(?=[A-ZÄÖÜ][A-Za-zÄÖÜäöüß]*:)/;
+ const sepFix=el=>el.querySelectorAll('.fml').forEach(f=>{const n=f.nextSibling;if(n&&n.nodeType===3){const m=n.nodeValue.match(SEP);if(m){n.nodeValue=n.nodeValue.slice(m[0].length);const b=document.createElement('br');b.className='jsep';f.after(b)}}});
+ const loose=el=>{el.querySelectorAll('br.jbr').forEach(b=>b.remove());if(!el.isConnected||!el.offsetParent||getComputedStyle(el).textAlign!=='justify')return;
+  const cs=getComputedStyle(el),bx=el.getBoundingClientRect(),L=bx.left+parseFloat(cs.paddingLeft),R=bx.right-parseFloat(cs.paddingRight);if(R-L<80)return;
+  for(const f of el.querySelectorAll('.fml')){if(f.parentElement.closest(BLK)!==el&&f.parentElement!==el)continue;
+   let pv=f.previousSibling;while(pv&&pv.nodeType===3&&!pv.nodeValue.trim())pv=pv.previousSibling;if(!pv||pv.nodeName==='BR')continue;
+   const ta=el.style.textAlign;el.style.textAlign='left';/* linksbündig messen, sonst ist jede Zeile voll */
+   const fr=f.getClientRects()[0],rg=document.createRange();rg.setStart(el,0);rg.setEndBefore(f);
+   const rs=fr?[...rg.getClientRects()].filter(r=>r.width>0&&r.bottom<=fr.top+2):[];el.style.textAlign=ta;
+   if(!fr||fr.left-L>4||!rs.length)continue;
+   const top=Math.max(...rs.map(r=>r.top)),rr=Math.max(...rs.filter(r=>Math.abs(r.top-top)<4).map(r=>r.right));
+   if((R-rr)/(R-L)>.22){const b=document.createElement('br');b.className='jbr';f.before(b)}}};
+ const doEl=el=>{if(el.querySelector('.fml')){sepFix(el);loose(el)}};
+ let tm=0;const all=()=>{tm=0;M.querySelectorAll(BLK).forEach(doEl);ob.takeRecords()},later=()=>{if(!tm)tm=setTimeout(all,80)};
+ const ob=new MutationObserver(rs=>{const S=new Set();let full=0;
+  for(const r of rs){const t=r.target.nodeType===1?r.target:r.target.parentElement;if(!t||t.closest('svg,canvas'))continue;
+   if(r.type==='attributes'){if(t.matches('#leg,#desc,details'))full=1;continue}
+   const b=t.closest(BLK);if(b){S.add(b);continue}
+   r.addedNodes.forEach(n=>{if(n.nodeType!==1)return;if(n.matches(BLK))S.add(n);n.querySelectorAll(BLK).forEach(x=>S.add(x))})}
+  S.forEach(doEl);ob.takeRecords();if(full)later()});
+ ob.observe(M,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['class','open']});
+ addEventListener('resize',later);M.addEventListener('toggle',later,true);document.fonts&&document.fonts.ready.then(later);later()})();
+</script>
 </body>
 </html>
