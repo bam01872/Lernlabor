@@ -15656,10 +15656,10 @@ function mcView(){const box=$('#mc');if(!box)return;const a=mcAll(),run=store.ge
 function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="panel"><h2>🧮 Mathe-Check</h2><p class="sub">Noch nicht gemacht. Der Check zeigt Dir in etwa 30 Minuten, wo Du in den Mathe-Grundlagen stehst.</p><div class="pb"><button type="button" class="sbtn2" data-mco="1">Zum Mathe-Check →</button></div></div>`;
  return`<div class="panel"><h2>🧮 Mathe-Check</h2>${mcTable(a)}<div class="pb"><button type="button" class="sbtn2" data-mco="1">Startplan und Lösungswege →</button></div></div>`}
 /* Pilot-Einstellungen: Version, Neuigkeit, Kontakt */
-const APPV=332,NEWS='Knöpfe Üben, Favorit und Mehr stehen jetzt unter der Simulation; die Ergebnis-Kästen ruckeln nicht mehr, während eine Simulation läuft.';
+const APPV=332,NEWS='Knöpfe Üben, Favorit und Mehr trennen Regler und Ergebnisse nicht mehr; die Ergebnis-Kästen ruckeln nicht mehr, während eine Simulation läuft.';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
- ['18.11.2026',332,['Die Knöpfe „Üben“, „Favorit“ und „Mehr“ stehen jetzt direkt unter der Simulation. Regler und Ergebnis-Kästen stehen damit ohne Unterbrechung untereinander, der Kasten „Was bedeuten die Größen?“ folgt nach den Ergebnissen.','Laufende Simulationen: Ergebnis-Kästen und Rechenweg behalten ihre Höhe und Schriftgröße, darunter springt nichts mehr. Die Schrift in den Kästen wird während des Laufs nicht mehr größer und kleiner.']],
+ ['18.11.2026',332,['Die Knöpfe „Üben“, „Favorit“ und „Mehr“ stehen am Laptop jetzt direkt unter der Simulation, am Handy nach „Werte einstellen“ und vor „Nachschlagen“. Regler und Ergebnis-Kästen stehen damit ohne Unterbrechung untereinander, der Kasten „Was bedeuten die Größen?“ folgt nach den Ergebnissen.','Laufende Simulationen: Ergebnis-Kästen und Rechenweg behalten ihre Höhe und Schriftgröße, darunter springt nichts mehr. Die Schrift in den Kästen wird während des Laufs nicht mehr größer und kleiner.']],
  ['18.11.2026',331,['Regler: Links steht nur noch das Formelzeichen (z. B. n statt „Scherflächen n“), Regler, Zahl und Einheit stehen in derselben Zeile. Auswahlfelder wie „Werkstoff“ schieben die Regler nicht mehr unter den Namen.','Kasten „Was bedeuten die Größen?“ jetzt auch in Flaschenzug, Reibung, Zugspannung, Scherung, Hydraulik-Leistung, Pneumatik, Titration und Linearen Gleichungen. Bezeichnungen stehen im Index (d_Kolben statt „d Kolben“).','Heizung: Beschriftungen in der Skizze laufen nicht mehr über den Rand. Atommodell startet mit „N = Z gekoppelt“.']],
  ['18.11.2026',330,['Statistik: aufklappbarer Kasten „Was bedeuten die Größen?“ in allen neun Themen, mit Reglern und Kürzeln aus dem Rechenweg.','Energie und Physik: Im Kasten „Was bedeuten die Größen?“ steht der Reglername nicht mehr doppelt (z. B. „Ansicht Ansicht“).']],
  ['18.11.2026',329,['Hausaufgaben: Maschinenfähigkeit (c_m, c_mk ab 1,67) und Prozessfähigkeit (c_p, c_pk ab 1,33) einheitlich bewertet, Toleranzgrenzen heißen OSG/USG.','Hausaufgaben: Zugstange mit sinnvolleren Kräften, unterfüllte Packungen als ganze Zahl, Mischungstemperatur mit 1 L ≈ 1 kg, Zahnkranz mit Mindesttemperatur.','Erklärvideos Photovoltaik, Windkraft, Geothermie, Schmelzwärme, Schutzleiter & RCD und Prozessfähigkeit sprachlich und fachlich präzisiert.']],
@@ -18084,6 +18084,7 @@ if($('#home')&&!$('#home').hidden){try{nav()}catch(e){homeView()}}
 
 <style>/* v332: Knopfzeile unter der Simulation; Werte ruckeln nicht (Markus 18.11.2026) */
 .btns.simbtns{margin:0 0 12px;padding:0 2px}@media(min-width:900px){.btns.simbtns{margin-top:10px}}
+/* Handy (Markus 18.11.): Knopfzeile nach „Werte einstellen“, vor „Nachschlagen“ */@media(max-width:899px){#app #btns.simbtns{order:3;margin:0}}
 #res,#steps{box-sizing:border-box}
 </style>
 <script>/* v332 RUHIG: Während eine Simulation läuft, wechseln die Werte ständig. Damit Kästen und Rechenweg nicht wachsen und schrumpfen
