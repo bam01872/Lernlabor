@@ -15665,9 +15665,10 @@ function mcView(){const box=$('#mc');if(!box)return;const a=mcAll(),run=store.ge
 function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="panel"><h2>🧮 Mathe-Check</h2><p class="sub">Noch nicht gemacht. Der Check zeigt Dir in etwa 30 Minuten, wo Du in den Mathe-Grundlagen stehst.</p><div class="pb"><button type="button" class="sbtn2" data-mco="1">Zum Mathe-Check →</button></div></div>`;
  return`<div class="panel"><h2>🧮 Mathe-Check</h2>${mcTable(a)}<div class="pb"><button type="button" class="sbtn2" data-mco="1">Startplan und Lösungswege →</button></div></div>`}
 /* Pilot-Einstellungen: Version, Neuigkeit, Kontakt */
-const APPV=338,NEWS='Wasserhärte: Die Ionen im Becherglas haben dieselben Farben wie im Erklärvideo und bewegen sich leicht.';
+const APPV=339,NEWS='Aggregatzustand: Im Erklärvideo schmilzt der Eiswürfel jetzt sichtbar, er wird kleiner und Schmelzwasser entsteht.';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
+ ['18.11.2026',339,['Kurz erklärt Aggregatzustand: Der Eiswürfel wandert nicht mehr nach oben, sondern schmilzt sichtbar. Er wird kleiner, schwimmt auf dem steigenden Schmelzwasser, Tropfen laufen ab. Beim Erhitzen steigen Bläschen auf, beim Verdampfen sinkt der Wasserstand.']],
  ['18.11.2026',338,['Wasserhärte: Im Becherglas beim Regler sind Ca²⁺ jetzt blau und Mg²⁺ grün wie im Erklärvideo, und die Ionen bewegen sich leicht im Wasser. Im Erklärvideo sind die Na⁺-Ionen am Ionentauscher violett, damit sie nicht mit Mg²⁺ verwechselt werden.']],
  ['18.11.2026',337,['Gasdichte (Normzustand → Betrieb): Die doppelte Zeile ρ₂ im Rechenweg ist weg. Die Ergebniskachel „von ρ_Normzustand“ heißt jetzt „Anteil von ρ₁“ und bricht nicht mehr mitten im Wort um.']],
  ['18.11.2026',336,['Eiskunstlauf am Handy: „Arme ausstrecken“, „Arme anziehen“, ☆ und ⋯ stehen in einer Zeile, die Arme-Knöpfe dafür mit kleinerer Schrift. Auf sehr schmalen Handys stehen die Wörter im Knopf untereinander.']],
