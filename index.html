@@ -3610,7 +3610,7 @@ fm(FP,HP,'Gasdichte (Normzustand → Betrieb)','Die Dichte eines Gases hängt vo
   +AR(262,186,xr-14-262,0,'var(--mute)','')+TH((262+xr-12)/2,174,'gleiche Masse','t2','middle')+TH((262+xr-12)/2,206,'m = '+nf(r1)+' kg','t2','middle')
   +T(84+a1*.72,250,'Normzustand: 0 °C, 1013 mbar','t2','middle')+T(84+a1*.72,268,'V₁ = 1 m³','t2','middle')+T(84+a1*.72,292,'ρ₁ = '+nf(r1)+' kg/m³','t1','middle')
   +T(xr+a2*.72,250,s.p+' mbar, '+nf(s.t)+' °C','t2','middle')+T(xr+a2*.72,268,'V₂ = '+nf(V2,3)+' m³','t2','middle')+T(xr+a2*.72,292,'ρ₂ = '+nf(r2)+' kg/m³','t1','middle'),
- res:[[nf(r2)+' kg/m³','Dichte ρ₂'],[nf(r2/r1*100)+' %','von ρ_Normzustand'],[nf(273.15+s.t)+' K','Temperatur T₂']],rows:[['ρ₁ (Normzustand)',nf(r1)+' kg/m³'],['Druckfaktor p₂/p₁',nf(s.p/1013)],['Temperaturfaktor T₁/T₂',nf(273.15/(273.15+s.t))],['Volumen von 1 m³ (Normzustand) im Betrieb',nf(V2,3)+' m³']],st:[['ρ₂ = ρ₁ · p₂ · T₁ / (p₁ · T₂)',`${nf(r1)} kg/m³ · ${s.p} mbar · 273,15 K / (1013 mbar · ${nf(273.15+s.t,5)} K) = ${nf(r2)} kg/m³`],['ρ₂',nf(r2)+' kg/m³']]}},
+ res:[[nf(r2)+' kg/m³','Dichte ρ₂'],[nf(r2/r1*100)+' %','Anteil von ρ₁'],[nf(273.15+s.t)+' K','Temperatur T₂']],rows:[['ρ₁ (Normzustand)',nf(r1)+' kg/m³'],['Druckfaktor p₂/p₁',nf(s.p/1013)],['Temperaturfaktor T₁/T₂',nf(273.15/(273.15+s.t))],['Volumen von 1 m³ (Normzustand) im Betrieb',nf(V2,3)+' m³']],st:[['ρ₂ = ρ₁ · p₂ · T₁ / (p₁ · T₂)',`${nf(r1)} kg/m³ · ${s.p} mbar · 273,15 K / (1013 mbar · ${nf(273.15+s.t,5)} K) = ${nf(r2)} kg/m³`]]}},
  'Beide Behälter enthalten dieselben Gasteilchen, also dieselbe Masse. Mehr Druck drückt sie enger zusammen (kleinerer Behälter, dichter). Mehr Temperatur lässt sie schneller fliegen und mehr Platz brauchen (größerer Behälter, weniger dicht). Das gilt für Gase, nicht für Flüssigkeiten.',1);
 /* Elektrotechnik: Drehstrom */
 fm(FP,ET,'Drehstrom (Stern & Dreieck)','Drehstrom hat drei um 120° versetzte Außenleiter. Verbraucher können im Stern (U_Str = U_L / √3) oder im Dreieck (U_Str = U_L) geschaltet werden. Im Dreieck ist die Leistung dreimal so groß.',
@@ -15660,9 +15660,10 @@ function mcView(){const box=$('#mc');if(!box)return;const a=mcAll(),run=store.ge
 function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="panel"><h2>🧮 Mathe-Check</h2><p class="sub">Noch nicht gemacht. Der Check zeigt Dir in etwa 30 Minuten, wo Du in den Mathe-Grundlagen stehst.</p><div class="pb"><button type="button" class="sbtn2" data-mco="1">Zum Mathe-Check →</button></div></div>`;
  return`<div class="panel"><h2>🧮 Mathe-Check</h2>${mcTable(a)}<div class="pb"><button type="button" class="sbtn2" data-mco="1">Startplan und Lösungswege →</button></div></div>`}
 /* Pilot-Einstellungen: Version, Neuigkeit, Kontakt */
-const APPV=336,NEWS='Eiskunstlauf: Am Handy stehen „Arme ausstrecken“, „Arme anziehen“, Favorit und Mehr jetzt alle in einer Zeile.';
+const APPV=337,NEWS='Gasdichte: Im Rechenweg steht ρ₂ nur noch einmal, die Ergebniskachel heißt „Anteil von ρ₁“.';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
+ ['18.11.2026',337,['Gasdichte (Normzustand → Betrieb): Die doppelte Zeile ρ₂ im Rechenweg ist weg. Die Ergebniskachel „von ρ_Normzustand“ heißt jetzt „Anteil von ρ₁“ und bricht nicht mehr mitten im Wort um.']],
  ['18.11.2026',336,['Eiskunstlauf am Handy: „Arme ausstrecken“, „Arme anziehen“, ☆ und ⋯ stehen in einer Zeile, die Arme-Knöpfe dafür mit kleinerer Schrift. Auf sehr schmalen Handys stehen die Wörter im Knopf untereinander.']],
  ['18.11.2026',335,['Themenknöpfe wie „Arme ausstrecken“ und „Arme anziehen“ (Eiskunstlauf) etwas kleiner: Am Laptop stehen sie mit Favorit und Mehr in einer Zeile, am Handy nebeneinander in einer eigenen Zeile.']],
  ['18.11.2026',334,['Blocksatz: Rutscht eine Formel in die nächste Zeile, wird die Zeile davor nicht mehr auseinandergezogen. „Ziel: …“ im Auftrag und „Rot: …“ nach einer Gleichung stehen in einer eigenen Zeile.','Grundgleichungen wieder linksbündig, Galvanische Zelle: Anode und Kathode je in einem eigenen Kasten.']],
