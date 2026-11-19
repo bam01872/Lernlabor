@@ -11,6 +11,8 @@ if(html.split('const DOZENT=false;').length!==2)bad('const DOZENT=false; fehlt o
 if(html.split('<title>Lernlabor</title>').length!==2)bad('<title>Lernlabor</title> fehlt oder doppelt');
 // 3) Alle referenzierten Dateien vorhanden
 for(const f of sw.match(/'([^']+\.(?:html|png|woff2|webmanifest))'/g).map(s=>s.slice(1,-1)))if(!fs.existsSync(path.join(ROOT,f)))bad('Datei fehlt: '+f);
+// 3b) Regler-Einheiten ohne Trenner (v345: L₀ zeigte „m|L“ statt „m“)
+for(const m of html.matchAll(/\['\w+','[^']*',-?[\d.]+,-?[\d.e]+,[\d.e]+,'([^']*)'/g))if(/[|~]/.test(m[1]))bad('Regler-Einheit mit Trenner: '+m[0]);
 // 4) Browser: Start und jedes Thema / Üben ohne JS-Fehler
 const MT={'.html':'text/html','.js':'text/javascript','.png':'image/png','.woff2':'font/woff2','.webmanifest':'application/manifest+json'};
 const srv=http.createServer((q,r)=>{let p=decodeURIComponent(q.url.split('?')[0]);if(p.endsWith('/'))p+='index.html';const f=path.join(ROOT,p);if(!f.startsWith(ROOT)||!fs.existsSync(f)){r.writeHead(404);return r.end()}r.writeHead(200,{'Content-Type':MT[path.extname(f)]||'application/octet-stream'});fs.createReadStream(f).pipe(r)}).listen(0,async()=>{
