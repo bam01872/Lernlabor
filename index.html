@@ -2610,7 +2610,7 @@ fm(FP,AE,'Wirkungsgrad','η = W_nutz / W_zu = P_nutz / P_zu. Der Rest geht als V
 /* Wärmelehre */
 const AU=[['Stahl',12e-6,1],['Aluminium',23e-6,1],['Kupfer',17e-6,1],['Glas',9e-6,1],['Quecksilber',1.8e-4,0],['Ethanol',1.1e-3,0]];
 fm(FP,WL,'Wärmeausdehnung','Festkörper dehnen sich linear aus: ΔL = α · L₀ · ΔT, das Volumen mit γ ≈ 3α. Beim Abkühlen ist ΔT negativ, dann wird ΔL negativ und der Körper kürzer. Flüssigkeiten dehnen sich viel stärker aus.',
- [['m','Stoff','sel',AU.map(x=>x[0]),0],['L','L₀',.1,100,.1,'m|L',10],['dT','ΔT',-150,150,1,'K',50]],
+ [['m','Stoff','sel',AU.map(x=>x[0]),0],['L','L₀',.1,100,.1,'m',10],['dT','ΔT',-150,150,1,'K',50]],
  s=>{const [nm,c,so]=AU[s.m],g=so?3*c:c,d=c*s.L*s.dT,rel=c*s.dT;
  const col=['#7d848c','#c4c9cf','#c8794a','#bfe3f2','#b8bec4','#7fb8e6'][s.m],op=s.m==3?.75:1,V=so?100:2,x0=40,L0=170,D=24,w1=L0*(1+Math.max(-.4,Math.min(rel*V,.4))),xe=x0+L0,
  st=(y,w)=>so?RODH(x0,y,w,D,col,op):`<rect x="${x0-5}" y="${y-5}" width="${L0*1.4+14}" height="${D+10}" rx="${D/2+5}" fill="url(#g-glas)" stroke="var(--ink)" stroke-width="1.2" stroke-opacity=".5"/>`+RODH(x0,y,w,D,col,.85),
@@ -16098,9 +16098,10 @@ function mcView(){const box=$('#mc');if(!box)return;const a=mcAll(),run=store.ge
 function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="panel"><h2>🧮 Mathe-Check</h2><p class="sub">Noch nicht gemacht. Der Check zeigt Dir in etwa 30 Minuten, wo Du in den Mathe-Grundlagen stehst.</p><div class="pb"><button type="button" class="sbtn2" data-mco="1">Zum Mathe-Check →</button></div></div>`;
  return`<div class="panel"><h2>🧮 Mathe-Check</h2>${mcTable(a)}<div class="pb"><button type="button" class="sbtn2" data-mco="1">Startplan und Lösungswege →</button></div></div>`}
 /* Pilot-Einstellungen: Version, Neuigkeit, Kontakt */
-const APPV=344,NEWS='Üben: 348 neue Aufgaben in Elektrik, Sicherheit und Umrechnen, jede mit eigener Stufe.';
+const APPV=345,NEWS='Wärmeausdehnung: Einheit beim Regler L₀ korrigiert (m).';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
+ ['19.11.2026',345,['Wärmeausdehnung: Beim Regler L₀ stand als Einheit „m|L“, jetzt richtig „m“. Alle anderen Regler geprüft, nur hier betroffen.']],
  ['19.11.2026',344,['Üben: 348 neue Aufgaben. Elektrik 115 (Verständnis, Rechnen, Mehrschritt, typische Fehler), Sicherheit 121 (mit Anwendungsfällen und Beurteilen-Aufgaben), Umrechnen 112 (Verständnis, Anwendungsfälle, typische Fehler).','Jede neue Aufgabe hat ihre eigene Stufe 🟢/🟡/🔴. Bei der Stufenwahl erscheinen nur passende Aufgaben, ohne Stufenwahl mischen sich bisherige und neue Aufgaben.','Ladung in Coulomb gehört nicht zum Kurs und ist entfernt: Rechenaufgabe „Elektronen pro Sekunde“, die Zeilen dazu in den Simulationen Stromkreis und Elektrolyse, der Schluss des Erklärvideos Stromkreis (jetzt mit P = U · I), die Formelkarte „Ladung und Elektronen“, Coulomb, Elementarladung und Faraday-Konstante in Formelsammlung und Glossar. Ladung steht nur noch in Ah.']],
  ['19.11.2026',343,['Wasserhärte: Ca²⁺ ist in Simulation und Erklärvideo jetzt grün, Mg²⁺ gelb (besser zu unterscheiden). Fehler behoben: Beim Erhöhen des Mg²⁺-Reglers kamen Ca²⁺-Kugeln hinzu, jetzt kommen gelbe Mg²⁺-Kugeln dazu. Im Erklärvideo ist die Zeile „Kalk bleibt im Topf“ nicht mehr abgeschnitten.']],
  ['19.11.2026',342,['Freier Fall: „Eigenes Objekt“ ist jetzt ein Eintrag in der Objekt-Auswahl, das Ja/Nein-Feld ist weg. Die Regler m, A und c_w erscheinen nur beim eigenen Objekt. Alle Regler stehen kompakt in einer Zeile (Formelzeichen, Regler, Zahl, Einheit), die Bedeutung steht im Kasten „Was bedeuten die Größen?“. Ein gewähltes Objekt, das nicht zu den vier Grundkörpern gehört, fällt in V1 und V2 als fünfter Körper mit. Ergebniskästen ohne abgeschnittene Wörter.']],
