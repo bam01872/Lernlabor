@@ -2664,13 +2664,12 @@ fm(FP,ET,'Grundlagen: Stromkreis','Ein Stromkreis braucht eine Spannungsquelle, 
   if(s.dir!=2)h+=AR(170,312,110,0,'var(--flow)')+T(290,317,'Elektronen e⁻: von − nach +','t2');/* unten nach rechts: Elektronen laufen gegen die technische Stromrichtung (oben nach rechts) */
   if(s.dir!=1)h+=AR(430,18,90,0,'var(--red)')+T(420,23,'Technische Stromrichtung I: von + nach −','t2','end');
   h+=T(330,338,on?`Zeitlupe: Ein echtes Elektron wandert hier nur etwa ${nf(vd,3)} mm/s.`:'Stromkreis offen: Es fließt kein Strom, die Elektronen bleiben stehen.','t2','middle');
-  return{vb:'0 0 640 350',d:h,res:[[fmt(I,'A'),'Stromstärke I'],[fmt(P,'W'),lamp?'Licht + Wärme P':'Wärmeleistung P'],[I?sc(N):'0','Elektronen pro Sekunde']],
-   rows:[['Spannung U',fmt(s.U,'V')],['Widerstand R',fmt(s.R,'Ω')],['Stromstärke I',fmt(I,'A')],['Leistung P',fmt(P,'W')],['Elektronen pro Sekunde',I?sc(N):'0'],['Driftgeschwindigkeit (Cu, 1,5 mm²)',on?nf(vd,3)+' mm/s':'0']],
+  return{vb:'0 0 640 350',d:h,res:[[fmt(I,'A'),'Stromstärke I'],[fmt(P,'W'),lamp?'Licht + Wärme P':'Wärmeleistung P']],
+   rows:[['Spannung U',fmt(s.U,'V')],['Widerstand R',fmt(s.R,'Ω')],['Stromstärke I',fmt(I,'A')],['Leistung P',fmt(P,'W')],['Driftgeschwindigkeit (Cu, 1,5 mm²)',on?nf(vd,3)+' mm/s':'0']],
    st:[['Was ist Strom?','Die geordnete Bewegung von Ladungsträgern. Im Metall sind das freie Elektronen. Die Leitung ist immer voll davon.'],
     ['Spannungsquelle','Am Minuspol herrscht Elektronenüberschuss, am Pluspol Mangel. Die Spannung U treibt die Elektronen durch den äußeren Kreis vom Minus- zum Pluspol.'],
     on?['I = U / R',`${fmt(s.U,'V')} / ${fmt(s.R,'Ω')} = ${fmt(I,'A')}`]:['Schalter offen','Der Kreis ist unterbrochen: I = 0. Die Spannung liegt trotzdem an, am offenen Schalter misst man die volle Quellenspannung.'],
-    ['Elektronen pro Sekunde: N = I / e',on?`${fmt(I,'A')} / 1,602 · 10⁻¹⁹ C = ${sc(N)}`:'0'],
-    ['Driftgeschwindigkeit v = I / (n · e · A)',on?`Kupfer, 1,5 mm²: etwa ${nf(vd,3)} mm/s. Trotzdem leuchtet die Lampe sofort: Das elektrische Feld breitet sich fast mit Lichtgeschwindigkeit in der Leitung aus und setzt alle Elektronen gleichzeitig in Bewegung.`:'0'],
+    ['Driftgeschwindigkeit der Elektronen',on?`Kupfer, 1,5 mm²: etwa ${nf(vd,3)} mm/s. Trotzdem leuchtet die Lampe sofort: Das elektrische Feld breitet sich fast mit Lichtgeschwindigkeit in der Leitung aus und setzt alle Elektronen gleichzeitig in Bewegung.`:'0'],
     ['Im Verbraucher: P = U · I',on?`${fmt(P,'W')}. Die Elektronen stoßen an die schwingenden Atomrümpfe und geben dabei Energie ab, als Wärme${lamp?' und Licht':''}. Je mehr Leistung, desto stärker schwingen die Atomrümpfe: Der Draht wird heiß.`:'0 W'],
     ['Was wird verbraucht?','Nicht die Elektronen: Es fließen genauso viele zurück, wie hineinfließen. Verbraucht wird elektrische Energie.']]}},
  'Blaue Punkte: freie Elektronen (e⁻), stark verlangsamt. Graue Kugeln in der Lupe: Atomrümpfe (positive Metallionen), sie schwingen stärker, je wärmer der Draht ist. Gelbe Blitze: Stöße, bei denen Energie als Wärme frei wird.',1);
@@ -3173,7 +3172,7 @@ fm(FC,EC,'Elektrolyse','Bei der Elektrolyse erzwingt eine Gleichspannung eine Re
  [['v','Ansicht','sel',['Versuchsaufbau','Teilchen-Lupe'],0],['e','Lösung','sel',EY.map(x=>x[0]),0],['I','I',.1,10,.1,'A',2],['t','t',1,120,1,'min',30]],
  (s,tm)=>{const E=EY[s.e],L=EYL[s.e],k=E[1],a=E[2],Q=s.I*s.t*60,ne=Q/96485,nk=ne/k[1],na=ne/a[1],amt=(g,n)=>g[2]?nf(n*g[2])+' g '+g[0]:nf(n*24)+' L '+g[0],dep=Math.min(14,2+Q/72000*14);
  const bil=a[1]==4?(k[2]?'Für 1 O₂ (4 e⁻) scheiden sich 2 Cu-Atome ab (je 2 e⁻)':'Für 1 O₂ (4 e⁻) entstehen 2 H₂ (je 2 e⁻): doppelt so viel Wasserstoff wie Sauerstoff'):(k[2]?'Für 1 Cl₂ (2 e⁻) scheidet sich 1 Cu-Atom ab (2 e⁻)':'Für 1 Cl₂ (2 e⁻) entsteht 1 H₂ (2 e⁻): gleich viel Gas an beiden Elektroden');
- const out=(vb,h)=>({vb,d:h,res:[[nf(Q/3600)+' Ah','Ladung Q'],[amt(k,nk),'an der Kathode'],[amt(a,na),'an der Anode']],rows:[['Ladung Q in C',nf(Q)+' C'],['Zeit t',s.t+' min = '+nf(s.t/60)+' h'],['Elektronen',bil],['Ionen',L.ca=='Na'?'Na⁺ wandert zur Kathode, wird aber nicht entladen: Dort reagiert Wasser':L.an=='SO'?'SO₄²⁻ wandert zur Anode, wird aber nicht entladen: Dort reagiert Wasser':'Kationen wandern zur Kathode, Anionen zur Anode']],
+ const out=(vb,h)=>({vb,d:h,res:[[nf(Q/3600)+' Ah','Ladung Q'],[amt(k,nk),'an der Kathode'],[amt(a,na),'an der Anode']],rows:[['Zeit t',s.t+' min = '+nf(s.t/60)+' h'],['Elektronen',bil],['Ionen',L.ca=='Na'?'Na⁺ wandert zur Kathode, wird aber nicht entladen: Dort reagiert Wasser':L.an=='SO'?'SO₄²⁻ wandert zur Anode, wird aber nicht entladen: Dort reagiert Wasser':'Kationen wandern zur Kathode, Anionen zur Anode']],
   st:[['Q = I · t',`${nf(s.I)} A · ${nf(s.t/60)} h = ${nf(Q/3600)} Ah`],['Kathode (Reduktion)',E[3]],['Anode (Oxidation)',E[4]],['Elektronen','fließen vom Minuspol des Netzgeräts zur Kathode und von der Anode zurück zum Pluspol'],['Mehr Ladung, mehr Stoff','Doppelte Ladung Q scheidet doppelt so viel ab.']]});
  if(s.v==1)return out('0 0 640 584',ELUPE(s.e,tm));
  const GE=GLAS(100,98,240,152,{lv:136,ry:10,c:'var(--flow)',op:.25}),d2=18+dep*1.4,sp=.5+s.I/10*1.5;let h=GE.b;
@@ -12939,9 +12938,9 @@ Object.assign(EIN,{
  {d:11,t:'Im Verbraucher stoßen die Elektronen an die Atomrümpfe und geben Energie ab: Wärme im Heizdraht, Licht in der Lampe. Ist der Schalter offen, fehlt der Weg und nichts fließt.',
   s:'Im Verbraucher stoßen die Elektronen an die Atomrümpfe und geben Energie ab: Wärme im Heizdraht, Licht in der Lampe. Ist der Schalter offen, fehlt der Weg und nichts fließt.',
   f:(k,t)=>{const on=k<.55;return EGSK(t,.5,on,{u:'6 V'})+(on?EQAR(150,100,70,t,2):'')+EFT(390,100,on?'Lampe leuchtet':'Schalter offen','ein1','middle')+EFT(390,130,on?'Energie → Licht, Wärme':'kein Strom','ein2','middle')}},
- {d:13,t:'Alles zusammen: 6 V an 12 Ω treiben I = U / R = 6 V / 12 Ω = 0,5 A. In einer Minute fließt die Ladung Q = I · t = 0,5 A · 60 s = 30 C, das sind fast 2 · 10²⁰ Elektronen.',
-  s:'Alles zusammen: 6 Volt an 12 Ohm treiben I gleich U durch R gleich 0,5 Ampere. In einer Minute fließt die Ladung Q gleich I mal t gleich 30 Coulomb, das sind fast 2 mal 10 hoch 20 Elektronen.',
-  f:k=>EFX(k,[['I = U / R = 6 V / 12 Ω','m'],['I = 0,5 A','r'],['Q = I · t = 0,5 A · 60 s = 30 C','m'],['30 C / 1,6 · 10⁻¹⁹ C ≈ 1,9 · 10²⁰ Elektronen','m']],['1 A = 1 C/s: ein Coulomb je Sekunde'])},
+ {d:12,t:'Alles zusammen: 6 V an 12 Ω treiben I = U / R = 6 V / 12 Ω = 0,5 A. Die Lampe nimmt P = U · I = 6 V · 0,5 A = 3 W auf.',
+  s:'Alles zusammen: 6 Volt an 12 Ohm treiben I gleich U durch R gleich 0,5 Ampere. Die Lampe nimmt P gleich U mal I gleich 6 Volt mal 0,5 Ampere gleich 3 Watt auf.',
+  f:k=>EFX(k,[['I = U / R = 6 V / 12 Ω','m'],['I = 0,5 A','r'],['P = U · I = 6 V · 0,5 A','m'],['P = 3 W','r']],['Mehr Spannung oder weniger Widerstand: mehr Strom'])},
  {d:9,t:'Merke: Quelle, geschlossener Weg, Verbraucher. Elektronen laufen von − nach +, die technische Stromrichtung zeigt von + nach −.',
   s:'Merke: Quelle, geschlossener Weg, Verbraucher. Elektronen laufen von Minus nach Plus, die technische Stromrichtung zeigt von Plus nach Minus.',
   f:(k,t)=>EMRK(k,t,`<g transform="translate(-10 20) scale(.7)">${EGSK(t,.5,1,{u:'U'})}</g>`,'I = U / R','Elektronen: − → +')}
@@ -16102,7 +16101,7 @@ function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="p
 const APPV=344,NEWS='Üben: 348 neue Aufgaben in Elektrik, Sicherheit und Umrechnen, jede mit eigener Stufe.';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
- ['19.11.2026',344,['Üben: 348 neue Aufgaben. Elektrik 115 (Verständnis, Rechnen, Mehrschritt, typische Fehler), Sicherheit 121 (mit Anwendungsfällen und Beurteilen-Aufgaben), Umrechnen 112 (Verständnis, Anwendungsfälle, typische Fehler).','Jede neue Aufgabe hat ihre eigene Stufe 🟢/🟡/🔴. Bei der Stufenwahl erscheinen nur passende Aufgaben, ohne Stufenwahl mischen sich bisherige und neue Aufgaben.','Grundlagen: Stromkreis: Die Rechenaufgabe „Elektronen pro Sekunde“ (Elementarladung in Coulomb) ist entfernt, sie gehört nicht zum Kurs.']],
+ ['19.11.2026',344,['Üben: 348 neue Aufgaben. Elektrik 115 (Verständnis, Rechnen, Mehrschritt, typische Fehler), Sicherheit 121 (mit Anwendungsfällen und Beurteilen-Aufgaben), Umrechnen 112 (Verständnis, Anwendungsfälle, typische Fehler).','Jede neue Aufgabe hat ihre eigene Stufe 🟢/🟡/🔴. Bei der Stufenwahl erscheinen nur passende Aufgaben, ohne Stufenwahl mischen sich bisherige und neue Aufgaben.','Ladung in Coulomb gehört nicht zum Kurs und ist entfernt: Rechenaufgabe „Elektronen pro Sekunde“, die Zeilen dazu in den Simulationen Stromkreis und Elektrolyse, der Schluss des Erklärvideos Stromkreis (jetzt mit P = U · I), die Formelkarte „Ladung und Elektronen“, Coulomb, Elementarladung und Faraday-Konstante in Formelsammlung und Glossar. Ladung steht nur noch in Ah.']],
  ['19.11.2026',343,['Wasserhärte: Ca²⁺ ist in Simulation und Erklärvideo jetzt grün, Mg²⁺ gelb (besser zu unterscheiden). Fehler behoben: Beim Erhöhen des Mg²⁺-Reglers kamen Ca²⁺-Kugeln hinzu, jetzt kommen gelbe Mg²⁺-Kugeln dazu. Im Erklärvideo ist die Zeile „Kalk bleibt im Topf“ nicht mehr abgeschnitten.']],
  ['19.11.2026',342,['Freier Fall: „Eigenes Objekt“ ist jetzt ein Eintrag in der Objekt-Auswahl, das Ja/Nein-Feld ist weg. Die Regler m, A und c_w erscheinen nur beim eigenen Objekt. Alle Regler stehen kompakt in einer Zeile (Formelzeichen, Regler, Zahl, Einheit), die Bedeutung steht im Kasten „Was bedeuten die Größen?“. Ein gewähltes Objekt, das nicht zu den vier Grundkörpern gehört, fällt in V1 und V2 als fünfter Körper mit. Ergebniskästen ohne abgeschnittene Wörter.']],
  ['18.11.2026',341,['Wasserhärte: Abkochen und Destillation genauer erklärt. Beim Abkochen fällt der Kalk aus und bleibt im Gefäß, das abgegossene Wasser enthält weniger Ca²⁺ (nur Carbonathärte). Bei der Destillation ist nur das aufgefangene Kondensat salzfrei, die Salze bleiben im Rückstand. Die Simulation zeigt Kalk am Boden bzw. die Salze im Siedegefäß und hat die Zeile „Wo bleiben die Ionen?“.']],
@@ -16296,7 +16295,7 @@ const GL=[
 ['pH','pH-Wert','Maß für sauer oder basisch: pH = −lg c(H₃O⁺). Unter 7 sauer, 7 neutral, über 7 basisch.','','C',['Säuren & Basen','Neutralisation & Titration']],
 ['Q','Wärme','Wärmemenge, die zu- oder abgeführt wird: Q = m · c · ΔT.','J, kJ','P',['Wärmekapazität','Schmelz- & Verdampfungswärme','Mischungstemperatur']],
 ['Q','Volumenstrom','Volumen, das je Zeit fließt: Q = A · v.','m³/s, l/min','P',['Hydraulische Leistung & Volumenstrom','Wasserkraftwerke','Pneumatik: Luftverbrauch']],
-['Q','Ladung','Elektrische Ladung: Q = I · t.','C, A·s','C',['Elektrolyse']],
+['Q','Ladung','Elektrische Ladung: Q = I · t, in der Galvanik in Amperestunden (Ah).','Ah','C',['Elektrolyse']],
 ['q','spezifische Schmelz- oder Verdampfungswärme','Wärme, die 1 kg schmilzt (q_s) oder verdampft (q_v), ohne dass sich die Temperatur ändert.','kJ/kg','P',['Schmelz- & Verdampfungswärme','Aggregatzustand']],
 ['ρ','spezifischer Widerstand','Widerstand eines Drahts mit 1 m Länge und 1 mm² Querschnitt: R = ρ · l / A. Kupfer: 0,0178 Ω·mm²/m.','Ω·mm²/m','P',['Leitungswiderstand']],
 ['R','elektrischer Widerstand','Wie stark ein Bauteil den Strom hemmt: R = U / I.','Ω','P',['Ohmsches Gesetz','Reihe','Parallel']],
@@ -16503,7 +16502,6 @@ const GLU=[
 ['A','Ampere','Stromstärke','',''],
 ['Ah','Amperestunde','Ladung eines Akkus','1 Ah = 3600 C',''],
 ['bar','Bar','Druck','1 bar = 100 000 Pa = 10 N/cm²','Druck ⇄'],
-['C','Coulomb','elektrische Ladung','1 C = 1 A · s',''],
 ['F','Farad','Kapazität','1 F = 1 C / V, üblich sind µF, nF und pF',''],
 ['H','Henry','Induktivität','1 H = 1 V · s / A',''],
 ['T','Tesla','magnetische Flussdichte','1 T = 1 V · s / m², Erdfeld etwa 50 µT',''],
@@ -16654,7 +16652,6 @@ const FSD=[
 ['Parallelschaltung',['1 / R_ges = 1 / R₁ + 1 / R₂ + 1 / R₃ + …','R_ges = R₁ · R₂ / (R₁ + R₂)','U = U₁ = U₂ = U₃','I = I₁ + I₂ + I₃'],'R_ges~Gesamtwiderstand~Ω|R₁, R₂, R₃~Einzelwiderstände~Ω|U~Spannung~V|I~Gesamtstrom~A|I₁, I₂, I₃~Teilströme~A','Zeile 2 gilt für zwei Widerstände. R_ges ist kleiner als der kleinste Einzelwiderstand.','Parallel'],
 ['Elektrische Leistung',['P = U · I','P = I² · R = U² / R'],'P~Leistung~W|U~Spannung~V|I~Stromstärke~A|R~Widerstand~Ω','1 W = 1 V · A','Elektrische Arbeit & Leistung'],
 ['Elektrische Arbeit',['W = P · t','Kosten = W · Preis'],'W~elektrische Arbeit~kWh, J|P~Leistung~kW, W|t~Zeit~h, s','1 kWh = 3,6 MJ','Elektrische Arbeit & Leistung'],
-['Ladung und Elektronen',['Q = I · t','N = Q / e'],'Q~Ladung~C|I~Stromstärke~A|t~Zeit~s|N~Anzahl der Elektronen~–|e~Elementarladung~C','e = 1,602 · 10⁻¹⁹ C, 1 C = 1 A · s, 1 Ah = 3600 C','Grundlagen: Stromkreis'],
 ['Wechselstrom',['U_eff = û / √2','T = 1 / f','ω = 2π · f','u(t) = û · sin(ω · t)'],'U_eff~Effektivwert~V|û~Scheitelwert~V|u(t)~Augenblickswert~V|T~Periodendauer~s|f~Frequenz~Hz|ω~Kreisfrequenz~1/s','Netz: U_eff = 230 V, û ≈ 325 V, f = 50 Hz.','Gleich- & Wechselstrom'],
 ['Drehstrom',['Stern: U_L = √3 · U_Str, I_L = I_Str','Dreieck: U_L = U_Str, I_L = √3 · I_Str','P = √3 · U_L · I_L · cos φ'],'U_L~Leiterspannung~V|U_Str~Strangspannung~V|I_L~Leiterstrom~A|I_Str~Strangstrom~A|P~Wirkleistung~W|cos φ~Leistungsfaktor~–','Netz: 400 V zwischen den Außenleitern, 230 V gegen N. Ohmsche Last: cos φ = 1.','Drehstrom (Stern & Dreieck)']]],
 [FP,SR,[
@@ -16742,7 +16739,7 @@ FSD.push([FE,E5,[
 // Einheiten: Tabellen [Überschrift, Kopfzeile, Zeilen, Hinweis]
 const FSU=[
 ['SI-Basiseinheiten',['Größe','Zeichen','Einheit'],[['Länge','l','m (Meter)'],['Masse','m','kg (Kilogramm)'],['Zeit','t','s (Sekunde)'],['Stromstärke','I','A (Ampere)'],['Temperatur','T','K (Kelvin)'],['Stoffmenge','n','mol (Mol)'],['Lichtstärke','I_v','cd (Candela)']],''],
-['Abgeleitete Einheiten',['Größe','Einheit','gleich'],[['Kraft','N (Newton)','1 N = 1 kg · m/s²'],['Druck','Pa (Pascal)','1 Pa = 1 N/m²'],['Energie, Arbeit, Wärme','J (Joule)','1 J = 1 N · m = 1 W · s'],['Leistung','W (Watt)','1 W = 1 J/s = 1 V · A'],['Ladung','C (Coulomb)','1 C = 1 A · s'],['Spannung','V (Volt)','1 V = 1 W/A'],['Widerstand','Ω (Ohm)','1 Ω = 1 V/A'],['Frequenz','Hz (Hertz)','1 Hz = 1/s']],''],
+['Abgeleitete Einheiten',['Größe','Einheit','gleich'],[['Kraft','N (Newton)','1 N = 1 kg · m/s²'],['Druck','Pa (Pascal)','1 Pa = 1 N/m²'],['Energie, Arbeit, Wärme','J (Joule)','1 J = 1 N · m = 1 W · s'],['Leistung','W (Watt)','1 W = 1 J/s = 1 V · A'],['Spannung','V (Volt)','1 V = 1 W/A'],['Widerstand','Ω (Ohm)','1 Ω = 1 V/A'],['Frequenz','Hz (Hertz)','1 Hz = 1/s']],''],
 ['Vorsätze',['Zeichen','Name','Faktor'],[['G','Giga','10⁹ = 1 000 000 000'],['M','Mega','10⁶ = 1 000 000'],['k','Kilo','10³ = 1000'],['h','Hekto','10² = 100'],['d','Dezi','10⁻¹ = 0,1'],['c','Zenti','10⁻² = 0,01'],['m','Milli','10⁻³ = 0,001'],['µ','Mikro','10⁻⁶ = 0,000 001'],['n','Nano','10⁻⁹']],'Achtung: m kann Milli (mm) oder Meter (m) bedeuten, M ist Mega.'],
 ['Umrechnungen',['Größe','Umrechnung','Beispiel'],[
  ['Länge','1 km = 1000 m | 1 m = 10 dm = 100 cm = 1000 mm | 1 mm = 1000 µm','2,5 km = 2500 m'],
@@ -16765,7 +16762,7 @@ const FSU=[
  'So rechnest Du um: In eine größere Einheit wird die Zahl kleiner (teilen), in eine kleinere Einheit größer (multiplizieren). Bei Flächen den Längenfaktor quadrieren, bei Volumen hoch drei nehmen: 1 m = 100 cm, also 1 m² = 100² cm² = 10 000 cm². Zusammengesetzte Einheiten Stück für Stück ersetzen: 72 km/h = 72 · 1000 m : 3600 s = 20 m/s.']];
 // Konstanten und Stoffwerte: Tabellen wie oben
 const FSK=[
-['Konstanten',['Größe','Zeichen','Wert'],[['Fallbeschleunigung','g','9,81 m/s²'],['Lichtgeschwindigkeit','c','3 · 10⁸ m/s'],['Elementarladung','e','1,602 · 10⁻¹⁹ C'],['Faraday-Konstante','F','96485 C/mol'],['Avogadro-Konstante','N_A','6,022 · 10²³ 1/mol'],['allgemeine Gaskonstante','R','8,314 J/(mol·K)'],['molares Volumen','V_m','22,4 l/mol (0 °C), ≈ 24 l/mol (20 °C)'],['Ionenprodukt des Wassers (25 °C)','K_w','10⁻¹⁴ mol²/l²'],['absoluter Nullpunkt','T','0 K = −273,15 °C'],['Normzustand','p, T','1013 mbar, 273,15 K (0 °C)'],['Umgebungsdruck','p_amb','≈ 1 bar']],''],
+['Konstanten',['Größe','Zeichen','Wert'],[['Fallbeschleunigung','g','9,81 m/s²'],['Lichtgeschwindigkeit','c','3 · 10⁸ m/s'],['Avogadro-Konstante','N_A','6,022 · 10²³ 1/mol'],['allgemeine Gaskonstante','R','8,314 J/(mol·K)'],['molares Volumen','V_m','22,4 l/mol (0 °C), ≈ 24 l/mol (20 °C)'],['Ionenprodukt des Wassers (25 °C)','K_w','10⁻¹⁴ mol²/l²'],['absoluter Nullpunkt','T','0 K = −273,15 °C'],['Normzustand','p, T','1013 mbar, 273,15 K (0 °C)'],['Umgebungsdruck','p_amb','≈ 1 bar']],''],
 ['Dichte',['Stoff','ρ in kg/m³','ρ in g/cm³'],[['Wasser','1000','1,00'],['Eis','917','0,92'],['Öl','≈ 900','≈ 0,9'],['Aluminium','2700','2,70'],['Stahl','7850','7,85'],['Kupfer','8960','8,96'],['Luft (0 °C, 1013 mbar)','1,293','0,001 293'],['Luft (20 °C)','≈ 1,2','0,0012']],''],
 ['Wärmewerte',['Stoff','Wert',''],[['Wasser','c = 4,19 kJ/(kg·K)',''],['Eis','c = 2,1 kJ/(kg·K)',''],['Aluminium','c = 0,90 kJ/(kg·K)',''],['Stahl, Eisen','c = 0,45 kJ/(kg·K)',''],['Kupfer','c = 0,385 kJ/(kg·K)',''],['Eis schmelzen (0 °C)','q_s = 334 kJ/kg',''],['Wasser verdampfen (100 °C)','q_v = 2257 kJ/kg','']],''],
 ['Längenausdehnung',['Stoff','α in 1/K',''],[['Stahl','12 · 10⁻⁶',''],['Edelstahl','16 · 10⁻⁶',''],['Kupfer','17 · 10⁻⁶',''],['Aluminium','23 · 10⁻⁶','']],'Für feste Stoffe: γ ≈ 3 · α.'],
