@@ -3752,7 +3752,7 @@ const SRWP=(reg,x0,y0,act)=>{const X=v=>x0+v,Y=v=>y0+v,L=(x,y,t,a='start',c='var
    +`<circle cx="${X(112)}" cy="${Y(75)}" r="7" fill="var(--card)" stroke="var(--ink)" stroke-width="1.6"/>`
    +ln([[134,75],[121,75]],F)+hd(119,75,-1,0,F)+sy(127,70,'r','middle',F)+L(122,88,'−','start',F,12,700)
    +ln([[105,75],[90,75]])+hd(88,75,-1,0)+sy(97,70,'e')
-   +ln([[112,98],[112,84]])+hd(112,82,0,-1)+L(116,94,'+','start','var(--ink)',12,700)+sy(112,110,'w')
+   +ln([[112,98],[112,84]])+hd(112,82,0,-1)+L(116,94,'+','start','var(--ink)',12,700)+sy(106,99,'w','end')
    +L(0,118,'Thermostat = Messglied + Regler','start',mu,10.5,500)+L(0,131,'Ventil = Stellglied, Raum = Strecke','start',mu,10.5,500)}
  else{/* Kette: w → Stellglied → y → Steuerstrecke → x, Außentemperatur als bekannte Störgröße am Steuergerät */
   g+=ln([[0,33],[20,33]])+hd(22,33,1,0)+sy(8,27,'w')+bx(22,20,70,'Stellglied',act)+ln([[92,33],[114,33]])+hd(116,33,1,0)+sy(104,27,'y')
@@ -3763,8 +3763,9 @@ const SRWP=(reg,x0,y0,act)=>{const X=v=>x0+v,Y=v=>y0+v,L=(x,y,t,a='start',c='var
    +L(0,118,'Stellglied: Steuergerät mit Ventil','start',mu,10.5,500)+L(0,131,'Steuerstrecke: Raum','start',mu,10.5,500)}
  return g};
 /* Heizung, v349: Handy (≤ 599 px) Anlage oben, Diagramm darunter, Blockschaltbild in voller Breite unten (lesbar). L:1 erzwingt Laptop */
-const SRLAY2=(d,cA,cB,wide)=>{if(wide||!matchMedia('(max-width:599px)').matches)return{d:d+cA+cB,vb:'0 0 640 380'};const W=404,Y0=386,kA=1.15,Y1=Y0+244,kB=1.7;
- return{d:`<g clip-path="url(#c-srsc)"><defs><clipPath id="c-srsc"><rect x="0" y="0" width="${W}" height="382"/></clipPath></defs>${d}</g><g transform="translate(${SRX(W/2-530*kA)} ${SRX(Y0-34*kA)}) scale(${kA})">${cA}</g><g transform="translate(${SRX(W/2-529*kB)} ${SRX(Y1-246*kB)}) scale(${kB})">${cB}</g>`,vb:`0 0 ${W} ${SRX(Y1+142*kB)}`}};
+const SRLAY2=(d,cA,cB,wide)=>{if(wide||!matchMedia('(max-width:599px)').matches)return{d:d+cA+cB,vb:'0 0 640 380'};const W=404,Y0=388,kA=.88,kB=.86,YB=Y0+24;
+ /* v356 (Markus): Handy Diagramm links, Blockschaltbild rechts daneben, kleiner */
+ return{d:`<g clip-path="url(#c-srsc)"><defs><clipPath id="c-srsc"><rect x="0" y="0" width="${W}" height="382"/></clipPath></defs>${d}</g><g transform="translate(${SRX(2-414*kA)} ${SRX(Y0-34*kA)}) scale(${kA})">${cA}</g><g transform="translate(${SRX(W-2-640*kB)} ${SRX(YB-236*kB)}) scale(${kB})">${cB}</g>`,vb:`0 0 ${W} ${SRX(Y0+172)}`}};
 const SRHZ=(s,t=0)=>{const o=SRHSIM(s),reg=s.m==1,N=o.N,tm=Math.min(N,Math.max(0,(t%19)*30)),i=Math.round(tm),x=o.T[i],P=o.P[i],f=P/6000,z=s.z,dx=x-s.w;
  /* Rückwand mit Fenster, Boden in Schrägansicht, Außenwand im Schnitt links, Decke, Keller */
  const WL=72,WR=96,BK=118,FL=290,BF=268,TOP=26;
@@ -16999,9 +17000,10 @@ function mcView(){const box=$('#mc');if(!box)return;const a=mcAll(),run=store.ge
 function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="panel"><h2>🧮 Mathe-Check</h2><p class="sub">Noch nicht gemacht. Der Check zeigt Dir in etwa 30 Minuten, wo Du in den Mathe-Grundlagen stehst.</p><div class="pb"><button type="button" class="sbtn2" data-mco="1">Zum Mathe-Check →</button></div></div>`;
  return`<div class="panel"><h2>🧮 Mathe-Check</h2>${mcTable(a)}<div class="pb"><button type="button" class="sbtn2" data-mco="1">Startplan und Lösungswege →</button></div></div>`}
 /* Pilot-Einstellungen: Version, Neuigkeit, Kontakt */
-const APPV=355,NEWS='Leistung und Wirkungsgrad wie im Kursskript: W_ab, P_ab, W_Reib, Pumpenleistung, Zugleistung, Drehleistung.';
+const APPV=356,NEWS='Heizung: Auf dem Handy stehen Diagramm und Blockschaltbild nebeneinander.';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
+ ['20.11.2026',356,['Heizung (Steuern & Regeln): Auf dem Handy stehen Temperaturdiagramm und Blockschaltbild jetzt nebeneinander, das Blockschaltbild ist kleiner.']],
  ['20.11.2026',355,['Leistung und Wirkungsgrad an das Kursskript angeglichen: η = W_ab / W_zu = P_ab / P_zu und W_zu = W_ab + W_Reib (statt W_nutz, P_nutz, W_Verlust), in Thema, Formelsammlung, Glossar und Aufgaben.','Neue Formelkarte Pumpenleistung: P = ṁ · g · h und P = Q · ρ · g · h mit Förderhöhe h. Pumpenaufgaben rechnen mit dem Massenstrom ṁ.','Formelkarte Leistung mit Zugleistung P = F_Z · v. Karte Drehleistung (Getriebeleistung) mit P = F · d · π · n und M = F · d / 2.','ω = 2 · π · n einheitlich geschrieben.']],
  ['20.11.2026',354,['Festigkeitslehre wie im Kursskript: Querschnittsfläche S (im Zugversuch S₀) statt A, Spannungsnachweis σ_vorh ≤ σ_zul, σ_z und σ_d in der Formelsammlung, σ_zul = R_m / ν für spröde Werkstoffe, Sicherheitszahl zäh 1,2 bis 2,2 und spröde 2,0 bis 5,0, Rohr S = π/4 · (d_a² − d_i²). Zugversuch zeigt σ_P und σ_E, Glossar mit R_m. Sicherheitszahl in zwei Aufgaben einheitlich ν statt S.']],
  ['20.11.2026',353,['Neues Thema Schutzmaßnahmen & Schutzklassen (Sicherheit): Basis-, Fehler- und Zusatzschutz, Fehlerarten Körper-, Kurz-, Leiter- und Erdschluss, Schutzklassen 0 bis III mit Schutzkleinspannung SELV/PELV, IP-Code als Schutzart. Mit Erklärvideo, Übungen und Prüfungsfragen.','Strom durch den Körper: neue Zeilen „Weitere Folgen“ und „Nach dem Unfall“ (Arzt, EKG); Schwellen einheitlich ab 0,5 mA, „Lebensgefahr“ statt „töten“.','Schutzleiter & RCD: RCD schaltet höchstens nach 0,3 s ab (meist 20 bis 40 ms), „ohne Schutzleiter“ entspricht Schutzklasse 0. Glossar: Bemessungsdifferenzstrom.']],
