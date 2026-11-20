@@ -16992,9 +16992,10 @@ function mcView(){const box=$('#mc');if(!box)return;const a=mcAll(),run=store.ge
 function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="panel"><h2>🧮 Mathe-Check</h2><p class="sub">Noch nicht gemacht. Der Check zeigt Dir in etwa 30 Minuten, wo Du in den Mathe-Grundlagen stehst.</p><div class="pb"><button type="button" class="sbtn2" data-mco="1">Zum Mathe-Check →</button></div></div>`;
  return`<div class="panel"><h2>🧮 Mathe-Check</h2>${mcTable(a)}<div class="pb"><button type="button" class="sbtn2" data-mco="1">Startplan und Lösungswege →</button></div></div>`}
 /* Pilot-Einstellungen: Version, Neuigkeit, Kontakt */
-const APPV=348,NEWS='Üben: 84 neue Rechenaufgaben in Mathematik, mit Stufe je Aufgabe.';
+const APPV=349,NEWS='Federrate heißt überall R (wie im Skript): F = R · Δl.';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
+ ['20.11.2026',349,['Federrate heißt jetzt überall R wie im Skript (F = R · Δl): Gesetz von Hooke, Schwingung, Energie, Messreihe, Erklärvideos, Aufgaben, Prüfungsaufgaben, Formelsammlung und Glossar. Aus „Federkonstante“ wird „Federrate“.']],
  ['20.11.2026',348,['Üben: 84 neue Rechenaufgaben in Mathematik, je drei 🟡-Rechnungen und drei 🔴-Mehrschrittaufgaben pro Thema.']],
  ['20.11.2026',347,['Üben: 216 neue Rechenaufgaben: Mechanik 132 und Fluide & Wärme 84, je drei 🟡-Rechnungen und drei 🔴-Mehrschrittaufgaben pro Thema.']],
  ['19.11.2026',346,['Üben: 420 neue Aufgaben in Mechanik, Fluide & Wärme, Chemie, Energie, Statistik und Mathematik: 252 Verständnisfragen 🟢 (je drei pro Thema) und 168 typische Fehler 🟡 (je zwei pro Thema).']],
