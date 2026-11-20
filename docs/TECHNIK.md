@@ -5,12 +5,12 @@ Zweck: Architektur, Hosting, PWA, Tests, Pflege und bekannte Einschränkungen.
 
 ## Architektur
 - Entschieden: Je Labor eine HTML-Datei ohne Server, ohne Konten, Lernstand im Browser (localStorage). Siehe [ADR 001](adr/001-ohne-konten-kein-abo.md).
-- Lernlabor-Repo: `84g64ds8jm-cmyk/LernLabor` mit index.html (rund 660 KB), manifest.webmanifest, sw.js, drei Symbolen.
+- Lernlabor-Repo: `bam01872/Lernlabor` mit index.html (rund 660 KB), manifest.webmanifest, sw.js, drei Symbolen.
 - Meisterlabor: noch kein Repo, nur lokal committet (Risiko: keine Sicherung außerhalb von Markus' Rechner).
 - Entschieden: Markus legt sofort ein privates Repo `84g64ds8jm-cmyk/Meisterlabor-Basis` an und pusht den lokalen Stand (Anleitung im Thread vom 19.10.2026).
 
 ## Hosting
-- Entschieden: Pilot über GitHub Pages, Adresse https://84g64ds8jm-cmyk.github.io/LernLabor/ (vor Kursstart prüfen).
+- Entschieden: Pilot über GitHub Pages, Adresse https://bam01872.github.io/Lernlabor/ (vor Kursstart prüfen).
 
 ## Offline und Updates
 - sw.js arbeitet „Cache zuerst“ mit Versionsname (Stand `lernlabor-v30`). Ein Update braucht eine neue index.html und eine höhere Version in sw.js.
