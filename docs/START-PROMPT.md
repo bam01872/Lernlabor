@@ -13,8 +13,8 @@ Ich habe zwei Produkte: das **Lernlabor** (NTG, Hauptprodukt, Pilot ab November 
 
 **Lernlabor**
 - **Eine einzige HTML-Datei** `index.html` (1,39 MB, 5.156 Zeilen) mit eingebettetem CSS und Vanilla-JavaScript. Kein Framework, kein Build, kein Server, keine Konten.
-- **Repo:** `84g64ds8jm-cmyk/LernLabor`, Branch `main` = live. Dazu `sw.js` (Service Worker, cache-first, Cache-Name `lernlabor-vN`, prüft stündlich und beim Zurückkehren auf neue Version), `manifest.webmanifest` (Schnellzugriffe #ueben, #hausaufgaben, #fehler, #simulation), Icons, `fonts/` (Schibsted Grotesk lokal), `tests/check.js`, `.github/workflows/check.yml`.
-- **Hosting:** GitHub Pages, https://84g64ds8jm-cmyk.github.io/LernLabor/ , installierbar als App. Neue Version → Hinweis „Jetzt laden“ (während laufender Prüfungssimulation erst danach).
+- **Repo:** `bam01872/Lernlabor`, Branch `main` = live. Dazu `sw.js` (Service Worker, cache-first, Cache-Name `lernlabor-vN`, prüft stündlich und beim Zurückkehren auf neue Version), `manifest.webmanifest` (Schnellzugriffe #ueben, #hausaufgaben, #fehler, #simulation), Icons, `fonts/` (Schibsted Grotesk lokal), `tests/check.js`, `.github/workflows/check.yml`.
+- **Hosting:** GitHub Pages, https://bam01872.github.io/Lernlabor/ , installierbar als App. Neue Version → Hinweis „Jetzt laden“ (während laufender Prüfungssimulation erst danach).
 - **Daten:** Lernstand nur im Browser (`localStorage`, Schlüssel `ll_…`), Export/Import als JSON. Keine Konten, kein Tracking, keine Nutzungszählung (ADR 001).
 - **KI:** im Pilot ausgeblendet (ADR 003).
 - **Datenstrukturen im Code:** `GEN` (89 Übungsgeneratoren, liefern `[frage, antwort, einheit, schritte]`), `STEPS` (36 Mehrschritt), `EXW` (111 Prüfungsaufgaben, optional Skizze `fig`), `MCQ` (267), `ORAL` (115), `FEH` (348 „Fehler finden“), `ERK` (Verstehen/typische Fehler), `BET` (Im Betrieb), `PRED`/`PRED2` (Vermute zuerst), `PLAUS` (Passt das?), `FX` (Formelkarten), `GL`/`GLU` (Glossar), `M` (116 Themen), `GORD` (Reihenfolge), `XL` (Thema in zweitem Fach), `HW` (8 Hausaufgaben-Einheiten), `MCG` (Mathe-Check). Fächer `FA=[FP,FC,FE,FS,FM,FSI,FU]`.
@@ -25,7 +25,7 @@ Ich habe zwei Produkte: das **Lernlabor** (NTG, Hauptprodukt, Pilot ab November 
 - **Dozentenversion:** gleiche index.html mit `const DOZENT=true`, Titel „Dozent · Lernlabor“, drei Schriften als base64. Nur `/mnt/project-files/dozent/lernlabor_dozent.html`, **nie committen**, nach jedem Merge neu bauen. Enthält Kursübersicht mit „Auswertung an mich mailen“.
 - **Versionierung:** `APPV` + `NEWS` in index.html und Cache-Name in sw.js. Nächste freie Nummer nehmen, direkt vor dem Merge main holen und rebasen.
 - **Tests:** `CHROMIUM=/opt/pw-browsers/chromium node tests/check.js` → „9440 Aufgaben erzeugt, 116 Themen geöffnet. Alles in Ordnung.“ Läuft als CI bei jedem PR. Prüft nur Abstürze, nicht die Fachlichkeit.
-- **Werkzeuge in Claude-Sitzungen:** Repo mit `git clone https://github.com/84g64ds8jm-cmyk/LernLabor.git` holen; PRs per `gh api` REST (GraphQL gesperrt, Repo vorher mit add_repo freischalten); Playwright mit Chromium; Live-Check per curl geht nicht, stattdessen Pages-Workflow-Runs prüfen.
+- **Werkzeuge in Claude-Sitzungen:** Repo mit `git clone https://github.com/bam01872/Lernlabor.git` holen; PRs per `gh api` REST (GraphQL gesperrt, Repo vorher mit add_repo freischalten); Playwright mit Chromium; Live-Check per curl geht nicht, stattdessen Pages-Workflow-Runs prüfen.
 
 **Meisterlabor Basis**
 - Eine HTML-Datei, Version 2, live als Claude-Artifact https://claude.ai/artifact/ETNVG16tGKCYAce3JXraiW . Noch **kein Repo** (lege ich selbst an), GitHub-Pages-Paket unter `/mnt/project-files/meisterlabor/`, Dozentenversion unter `meisterlabor/dozent/`.

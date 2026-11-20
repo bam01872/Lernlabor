@@ -103,7 +103,7 @@ Testpersonen (Empfehlung): 5 Erwachsene, möglichst nah an der Zielgruppe: Facha
 
 | Bereich | Was | Status |
 |---|---|---|
-| Zugang zur App | Pages-Adresse https://84g64ds8jm-cmyk.github.io/LernLabor/ auf dem eigenen Handy der Testperson. Vorher die Websitedaten der Seite in den Browser-Einstellungen löschen (oder einen Browser nehmen, in dem die App noch nie offen war), damit der Erststart echt ist. Kein privates Fenster: Dort geht der Lernstand beim Schließen verloren, dann scheitert T7 künstlich. | vorhanden |
+| Zugang zur App | Pages-Adresse https://bam01872.github.io/Lernlabor/ auf dem eigenen Handy der Testperson. Vorher die Websitedaten der Seite in den Browser-Einstellungen löschen (oder einen Browser nehmen, in dem die App noch nie offen war), damit der Erststart echt ist. Kein privates Fenster: Dort geht der Lernstand beim Schließen verloren, dann scheitert T7 künstlich. | vorhanden |
 | Testkonto | nicht nötig, es gibt keine Konten | — |
 | Aufnahme iPhone | Kontrollzentrum → Bildschirmaufnahme (Mikrofon aus lassen, wenn keine Tonaufnahme vereinbart ist) | Bordmittel |
 | Aufnahme Android | Schnelleinstellungen → Bildschirmaufnahme (ab Android 11, je nach Hersteller benannt) | Bordmittel |

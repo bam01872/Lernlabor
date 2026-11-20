@@ -3,7 +3,7 @@ Stand: 19.10.2026
 
 Zweck: Anleitung für Teilnehmer am ersten Kurs-Samstag. Zum Ausdrucken oder Vorführen am Beamer.
 
-**Adresse:** https://84g64ds8jm-cmyk.github.io/LernLabor/
+**Adresse:** https://bam01872.github.io/Lernlabor/
 (Vor dem Ausdrucken einmal im Browser prüfen, ob die Adresse stimmt.)
 
 ## Warum installieren?
