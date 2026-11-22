@@ -18752,6 +18752,7 @@ body.rfon #auf>details>summary>b:first-of-type::before{content:var(--rfn);displa
 /* v301: Einleitungstext im Blocksatz mit Silbentrennung (Markus 11.11.2026) */#desc{text-align:justify;-webkit-hyphens:auto;hyphens:auto}
 /* v332: Blocksatz mit Silbentrennung in allen Textboxen aller Reiter (Markus 18.11.2026), wie Lernlabor Pro */
 :where(main,.tour,dialog) :where(p,li,dd,blockquote,.legend,.fx>span:only-of-type,#probe,.tumbl .sub,.tiph>span){text-align:justify;-webkit-hyphens:auto;hyphens:auto;overflow-wrap:break-word}
+/* Lösungen und Lösungswege linksbündig statt Blocksatz, damit Gleichungen ohne Lücken stehen; Aufgabenstellungen bleiben im Blocksatz (Markus 22.11.2026) */:is(#psol,#pvw .pvs,#pgl .pgs,#pgl .pgr,.hwsol,.ssol,.tulw) :is(p,li,dd,blockquote),.sr p+p,.mcri p+p+p{text-align:left}
 :where(main,.tour,dialog) :where(td,th,button,label,summary,nav,footer,.crumb,.ctl) :where(p,li){text-align:start;-webkit-hyphens:manual;hyphens:manual}
 :where(main,.tour,dialog) :where(input,textarea,select,code,pre){-webkit-hyphens:manual;hyphens:manual}
 :where(main) :where(p.big){text-align:start}
