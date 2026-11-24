@@ -3098,9 +3098,9 @@ const LPSO=(x,y,a,o=1,q=1)=>{let h='';for(let k=0;k<4;k++){const w=a+k*1.571+.4;
  LPWAT=(C,R,x1,x2,seed,t,fr,n=24)=>{let g='';for(let i=0;i<n;i++){const x=x1+GZH(i*3.1+seed)*(x2-x1),y=C[1]-R+12+GZH(i*7.7+seed)*(2*R-24);if(Math.hypot(x-C[0],y-C[1])>R-4||fr&&Math.hypot(x-fr[0],y-fr[1])<fr[2])continue;const j=GZJ(i+seed,t,3);g+=GZW(x+j[0],y+j[1],GZH(i*1.3+seed)*6.28+.4*Math.sin(t*.8+i),.8)}return g},
  /* frei bewegliche Elektronen im Leiter */
  LPEG=(C,R,x1,x2,seed,t,n=16)=>{let g='';for(let i=0;i<n;i++){const x=x1+GZH(i*5.3+seed)*(x2-x1),y=C[1]-R+10+GZH(i*9.1+seed)*(2*R-20),j=GZJ(i*3+seed,t,6);g+=`<circle cx="${f2(x+j[0])}" cy="${f2(y+j[1])}" r="1.9" fill="var(--flow)" opacity=".75"/>`}return g};
-const EY=[['CuCl₂-Lösung (Labor)',['Cu',2,63.55],['Cl₂',2,0],'Cu²⁺ + 2 e⁻ → Cu','2 Cl⁻ → Cl₂ + 2 e⁻'],['NaCl-Lösung (Labor)',['H₂',2,0],['Cl₂',2,0],'2 H₂O + 2 e⁻ → H₂ + 2 OH⁻','2 Cl⁻ → Cl₂ + 2 e⁻'],['Wasser (H₂SO₄)',['H₂',2,0],['O₂',4,0],'2 H₃O⁺ + 2 e⁻ → H₂ + 2 H₂O','6 H₂O → O₂ + 4 H₃O⁺ + 4 e⁻'],['CuSO₄-Lösung',['Cu',2,63.55],['O₂',4,0],'Cu²⁺ + 2 e⁻ → Cu','6 H₂O → O₂ + 4 H₃O⁺ + 4 e⁻'],['Galvanik: Cu-Anode',['Cu',2,63.55],['Cu',2,63.55],'Cu²⁺ + 2 e⁻ → Cu','Cu → Cu²⁺ + 2 e⁻']];
+const EY=[['CuCl₂-Lösung (Labor)',['Cu',2,63.55],['Cl₂',2,0],'Cu²⁺ + 2 e⁻ → Cu','2 Cl⁻ → Cl₂ + 2 e⁻'],['NaCl-Lösung (Labor)',['H₂',2,0],['Cl₂',2,0],'2 H₂O + 2 e⁻ → H₂ + 2 OH⁻','2 Cl⁻ → Cl₂ + 2 e⁻'],['Wasser (H₂SO₄)',['H₂',2,0],['O₂',4,0],'2 H₃O⁺ + 2 e⁻ → H₂ + 2 H₂O','6 H₂O → O₂ + 4 H₃O⁺ + 4 e⁻'],['Galvanik: Cu-Anode',['Cu',2,63.55],['Cu',2,63.55],'Cu²⁺ + 2 e⁻ → Cu','Cu → Cu²⁺ + 2 e⁻']];
 /* Was an den Elektroden reagiert: k = Kathode (Cu, Wasser W, H₃O⁺ H3), a = Anode (Cl, O), dazu Kation/Anion der Lösung (Anzahl ladungsgleich) */
-const EYL=[{k:'Cu',a:'Cl',ca:'Cu',an:'Cl',nc:4,na:8},{k:'W',a:'Cl',ca:'Na',an:'Cl',nc:6,na:6},{k:'H3',a:'O',ca:'H3',an:'SO',nc:8,na:4},{k:'Cu',a:'O',ca:'Cu',an:'SO',nc:5,na:5},{k:'Cu',a:'Cu',ca:'Cu',an:'SO',nc:5,na:5,g:1}];
+const EYL=[{k:'Cu',a:'Cl',ca:'Cu',an:'Cl',nc:4,na:8},{k:'W',a:'Cl',ca:'Na',an:'Cl',nc:6,na:6},{k:'H3',a:'O',ca:'H3',an:'SO',nc:8,na:4},{k:'Cu',a:'Cu',ca:'Cu',an:'SO',nc:5,na:5,g:1}];
 /* g: Galvanik im Betrieb, Werkstück aus Stahl an der Kathode, lösliche Kupferanode, kein Gas */
 /* Ion in der Lupe zeichnen (mit Wasserhülle), x,y Mitte */
 const EYI=(w,x,y,t,i)=>{const j=GZJ(i,t,3),X=x+j[0],Y=y+j[1],r=.3*Math.sin(t*.5+i)+i;return w=='Cu'?GZI(X,Y,7.3,LPC.CK,'2+',1,r):w=='Na'?KOI(X,Y,10.2,LPC.CN,'+',1,r):w=='Cl'?KOI(X,Y,18.1,LPC.Cl,'−',1,r,1,1):w=='H3'?KOH3(X,Y,t*.6+i):LPSO(X,Y,t*.5+i)};
@@ -13212,8 +13212,8 @@ Object.assign(EIN,{
   f:(k,t)=>EMRK(k,t,ESIM('Galvanische Zelle & Spannungsreihe',{v:0,a:2,b:7,sw:0},t,'0 0 640 395',0,60,230,142),'U = E°(+) − E°(−)','Zn und Cu: 1,10 V')}
 ],
 'Elektrolyse':[
- {d:12,t:'Zwei Graphitelektroden hängen in Kupfersulfatlösung, ein Netzgerät liefert Gleichstrom. An der Elektrode am Minuspol wächst eine Kupferschicht, am Pluspol steigen Gasbläschen auf. Strom erzwingt hier eine Reaktion.',
-  s:'Zwei Graphitelektroden hängen in Kupfersulfatlösung, ein Netzgerät liefert Gleichstrom. An der Elektrode am Minuspol wächst eine Kupferschicht, am Pluspol steigen Gasbläschen auf. Strom erzwingt hier eine Reaktion.',
+ {d:14,t:'Galvanik: Ein Werkstück aus Stahl und ein Kupferstab hängen in Kupfersulfatlösung, ein Netzgerät liefert Gleichstrom. Auf dem Werkstück am Minuspol wächst eine Kupferschicht, der Kupferstab am Pluspol löst sich auf. Strom erzwingt hier eine Reaktion.',
+  s:'Galvanik: Ein Werkstück aus Stahl und ein Kupferstab hängen in Kupfersulfatlösung, ein Netzgerät liefert Gleichstrom. Auf dem Werkstück am Minuspol wächst eine Kupferschicht, der Kupferstab am Pluspol löst sich auf. Strom erzwingt hier eine Reaktion.',
   f:(k,t)=>ESIM('Elektrolyse',{v:0,e:3,I:2,t:30},t,'40 10 520 290',0,0,480,225)+ETAG(240,252,'I = 2 A, t = 30 min: wie viel Kupfer?','middle','ein1')},
  {d:11,t:'Galvanische Zelle und Elektrolyse sind Gegenstücke: Die Zelle liefert Strom aus einer freiwilligen Reaktion. Die Elektrolyse braucht Strom und erzwingt eine Reaktion, die von selbst nicht liefe.',
   s:'Galvanische Zelle und Elektrolyse sind Gegenstücke: Die Zelle liefert Strom aus einer freiwilligen Reaktion. Die Elektrolyse braucht Strom und erzwingt eine Reaktion, die von selbst nicht liefe.',
@@ -13221,9 +13221,9 @@ Object.assign(EIN,{
  {d:12,t:'An der Kathode, dem Minuspol, kommen die Elektronen vom Netzgerät an. Ein Cu²⁺-Ion verliert seine Wasserhülle, nimmt 2 Elektronen auf und wird ein Kupferatom: Reduktion. Merkhilfe: Kathode, Minus, Reduktion.',
   s:'An der Kathode, dem Minuspol, kommen die Elektronen vom Netzgerät an. Ein Kupfer 2 plus Ion verliert seine Wasserhülle, nimmt 2 Elektronen auf und wird ein Kupferatom: Reduktion. Merkhilfe: Kathode, Minus, Reduktion.',
   f:(k,t)=>ESIM('Elektrolyse',{v:1,e:3,I:2,t:30},t,'15 55 300 320',0,14,220,235)+EFT(350,70,'Kathode (−)','ein1','middle')+EFT(350,104,'Reduktion','ein2','middle')+EFT(350,150,'Cu²⁺ + 2 e⁻ → Cu','ein1','middle')+EFT(350,196,'Kupferschicht wächst','ein2','middle')},
- {d:12,t:'An der Anode, dem Pluspol, zieht das Netzgerät Elektronen ab. In Kupfersulfatlösung gibt dort Wasser Elektronen ab, es entsteht Sauerstoff: Oxidation. Merkhilfe: Anode, Plus, Oxidation.',
-  s:'An der Anode, dem Pluspol, zieht das Netzgerät Elektronen ab. In Kupfersulfatlösung gibt dort Wasser Elektronen ab, es entsteht Sauerstoff: Oxidation. Merkhilfe: Anode, Plus, Oxidation.',
-  f:(k,t)=>ESIM('Elektrolyse',{v:1,e:3,I:2,t:30},t,'325 55 300 320',260,14,220,235)+EFT(130,70,'Anode (+)','ein1','middle')+EFT(130,104,'Oxidation','ein2','middle')+EFT(130,150,'6 H₂O → O₂ + 4 H₃O⁺ + 4 e⁻','ein1','middle')+EFT(130,196,'Sauerstoff steigt auf','ein2','middle')},
+ {d:14,t:'An der Anode, dem Pluspol, zieht das Netzgerät Elektronen ab. Dort gibt ein Kupferatom der Anode 2 Elektronen ab und geht als Cu²⁺-Ion in Lösung: Oxidation. So füllt die Anode das Bad nach. Merkhilfe: Anode, Plus, Oxidation.',
+  s:'An der Anode, dem Pluspol, zieht das Netzgerät Elektronen ab. Dort gibt ein Kupferatom der Anode 2 Elektronen ab und geht als Kupfer 2 plus Ion in Lösung: Oxidation. So füllt die Anode das Bad nach. Merkhilfe: Anode, Plus, Oxidation.',
+  f:(k,t)=>ESIM('Elektrolyse',{v:1,e:3,I:2,t:30},t,'325 55 300 320',260,14,220,235)+EFT(130,70,'Anode (+)','ein1','middle')+EFT(130,104,'Oxidation','ein2','middle')+EFT(130,150,'Cu → Cu²⁺ + 2 e⁻','ein1','middle')+EFT(130,196,'Kupferstab löst sich auf','ein2','middle')},
  {d:12,t:'Wie viel Kupfer? Je mehr Ladung fließt, desto mehr Kupfer. Q = I · t = 2 A · 0,5 h = 1 Ah. Je Amperestunde scheiden sich rund 1,19 g Kupfer ab, also 1,19 g.',
   s:'Wie viel Kupfer? Je mehr Ladung fließt, desto mehr Kupfer. Q gleich I mal t gleich 2 Ampere mal eine halbe Stunde gleich 1 Amperestunde. Je Amperestunde scheiden sich rund 1,19 Gramm Kupfer ab, also 1,19 Gramm.',
   f:k=>EFX(k,[['Q = I · t = 2 A · 0,5 h = 1 Ah','m'],['m = 1 Ah · 1,19 g/Ah','m'],['m = 1,19 g','r']],['Doppelte Ladung → doppelte Masse'])},
