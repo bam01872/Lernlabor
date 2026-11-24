@@ -11853,7 +11853,7 @@ const AUF_PC={
 'Neutralisation & Titration':{t:'<b>20 ml Salzsäure</b> (0,15 mol/l) sollen mit <b>Natronlauge</b> (0,2 mol/l) bis zum <b>Äquivalenzpunkt</b> titriert werden, auf einen halben Milliliter genau. Verändere nur V_L.',st:{ca:.15,Va:20,cb:.2,Vb:5},fr:['Vb'],
  ok:s=>Math.abs(s.Vb-s.ca*s.Va/s.cb)<=.5+1e-9,v:s=>'V_L = '+aufNf(s.Vb)+' mL',z:'Äquivalenzpunkt (± 0,5 ml)',h:s=>s.Vb<s.ca*s.Va/s.cb?'Noch sauer: mehr Lauge.':'Schon basisch: weniger Lauge.',
  q:'Wie berechnest Du das Laugenvolumen?',a:'n(HCl) = 0,15 mol/l · 0,020 l = 0,003 mol. V_L = 0,003 mol / (0,2 mol/l) = 0,015 l = 15 ml. Am Äquivalenzpunkt springt der pH-Wert schon bei einem halben Milliliter um mehrere Stufen.'},
-'Elektrolyse':{t:'Aus <b>CuCl₂-Lösung</b> sollen in <b>30 min</b> mindestens <b>2 g Kupfer</b> abgeschieden werden. Nimm dafür nicht unnötig viel Strom: <b>höchstens 2,2 g</b>. Verändere nur I.',st:{e:0,I:1,t:30},fr:['I'],
+'Elektrolyse':{t:'Im <b>Galvanikbad</b> (CuSO₄, Kupferanode) sollen in <b>30 min</b> mindestens <b>2 g Kupfer</b> abgeschieden werden. Nimm dafür nicht unnötig viel Strom: <b>höchstens 2,2 g</b>. Verändere nur I.',st:{e:3,I:1,t:30},fr:['I'],
  ok:s=>{const m=x=>x*s.t*60/96485/2*63.55;return m(s.I)>=2&&m(s.I)<=2.2},v:s=>'m(Cu) = '+aufNf(s.I*s.t*60/96485/2*63.55)+' g bei I = '+aufNf(s.I)+' A',z:'m(Cu) zwischen 2 g und 2,2 g',h:s=>s.I*s.t*60/96485/2*63.55<2?'Zu wenig Kupfer: I größer machen.':'Zu viel Strom: I kleiner machen.',
  q:'Ab welcher Stromstärke am Regler sind es mindestens 2 g Kupfer?',a:'Ab 3,4 A: Dann liegt m(Cu) knapp über 2 g. Die Masse wächst mit der Ladung Q = I · t, also mit dem Strom.'},
 'Blei-Batterie (Akkumulator)':{t:'Das Aräometer zeigt eine Säuredichte von <b>1,19 g/cm³</b>. Stell den Ladezustand ein, der dazu passt. Verändere nur den Ladezustand.',st:{q:100},fr:['q'],
@@ -17089,9 +17089,10 @@ function mcMemHTML(){const a=mcAll();if(!(a['1']&&a['1'].r))return`<div class="p
    APPN  = Versionsname für Lernende: kleine Änderungen (Korrekturen, neue Aufgaben) 1.1, 1.2, 1.3 …,
            große Neuerungen (neues Fach, englische Fassung, neuer Aufbau) 2.0, dann 2.1 …
    Angezeigt wird überall VNAME, z. B. „Version 1.1 (362)“. Im CHL-Eintrag steht APPN als 4. Wert. */
-const APPV=364,APPN='1.3',VNAME='Version '+APPN+' ('+APPV+')',NEWS='Elektrolyse: Der Versuch mit CuSO₄ und Graphit ist entfallen. Das Erklärvideo zeigt jetzt die Galvanik mit Kupferanode, die sich auflöst.';
+const APPV=365,APPN='1.4',VNAME='Version '+APPN+' ('+APPV+')',NEWS='Elektrolyse: Der Auftrag startet jetzt im Galvanikbad mit Kupferanode statt mit CuCl₂-Lösung.';
 /* Änderungsliste für Dozenten: fachliche Korrekturen mit Datum, neueste zuerst. Bei jeder fachlichen Korrektur ergänzen. */
 const CHL=[
+ ['24.11.2026',365,['Elektrolyse: Der Auftrag startet jetzt im Galvanikbad mit Kupferanode statt mit CuCl₂-Lösung.'],'1.4'],
  ['24.11.2026',364,['Elektrolyse: Der Versuch mit CuSO₄ und Graphit ist entfallen. Das Erklärvideo zeigt jetzt die Galvanik mit Kupferanode, die sich auflöst.'],'1.3'],
  ['24.11.2026',363,['Elektrolyse: Neue Lösung „Galvanik: Cu-Anode“ zeigt die Galvanik im Betrieb. Die Kupferanode löst sich auf, es entsteht kein Gas. CuCl₂ und NaCl sind als Laborversuch gekennzeichnet (Chlor nur unter dem Abzug).'],'1.2'],
  ['23.11.2026',362,['Neue Versionsnummern: Der Stand zum Kursstart ist Version 1.0. Kleine Änderungen zählen weiter 1.1, 1.2 …, große Neuerungen wie ein neues Fach heißen 2.0. In Klammern steht die laufende Nummer, z. B. „Version 1.1 (362)“.'],'1.1'],
