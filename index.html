@@ -15864,7 +15864,7 @@ const XSCR=(z,ang,o={})=>{const r=ang*PI/180,c=Math.cos(r),s=Math.sin(r),x0=40,y
  if(o.fh){const L=60;h+=XAR(S[0],S[1],-L*c,L*s,'var(--flow)')+XT(XN(S[0]-L*c-8),XN(S[1]+L*s+4),'F_H','ein1','end')}
  return h};
 EXV['Schaltschrank auf Transportbrett: Kippen oder Rutschen']=z=>{const {b,h,mu,m,aR,aK,Gw,FH}=z,dA=+(aK-aR).toFixed(1);return[
- XS(0,12,`Das Transportbrett wird an einer Seite langsam angehoben. Der Schrank kann bei einem Winkel rutschen oder bei einem anderen kippen. Was passiert zuerst?`,k=>XSCR(z,4+Math.min(aR,aK)*.6*EINQ(k/.9),{kk:1}),'Aufgabe'),
+ XS(0,12,`Das Transportbrett wird an einer Seite langsam angehoben. Der Schrank kann bei einem Winkel rutschen oder bei einem anderen kippen. Was passiert zuerst?`,k=>XSCR(z,10+(Math.min(aR,aK)*.8-10)*EINQ(k/.9)),'Aufgabe'),
  XS(0,11,`Schritt 1: Rutschen beginnt, wenn der Hangabtrieb die Haftreibung erreicht. F_G steht auf beiden Seiten und kürzt sich. Es bleibt tan\u00a0α gleich μ₀.`,k=>XSCR(z,aR,{fh:k>.3,lab:'α_Rutsch'})),
  XS(0,8,`Dann arctan.`,k=>XFX(k,[['F_G · sin\u00a0α = μ₀ · F_G · cos\u00a0α','m'],['tan\u00a0α = μ₀','h'],[`tan\u00a0α = ${de(mu)}`,'m'],[`α_Rutsch = ${nf(aR)}°`,'r']])),
  XS(1,12,`Schritt 2: Kippen beginnt, wenn der Schwerpunkt S genau senkrecht über der Kippkante steht. Dann trifft die gestrichelte Linie die Kante.`,k=>XSCR(z,aK*EINQ(.3+.7*k),{v:1,kk:1,lab:'α_Kipp'})),
