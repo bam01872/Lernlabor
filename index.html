@@ -11272,16 +11272,16 @@ const HW=[
 /* Fachkonsortium v269 Nr. 3: Einheit 0 zu den Mathe-Grundlagen (Umrechnen und Formeln umstellen, siehe DIDAKTIK.md). z:1 = steht vor den Kapiteln; im Kurs IM TZ 11/2026 am 14.11.2026 (Kollege), Abgabe mit Kapitel 1.1 (hwDueOf) */
 {id:'k0',k:'Einheit 0',t:'Umrechnen und Formeln umstellen',f:'Mathematik',z:1,tasks:[
  {id:'k0a',typ:'num',name:'Druck und Fläche umrechnen',gen:()=>{const p=hR.st(20,80,5),A=hR.st(10,60,5),F=p*1e5*A/1e4;
-  return{q:'Auf einen Hydraulikkolben mit der Fläche A = '+A+' cm² wirkt ein Druck von p = '+p+' bar. Rechne beide Werte in SI-Einheiten um (1 bar = 100 000 Pa, 1 m² = 10 000 cm²) und berechne die Kraft F = p · A in N.',a:F,u:'N',d:0,tol:{rel:.01},sol:['p = '+p+' bar = '+p+' · 100 000 Pa = '+hf(p*1e5,0)+' Pa = '+hf(p*1e5,0)+' N/m²','A = '+A+' cm² = '+A+' / 10 000 m² = '+hf(A/1e4,4)+' m²','F = p · A = '+hf(p*1e5,0)+' N/m² · '+hf(A/1e4,4)+' m² = '+hf(F,0)+' N']}}},
+  return{ev:{p,A,F},q:'Auf einen Hydraulikkolben mit der Fläche A = '+A+' cm² wirkt ein Druck von p = '+p+' bar. Rechne beide Werte in SI-Einheiten um (1 bar = 100 000 Pa, 1 m² = 10 000 cm²) und berechne die Kraft F = p · A in N.',a:F,u:'N',d:0,tol:{rel:.01},sol:['p = '+p+' bar = '+p+' · 100 000 Pa = '+hf(p*1e5,0)+' Pa = '+hf(p*1e5,0)+' N/m²','A = '+A+' cm² = '+A+' / 10 000 m² = '+hf(A/1e4,4)+' m²','F = p · A = '+hf(p*1e5,0)+' N/m² · '+hf(A/1e4,4)+' m² = '+hf(F,0)+' N']}}},
  {id:'k0b',typ:'num',name:'Formel nach der Fläche umstellen',gen:()=>{const p=hR.p([40,50,60,80,100]),A=hR.p([20,25,40,50,80]),F=p*A;
-  return{q:'Eine Presse soll eine Kraft von F = '+hf(F,0)+' N erzeugen. Der Öldruck beträgt p = '+p+' N/cm². Wie groß muss die Kolbenfläche A sein? Stelle p = F / A nach A um.',a:A,u:'cm²',d:1,tol:{rel:.01},sol:['p = F / A, beide Seiten mit A malnehmen: p · A = F','Beide Seiten durch p teilen: A = F / p','A = '+hf(F,0)+' N / '+p+' N/cm² = '+hf(A,1)+' cm²']}}},
+  return{ev:{p,A,F},q:'Eine Presse soll eine Kraft von F = '+hf(F,0)+' N erzeugen. Der Öldruck beträgt p = '+p+' N/cm². Wie groß muss die Kolbenfläche A sein? Stelle p = F / A nach A um.',a:A,u:'cm²',d:1,tol:{rel:.01},sol:['p = F / A, beide Seiten mit A malnehmen: p · A = F','Beide Seiten durch p teilen: A = F / p','A = '+hf(F,0)+' N / '+p+' N/cm² = '+hf(A,1)+' cm²']}}},
  {id:'k0c',typ:'num',name:'Prozent und Dreisatz',gen:()=>{const n=hR.p([400,500,800,1250,2000]),q=hR.p([2,2.5,3,4,5]),k=n*q/100,m=hR.p([3000,5000,6000,10000]),km=m*q/100;
-  return{q:'In einer Lieferung von '+n+' Schrauben sind '+hf(k,0)+' fehlerhaft. Mit wie vielen fehlerhaften Schrauben musst Du bei '+hf(m,0)+' Schrauben derselben Fertigung rechnen?',a:km,u:'Stück',d:0,tol:{rel:.01},sol:['Ausschussanteil: '+hf(k,0)+' Stück / '+n+' Stück · 100 % = '+hf(q,1)+' %','Dreisatz: '+hf(m,0)+' Stück · '+hf(q,1)+' % = '+hf(m,0)+' Stück · '+hf(q/100,3)+' = '+hf(km,0)+' Stück']}}}]},
+  return{ev:{n,q,k,m,km},q:'In einer Lieferung von '+n+' Schrauben sind '+hf(k,0)+' fehlerhaft. Mit wie vielen fehlerhaften Schrauben musst Du bei '+hf(m,0)+' Schrauben derselben Fertigung rechnen?',a:km,u:'Stück',d:0,tol:{rel:.01},sol:['Ausschussanteil: '+hf(k,0)+' Stück / '+n+' Stück · 100 % = '+hf(q,1)+' %','Dreisatz: '+hf(m,0)+' Stück · '+hf(q,1)+' % = '+hf(m,0)+' Stück · '+hf(q/100,3)+' = '+hf(km,0)+' Stück']}}}]},
 {id:'k11',k:'Kapitel 1.1',t:'Grundlagen der Chemie',f:'Chemie',tasks:[
  {id:'k11a',typ:'num',name:'Stoffmenge aus der Masse',gen:()=>{const S=hR.p([['Wasser','H₂O',{H:2,O:1}],['Kohlenstoffdioxid','CO₂',{C:1,O:2}],['Natriumhydroxid','NaOH',{Na:1,O:1,H:1}],['Schwefelsäure','H₂SO₄',{H:2,S:1,O:4}],['Calciumcarbonat (Kalk)','CaCO₃',{Ca:1,C:1,O:3}]]),A={H:1,C:12,O:16,Na:23,S:32,Ca:40},m=hR.st(2,50,1),M=Object.entries(S[2]).reduce((s,[e,n])=>s+A[e]*n,0),n=m*1000/M;
-  return{q:'Im Lager stehen '+m+' kg '+S[0]+' ('+S[1]+'). Wie groß ist die Stoffmenge in mol? Atommassen: H = 1, C = 12, O = 16, Na = 23, S = 32, Ca = 40 (in u bzw. g/mol).',a:n,u:'mol',d:1,tol:{rel:.01},sol:['Molare Masse M('+S[1]+') = '+Object.entries(S[2]).map(([e,k])=>(k>1?k+' · ':'')+A[e]+' g/mol').join(' + ')+' = '+M+' g/mol','Masse in Gramm: '+m+' kg = '+hf(m*1000,0)+' g','n = m / M = '+hf(m*1000,0)+' g / '+M+' g/mol = '+hf(n,1)+' mol']}}},
+  return{ev:{nm:S[0],fo:S[1],el:Object.entries(S[2]).map(([e,c])=>[e,c,A[e]]),sum:Object.entries(S[2]).map(([e,c])=>(c>1?c+' · ':'')+A[e]+' g/mol').join(' + '),m,M,n},q:'Im Lager stehen '+m+' kg '+S[0]+' ('+S[1]+'). Wie groß ist die Stoffmenge in mol? Atommassen: H = 1, C = 12, O = 16, Na = 23, S = 32, Ca = 40 (in u bzw. g/mol).',a:n,u:'mol',d:1,tol:{rel:.01},sol:['Molare Masse M('+S[1]+') = '+Object.entries(S[2]).map(([e,k])=>(k>1?k+' · ':'')+A[e]+' g/mol').join(' + ')+' = '+M+' g/mol','Masse in Gramm: '+m+' kg = '+hf(m*1000,0)+' g','n = m / M = '+hf(m*1000,0)+' g / '+M+' g/mol = '+hf(n,1)+' mol']}}},
  {id:'k11b',typ:'num',name:'Molares Volumen eines Gases',gen:()=>{const m=hR.st(5,60,5),n=m*1000/44,V=n*22.4/1000;
-  return{q:'Eine Gasflasche enthält '+m+' kg Kohlenstoffdioxid (CO₂, M = 44 g/mol). Welches Volumen nimmt das Gas bei Normbedingungen (0 °C, 1,013 bar) ein? Ergebnis in m³.',a:V,u:'m³',d:2,tol:{rel:.01},sol:['n = m / M = '+hf(m*1000,0)+' g / 44 g/mol = '+hf(n,1)+' mol','Molares Volumen bei Normbedingungen: 22,4 l/mol','V = '+hf(n,1)+' mol · 22,4 l/mol = '+hf(n*22.4,0)+' l = '+hf(V,2)+' m³']}}},
+  return{ev:{m,n,V},q:'Eine Gasflasche enthält '+m+' kg Kohlenstoffdioxid (CO₂, M = 44 g/mol). Welches Volumen nimmt das Gas bei Normbedingungen (0 °C, 1,013 bar) ein? Ergebnis in m³.',a:V,u:'m³',d:2,tol:{rel:.01},sol:['n = m / M = '+hf(m*1000,0)+' g / 44 g/mol = '+hf(n,1)+' mol','Molares Volumen bei Normbedingungen: 22,4 l/mol','V = '+hf(n,1)+' mol · 22,4 l/mol = '+hf(n*22.4,0)+' l = '+hf(V,2)+' m³']}}},
  {id:'k11c',typ:'txt',name:'Korrosion und Korrosionsschutz',q:'An einer feuerverzinkten Stahltreppe ist die Zinkschicht an einer Stelle bis auf den Stahl verkratzt. Erkläre, warum der Stahl an dieser Stelle zunächst nicht rostet. Nenne außerdem je zwei Beispiele für aktiven und passiven Korrosionsschutz.',
   a:'Zink ist unedler als Eisen. Bei Feuchtigkeit (Elektrolyt) bildet sich ein galvanisches Element: Das Zink wird oxidiert und gibt Elektronen ab, es „opfert“ sich (Opferanode). Das Eisen bleibt geschützt, bis das Zink in der Umgebung verbraucht ist. Aktiver Korrosionsschutz greift in die Reaktion ein: z. B. Opferanode aus unedlem Metall, Galvanisieren/Verzinken, Fremdstrom, passende Werkstoffwahl. Passiver Korrosionsschutz trennt Werkstoff und angreifendes Medium: z. B. Lack, Pulverbeschichtung, Kunststoffüberzug, Einölen/Einfetten.',
   chk:['Zink ist unedler als Eisen','Galvanisches Element / Opferanode','Aktiv: Eingriff in die Reaktion (2 Beispiele)','Passiv: Trennung vom Medium (2 Beispiele)']},
@@ -11293,51 +11293,51 @@ const HW=[
   chk:['Reinkupfer als einziger Reinstoff erkannt','Homogen: Edelstahl (Legierung), Meerwasser (Lösung)','Heterogen mit Fachbegriff: Emulsion, Rauch, Suspension, Nebel, Gemenge','Zwei passende Trennverfahren']}]},
 {id:'k12',k:'Kapitel 1.2',t:'Säuren, Basen und Salze',f:'Chemie',tasks:[
  {id:'k12a',typ:'num',name:'Wasserhärte',gen:()=>{const x=hR.st(48,300,6),dh=x/10,cl=dh<8.4?'weich':dh<=14?'mittel':'hart';
-  return{q:'Ein Laborbericht weist für das Kühlwasser eines Betriebs '+x+' mg CaO pro Liter aus (Calcium- und Magnesiumsalze zusammen als CaO umgerechnet). Wie hoch ist die Gesamthärte in °dH?',a:dh,u:'°dH',d:1,tol:{abs:.05},sol:['1 °dH ≙ 10 mg CaO pro Liter','Härte = '+x+' mg/l / 10 mg/(l·°dH) = '+hf(dh,1)+' °dH','Umrechnung: 1 °dH ≙ 0,178 mmol/l','In mmol/l: '+hf(dh,1)+' °dH · 0,178 mmol/(l·°dH) = '+hf(dh*.178,2)+' mmol/l','Einstufung: '+cl+' (weich unter 8,4 °dH, mittel 8,4 bis 14 °dH, hart über 14 °dH)']}}},
+  return{ev:{x,dh,cl},q:'Ein Laborbericht weist für das Kühlwasser eines Betriebs '+x+' mg CaO pro Liter aus (Calcium- und Magnesiumsalze zusammen als CaO umgerechnet). Wie hoch ist die Gesamthärte in °dH?',a:dh,u:'°dH',d:1,tol:{abs:.05},sol:['1 °dH ≙ 10 mg CaO pro Liter','Härte = '+x+' mg/l / 10 mg/(l·°dH) = '+hf(dh,1)+' °dH','Umrechnung: 1 °dH ≙ 0,178 mmol/l','In mmol/l: '+hf(dh,1)+' °dH · 0,178 mmol/(l·°dH) = '+hf(dh*.178,2)+' mmol/l','Einstufung: '+cl+' (weich unter 8,4 °dH, mittel 8,4 bis 14 °dH, hart über 14 °dH)']}}},
  {id:'k12b',typ:'num',name:'Neutralisation',gen:()=>{const m=hR.st(10,120,5),n=m*1000/98,k=n*2*40/1000;
-  return{q:'In einem Auffangbecken befinden sich '+m+' kg Schwefelsäure (H₂SO₄, M = 98 g/mol). Sie soll mit Natriumhydroxid (NaOH, M = 40 g/mol) vollständig neutralisiert werden: H₂SO₄ + 2 NaOH → Na₂SO₄ + 2 H₂O. Wie viel kg NaOH werden benötigt?',a:k,u:'kg',d:2,tol:{rel:.01},sol:['n(H₂SO₄) = '+hf(m*1000,0)+' g / 98 g/mol = '+hf(n,1)+' mol','Laut Gleichung braucht 1 mol H₂SO₄ 2 mol NaOH: n(NaOH) = '+hf(2*n,1)+' mol','m(NaOH) = '+hf(2*n,1)+' mol · 40 g/mol = '+hf(k*1000,0)+' g = '+hf(k,2)+' kg']}}},
+  return{ev:{m,n,k},q:'In einem Auffangbecken befinden sich '+m+' kg Schwefelsäure (H₂SO₄, M = 98 g/mol). Sie soll mit Natriumhydroxid (NaOH, M = 40 g/mol) vollständig neutralisiert werden: H₂SO₄ + 2 NaOH → Na₂SO₄ + 2 H₂O. Wie viel kg NaOH werden benötigt?',a:k,u:'kg',d:2,tol:{rel:.01},sol:['n(H₂SO₄) = '+hf(m*1000,0)+' g / 98 g/mol = '+hf(n,1)+' mol','Laut Gleichung braucht 1 mol H₂SO₄ 2 mol NaOH: n(NaOH) = '+hf(2*n,1)+' mol','m(NaOH) = '+hf(2*n,1)+' mol · 40 g/mol = '+hf(k*1000,0)+' g = '+hf(k,2)+' kg']}}},
  {id:'k12c',typ:'txt',name:'Umgang mit Säuren und Laugen',q:'Ein Mitarbeiter soll konzentrierte Schwefelsäure verdünnen. Er will zuerst die Säure in den Eimer geben und dann Wasser dazugießen. Was sagst Du ihm, und warum? Welche Schutzmaßnahmen gelten? Welche Stoffe entstehen, wenn die verdünnte Säure anschließend mit Natronlauge neutralisiert wird?',
   a:'Immer zuerst das Wasser, dann langsam die Säure unter Rühren dazugeben („Zuerst das Wasser, dann die Säure, sonst geschieht das Ungeheure“). Beim Verdünnen wird viel Wärme frei; gibt man Wasser in konzentrierte Säure, kann es schlagartig verdampfen und die Säure herausspritzen. Schutz: Schutzbrille bzw. Gesichtsschutz, säurefeste Handschuhe und Kleidung, gute Lüftung, Sicherheitsdatenblatt und Betriebsanweisung beachten, Augendusche bereit; bei Kontakt sofort mit viel Wasser spülen und Arzt. Neutralisation: Säure + Base → Salz + Wasser, hier H₂SO₄ + 2 NaOH → Na₂SO₄ (Natriumsulfat) + 2 H₂O.',
   chk:['Wasser vorlegen, Säure langsam zugeben','Begründung: starke Wärmeentwicklung, Spritzen','Mindestens drei Schutzmaßnahmen','Produkte: Natriumsulfat und Wasser']},
  {id:'k12d',typ:'num',name:'pH-Wert beim Verdünnen',gen:()=>{const c0=hR.p([.1,.01]),v=10,V=hR.p([100,1000,10000]),c=c0*v/V,pH=-Math.log10(c),p0=-Math.log10(c0);
-  return{q:'Von einer Salzsäure mit c = '+hf(c0,c0<.1?2:1)+' mol/l (pH '+hf(p0,0)+') werden '+v+' ml mit Wasser auf '+hf(V,0)+' ml aufgefüllt. Salzsäure ist eine starke Säure, alle HCl-Moleküle geben ihr Proton ab. Welchen pH-Wert hat die verdünnte Säure?',a:pH,u:'',d:1,tol:{abs:.05},sol:['Verdünnungsfaktor: '+hf(V,0)+' ml / '+v+' ml = '+hf(V/v,0),'c(H₃O⁺) = '+hf(c0,c0<.1?2:1)+' mol/l / '+hf(V/v,0)+' = '+SCI(c)+' mol/l','pH = −lg c(H₃O⁺) = −lg '+SCI(c)+' = '+hf(pH,1),'Je Verdünnung um den Faktor 10 steigt der pH-Wert um 1.']}}},
+  return{ev:{c0,v,V,c,pH,p0,sci:SCI(c)},q:'Von einer Salzsäure mit c = '+hf(c0,c0<.1?2:1)+' mol/l (pH '+hf(p0,0)+') werden '+v+' ml mit Wasser auf '+hf(V,0)+' ml aufgefüllt. Salzsäure ist eine starke Säure, alle HCl-Moleküle geben ihr Proton ab. Welchen pH-Wert hat die verdünnte Säure?',a:pH,u:'',d:1,tol:{abs:.05},sol:['Verdünnungsfaktor: '+hf(V,0)+' ml / '+v+' ml = '+hf(V/v,0),'c(H₃O⁺) = '+hf(c0,c0<.1?2:1)+' mol/l / '+hf(V/v,0)+' = '+SCI(c)+' mol/l','pH = −lg c(H₃O⁺) = −lg '+SCI(c)+' = '+hf(pH,1),'Je Verdünnung um den Faktor 10 steigt der pH-Wert um 1.']}}},
  {id:'k12e',typ:'txt',name:'Starke und schwache Säure',q:'Salzsäure und Essigsäure haben beide die Konzentration 0,1 mol/l. Die Salzsäure hat pH 1, die Essigsäure etwa pH 2,9. Erkläre den Unterschied mit dem Protonenübergang (Protolyse). Woran merkst Du ihn außer am pH-Wert noch?',
   a:'Bei einer Protolyse gibt die Säure ein Proton (H⁺) an ein Wassermolekül ab, es entsteht H₃O⁺. Salzsäure ist eine starke Säure: Praktisch jedes HCl-Molekül gibt sein Proton ab, c(H₃O⁺) = 0,1 mol/l, pH 1. Essigsäure ist eine schwache Säure: Nur etwa 1 von 100 Molekülen gibt sein Proton ab, die meisten bleiben ganz (Gleichgewicht ⇌). Es gibt viel weniger H₃O⁺, deshalb ist der pH-Wert höher. Man merkt es auch an der elektrischen Leitfähigkeit (weniger Ionen, die Lampe leuchtet kaum) und daran, dass sie z. B. Kalk langsamer löst. Stark heißt nicht konzentriert.',
   chk:['Säure gibt Proton an Wasser ab (H₃O⁺)','Stark: fast alle Moleküle geben ab','Schwach: nur wenige, Gleichgewicht','Weiterer Unterschied: Leitfähigkeit oder Reaktion mit Kalk/Metall']}]},
 {id:'k13',k:'Kapitel 1.3',t:'Temperatureinfluss auf Materialien',f:'Physik',tasks:[
  {id:'k13a',typ:'num',name:'Längenänderung einer Rohrleitung',gen:()=>{const l=hR.st(20,120,5),t1=hR.st(10,20,5),t2=hR.st(60,150,10),dl=l*1000*.000012*(t2-t1);
-  return{q:'Eine Dampfleitung aus Stahl (α_L = 12 · 10⁻⁶ 1/K) ist bei '+t1+' °C genau '+l+' m lang. Im Betrieb erreicht sie '+t2+' °C. Um wie viele Millimeter wird sie länger?',a:dl,u:'mm',d:1,tol:{rel:.01},sol:['Δl = l₀ · α_L · ΔT','ΔT = '+t2+' °C − '+t1+' °C = '+(t2-t1)+' K','Δl = '+hf(l*1000,0)+' mm · 12 · 10⁻⁶ 1/K · '+(t2-t1)+' K = '+hf(dl,1)+' mm']}}},
+  return{ev:{l,t1,t2,dl},q:'Eine Dampfleitung aus Stahl (α_L = 12 · 10⁻⁶ 1/K) ist bei '+t1+' °C genau '+l+' m lang. Im Betrieb erreicht sie '+t2+' °C. Um wie viele Millimeter wird sie länger?',a:dl,u:'mm',d:1,tol:{rel:.01},sol:['Δl = l₀ · α_L · ΔT','ΔT = '+t2+' °C − '+t1+' °C = '+(t2-t1)+' K','Δl = '+hf(l*1000,0)+' mm · 12 · 10⁻⁶ 1/K · '+(t2-t1)+' K = '+hf(dl,1)+' mm']}}},
  {id:'k13b',typ:'num',name:'Mischungstemperatur',gen:()=>{const m1=hR.st(20,80,5),t1=hR.st(10,15,1),m2=hR.st(20,80,5),t2=hR.st(60,85,5),tm=(m1*t1+m2*t2)/(m1+m2);
-  return{q:'Zum Ansetzen einer Reinigungslösung werden '+m1+' L Wasser mit '+t1+' °C und '+m2+' L Wasser mit '+t2+' °C gemischt. Welche Mischungstemperatur stellt sich ein (ohne Wärmeverluste)?',a:tm,u:'°C',d:1,tol:{abs:.15},sol:['1 L Wasser ≈ 1 kg, also m₁ = '+m1+' kg und m₂ = '+m2+' kg','Gleicher Stoff, daher kürzt sich c heraus: ϑm = (m₁·ϑ₁ + m₂·ϑ₂) / (m₁ + m₂)','ϑm = ('+m1+' kg · '+t1+' °C + '+m2+' kg · '+t2+' °C) / ('+m1+' kg + '+m2+' kg) = '+hf(tm,1)+' °C']}}},
+  return{ev:{m1,t1,m2,t2,tm},q:'Zum Ansetzen einer Reinigungslösung werden '+m1+' L Wasser mit '+t1+' °C und '+m2+' L Wasser mit '+t2+' °C gemischt. Welche Mischungstemperatur stellt sich ein (ohne Wärmeverluste)?',a:tm,u:'°C',d:1,tol:{abs:.15},sol:['1 L Wasser ≈ 1 kg, also m₁ = '+m1+' kg und m₂ = '+m2+' kg','Gleicher Stoff, daher kürzt sich c heraus: ϑm = (m₁·ϑ₁ + m₂·ϑ₂) / (m₁ + m₂)','ϑm = ('+m1+' kg · '+t1+' °C + '+m2+' kg · '+t2+' °C) / ('+m1+' kg + '+m2+' kg) = '+hf(tm,1)+' °C']}}},
  {id:'k13c',typ:'txt',name:'Wärmeübertragung und Ausdehnung',q:'Nenne die drei Arten der Wärmeübertragung mit je einem Beispiel aus dem Betrieb. Erkläre außerdem, warum lange Rohrleitungen Dehnungsbögen oder Kompensatoren brauchen und wo man die Wärmeausdehnung gezielt nutzt.',
   a:'Wärmeleitung (in festen Stoffen, z. B. Wärme wandert durch die Wand eines Wärmetauschers oder in einem Lötkolben), Konvektion bzw. Wärmeströmung (Wärme wird mit einem strömenden Stoff transportiert, z. B. Heizungswasser, Warmluft im Trockenofen), Wärmestrahlung (ohne Stoff, z. B. Infrarotstrahler, Strahlung eines glühenden Werkstücks). Rohrleitungen dehnen sich bei Erwärmung aus (Δl = l₀ · α_L · ΔT). Ohne Ausgleich entstehen große Kräfte, die Halterungen, Flansche oder Pumpen beschädigen. Dehnungsbögen und Kompensatoren nehmen die Längenänderung auf. Gezielt genutzt wird die Ausdehnung z. B. beim Schrumpfen (Aufschrumpfen von Lagern oder Zahnrädern), beim Bimetall-Thermostat und beim Flüssigkeitsthermometer.',
   chk:['Leitung, Konvektion, Strahlung mit Beispielen','Ausdehnung erzeugt Kräfte, Schäden','Kompensator/Dehnungsbogen nimmt Δl auf','Gezielte Nutzung (Schrumpfen, Bimetall …)']},
  {id:'k13d',typ:'num',name:'Wärmemenge zum Aufheizen',gen:()=>{const V=hR.st(150,800,50),t1=hR.st(10,18,1),t2=hR.st(50,80,5),dT=t2-t1,Q=V*4.19*dT,E=Q/3600;
-  return{q:'Ein Reinigungsbad enthält '+V+' L Wasser von '+t1+' °C. Es wird elektrisch auf '+t2+' °C aufgeheizt. Wie viel Energie in kWh ist dafür mindestens nötig? (c = 4,19 kJ/(kg·K), 1 L Wasser ≈ 1 kg, 1 kWh = 3600 kJ)',a:E,u:'kWh',d:1,tol:{rel:.01},sol:['Q = m · c · ΔT','m = '+V+' kg, ΔT = '+t2+' °C − '+t1+' °C = '+dT+' K','Q = '+V+' kg · 4,19 kJ/(kg·K) · '+dT+' K = '+hf(Q,0)+' kJ','Q = '+hf(Q,0)+' kJ / 3600 kJ/kWh = '+hf(E,1)+' kWh']}}},
+  return{ev:{V,t1,t2,dT,Q,E},q:'Ein Reinigungsbad enthält '+V+' L Wasser von '+t1+' °C. Es wird elektrisch auf '+t2+' °C aufgeheizt. Wie viel Energie in kWh ist dafür mindestens nötig? (c = 4,19 kJ/(kg·K), 1 L Wasser ≈ 1 kg, 1 kWh = 3600 kJ)',a:E,u:'kWh',d:1,tol:{rel:.01},sol:['Q = m · c · ΔT','m = '+V+' kg, ΔT = '+t2+' °C − '+t1+' °C = '+dT+' K','Q = '+V+' kg · 4,19 kJ/(kg·K) · '+dT+' K = '+hf(Q,0)+' kJ','Q = '+hf(Q,0)+' kJ / 3600 kJ/kWh = '+hf(E,1)+' kWh']}}},
  {id:'k13e',typ:'num',name:'Volumenänderung im Hydrauliktank',gen:()=>{const V=hR.st(100,500,20),t1=hR.st(15,25,5),t2=hR.st(50,70,5),dT=t2-t1,dV=V*.0007*dT;
-  return{q:'Der Tank einer Hydraulikanlage wird bei '+t1+' °C mit '+V+' L Öl befüllt. Im Betrieb erwärmt sich das Öl auf '+t2+' °C. Um wie viele Liter dehnt es sich aus? Volumenausdehnungskoeffizient des Öls α_V = 0,0007 1/K.',a:dV,u:'L',d:1,tol:{rel:.01},sol:['ΔV = V₀ · α_V · ΔT','ΔT = '+t2+' °C − '+t1+' °C = '+dT+' K','ΔV = '+V+' L · 0,0007 1/K · '+dT+' K = '+hf(dV,1)+' L','Deshalb braucht der Tank Luftraum über dem Ölspiegel.']}}}]},
+  return{ev:{V,t1,t2,dT,dV},q:'Der Tank einer Hydraulikanlage wird bei '+t1+' °C mit '+V+' L Öl befüllt. Im Betrieb erwärmt sich das Öl auf '+t2+' °C. Um wie viele Liter dehnt es sich aus? Volumenausdehnungskoeffizient des Öls α_V = 0,0007 1/K.',a:dV,u:'L',d:1,tol:{rel:.01},sol:['ΔV = V₀ · α_V · ΔT','ΔT = '+t2+' °C − '+t1+' °C = '+dT+' K','ΔV = '+V+' L · 0,0007 1/K · '+dT+' K = '+hf(dV,1)+' L','Deshalb braucht der Tank Luftraum über dem Ölspiegel.']}}}]},
 {id:'k14',k:'Kapitel 1.4',t:'Kräfte, Drehmoment, Arbeit und Wirkungsgrad',f:'Physik',tasks:[
  {id:'k14a',typ:'num',name:'Hebelgesetz',gen:()=>{const F2=hR.st(1200,4000,100),l2=hR.st(40,120,10),l1=hR.st(600,1200,50),F1=F2*l2/l1;
-  return{q:'Mit einem Montagehebel soll ein Bauteil angehoben werden. Die Last von '+hf(F2,0)+' N greift '+l2+' mm vom Drehpunkt an. Die Hand drückt '+l1+' mm vom Drehpunkt entfernt (Kräfte jeweils senkrecht zum Hebel). Welche Handkraft ist nötig?',a:F1,u:'N',d:1,tol:{rel:.01},sol:['Momentengleichgewicht: F₁ · l₁ = F₂ · l₂','F₁ = F₂ · l₂ / l₁ = '+hf(F2,0)+' N · '+l2+' mm / '+l1+' mm = '+hf(F1,1)+' N']}}},
+  return{ev:{F2,l2,l1,F1},q:'Mit einem Montagehebel soll ein Bauteil angehoben werden. Die Last von '+hf(F2,0)+' N greift '+l2+' mm vom Drehpunkt an. Die Hand drückt '+l1+' mm vom Drehpunkt entfernt (Kräfte jeweils senkrecht zum Hebel). Welche Handkraft ist nötig?',a:F1,u:'N',d:1,tol:{rel:.01},sol:['Momentengleichgewicht: F₁ · l₁ = F₂ · l₂','F₁ = F₂ · l₂ / l₁ = '+hf(F2,0)+' N · '+l2+' mm / '+l1+' mm = '+hf(F1,1)+' N']}}},
  {id:'k14b',typ:'num',name:'Hubleistung und Wirkungsgrad',gen:()=>{const m=hR.st(250,1500,50),h=hR.st(4,20,1),t=hR.st(10,40,2),e=hR.p([.7,.75,.8,.85]),W=m*G9*h,Pab=W/t,Pzu=Pab/e;
-  return{q:'Ein Kran hebt eine Last von '+m+' kg in '+t+' s um '+h+' m an. Der Gesamtwirkungsgrad des Antriebs beträgt '+hf(e*100,0)+' %. Welche Leistung nimmt der Antrieb auf (in kW)? (g = 9,81 m/s²)',a:Pzu/1000,u:'kW',d:2,tol:{rel:.01},sol:['Hubarbeit W = m · g · h = '+m+' kg · 9,81 m/s² · '+h+' m = '+hf(W,0)+' J','Abgegebene Leistung P_ab = W / t = '+hf(W,0)+' J / '+t+' s = '+hf(Pab,0)+' W','Aufgenommene Leistung P_zu = P_ab / η = '+hf(Pab,0)+' W / '+hf(e,2)+' = '+hf(Pzu,0)+' W = '+hf(Pzu/1000,2)+' kW']}}},
+  return{ev:{m,h,t,e,W,Pab,Pzu},q:'Ein Kran hebt eine Last von '+m+' kg in '+t+' s um '+h+' m an. Der Gesamtwirkungsgrad des Antriebs beträgt '+hf(e*100,0)+' %. Welche Leistung nimmt der Antrieb auf (in kW)? (g = 9,81 m/s²)',a:Pzu/1000,u:'kW',d:2,tol:{rel:.01},sol:['Hubarbeit W = m · g · h = '+m+' kg · 9,81 m/s² · '+h+' m = '+hf(W,0)+' J','Abgegebene Leistung P_ab = W / t = '+hf(W,0)+' J / '+t+' s = '+hf(Pab,0)+' W','Aufgenommene Leistung P_zu = P_ab / η = '+hf(Pab,0)+' W / '+hf(e,2)+' = '+hf(Pzu,0)+' W = '+hf(Pzu/1000,2)+' kW']}}},
  {id:'k14c',typ:'txt',name:'Reibung',q:'Erkläre den Unterschied zwischen Haftreibung, Gleitreibung und Rollreibung. Warum ist es leichter, eine schwere Kiste in Bewegung zu halten, als sie anzuschieben? Wie kann man im Betrieb die Reibung verringern, und wo ist Reibung erwünscht?',
   a:'Reibungskraft F_R = μ · F_N. Haftreibung wirkt, solange der Körper ruht; sie ist am größten (μ₀ > μ_Gleit). Gleitreibung wirkt, wenn der Körper gleitet; sie ist kleiner als die Haftreibung. Darum braucht man zum Anschieben mehr Kraft als zum Weiterschieben. Rollreibung (Rollen, Räder, Wälzlager) ist deutlich kleiner als Gleitreibung. Verringern: Schmieren, Rollen oder Wälzlager einsetzen, glatte Oberflächen, kleinere Normalkraft. Erwünscht ist Reibung z. B. bei Bremsen, Kupplungen, Schraubverbindungen, Riementrieben, rutschfesten Böden und Reifen.',
   chk:['F_R = μ · F_N, Abhängigkeit von Normalkraft','Haftreibung > Gleitreibung > Rollreibung','Begründung Anschieben vs. Weiterschieben','Maßnahmen und erwünschte Beispiele']},
  {id:'k14d',typ:'num',name:'Kiste auf der Rampe',gen:()=>{const m=hR.st(60,300,10),al=hR.p([10,12,15,18,20,25]),mu=hR.p([.2,.25,.3,.35]),r=al*Math.PI/180,FG=m*G9,FH=FG*Math.sin(r),FN=FG*Math.cos(r),FR=mu*FN,F=FH+FR;
-  return{q:'Eine Kiste ('+m+' kg) wird eine Rampe mit '+al+'° Neigung gleichmäßig hinaufgezogen, parallel zur Rampe. Die Gleitreibungszahl beträgt μ = '+hf(mu,2)+'. Welche Zugkraft ist nötig? (g = 9,81 m/s²)',a:F,u:'N',d:0,tol:{rel:.01},sol:['F_G = m · g = '+m+' kg · 9,81 m/s² = '+hf(FG,1)+' N','F_H = F_G · sin α = '+hf(FG,1)+' N · sin '+al+'° = '+hf(FH,1)+' N','F_N = F_G · cos α = '+hf(FG,1)+' N · cos '+al+'° = '+hf(FN,1)+' N','F_R = μ · F_N = '+hf(mu,2)+' · '+hf(FN,1)+' N = '+hf(FR,1)+' N','F = F_H + F_R = '+hf(FH,1)+' N + '+hf(FR,1)+' N = '+hf(F,0)+' N']}}},
+  return{ev:{m,al,mu,FG,FH,FN,FR,F},q:'Eine Kiste ('+m+' kg) wird eine Rampe mit '+al+'° Neigung gleichmäßig hinaufgezogen, parallel zur Rampe. Die Gleitreibungszahl beträgt μ = '+hf(mu,2)+'. Welche Zugkraft ist nötig? (g = 9,81 m/s²)',a:F,u:'N',d:0,tol:{rel:.01},sol:['F_G = m · g = '+m+' kg · 9,81 m/s² = '+hf(FG,1)+' N','F_H = F_G · sin α = '+hf(FG,1)+' N · sin '+al+'° = '+hf(FH,1)+' N','F_N = F_G · cos α = '+hf(FG,1)+' N · cos '+al+'° = '+hf(FN,1)+' N','F_R = μ · F_N = '+hf(mu,2)+' · '+hf(FN,1)+' N = '+hf(FR,1)+' N','F = F_H + F_R = '+hf(FH,1)+' N + '+hf(FR,1)+' N = '+hf(F,0)+' N']}}},
  {id:'k14e',typ:'num',name:'Zwei Seile, eine Kraft',gen:()=>{const F1=hR.st(200,900,50),F2=hR.st(200,900,50),R=Math.hypot(F1,F2),al=Math.atan(F2/F1)*180/Math.PI;
-  return{q:'Eine Maschine wird mit zwei Seilen verschoben. Seil 1 zieht mit '+F1+' N, Seil 2 im rechten Winkel dazu mit '+F2+' N. Wie groß ist die resultierende Kraft?',a:R,u:'N',d:0,tol:{rel:.01},sol:['Kräfte im rechten Winkel: Parallelogramm wird zum Rechteck, Pythagoras','F_res = √(F₁² + F₂²) = √(('+F1+' N)² + ('+F2+' N)²) = '+hf(R,0)+' N','Richtung: tan α = F₂ / F₁ = '+F2+' N / '+F1+' N, also α ≈ '+hf(al,1)+'° gegenüber Seil 1']}}}]},
+  return{ev:{F1,F2,R,al},q:'Eine Maschine wird mit zwei Seilen verschoben. Seil 1 zieht mit '+F1+' N, Seil 2 im rechten Winkel dazu mit '+F2+' N. Wie groß ist die resultierende Kraft?',a:R,u:'N',d:0,tol:{rel:.01},sol:['Kräfte im rechten Winkel: Parallelogramm wird zum Rechteck, Pythagoras','F_res = √(F₁² + F₂²) = √(('+F1+' N)² + ('+F2+' N)²) = '+hf(R,0)+' N','Richtung: tan α = F₂ / F₁ = '+F2+' N / '+F1+' N, also α ≈ '+hf(al,1)+'° gegenüber Seil 1']}}}]},
 {id:'k15',k:'Kapitel 1.5',t:'Leistungsbereitstellung: Hydraulik, Pneumatik, Elektrotechnik',f:'Physik',tasks:[
  {id:'k15a',typ:'num',name:'Kolbenkraft eines Hydraulikzylinders',gen:()=>{const d=hR.p([40,50,63,80,100]),p=hR.st(80,200,10),A=Math.PI*d*d/4,F=p*.1*A;
-  return{q:'Ein Hydraulikzylinder hat einen Kolbendurchmesser von '+d+' mm und wird mit '+p+' bar betrieben. Welche Kolbenkraft erzeugt er (ohne Reibung)? Ergebnis in kN.',a:F/1000,u:'kN',d:2,tol:{rel:.01},sol:['A = π · d² / 4 = π · ('+d+' mm)² / 4 = '+hf(A,0)+' mm²','p = '+p+' bar = '+hf(p*.1,1)+' N/mm² (1 bar = 0,1 N/mm²)','F = p · A = '+hf(p*.1,1)+' N/mm² · '+hf(A,0)+' mm² = '+hf(F,0)+' N = '+hf(F/1000,2)+' kN']}}},
+  return{ev:{d,p,A,F},q:'Ein Hydraulikzylinder hat einen Kolbendurchmesser von '+d+' mm und wird mit '+p+' bar betrieben. Welche Kolbenkraft erzeugt er (ohne Reibung)? Ergebnis in kN.',a:F/1000,u:'kN',d:2,tol:{rel:.01},sol:['A = π · d² / 4 = π · ('+d+' mm)² / 4 = '+hf(A,0)+' mm²','p = '+p+' bar = '+hf(p*.1,1)+' N/mm² (1 bar = 0,1 N/mm²)','F = p · A = '+hf(p*.1,1)+' N/mm² · '+hf(A,0)+' mm² = '+hf(F,0)+' N = '+hf(F/1000,2)+' kN']}}},
  {id:'k15b',typ:'num',name:'Gemischte Schaltung',gen:()=>{const U=hR.p([12,24,48]),R1=hR.p([10,15,22,33,47]),R2=hR.p([20,30,40,60]),R3=hR.p([30,60,120]),Rp=R2*R3/(R2+R3),Rg=R1+Rp,I=U/Rg;
-  return{q:'An '+U+' V liegt ein Widerstand R₁ = '+R1+' Ω in Reihe mit einer Parallelschaltung aus R₂ = '+R2+' Ω und R₃ = '+R3+' Ω. Wie groß ist der Gesamtstrom?',a:I,u:'A',d:3,tol:{rel:.01},sol:['Parallelschaltung: R₂₃ = R₂ · R₃ / (R₂ + R₃) = '+R2+' Ω · '+R3+' Ω / '+(R2+R3)+' Ω = '+hf(Rp,2)+' Ω','Gesamtwiderstand: R = R₁ + R₂₃ = '+R1+' Ω + '+hf(Rp,2)+' Ω = '+hf(Rg,2)+' Ω','I = U / R = '+U+' V / '+hf(Rg,2)+' Ω = '+hf(I,3)+' A']}}},
+  return{ev:{U,R1,R2,R3,Rp,Rg,I},q:'An '+U+' V liegt ein Widerstand R₁ = '+R1+' Ω in Reihe mit einer Parallelschaltung aus R₂ = '+R2+' Ω und R₃ = '+R3+' Ω. Wie groß ist der Gesamtstrom?',a:I,u:'A',d:3,tol:{rel:.01},sol:['Parallelschaltung: R₂₃ = R₂ · R₃ / (R₂ + R₃) = '+R2+' Ω · '+R3+' Ω / '+(R2+R3)+' Ω = '+hf(Rp,2)+' Ω','Gesamtwiderstand: R = R₁ + R₂₃ = '+R1+' Ω + '+hf(Rp,2)+' Ω = '+hf(Rg,2)+' Ω','I = U / R = '+U+' V / '+hf(Rg,2)+' Ω = '+hf(I,3)+' A']}}},
  {id:'k15c',typ:'txt',name:'Steuern, Regeln, Hydraulik und Pneumatik',q:'Erkläre den Unterschied zwischen Steuern und Regeln und nenne je ein Beispiel aus dem Betrieb. Wann setzt man eher Hydraulik, wann eher Pneumatik ein? Begründe mit den Eigenschaften der Arbeitsmedien.',
   a:'Steuern: offener Wirkungsablauf. Eine Eingangsgröße beeinflusst die Ausgangsgröße, ohne dass das Ergebnis zurückgemeldet wird (z. B. Zeitschaltuhr für ein Förderband, Ampel nach festem Programm). Regeln: geschlossener Regelkreis. Die Regelgröße wird fortlaufend gemessen, mit dem Sollwert verglichen und bei Abweichung nachgestellt (z. B. Temperaturregelung eines Ofens, Füllstandsregelung eines Tanks). Hydraulik arbeitet mit Öl, das praktisch nicht zusammendrückbar ist: sehr große Kräfte, genaue Positionierung, gleichmäßige Bewegung (Pressen, Hebebühnen, Bagger). Pneumatik arbeitet mit Druckluft, die kompressibel ist: schnelle Bewegungen, kleinere Kräfte, sauber und überlastsicher, aber weniger genau positionierbar (Spannen, Greifen, Sortieren, Verpackung).',
   chk:['Steuern: offen, keine Rückmeldung (Beispiel)','Regeln: geschlossener Kreis, Soll-Ist-Vergleich (Beispiel)','Hydraulik: inkompressibel, große Kräfte','Pneumatik: kompressibel, schnell, kleinere Kräfte']},
  {id:'k15d',typ:'num',name:'Volumenstrom für einen Hydraulikzylinder',gen:()=>{const d=hR.p([40,50,63,80]),v=hR.p([.05,.08,.1,.12,.15,.2]),A=Math.PI*d*d/4,Am=A/1e6,Q=Am*v,QL=Q*60000;
-  return{q:'Ein Hydraulikzylinder mit '+d+' mm Kolbendurchmesser soll mit '+hf(v,2)+' m/s ausfahren. Welchen Volumenstrom muss die Pumpe liefern (ohne Leckverluste)? Ergebnis in L/min.',a:QL,u:'L/min',d:1,tol:{rel:.01},sol:['Q = A · v','A = π · d² / 4 = π · ('+d+' mm)² / 4 = '+hf(A,0)+' mm² = '+hf(Am,6)+' m²','Q = '+hf(Am,6)+' m² · '+hf(v,2)+' m/s = '+hf(Q,6)+' m³/s','Q = '+hf(Q,6)+' m³/s · 1000 L/m³ · 60 s/min = '+hf(QL,1)+' L/min']}}},
+  return{ev:{d,v,A,Am,Q,QL},q:'Ein Hydraulikzylinder mit '+d+' mm Kolbendurchmesser soll mit '+hf(v,2)+' m/s ausfahren. Welchen Volumenstrom muss die Pumpe liefern (ohne Leckverluste)? Ergebnis in L/min.',a:QL,u:'L/min',d:1,tol:{rel:.01},sol:['Q = A · v','A = π · d² / 4 = π · ('+d+' mm)² / 4 = '+hf(A,0)+' mm² = '+hf(Am,6)+' m²','Q = '+hf(Am,6)+' m² · '+hf(v,2)+' m/s = '+hf(Q,6)+' m³/s','Q = '+hf(Q,6)+' m³/s · 1000 L/m³ · 60 s/min = '+hf(QL,1)+' L/min']}}},
  {id:'k15e',typ:'txt',name:'Schutzleiter und RCD',q:'Eine Bohrmaschine mit Metallgehäuse hat einen Isolationsfehler (Körperschluss). Erkläre, wie Schutzleiter und Fehlerstrom-Schutzschalter (RCD) den Menschen schützen. Warum löst der RCD schon bei 30 mA aus, und warum ersetzt er den Schutzleiter nicht?',
   a:'Bei Körperschluss liegt Spannung am Metallgehäuse. Der Schutzleiter (grün-gelb) verbindet das Gehäuse mit dem geerdeten Netz (Erdungsanlage und geerdeter Sternpunkt): Über ihn fließt ein großer Fehlerstrom, der Leitungsschutzschalter (Sicherung) löst aus und schaltet ab. Der RCD vergleicht den Strom im Hinleiter mit dem im Rückleiter. Fließt ein Teil über den Schutzleiter oder über einen Menschen zur Erde ab, fehlt er im Rückleiter. Ab 30 mA Differenz schaltet der RCD in Sekundenbruchteilen ab. 30 mA liegt unter der Grenze, ab der Herzkammerflimmern wahrscheinlich wird, deshalb schützt der RCD auch beim direkten Berühren. Er ersetzt den Schutzleiter nicht: Ohne Schutzleiter fließt erst dann ein Fehlerstrom, wenn ein Mensch das Gehäuse berührt, der Mensch bekommt also einen (kurzen) Schlag. Fließt der Strom durch den Körper von Außenleiter zu Neutralleiter (z. B. beide Hände an den Adern), erkennt der RCD keine Differenz. Den RCD regelmäßig mit der Prüftaste testen.',
   chk:['Körperschluss: Gehäuse steht unter Spannung','Schutzleiter leitet ab, Sicherung schaltet ab','RCD vergleicht Hin- und Rückstrom, 30 mA','Grenzen: ersetzt Schutzleiter nicht, Prüftaste']}]},
@@ -11423,7 +11423,7 @@ function hwSummary(){const s=hwGet(),o={};hwUnits().forEach(u=>{const st=hwUnitS
 const HWC={};
 function hwOpen(id){prac=false;cur=-1;HWN=true;HWU=id||HWU||null;nav();hwView()}
 const hwAcc=f=>{document.body.dataset.f=f||''};
-function hwView(){const box=$('#hw');if(!box)return;const s=hwGet();
+function hwView(){const box=$('#hw');if(!box)return;hxvStop();const s=hwGet();
  if(!HWU){hwAcc('');/* Kursplan: Kurstag je Kapitel, aktuell ist das Kapitel der letzten Einheit */const kk=store.get('ll_kurs',null)||{},kE=kk.e||{},kd={},T0=mToday();let now='';(kk.d||[]).forEach(x=>{const c=kE[x]&&kE[x].k;if(c&&HW.some(u=>u.id===c)){if(!kd[c])kd[c]=x;if(x<T0)now=c}});const HU=hwUnits(),all=HU.reduce((a,u)=>a+u.tasks.length,0),dn=HU.reduce((a,u)=>a+hwUnitState(u).d,0);
   box.innerHTML=`<div class="panel"><h2>📝 Hausaufgaben</h2><p class="sub">Zu jedem Kapitel gibt es eine Hausaufgabe mit fünf Aufgaben: Rechenaufgaben mit eigenen Zahlen und Verständnisaufgaben. Die Einheit 0 zu den Mathe-Grundlagen hat drei Aufgaben. Bearbeite die Hausaufgabe zu dem Kapitel, das Ihr zuletzt im Unterricht hattet. Abgabe ist jeweils am nächsten NTG-Kurstag. Wer mehr will, findet in jedem Kapitel eine freiwillige ⭐ Fleißaufgabe. Dein Fortschritt fließt in den Lernfortschritt ein, den Du Deinem Dozenten senden kannst.</p><p><b>${HU.filter(u=>{const q=hwUnitState(u);return q.n&&q.d===q.n}).length} von ${HU.length}</b> Hausaufgaben fertig · <b>${dn} von ${all}</b> Aufgaben erledigt.</p></div><div class="hwl">${HU.map(u=>{const st=hwUnitState(u),kt=kd[u.id],ab=kk.d?hwDueOf(kk,u.id):null,abl=ab&&ab<T0&&st.d<st.n;return`<button type="button" class="hwc${st.d===st.n?' hwd':''}${u.id===now?' hwnow':''}" data-u="${u.id}" data-f="${u.f}"><small>${u.k}${u.f?' · '+u.f:''}${kt?' · Kurstag '+kt.split('-').reverse().join('.'):u.z?' · vor dem ersten Kurstag':''}</small>${ab?`<small class="hwab${abl?' late':''}">${abl?'Abgabe war':'Abgabe bis'} ${ab.split('-').reverse().join('.')}</small>`:''}${u.id===now?'<em class="hwne">Jetzt dran</em>':''}<b>${u.t}</b><span>${st.d===st.n?'✓ erledigt':st.d+' von '+st.n+' erledigt'}${st.d?' · '+hwStTxt(st):''}${u.x&&s[u.x.id]&&s[u.x.id].done?' · ⭐ Fleißaufgabe':''}</span></button>`}).join('')}</div>`;
   box.querySelectorAll('[data-u]').forEach(b=>b.onclick=()=>{HWU=b.dataset.u;hwView();window.scrollTo(0,0)});return}
@@ -11432,11 +11432,11 @@ function hwView(){const box=$('#hw');if(!box)return;const s=hwGet();
  $('#hwb').onclick=()=>{HWU=null;hwView()};const wrap=$('#hwt');
  (u.x?[...u.tasks,u.x]:u.tasks).forEach((t,i)=>{const p=document.createElement('div'),fx=t===u.x;p.className='panel hwq'+(fx?' hwx':'');const st=s[t.id]||{};
   const head=(fx?'<p class="hwxh">⭐ Fleißaufgabe · freiwillig</p><p class="sub">Für alle, die mehr üben wollen. Sie zählt nicht zu den Hausaufgaben.</p>':'')+`<h3>${fx?'':'Aufgabe '+(i+1)+': '}${t.name} <span class="chip">${t.typ==='num'?'Rechnen':'Verständnis'}</span>${st.done?` <span class="hwok">${st.ok?'✓ gelöst':st.sn?'👁️ nur angesehen':'✓ bearbeitet'}</span>`:''}</h3>`;
-  if(t.typ==='num'){const K=HWC[t.id]||(HWC[t.id]={c:t.gen(),shown:false,tried:false,hl:0,inp:'',fb:'',fc:'',sol:false});let c=K.c,shown=K.shown;const draw=()=>{const tn=hwTop(t);let hl=0,tried=K.tried;p.innerHTML=head+`<p>${c.q}</p><div class="pb"><input type="text" inputmode="decimal" class="hwin" aria-label="Deine Antwort" autocomplete="off"><button type="button" class="pm nofr" aria-label="Vorzeichen wechseln (Minus)" title="Vorzeichen wechseln">+/−</button> <span>${c.u}</span><button type="button" class="sbtn hwck">Antwort prüfen</button><button type="button" class="sbtn2 hwtp">💡 Hilfe</button><button type="button" class="sbtn2 hwsl">Lösungsweg</button>${t.fixed?'':'<button type="button" class="sbtn2 hwnw">Neue Zahlen</button>'}</div><p class="hwfb" aria-live="polite"></p><div class="hwhl sub" hidden></div><div class="hwsol" hidden></div>${glbBox(c.q+' '+(c.sol||[]).join(' '))}${tn?`<p><button type="button" class="chip hwtn">Thema mit Simulation: ${tn} →</button></p>`:''}`;
+  if(t.typ==='num'){const K=HWC[t.id]||(HWC[t.id]={c:t.gen(),shown:false,tried:false,hl:0,inp:'',fb:'',fc:'',sol:false});let c=K.c,shown=K.shown;const draw=()=>{hxvStop();const tn=hwTop(t);let hl=0,tried=K.tried;p.innerHTML=head+`<p>${c.q}</p><div class="pb"><input type="text" inputmode="decimal" class="hwin" aria-label="Deine Antwort" autocomplete="off"><button type="button" class="pm nofr" aria-label="Vorzeichen wechseln (Minus)" title="Vorzeichen wechseln">+/−</button> <span>${c.u}</span><button type="button" class="sbtn hwck">Antwort prüfen</button><button type="button" class="sbtn2 hwtp">💡 Hilfe</button><button type="button" class="sbtn2 hwsl">Lösungsweg</button>${t.fixed?'':'<button type="button" class="sbtn2 hwnw">Neue Zahlen</button>'}</div><p class="hwfb" aria-live="polite"></p><div class="hwhl sub" hidden></div><div class="hwsol" hidden></div>${glbBox(c.q+' '+(c.sol||[]).join(' '))}${tn?`<p><button type="button" class="chip hwtn">Thema mit Simulation: ${tn} →</button></p>`:''}`;
     {const hb=p.querySelector('.hwhl'),tb=p.querySelector('.hwtp'),L=[ '💡 Tipp: '+denkTip(c.u)].concat(c.sol&&c.sol.length>1?['✏️ Ansatz: '+c.sol[0]]:[]);tb.onclick=()=>{if(hl>=L.length){tb.hidden=true;p.querySelector('.hwsl').click();return}hl++;hb.hidden=false;hb.innerHTML=L.slice(0,hl).map(x=>'<p>'+x+'</p>').join('');tb.textContent=hl<L.length?'💡 Mehr Hilfe':'📖 Lösungsweg zeigen'}}
     if(tn)p.querySelector('.hwtn').onclick=()=>{const i=byName(tn);if(i>=0)go(i)};
     const inp=p.querySelector('.hwin'),fb=p.querySelector('.hwfb'),sol=p.querySelector('.hwsol');
-    const showSol=()=>{sol.hidden=false;sol.innerHTML='<b>Ergebnis: '+hf(c.a,c.d)+' '+c.u+sciTxt(c.a,c.u)+'</b>'+c.sol.map(l=>'<div>'+l+'</div>').join('')};
+    const showSol=()=>{sol.hidden=false;sol.innerHTML='<b>Ergebnis: '+hf(c.a,c.d)+' '+c.u+sciTxt(c.a,c.u)+'</b>'+c.sol.map(l=>'<div>'+l+'</div>').join('');hxvBtn(sol,t.id,c)};
     p.querySelector('.hwck').onclick=()=>{const x=pnumFor(inp.value,c.a);if(pAmb(inp.value)){fb.textContent=pAmbTxt(inp.value);fb.className='hwfb hint';return}if(!isFinite(x)){fb.textContent='Bitte eine Zahl eingeben.';fb.className='hwfb bad';return}
      const ok=Math.abs(x-c.a)<=(c.tol.abs!=null?c.tol.abs:Math.abs(c.a)*c.tol.rel)+1e-9;fb.textContent=ok?'Richtig! Ergebnis: '+hf(c.a,c.d)+' '+c.u+sciTxt(c.a,c.u):'Noch nicht. '+(errHint(x,c.a,{n:tn||'',u:c.u})||'Prüfe Formel, Einheiten und Rechenweg.');fb.className='hwfb '+(ok?'ok':'bad');{const tp=p.querySelector('.hwtp');if(tp)tp.classList.toggle('uihl',!ok&&!tp.hidden)}
      if(!tried&&!shown){tried=true;if(tn){memRec(tn,ok,ok?null:errKind(x,c.a),'hw');lvAdd(tn,2,ok);if(!ok&&window.llFehlerAdd)window.llFehlerAdd({n:tn,q:String(c.q).replace(/<[^>]+>/g,''),a:c.a,u:c.u,s:c.sol,t:c.tol})}}
@@ -11450,7 +11450,7 @@ function hwView(){const box=$('#hw');if(!box)return;const s=hwGet();
    if(p.querySelector('.hwtn2'))p.querySelector('.hwtn2').onclick=()=>{const i=byName(HWT2[t.id]);if(i>=0)go(i)};
    const ta=p.querySelector('.hwta');ta.onchange=()=>hwSet(t.id,{txt:ta.value.slice(0,4000)});
    if(st.self!=null)p.querySelectorAll('[data-k]').forEach(b=>{if(+b.dataset.k===st.self)b.style.outline='3px solid var(--acc)'});
-   p.querySelector('.hwml').onclick=()=>{p.querySelector('.hwsol').hidden=false;hwSet(t.id,{txt:ta.value.slice(0,4000)})};
+   p.querySelector('.hwml').onclick=()=>{p.querySelector('.hwsol').hidden=false;hwSet(t.id,{txt:ta.value.slice(0,4000)});hxvBtn(p.querySelector('.hwsol'),t.id,null)};
    p.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const k=+b.dataset.k;if(!(hwGet()[t.id]||{}).done&&hwTop(t))memRec(hwTop(t),k>=.5,null,'hw');hwSet(t.id,{done:true,ok:k>=.5,self:k,txt:ta.value.slice(0,4000)});p.querySelectorAll('[data-k]').forEach(x=>x.style.outline='');b.style.outline='3px solid var(--acc)';p.querySelector('.hwfb').textContent='Gespeichert. Aufgabe erledigt.'});
    if(p.querySelector('.hwki'))p.querySelector('.hwki').onclick=async()=>{const r=await KI.grade(p.querySelector('.hwkg'),{q:t.q,a:t.a},ta.value,3);if(r!==null)hwSet(t.id,{done:true,ok:r>=1.5,ki:r,txt:ta.value.slice(0,4000)})}}
   wrap.append(p)})}
@@ -17057,6 +17057,345 @@ EXV['Fabrikauftrag, Teil 1: Montageplatten stanzen']=z=>{const {a,b,d,t,tau,Ua,U
  XS(4,7,`Masse gleich Dichte mal Volumen.`,k=>XFX(k,[['m = ρ · V','h'],[`m = 7,85 g/cm³ · ${nf(A*t/1000)} cm³`,'m'],[`m = ${nf(m)} g`,'r']])),
  XS(99,9,`Merke: Schneidkraft gleich Schnittlänge mal Blechdicke mal Scherfestigkeit.`,(k,t)=>XMRK(k,t,XFG12(fg()),'F = (U_a + U_L) · t · τ_aB','Presse: F_P = F / 0,8'),'Merke')]};
 /* EXV-P15-END */
+/* HXV-CORE-START */
+/* Lösung als Video für die Hausaufgaben: HXV[Aufgaben-id] = ev => Szenen (gleiche Bausteine wie EXV).
+   Rechenaufgaben: ev = Zufallswerte aus gen() (Feld ev), Video erscheint mit dem Lösungsweg.
+   Textaufgaben: ev = {}, Video erscheint mit der Musterlösung. */
+const HXV={};window.HXP=null;
+function hxvStop(){if(window.HXP){try{window.HXP.stop()}catch(e){}window.HXP=null}}
+function hxvBtn(after,id,c){const G=HXV[id];let w=after.nextElementSibling;if(w&&w.classList.contains('hxv')){hxvStop();w.remove()}if(!G)return;
+ w=document.createElement('div');w.className='hxv';after.after(w);
+ const S=G(c&&c.ev||{}),tot=S.reduce((a,x)=>a+x.d,0),mm=s=>Math.floor(s/60)+':'+String(Math.round(s%60)).padStart(2,'0');
+ const b=document.createElement('button');b.type='button';b.className='einb';b.innerHTML=`<span class="einpl" aria-hidden="true">▶</span><span aria-hidden="true">🎬</span> Lösung als Video <span class="einz">${mm(tot)} min</span>`;w.appendChild(b);
+ b.onclick=()=>{b.remove();hxvStop();window.HXP=einPlay(w,S,id,{h:'Lösung erklärt',i0:0,x:()=>{window.HXP=null;hxvBtn(after,id,c)}})}}
+/* Zahlen wie im Lösungsweg (hf), Tausender-Abstand als normales Leerzeichen, damit er im Video sichtbar bleibt */
+const hh=(v,d)=>hf(v,d).replace(/\u202f/g,' ');
+/* Angaben-Liste in normaler Schriftgröße */
+const HGIV=(x,y,L,a='start')=>ESTK(x,y,L.map(s=>[XSB(s),'ein1']),a,30);
+/* Liste mit Häkchen unter einer Überschrift */
+const HLST=(k,ti,L)=>XT(30,40,ti,'ein1')+XLST8(k,L,88,40);
+/* farbige Beschriftung */
+const HTC=(x,y,s,c,a='start')=>`<text class="ein2" x="${x}" y="${y}" text-anchor="${a}" style="fill:${c}">${s}</text>`;
+/* Bausteine für Skizzen in den Hausaufgaben-Videos */
+const HKAR=(x,y,dx,dy,c='var(--red)')=>XAR(x,y,dx,dy,c);
+const HBOX=(x,y,w,h,f='var(--card)',s='var(--ink)')=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="6" fill="${f}" stroke="${s}" stroke-width="2.5"/>`;
+/* Hydraulikzylinder senkrecht: Öl unten (Druck p), Kolben mit Stange, Kraft F nach oben */
+const HZYL=(x,y,lab=['p','F'],k=1)=>{const h=Math.round(70+20*k);return`<rect class="fluid" x="${x+4}" y="${y+150-h}" width="112" height="${h}"/>`+`<path class="wall" d="M${x} ${y+20}V${y+154}H${x+120}V${y+20}"/>`+
+ `<rect class="pst" x="${x+4}" y="${y+136-h}" width="112" height="14"/><rect x="${x+50}" y="${y+136-h-80}" width="20" height="80" fill="var(--mute)" stroke="var(--ink)" stroke-width="2"/>`+
+ HKAR(x+60,y+136-h-86,0,-44)+XT(x+76,y+136-h-110,lab[1])+XT(x+60,y+150-h/2+6,lab[0],'ein1','middle')}
+/* HXV-CORE-END */
+/* HXV-H0-START */
+/* Hausaufgaben-Videos, Einheit 0: Umrechnen und Formeln umstellen (3 Aufgaben) */
+HXV.k0a=z=>{const {p,A,F}=z,sk=()=>HZYL(40,90,['p','F'])+`<path d="M44 236H156" stroke="var(--amber)" stroke-width="3"/>`+XT(100,262,'Fläche A','ein2','middle');return[
+ XS(0,10,`Auf einen Hydraulikkolben wirkt ein Druck. Erst beide Werte in SI-Einheiten umrechnen, dann F gleich p mal A.`,k=>sk()+HGIV(230,80,[`p = ${p} bar`,`A = ${A} cm²`,'gesucht: F in N']),'Aufgabe'),
+ XS(0,10,`Schritt 1: Ein bar sind hunderttausend Pascal. Ein Pascal ist ein Newton pro Quadratmeter.`,k=>XFX(k,[['1 bar = 100 000 Pa = 100 000 N/m²','h'],[`p = ${p} · 100 000 Pa`,'m'],[`p = ${hh(p*1e5,0)} Pa = ${hh(p*1e5,0)} N/m²`,'r']])),
+ XS(1,10,`Schritt 2: Ein Quadratmeter hat zehntausend Quadratzentimeter. Deshalb durch zehntausend teilen.`,k=>XFX(k,[['1 m² = 10 000 cm²','h'],[`A = ${A} cm² : 10 000`,'m'],[`A = ${hh(A/1e4,4)} m²`,'r']])),
+ XS(2,9,`Schritt 3: Jetzt passen die Einheiten zusammen. Quadratmeter kürzt sich, Newton bleibt.`,k=>XFX(k,[['F = p · A','h'],[`F = ${hh(p*1e5,0)} N/m² · ${hh(A/1e4,4)} m²`,'m'],[`F = ${hh(F,0)} N`,'r']])),
+ XS(99,9,`Merke: Erst in SI-Einheiten umrechnen, dann einsetzen. Ein bar sind hunderttausend Pascal.`,(k,t)=>XMRK(k,t,sk(),'F = p · A','1 bar = 100 000 Pa, 1 m² = 10 000 cm²'),'Merke')]};
+
+HXV.k0b=z=>{const {p,A,F}=z,sk=()=>HZYL(40,90,['p','F'])+`<path d="M44 236H156" stroke="var(--amber)" stroke-width="3"/>`+XT(100,262,'A = ?','ein2','middle');return[
+ XS(0,9,`Eine Presse soll eine bestimmte Kraft erzeugen. Gesucht ist die Kolbenfläche. Dazu stellen wir p gleich F durch A nach A um.`,k=>sk()+HGIV(230,80,[`F = ${hh(F,0)} N`,`p = ${p} N/cm²`,'gesucht: A']),'Aufgabe'),
+ XS(0,9,`Schritt 1: A steht im Nenner. Beide Seiten mit A malnehmen, dann steht A oben.`,k=>XFX(k,[['p = F / A','h'],['p · A = F','m']],['beide Seiten · A'])),
+ XS(1,8,`Schritt 2: Jetzt beide Seiten durch p teilen. Dann steht A allein.`,k=>XFX(k,[['p · A = F','m'],['A = F / p','r']],['beide Seiten : p'])),
+ XS(2,9,`Schritt 3: Werte einsetzen. Newton kürzt sich, Quadratzentimeter bleibt.`,k=>XFX(k,[['A = F / p','h'],[`A = ${hh(F,0)} N / ${p} N/cm²`,'m'],[`A = ${hh(A,1)} cm²`,'r']])),
+ XS(99,9,`Merke: Beim Umstellen machst Du auf beiden Seiten immer dasselbe.`,(k,t)=>XMRK(k,t,sk(),'A = F / p','auf beiden Seiten dasselbe tun'),'Merke')]};
+
+HXV.k0c=z=>{const {n,q,k:kk,m,km}=z;return[
+ XS(0,10,`In einer Lieferung sind einige Schrauben fehlerhaft. Wir bestimmen den Ausschussanteil und übertragen ihn auf die größere Menge.`,k=>HGIV(40,80,[`Lieferung: ${n} Stück`,`fehlerhaft: ${hh(kk,0)} Stück`,`neue Menge: ${hh(m,0)} Stück`,'gesucht: fehlerhafte Stück']),'Aufgabe'),
+ XS(0,10,`Schritt 1: Anteil gleich fehlerhaft durch gesamt, mal hundert Prozent.`,k=>XFX(k,[['Anteil = fehlerhaft / gesamt · 100 %','h'],[`${hh(kk,0)} Stück / ${n} Stück · 100 %`,'m'],[`Anteil = ${hh(q,1)} %`,'r']])),
+ XS(1,10,`Schritt 2: Derselbe Anteil gilt auch für die größere Menge. Prozent in eine Dezimalzahl umrechnen und malnehmen.`,k=>XFX(k,[[`${hh(q,1)} % = ${hh(q/100,3)}`,'m'],[`x = ${hh(m,0)} Stück · ${hh(q/100,3)}`,'m'],[`x = ${hh(km,0)} Stück`,'r']])),
+ XS(1,8,`Gleicher Anteil, mehr Schrauben, also mehr fehlerhafte.`,k=>XHBAR(k,[[`${n} Stück`,kk,`${hh(kk,0)} fehlerhaft`,'var(--amber)'],[`${hh(m,0)} Stück`,km,`${hh(km,0)} fehlerhaft`,'var(--red)']],km*1.6,70,80,240,20),'Schritt 2'),
+ XS(99,9,`Merke: Erst den Anteil bestimmen, dann mit der neuen Grundmenge malnehmen.`,(k,t)=>XMRK(k,t,XHBAR(1,[['vorher',kk,`${hh(kk,0)}`,'var(--amber)'],['nachher',km,`${hh(km,0)}`,'var(--red)']],km*1.6,70,80,240,20),'Anteil = Teil / Ganzes · 100 %','Teil = Ganzes · Anteil'),'Merke')]};
+/* HXV-H0-END */
+/* HXV-H11-START */
+/* Hausaufgaben-Videos, Kapitel 1.1: Grundlagen der Chemie (5 Aufgaben) */
+HXV.k11a=z=>{const {nm,fo,el,sum,m,M,n}=z;return[
+ XS(0,9,`Im Lager steht ein Stoff. Aus der Masse wird die Stoffmenge: Erst die molare Masse aus den Atommassen, dann n gleich m durch M.`,k=>HGIV(40,70,[`${m} kg ${nm}`,`Formel: ${fo}`,'gesucht: Stoffmenge n in mol']),'Aufgabe'),
+ XS(0,10,`Schritt 1: Jedes Atom der Formel bringt seine Atommasse mit. Die Zahl unten rechts sagt, wie oft es vorkommt.`,k=>XT(30,36,`Atome in ${fo}:`,'ein1')+XLST8(k,el.map(([e,c,a])=>`${c} × ${e}: ${c} · ${a} g/mol = ${c*a} g/mol`),84,40),'Schritt 1'),
+ XS(0,8,`Alles zusammenzählen ergibt die molare Masse.`,k=>XFX(k,[[`M(${fo})`,'h'],[`M = ${sum}`,'m'],[`M = ${M} g/mol`,'r']])),
+ XS(1,7,`Schritt 2: Die Masse in Gramm umrechnen, weil M in Gramm pro Mol angegeben ist.`,k=>XFX(k,[['1 kg = 1000 g','h'],[`m = ${m} kg = ${hh(m*1000,0)} g`,'r']])),
+ XS(2,8,`Schritt 3: Stoffmenge gleich Masse durch molare Masse. Gramm kürzt sich, Mol bleibt.`,k=>XFX(k,[['n = m / M','h'],[`n = ${hh(m*1000,0)} g / ${M} g/mol`,'m'],[`n = ${hh(n,1)} mol`,'r']])),
+ XS(99,8,`Merke: Die molare Masse ist die Summe der Atommassen. Dann n gleich m durch M.`,(k,t)=>XMRK(k,t,XT(240,120,fo,'ein1','middle')+XT(240,160,`M = ${M} g/mol`,'ein2','middle'),'n = m / M','M = Summe der Atommassen in g/mol'),'Merke')]};
+
+HXV.k11b=z=>{const {m,n,V}=z,sk=()=>`<rect x="70" y="70" width="70" height="170" rx="30" fill="var(--flow)" fill-opacity=".25" stroke="var(--ink)" stroke-width="2.5"/><rect x="92" y="44" width="26" height="28" fill="var(--mute)" stroke="var(--ink)" stroke-width="2"/>`+XT(105,165,'CO₂','ein1','middle');return[
+ XS(0,9,`Eine Gasflasche enthält Kohlenstoffdioxid. Erst die Stoffmenge, dann das Volumen bei Normbedingungen.`,k=>sk()+HGIV(190,80,[`m = ${m} kg CO₂`,'M = 44 g/mol','0 °C, 1,013 bar','gesucht: V in m³']),'Aufgabe'),
+ XS(0,9,`Schritt 1: Stoffmenge gleich Masse durch molare Masse. Die Masse vorher in Gramm umrechnen.`,k=>XFX(k,[['n = m / M','h'],[`n = ${hh(m*1000,0)} g / 44 g/mol`,'m'],[`n = ${hh(n,1)} mol`,'r']],[`m = ${m} kg = ${hh(m*1000,0)} g`])),
+ XS(1,9,`Schritt 2: Bei Normbedingungen nimmt ein Mol jedes Gases 22,4 Liter ein. Das ist das molare Volumen.`,k=>XFX(k,[['V_m = 22,4 l/mol','h']],['gilt bei 0 °C und 1,013 bar','für jedes Gas gleich'])),
+ XS(2,10,`Schritt 3: Volumen gleich Stoffmenge mal molares Volumen. Tausend Liter sind ein Kubikmeter.`,k=>XFX(k,[['V = n · V_m','h'],[`V = ${hh(n,1)} mol · 22,4 l/mol`,'m'],[`V = ${hh(n*22.4,0)} l`,'m'],[`V = ${hh(V,2)} m³`,'r']],['1000 l = 1 m³'])),
+ XS(99,8,`Merke: Bei Normbedingungen hat ein Mol Gas 22,4 Liter.`,(k,t)=>XMRK(k,t,sk(),'V = n · V_m','V_m = 22,4 l/mol bei 0 °C und 1,013 bar'),'Merke')]};
+
+/* Verzinkter Stahl mit Kratzer: Zink gibt Elektronen ab, Eisen bleibt geschützt */
+const HZINK=(k=1)=>`<rect x="30" y="170" width="420" height="56" fill="var(--mute)" fill-opacity=".55" stroke="var(--ink)" stroke-width="2"/>`+
+ `<rect x="30" y="150" width="190" height="20" fill="#9fb3c8" stroke="var(--ink)" stroke-width="2"/><rect x="262" y="150" width="188" height="20" fill="#9fb3c8" stroke="var(--ink)" stroke-width="2"/>`+
+ `<path d="M196 150Q241 96 286 150Z" fill="var(--flow)" fill-opacity=".35" stroke="var(--flow)" stroke-width="2"/>`+
+ XT(120,142,'Zink','ein2','middle')+XT(360,142,'Zink','ein2','middle')+XT(240,206,'Stahl (Eisen)','ein1','middle')+XT(241,92,'Wasser','ein2','middle')+
+ (k>.3?HKAR(206,160,40,0,'var(--amber)')+XT(160,60,'Zn → Zn²⁺ + 2 e⁻','ein1','middle'):'')+(k>.6?XT(360,60,'Eisen geschützt','ein1','middle'):'');
+HXV.k11c=()=>[
+ XS(0,9,`Eine verzinkte Stahltreppe ist bis auf den Stahl verkratzt. Trotzdem rostet der Stahl zunächst nicht. Warum?`,k=>HGIV(40,70,['Treppe aus Stahl, feuerverzinkt','Zinkschicht verkratzt','Warum rostet der Stahl nicht?','je 2 Beispiele aktiver und','passiver Korrosionsschutz']),'Aufgabe'),
+ XS(0,11,`Zink ist unedler als Eisen. Mit Feuchtigkeit entsteht ein galvanisches Element. Das Zink gibt Elektronen ab und wird oxidiert.`,k=>HZINK(k),'Schritt 1'),
+ XS(0,10,`Das Zink opfert sich wie eine Opferanode. Das Eisen bleibt geschützt, bis das Zink in der Nähe verbraucht ist.`,k=>HLST(k,'Warum kein Rost?',['Zink ist unedler als Eisen','Feuchtigkeit: galvanisches Element','Zink gibt Elektronen ab (Opferanode)','Eisen bleibt geschützt, bis Zink weg']),'Schritt 1'),
+ XS(1,9,`Aktiver Korrosionsschutz greift in die Reaktion ein.`,k=>HLST(k,'Aktiv: greift in die Reaktion ein',['Opferanode aus unedlem Metall','Verzinken, Galvanisieren','Fremdstrom','passende Werkstoffwahl']),'Schritt 2'),
+ XS(1,9,`Passiver Korrosionsschutz trennt den Werkstoff vom angreifenden Medium.`,k=>HLST(k,'Passiv: trennt vom Medium',['Lack, Pulverbeschichtung','Kunststoffüberzug','Einölen, Einfetten']),'Schritt 2'),
+ XS(99,9,`Merke: Das unedlere Metall opfert sich. Aktiver Schutz greift in die Reaktion ein, passiver Schutz trennt.`,(k,t)=>XMRK(k,t,HZINK(1),'unedleres Metall opfert sich','aktiv greift ein, passiv trennt'),'Merke')];
+
+/* Aggregatzustände im Dreieck: rot = Wärme zuführen, blau = Wärme abgeben */
+const HAGG=(k=1)=>{const R='var(--red)',B='var(--flow)',bx=(x,y,a,b)=>HBOX(x,y,130,48)+XT(x+65,y+21,a,'ein1','middle')+XT(x+65,y+41,b,'ein2','middle');
+ return bx(20,196,'fest','Eis')+bx(330,196,'flüssig','Wasser')+bx(175,16,'gasförmig','Dampf')+
+ (k>.15?HKAR(152,206,174,0,R)+HTC(240,198,'Schmelzen',R,'middle'):'')+(k>.3?HKAR(328,236,-174,0,B)+HTC(240,258,'Erstarren',B,'middle'):'')+
+ (k>.45?HKAR(380,192,-90,-124,R)+HTC(360,124,'Verdampfen',R):'')+(k>.6?HKAR(312,68,90,124,B)+HTC(358,96,'Kondensieren',B):'')+
+ (k>.75?HKAR(100,192,90,-124,R)+HTC(122,124,'Sublimieren',R,'end'):'')+(k>.9?HKAR(168,68,-90,124,B)+HTC(122,96,'Resublimieren',B,'end'):'')};
+/* See im Winter: Eis oben, 4 °C am Grund */
+const HSEE=()=>`<path d="M20 70H460L420 250H60Z" fill="var(--flow)" fill-opacity=".25" stroke="var(--ink)" stroke-width="2"/><rect x="20" y="62" width="440" height="16" fill="#dbeafe" stroke="var(--ink)" stroke-width="2"/>`+
+ `<path d="M60 250H420L440 160H40Z" fill="var(--flow)" fill-opacity=".3"/>`+XT(240,56,'Eis 0 °C, isoliert','ein2','middle')+XT(240,110,'kälteres Wasser oben','ein2','middle')+XT(240,226,'4 °C am Grund','ein1','middle')+
+ `<path d="M300 200q14 -10 28 0q-14 10 -28 0zm28 0l8 -6v12z" fill="var(--amber)" stroke="var(--ink)" stroke-width="1.5"/>`;
+HXV.k11d=()=>[
+ XS(0,9,`Wasser kommt als Eis, flüssiges Wasser und Wasserdampf vor. Dazu die Dichteanomalie und zwei Beispiele.`,k=>HGIV(40,70,['a) sechs Übergänge, Wärme zu oder ab','b) Dichteanomalie des Wassers','c) zwei Beispiele']),'Aufgabe'),
+ XS(0,13,`Schritt a: Rot heißt Wärme zuführen: Schmelzen, Verdampfen, Sublimieren. Blau heißt Wärme abgeben: Erstarren, Kondensieren, Resublimieren.`,k=>HAGG(k),'Schritt a'),
+ XS(0,9,`Beispiele: Wäsche trocknet im Frost durch Sublimieren. Eine Brille beschlägt durch Kondensieren. Raureif entsteht durch Resublimieren.`,k=>HLST(k,'Beispiele',['Sublimieren: Wäsche trocknet im Frost','Kondensieren: Brille beschlägt','Resublimieren: Raureif']),'Schritt a'),
+ XS(1,11,`Schritt b: Fast alle Stoffe werden beim Abkühlen dichter. Wasser hat seine größte Dichte aber schon bei 4 Grad. Darunter dehnt es sich wieder aus.`,k=>HLST(k,'Dichteanomalie',['größte Dichte bei 4 °C (1,000 g/cm³)','unter 4 °C dehnt es sich wieder aus','beim Gefrieren rund 9 % mehr Volumen','Eis 0,92 g/cm³: es schwimmt']),'Schritt b'),
+ XS(2,10,`Schritt c: Ein See friert von oben zu. Das schwerste Wasser mit 4 Grad sinkt nach unten, dort überwintern die Fische.`,k=>HSEE(),'Schritt c'),
+ XS(2,9,`Weitere Beispiele: Eisberge schwimmen, Leitungen und Kühler platzen bei Frost, die Straße bekommt Frostaufbrüche.`,k=>HLST(k,'Weitere Beispiele',['Eisberge schwimmen','Leitungen und Kühler platzen bei Frost','Frostaufbrüche in der Straße']),'Schritt c'),
+ XS(99,9,`Merke: Wasser ist bei 4 Grad am dichtesten. Eis ist leichter und schwimmt.`,(k,t)=>XMRK(k,t,HSEE(),'Wasser: größte Dichte bei 4 °C','Eis schwimmt, Leitungen platzen bei Frost'),'Merke')];
+
+/* Einteilung der Stoffe als Baum */
+const HSTB=(k=1)=>{const bx=(x,y,w,a,b)=>HBOX(x,y,w,48)+XT(x+w/2,y+21,a,'ein1','middle')+(b?XT(x+w/2,y+41,b,'ein2','middle'):''),ln=(x1,y1,x2,y2)=>`<path d="M${x1} ${y1}L${x2} ${y2}" stroke="var(--ink)" stroke-width="2"/>`;
+ return bx(185,6,110,'Stoff','')+ln(220,54,110,90)+ln(260,54,350,90)+bx(40,90,140,'Reinstoff','Reinkupfer')+bx(290,90,130,'Gemisch','')+
+ (k>.4?ln(330,138,215,180)+ln(390,138,400,180)+bx(110,180,210,'homogen','Edelstahl, Meerwasser')+bx(330,180,140,'heterogen','KSS, Rauch …'):'')};
+HXV.k11e=()=>[
+ XS(0,9,`Acht Stoffe aus dem Betrieb werden zugeordnet: Reinstoff oder Gemisch, homogen oder heterogen, mit Fachbegriff.`,k=>HGIV(40,70,['Reinstoff oder Gemisch?','homogen oder heterogen?','Fachbegriff','zwei Trennverfahren']),'Aufgabe'),
+ XS(0,11,`Ein Reinstoff besteht aus nur einem Stoff. Hier ist das nur der Kupferdraht aus Reinkupfer. Alles andere sind Gemische.`,k=>HSTB(k),'Schritt 1'),
+ XS(1,10,`Homogen heißt: Man sieht keine Bestandteile. Edelstahl ist eine Legierung, Meerwasser eine Lösung.`,k=>HLST(k,'Homogene Gemische',['Edelstahl: Legierung (Fe, Cr, Ni)','Meerwasser: Lösung (Salz in Wasser)']),'Schritt 2'),
+ XS(1,11,`Heterogen heißt: Die Bestandteile sind getrennt erkennbar. Jedes Gemisch hat einen eigenen Fachbegriff.`,k=>HLST(k,'Heterogene Gemische',['Kühlschmierstoff: Emulsion','Schweißrauch: Rauch','Bohrschlamm: Suspension','Lacknebel: Nebel','Granit: Gemenge']),'Schritt 2'),
+ XS(2,10,`Schritt 3: Gemische lassen sich wieder trennen, je nach Art ganz unterschiedlich.`,k=>HLST(k,'Trennverfahren',['Meerwasser: eindampfen, destillieren','Bohrschlamm: filtrieren, absetzen','Schweißrauch: absaugen, filtern','Emulsion: spalten, Öl abscheiden']),'Schritt 3'),
+ XS(99,9,`Merke: Erst Reinstoff oder Gemisch, dann homogen oder heterogen, dann der Fachbegriff.`,(k,t)=>XMRK(k,t,HSTB(1),'Reinstoff oder Gemisch?','homogen: einheitlich, heterogen: erkennbar'),'Merke')];
+/* HXV-H11-END */
+/* HXV-H12-START */
+/* Hausaufgaben-Videos, Kapitel 1.2: Säuren, Basen und Salze (5 Aufgaben) */
+/* Härteskala 0 bis 30 °dH mit Bereichen und Marke */
+const HHAER=(dh,k=1)=>{const X=v=>40+400*Math.min(v,30)/30,m=X(dh*Math.min(1,k*1.3));
+ return`<rect x="40" y="120" width="${X(8.4)-40}" height="34" fill="var(--ok)" fill-opacity=".45"/><rect x="${X(8.4)}" y="120" width="${X(14)-X(8.4)}" height="34" fill="var(--amber)" fill-opacity=".5"/><rect x="${X(14)}" y="120" width="${440-X(14)}" height="34" fill="var(--red)" fill-opacity=".4"/>`+
+ `<rect x="40" y="120" width="400" height="34" fill="none" stroke="var(--ink)" stroke-width="2"/>`+XT(X(4.2),144,'weich','ein2','middle')+XT(X(11.2),144,'mittel','ein2','middle')+XT(X(22),144,'hart','ein2','middle')+
+ XT(X(8.4),178,'8,4','ein2','middle')+XT(X(14),178,'14','ein2','middle')+XT(40,178,'0','ein2','middle')+XT(440,178,'30 °dH','ein2','end')+
+ `<path d="M${m} 104V170" stroke="var(--ink)" stroke-width="3"/>`+HKAR(m,64,0,52,'var(--ink)')+XT(m,56,`${hh(dh,1)} °dH`,'ein1','middle')};
+HXV.k12a=z=>{const {x,dh,cl}=z;return[
+ XS(0,8,`Im Laborbericht steht, wie viel Calciumoxid ein Liter Kühlwasser umgerechnet enthält. Daraus wird die Härte in Grad deutscher Härte.`,k=>HGIV(40,80,[`${x} mg CaO pro Liter`,'gesucht: Gesamthärte in °dH']),'Aufgabe'),
+ XS(0,9,`Schritt 1: Ein Grad deutscher Härte entspricht zehn Milligramm Calciumoxid pro Liter. Also durch zehn teilen.`,k=>XFX(k,[['1 °dH ≙ 10 mg CaO pro Liter','h'],[`${x} mg/l / 10 mg/l = ${hh(dh,1)}`,'m'],[`Härte = ${hh(dh,1)} °dH`,'r']])),
+ XS(1,9,`Schritt 2: In Millimol pro Liter: Ein Grad deutscher Härte sind 0,178 Millimol pro Liter.`,k=>XFX(k,[['1 °dH ≙ 0,178 mmol/l','h'],[`c = ${hh(dh,1)} · 0,178 mmol/l`,'m'],[`c = ${hh(dh*.178,2)} mmol/l`,'r']])),
+ XS(2,10,`Schritt 3: Weich ist Wasser unter 8,4 Grad, mittel bis 14 Grad, darüber hart.`,k=>HHAER(dh,k)+XT(240,232,`Einstufung: ${cl}`,'ein1','middle'),'Schritt 3'),
+ XS(99,8,`Merke: Zehn Milligramm Calciumoxid pro Liter sind ein Grad deutscher Härte.`,(k,t)=>XMRK(k,t,HHAER(dh,1),'1 °dH ≙ 10 mg CaO pro Liter','weich unter 8,4 °dH, hart über 14 °dH'),'Merke')]};
+
+HXV.k12b=z=>{const {m,n,k:kg}=z;return[
+ XS(0,9,`Schwefelsäure im Auffangbecken soll mit Natriumhydroxid neutralisiert werden. Gesucht ist die nötige Masse Natriumhydroxid.`,k=>HGIV(40,70,[`${m} kg H₂SO₄, M = 98 g/mol`,'NaOH: M = 40 g/mol','gesucht: m(NaOH) in kg']),'Aufgabe'),
+ XS(0,9,`Die Reaktionsgleichung sagt: Ein Mol Schwefelsäure braucht zwei Mol Natriumhydroxid.`,k=>XFX(k,[['H₂SO₄ + 2 NaOH → Na₂SO₄ + 2 H₂O','h']],['1 mol Säure braucht 2 mol Lauge'])),
+ XS(0,9,`Schritt 1: Stoffmenge der Säure gleich Masse durch molare Masse. Die Masse in Gramm.`,k=>XFX(k,[['n = m / M','h'],[`n = ${hh(m*1000,0)} g / 98 g/mol`,'m'],[`n(H₂SO₄) = ${hh(n,1)} mol`,'r']])),
+ XS(1,8,`Schritt 2: Doppelt so viel Natriumhydroxid wie Schwefelsäure.`,k=>XFX(k,[['n(NaOH) = 2 · n(H₂SO₄)','h'],[`n(NaOH) = 2 · ${hh(n,1)} mol`,'m'],[`n(NaOH) = ${hh(2*n,1)} mol`,'r']])),
+ XS(2,9,`Schritt 3: Masse gleich Stoffmenge mal molare Masse. Tausend Gramm sind ein Kilogramm.`,k=>XFX(k,[['m = n · M','h'],[`m = ${hh(2*n,1)} mol · 40 g/mol`,'m'],[`m = ${hh(kg*1000,0)} g = ${hh(kg,2)} kg`,'r']])),
+ XS(99,8,`Merke: Die Zahlen vor den Formeln geben das Verhältnis der Stoffmengen an.`,(k,t)=>XMRK(k,t,XT(240,130,'H₂SO₄ + 2 NaOH','ein1','middle'),'n(NaOH) = 2 · n(H₂SO₄)','dann m = n · M'),'Merke')]};
+
+/* Becherglas: Wasser vorgelegt, Säure läuft langsam hinein */
+const HBECH=(k=1)=>`<rect class="fluid" x="154" y="150" width="172" height="88"/><path class="wall" d="M150 96V242H330V96"/>`+
+ `<g transform="rotate(-35 380 70)"><rect x="350" y="40" width="60" height="80" rx="8" fill="var(--amber)" fill-opacity=".4" stroke="var(--ink)" stroke-width="2.5"/><rect x="368" y="22" width="24" height="20" fill="var(--mute)" stroke="var(--ink)" stroke-width="2"/></g>`+
+ [0,1,2].map(i=>{const y=96+((k*3+i*.33)%1)*50;return`<circle cx="300" cy="${y.toFixed(1)}" r="4" fill="var(--amber)"/>`}).join('')+
+ XT(240,200,'Wasser','ein1','middle')+XT(420,150,'Säure','ein1','middle')+XT(240,264,'erst Wasser, dann Säure','ein2','middle')+`<path d="M200 220q20 -24 40 0q20 24 40 0" fill="none" stroke="var(--ink)" stroke-width="2"/>`;
+HXV.k12c=()=>[
+ XS(0,9,`Ein Mitarbeiter will konzentrierte Schwefelsäure verdünnen und zuerst die Säure in den Eimer geben. Was sagst Du ihm?`,k=>HGIV(40,70,['Säure verdünnen: in welcher Reihenfolge?','Warum?','Schutzmaßnahmen','Produkte der Neutralisation']),'Aufgabe'),
+ XS(0,11,`Schritt 1: Immer zuerst das Wasser vorlegen, dann langsam die Säure unter Rühren dazugeben. Zuerst das Wasser, dann die Säure, sonst geschieht das Ungeheure.`,k=>HBECH(k),'Schritt 1'),
+ XS(0,10,`Beim Verdünnen wird viel Wärme frei. Gibt man Wasser in konzentrierte Säure, verdampft es schlagartig und die Säure spritzt heraus.`,k=>HLST(k,'Warum diese Reihenfolge?',['beim Verdünnen wird viel Wärme frei','Wasser in Säure: verdampft schlagartig','Säure spritzt heraus']),'Schritt 1'),
+ XS(1,10,`Schritt 2: Augen und Haut schützen, gut lüften, Sicherheitsdatenblatt beachten. Bei Kontakt sofort mit viel Wasser spülen.`,k=>HLST(k,'Schutzmaßnahmen',['Schutzbrille oder Gesichtsschutz','säurefeste Handschuhe und Kleidung','gute Lüftung, Betriebsanweisung','Augendusche, bei Kontakt viel Wasser']),'Schritt 2'),
+ XS(2,9,`Schritt 3: Säure und Base ergeben Salz und Wasser. Hier entstehen Natriumsulfat und Wasser.`,k=>XFX(k,[['Säure + Base → Salz + Wasser','h'],['H₂SO₄ + 2 NaOH → Na₂SO₄ + 2 H₂O','r']],['Na₂SO₄ heißt Natriumsulfat'])),
+ XS(99,8,`Merke: Erst das Wasser, dann die Säure.`,(k,t)=>XMRK(k,t,HBECH(1),'erst Wasser, dann Säure','Säure + Base → Salz + Wasser'),'Merke')];
+
+/* pH-Skala 0 bis 14 mit zwei Marken */
+const HPH=(a,b,k=1)=>{const X=v=>40+400*v/14,mb=X(a+(b-a)*Math.min(1,k*1.3));let s='';for(let i=0;i<14;i++){const c=i<7?'var(--red)':'var(--flow)';s+=`<rect x="${X(i)}" y="120" width="${400/14}" height="30" fill="${c}" fill-opacity="${(.15+.5*Math.abs(i+.5-7)/7).toFixed(2)}"/>`}
+ return s+`<rect x="40" y="120" width="400" height="30" fill="none" stroke="var(--ink)" stroke-width="2"/>`+[0,7,14].map(v=>XT(X(v),174,String(v),'ein2','middle')).join('')+XT(X(3.5),200,'sauer','ein2','middle')+XT(X(10.5),200,'basisch','ein2','middle')+
+ `<path d="M${X(a)} 110V160" stroke="var(--mute)" stroke-width="3"/>`+XT(X(a),100,'vorher','ein2','middle')+`<path d="M${mb} 110V160" stroke="var(--ink)" stroke-width="3"/>`+XT(mb,74,'nachher','ein1','middle')};
+HXV.k12d=z=>{const {c0,v,V,pH,p0,sci}=z,cs=hh(c0,c0<.1?2:1);return[
+ XS(0,9,`Salzsäure wird mit Wasser verdünnt. Salzsäure ist eine starke Säure: Jedes Molekül gibt sein Proton ab.`,k=>HGIV(40,70,[`c = ${cs} mol/l (pH ${hh(p0,0)})`,`${v} ml auf ${hh(V,0)} ml auffüllen`,'gesucht: pH']),'Aufgabe'),
+ XS(0,8,`Schritt 1: Um welchen Faktor wird verdünnt? Neues Volumen durch altes Volumen.`,k=>XFX(k,[['f = V_neu / V_alt','h'],[`f = ${hh(V,0)} ml / ${v} ml`,'m'],[`f = ${hh(V/v,0)}`,'r']])),
+ XS(1,9,`Schritt 2: Die Konzentration der Oxoniumionen sinkt um denselben Faktor.`,k=>XFX(k,[[`c = ${cs} mol/l / ${hh(V/v,0)}`,'m'],[`c(H₃O⁺) = ${sci} mol/l`,'r']])),
+ XS(2,9,`Schritt 3: Der pH-Wert ist der negative Zehnerlogarithmus der Konzentration.`,k=>XFX(k,[['pH = −lg c(H₃O⁺)','h'],[`pH = −lg ${sci}`,'m'],[`pH = ${hh(pH,1)}`,'r']])),
+ XS(3,9,`Je Verdünnung um den Faktor zehn steigt der pH-Wert um eins. Die Lösung bleibt sauer.`,k=>HPH(p0,pH,k),'Schritt 3'),
+ XS(99,8,`Merke: Zehnmal verdünnt heißt pH plus eins.`,(k,t)=>XMRK(k,t,HPH(p0,pH,1),'pH = −lg c(H₃O⁺)','Verdünnung × 10: pH + 1'),'Merke')]};
+
+/* Zwei Bechergläser: starke Säure (alle Protonen abgegeben), schwache Säure (nur wenige) */
+const HSAEU=(k=1)=>{const bk=(x,lab,ph,n)=>{let s=`<rect class="fluid" x="${x+4}" y="96" width="152" height="120"/><path class="wall" d="M${x} 80V220H${x+160}V80"/>`;for(let i=0;i<10;i++){const cx=x+24+(i%5)*28,cy=126+Math.floor(i/5)*50,io=i<n&&k>.2;s+=io?`<circle cx="${cx}" cy="${cy}" r="9" fill="var(--red)"/>`:`<circle cx="${cx}" cy="${cy}" r="9" fill="var(--mute)"/><circle cx="${cx+8}" cy="${cy-6}" r="4" fill="var(--mute)"/>`}
+  return s+XT(x+80,248,lab,'ein1','middle')+XT(x+80,268,ph,'ein2','middle')};
+ return bk(40,'Salzsäure','stark, pH 1',10)+bk(280,'Essigsäure','schwach, pH 2,9',1)+`<circle cx="130" cy="34" r="9" fill="var(--red)"/><circle cx="290" cy="34" r="9" fill="var(--mute)"/><circle cx="298" cy="28" r="4" fill="var(--mute)"/>`+XT(146,40,'H₃O⁺','ein2')+XT(310,40,'Säuremolekül','ein2')};
+HXV.k12e=()=>[
+ XS(0,9,`Salzsäure und Essigsäure haben dieselbe Konzentration, aber verschiedene pH-Werte. Warum?`,k=>HGIV(40,70,['beide 0,1 mol/l','Salzsäure pH 1, Essigsäure pH 2,9','Erkläre mit der Protolyse','weiterer Unterschied?']),'Aufgabe'),
+ XS(0,10,`Schritt 1: Bei der Protolyse gibt die Säure ein Proton an ein Wassermolekül ab. Es entsteht ein Oxoniumion.`,k=>XFX(k,[['HA + H₂O → A⁻ + H₃O⁺','h']],['Säure gibt Proton (H⁺) an Wasser ab'])),
+ XS(1,12,`Schritt 2: In der Salzsäure gibt praktisch jedes Molekül sein Proton ab. In der Essigsäure nur etwa eins von hundert, die meisten bleiben ganz.`,k=>HSAEU(k),'Schritt 2'),
+ XS(1,10,`Weniger Oxoniumionen bedeuten einen höheren pH-Wert. Stark heißt also nicht konzentriert.`,k=>HLST(k,'Stark und schwach',['stark: fast alle Moleküle geben ab','schwach: nur wenige, Gleichgewicht ⇌','weniger H₃O⁺: höherer pH-Wert','stark heißt nicht konzentriert']),'Schritt 2'),
+ XS(2,9,`Schritt 3: Man merkt es auch an der Leitfähigkeit und daran, wie schnell Kalk gelöst wird.`,k=>HLST(k,'Weitere Unterschiede',['weniger Ionen: kaum Leitfähigkeit','Lampe im Stromkreis leuchtet kaum','löst Kalk und Metall langsamer']),'Schritt 3'),
+ XS(99,8,`Merke: Starke Säuren geben fast alle Protonen ab, schwache nur wenige.`,(k,t)=>XMRK(k,t,HSAEU(1),'stark: fast alle Moleküle protolysieren','schwach: nur wenige, Gleichgewicht'),'Merke')];
+/* HXV-H12-END */
+/* HXV-H13-START */
+/* Hausaufgaben-Videos, Kapitel 1.3: Temperatureinfluss auf Materialien (5 Aufgaben) */
+/* Rohrleitung, links Festpunkt, rechts wird sie um Δl länger */
+const HROHR=(k=1,lab='Δl')=>{const e=380+40*Math.min(1,k*1.4);return`<path d="M40 90V170" stroke="var(--ink)" stroke-width="4"/>`+[0,1,2,3,4].map(i=>`<path d="M40 ${96+i*16}l-14 10" stroke="var(--ink)" stroke-width="2"/>`).join('')+
+ `<rect x="40" y="114" width="340" height="32" fill="var(--mute)" fill-opacity=".5" stroke="var(--ink)" stroke-width="2.5"/><rect x="380" y="114" width="${(e-380).toFixed(1)}" height="32" fill="var(--red)" fill-opacity=".45" stroke="var(--ink)" stroke-width="2.5"/>`+
+ XT(210,136,'Stahlrohr','ein1','middle')+XT(46,200,'Festpunkt','ein2','start')+(k>.4?XDIM(380,420,186,'')+(lab.length>3?XT(446,216,lab,'ein1','end'):XT(400,216,lab,'ein1','middle')):'')};
+HXV.k13a=z=>{const {l,t1,t2,dl}=z;return[
+ XS(0,9,`Eine Dampfleitung aus Stahl wird im Betrieb heiß und dadurch länger. Um wie viele Millimeter?`,k=>HROHR(k)+HGIV(40,40,[`l₀ = ${l} m, ${t1} °C → ${t2} °C`]),'Aufgabe'),
+ XS(0,7,`Schritt 1: Temperaturunterschied. Ein Unterschied in Grad Celsius ist gleich groß in Kelvin.`,k=>XFX(k,[['ΔT = ϑ₂ − ϑ₁','h'],[`ΔT = ${t2} °C − ${t1} °C = ${t2-t1} K`,'r']])),
+ XS(1,10,`Schritt 2: Länge mal Längenausdehnungskoeffizient mal Temperaturunterschied. Die Länge gleich in Millimeter einsetzen.`,k=>XFX(k,[['Δl = l₀ · α_L · ΔT','h'],[`Δl = ${hh(l*1000,0)} mm · 12 · 10⁻⁶ 1/K · ${t2-t1} K`,'m'],[`Δl = ${hh(dl,1)} mm`,'r']],[`l₀ = ${l} m = ${hh(l*1000,0)} mm`])),
+ XS(99,8,`Merke: Längenänderung gleich l null mal Alpha mal Delta T. Deshalb brauchen lange Leitungen Dehnungsbögen.`,(k,t)=>XMRK(k,t,HROHR(1),'Δl = l₀ · α_L · ΔT','Stahl: α_L = 12 · 10⁻⁶ 1/K'),'Merke')]};
+
+/* Zwei Eimer kalt und warm, darunter die Mischung */
+const HMISCH=(z,k=1)=>{const {m1,t1,m2,t2,tm}=z,em=(x,c,a,b)=>`<path d="M${x} 50l10 80h80l10 -80z" fill="${c}" fill-opacity=".35" stroke="var(--ink)" stroke-width="2.5"/>`+XT(x+50,94,a,'ein1','middle')+XT(x+50,118,b,'ein2','middle');
+ return em(40,'var(--flow)',`${m1} L`,`${t1} °C`)+em(340,'var(--red)',`${m2} L`,`${t2} °C`)+(k>.3?HKAR(150,120,60,60,'var(--ink)')+HKAR(330,120,-60,60,'var(--ink)'):'')+(k>.5?`<path d="M180 190l10 66h100l10 -66z" fill="#c084fc" fill-opacity=".3" stroke="var(--ink)" stroke-width="2.5"/>`+XT(240,232,`${hh(tm,1)} °C`,'ein1','middle'):'')};
+HXV.k13b=z=>{const {m1,t1,m2,t2,tm}=z;return[
+ XS(0,9,`Kaltes und warmes Wasser werden gemischt. Welche Temperatur stellt sich ein, wenn keine Wärme verloren geht?`,k=>HMISCH(z,0),'Aufgabe'),
+ XS(0,8,`Schritt 1: Ein Liter Wasser wiegt etwa ein Kilogramm.`,k=>XFX(k,[['1 L Wasser ≈ 1 kg','h'],[`m₁ = ${m1} kg, m₂ = ${m2} kg`,'r']])),
+ XS(1,10,`Schritt 2: Das warme Wasser gibt so viel Wärme ab, wie das kalte aufnimmt. Bei gleichem Stoff kürzt sich die spezifische Wärmekapazität heraus.`,k=>XFX(k,[['ϑ_m = (m₁ · ϑ₁ + m₂ · ϑ₂) / (m₁ + m₂)','h']],['gleicher Stoff: c kürzt sich'])),
+ XS(2,10,`Schritt 3: Werte einsetzen.`,k=>XFX(k,[[`ϑ_m = (${m1} kg · ${t1} °C + ${m2} kg · ${t2} °C) / (${m1} kg + ${m2} kg)`,'m'],[`ϑ_m = ${hh(tm,1)} °C`,'r']])),
+ XS(2,8,`Die Mischtemperatur liegt zwischen beiden, näher an der größeren Menge.`,k=>HMISCH(z,k),'Schritt 3'),
+ XS(99,8,`Merke: Abgegebene Wärme gleich aufgenommene Wärme.`,(k,t)=>XMRK(k,t,HMISCH(z,1),'ϑ_m = (m₁ · ϑ₁ + m₂ · ϑ₂) / (m₁ + m₂)','Q_ab = Q_auf'),'Merke')]};
+
+/* Drei Arten der Wärmeübertragung */
+const HWUE=(k=1)=>{const fl=(x,y)=>`<path d="M${x} ${y}q-12 -16 0 -34q12 18 0 34z" fill="var(--amber)" stroke="var(--red)" stroke-width="2"/>`;
+ let s=`<rect x="20" y="120" width="130" height="18" fill="var(--mute)" stroke="var(--ink)" stroke-width="2"/>`+fl(36,160)+(k>.1?HKAR(50,112,90,0,'var(--red)'):'')+XT(85,210,'Leitung','ein1','middle')+XT(85,234,'Metallstab','ein2','middle');
+ s+=`<rect x="175" y="70" width="130" height="100" fill="var(--flow)" fill-opacity=".2" stroke="var(--ink)" stroke-width="2"/>`+fl(240,190)+(k>.4?`<path d="M240 160V90M240 90q50 0 50 40t-50 30" fill="none" stroke="var(--red)" stroke-width="3"/>`+HKAR(260,160,-14,0,'var(--red)'):'')+XT(240,210,'Konvektion','ein1','middle')+XT(240,234,'Heizungswasser','ein2','middle');
+ s+=`<circle cx="360" cy="120" r="18" fill="var(--red)" fill-opacity=".6" stroke="var(--ink)" stroke-width="2"/>`+(k>.7?[0,1,2].map(i=>`<path d="M384 ${108+i*12}q8 -6 16 0t16 0t16 0" fill="none" stroke="var(--red)" stroke-width="2.5"/>`).join(''):'')+XT(395,210,'Strahlung','ein1','middle')+XT(395,234,'Infrarotstrahler','ein2','middle');
+ return s};
+HXV.k13c=()=>[
+ XS(0,9,`Drei Arten der Wärmeübertragung, dazu die Wärmeausdehnung von Rohrleitungen und wo man sie gezielt nutzt.`,k=>HGIV(40,70,['drei Arten der Wärmeübertragung','je ein Beispiel aus dem Betrieb','Warum Dehnungsbögen?','gezielte Nutzung der Ausdehnung']),'Aufgabe'),
+ XS(0,13,`Schritt 1: Wärmeleitung im festen Stoff, Konvektion mit einem strömenden Stoff, Strahlung ganz ohne Stoff.`,k=>HWUE(k),'Schritt 1'),
+ XS(0,10,`Beispiele aus dem Betrieb.`,k=>HLST(k,'Beispiele',['Leitung: Wand eines Wärmetauschers','Konvektion: Warmluft im Trockenofen','Strahlung: glühendes Werkstück']),'Schritt 1'),
+ XS(1,11,`Schritt 2: Rohre werden beim Erwärmen länger. Ohne Ausgleich entstehen große Kräfte. Dehnungsbögen und Kompensatoren nehmen die Längenänderung auf.`,k=>HROHR(k,'Δl = l₀ · α_L · ΔT'),'Schritt 2'),
+ XS(1,9,`Ohne Ausgleich gehen Halterungen, Flansche oder Pumpen kaputt.`,k=>HLST(k,'Warum Kompensatoren?',['Ausdehnung erzeugt große Kräfte','Halterungen, Flansche, Pumpen leiden','Dehnungsbogen nimmt Δl auf']),'Schritt 2'),
+ XS(2,9,`Schritt 3: Gezielt genutzt wird die Ausdehnung beim Aufschrumpfen, im Bimetall und im Thermometer.`,k=>HLST(k,'Gezielte Nutzung',['Aufschrumpfen von Lagern, Zahnrädern','Bimetall-Thermostat','Flüssigkeitsthermometer']),'Schritt 3'),
+ XS(99,8,`Merke: Leitung, Konvektion, Strahlung.`,(k,t)=>XMRK(k,t,HWUE(1),'Leitung, Konvektion, Strahlung','Δl = l₀ · α_L · ΔT braucht Ausgleich'),'Merke')];
+
+HXV.k13d=z=>{const {V,t1,t2,dT,Q,E}=z;return[
+ XS(0,9,`Ein Reinigungsbad wird elektrisch aufgeheizt. Wie viel Energie ist mindestens nötig?`,k=>HGIV(40,70,[`${V} L Wasser`,`${t1} °C → ${t2} °C`,'c = 4,19 kJ/(kg·K)','gesucht: E in kWh']),'Aufgabe'),
+ XS(0,8,`Schritt 1: Ein Liter Wasser wiegt etwa ein Kilogramm. Dann der Temperaturunterschied.`,k=>XFX(k,[[`m = ${V} kg`,'m'],[`ΔT = ${t2} °C − ${t1} °C = ${dT} K`,'r']])),
+ XS(1,10,`Schritt 2: Wärmemenge gleich Masse mal spezifische Wärmekapazität mal Temperaturunterschied.`,k=>XFX(k,[['Q = m · c · ΔT','h'],[`Q = ${V} kg · 4,19 kJ/(kg·K) · ${dT} K`,'m'],[`Q = ${hh(Q,0)} kJ`,'r']])),
+ XS(2,9,`Schritt 3: Eine Kilowattstunde sind 3600 Kilojoule.`,k=>XFX(k,[['1 kWh = 3600 kJ','h'],[`E = ${hh(Q,0)} kJ / 3600 kJ/kWh`,'m'],[`E = ${hh(E,1)} kWh`,'r']])),
+ XS(99,8,`Merke: Q gleich m mal c mal Delta T. Eine Kilowattstunde sind 3600 Kilojoule.`,(k,t)=>XMRK(k,t,HGIV(150,120,[`${V} L`,`ΔT = ${dT} K`]),'Q = m · c · ΔT','1 kWh = 3600 kJ'),'Merke')]};
+
+/* Hydrauliktank mit steigendem Ölspiegel und Luftraum */
+const HTANK=(k=1)=>{const y=150-30*Math.min(1,k*1.3);return`<rect x="${110}" y="${y.toFixed(1)}" width="260" height="${(230-y).toFixed(1)}" fill="var(--amber)" fill-opacity=".45"/><path d="M110 150H370" stroke="var(--ink)" stroke-width="2" stroke-dasharray="6 5"/>`+
+ `<rect x="110" y="70" width="260" height="160" fill="none" stroke="var(--ink)" stroke-width="3"/>`+XT(240,200,'Öl','ein1','middle')+XT(240,100,'Luftraum','ein2','middle')+XT(380,156,'kalt','ein2','start')+(k>.5?XT(380,(y+6).toFixed(1),'warm','ein2','start'):'')};
+HXV.k13e=z=>{const {V,t1,t2,dT,dV}=z;return[
+ XS(0,9,`Das Öl in einem Hydrauliktank erwärmt sich im Betrieb und braucht mehr Platz.`,k=>HTANK(0)+HGIV(40,40,[`${V} L Öl, ${t1} °C → ${t2} °C`]),'Aufgabe'),
+ XS(0,7,`Schritt 1: Temperaturunterschied in Kelvin.`,k=>XFX(k,[['ΔT = ϑ₂ − ϑ₁','h'],[`ΔT = ${t2} °C − ${t1} °C = ${dT} K`,'r']])),
+ XS(1,10,`Schritt 2: Volumen mal Volumenausdehnungskoeffizient mal Temperaturunterschied.`,k=>XFX(k,[['ΔV = V₀ · α_V · ΔT','h'],[`ΔV = ${V} L · 0,0007 1/K · ${dT} K`,'m'],[`ΔV = ${hh(dV,1)} L`,'r']])),
+ XS(2,9,`Deshalb braucht der Tank Luftraum über dem Ölspiegel.`,k=>HTANK(k),'Schritt 2'),
+ XS(99,8,`Merke: Volumenänderung gleich V null mal Alpha V mal Delta T.`,(k,t)=>XMRK(k,t,HTANK(1),'ΔV = V₀ · α_V · ΔT','Tank braucht Luftraum'),'Merke')]};
+/* HXV-H13-END */
+/* HXV-H14-START */
+/* Hausaufgaben-Videos, Kapitel 1.4: Kräfte, Drehmoment, Arbeit und Wirkungsgrad (5 Aufgaben) */
+/* Hebel: Drehpunkt, kurzer Arm mit Last F₂ links, langer Arm mit Handkraft F₁ rechts */
+const HHEB=(k=1)=>`<path d="M60 120H440" stroke="var(--ink)" stroke-width="10" stroke-linecap="round"/><path d="M120 126l-18 34h36z" fill="var(--amber)" stroke="var(--ink)" stroke-width="2"/>`+
+ HKAR(70,60,0,52,'var(--red)')+XT(80,62,'F₂ (Last)','ein1')+(k>.3?HKAR(430,56,0,56,'var(--red)')+XT(420,52,'F₁ (Hand)','ein1','end'):'')+
+ XDIM(70,120,190,'l₂')+(k>.5?XDIM(120,430,222,'l₁'):'');
+HXV.k14a=z=>{const {F2,l2,l1,F1}=z;return[
+ XS(0,10,`Ein Montagehebel hebt ein Bauteil an. Die Last greift nah am Drehpunkt an, die Hand weit weg. Welche Handkraft ist nötig?`,k=>HHEB(k),'Aufgabe'),
+ XS(0,10,`Schritt 1: Im Gleichgewicht ist das linksdrehende Moment so groß wie das rechtsdrehende. Kraft mal Hebelarm.`,k=>XFX(k,[['F₁ · l₁ = F₂ · l₂','h'],['F₁ = F₂ · l₂ / l₁','r']],[`F₂ = ${hh(F2,0)} N, l₂ = ${l2} mm, l₁ = ${l1} mm`])),
+ XS(1,9,`Schritt 2: Werte einsetzen. Millimeter kürzt sich, Newton bleibt.`,k=>XFX(k,[[`F₁ = ${hh(F2,0)} N · ${l2} mm / ${l1} mm`,'m'],[`F₁ = ${hh(F1,1)} N`,'r']],[`langer Hebel: nur ${hh(F1/F2*100,1)} % der Last`])),
+ XS(99,8,`Merke: Kraft mal Kraftarm gleich Last mal Lastarm.`,(k,t)=>XMRK(k,t,HHEB(1),'F₁ · l₁ = F₂ · l₂','langer Hebel, kleine Kraft'),'Merke')]};
+
+HXV.k14b=z=>{const {m,h,t,e,W,Pab,Pzu}=z;return[
+ XS(0,9,`Ein Kran hebt eine Last. Erst die Hubarbeit, dann die abgegebene Leistung, dann die aufgenommene Leistung mit dem Wirkungsgrad.`,k=>HGIV(40,70,[`m = ${m} kg, h = ${h} m`,`t = ${t} s, η = ${hh(e*100,0)} %`,'gesucht: P_zu in kW']),'Aufgabe'),
+ XS(0,9,`Schritt 1: Hubarbeit gleich Masse mal g mal Höhe.`,k=>XFX(k,[['W = m · g · h','h'],[`W = ${m} kg · 9,81 m/s² · ${h} m`,'m'],[`W = ${hh(W,0)} J`,'r']])),
+ XS(1,8,`Schritt 2: Leistung ist Arbeit pro Zeit.`,k=>XFX(k,[['P_ab = W / t','h'],[`P_ab = ${hh(W,0)} J / ${t} s`,'m'],[`P_ab = ${hh(Pab,0)} W`,'r']])),
+ XS(2,10,`Schritt 3: Der Antrieb nimmt mehr auf, als er abgibt. Deshalb durch den Wirkungsgrad teilen.`,k=>XFX(k,[['P_zu = P_ab / η','h'],[`P_zu = ${hh(Pab,0)} W / ${hh(e,2)}`,'m'],[`P_zu = ${hh(Pzu,0)} W = ${hh(Pzu/1000,2)} kW`,'r']])),
+ XS(2,8,`Der Unterschied geht als Wärme verloren.`,k=>XHBAR(k,[['aufgenommen',Pzu,`${hh(Pzu,0)} W`,'var(--amber)'],['abgegeben',Pab,`${hh(Pab,0)} W`,'var(--ok)']],Pzu*1.45,70,80,260,20),'Schritt 3'),
+ XS(99,8,`Merke: Aufgenommene Leistung gleich abgegebene Leistung durch Wirkungsgrad.`,(k,t)=>XMRK(k,t,XHBAR(1,[['P_zu',Pzu,'','var(--amber)'],['P_ab',Pab,'','var(--ok)']],Pzu*1.2,70,80,260,20),'P_zu = P_ab / η','W = m · g · h, P = W / t'),'Merke')]};
+
+HXV.k14c=()=>[
+ XS(0,9,`Haftreibung, Gleitreibung und Rollreibung. Warum ist Anschieben schwerer als Weiterschieben?`,k=>HGIV(40,70,['Haft-, Gleit- und Rollreibung','Anschieben oder Weiterschieben?','Reibung verringern','wo ist Reibung erwünscht?']),'Aufgabe'),
+ XS(0,9,`Schritt 1: Die Reibungskraft ist Reibungszahl mal Normalkraft. Je stärker die Fläche angedrückt wird, desto größer die Reibung.`,k=>XFX(k,[['F_R = μ · F_N','h']],['μ hängt von der Reibungsart ab'])),
+ XS(0,11,`Haftreibung ist am größten, Gleitreibung kleiner, Rollreibung deutlich kleiner.`,k=>XHBAR(k,[['Haftreibung μ₀',3,'am größten','var(--red)'],['Gleitreibung μ_Gleit',2,'kleiner','var(--amber)'],['Rollreibung μ_Roll',.5,'sehr klein','var(--ok)']],4.6,58,72,260,20),'Schritt 1'),
+ XS(1,10,`Schritt 2: Zum Anschieben muss die Haftreibung überwunden werden. Gleitet die Kiste, wirkt nur noch die kleinere Gleitreibung.`,k=>HLST(k,'Anschieben oder Weiterschieben?',['in Ruhe wirkt Haftreibung','sie ist größer als Gleitreibung','Anschieben braucht mehr Kraft']),'Schritt 2'),
+ XS(2,10,`Schritt 3: Schmieren, Rollen oder Wälzlager und glatte Flächen verringern die Reibung. Bei Bremsen und Kupplungen ist sie erwünscht.`,k=>HLST(k,'Verringern und erwünscht',['schmieren, Rollen, Wälzlager','glatte Flächen, kleinere Normalkraft','erwünscht: Bremse, Kupplung','Schraube, Riementrieb, Reifen']),'Schritt 3'),
+ XS(99,8,`Merke: Haftreibung größer als Gleitreibung größer als Rollreibung.`,(k,t)=>XMRK(k,t,XHBAR(1,[['μ₀',3,'','var(--red)'],['μ_Gleit',2,'','var(--amber)'],['μ_Roll',.5,'','var(--ok)']],3.6,58,72,260,20),'F_R = μ · F_N','μ₀ > μ_Gleit > μ_Roll'),'Merke')];
+
+/* Kiste auf der Rampe mit Kräften */
+const HRAMP=(al,k=1)=>{const r=al*Math.PI/180,L=330,x0=60,y0=240,cx=x0+.55*L*Math.cos(r),cy=y0-.55*L*Math.sin(r),c=Math.cos(r),s=Math.sin(r),P=(u,v)=>[cx+u*c-v*s,cy-u*s-v*c].map(q=>q.toFixed(1)).join(' ');
+ let g=`<path d="M${x0} ${y0}H${(x0+L*c).toFixed(1)}V${(y0-L*s).toFixed(1)}Z" fill="var(--mute)" fill-opacity=".25" stroke="var(--ink)" stroke-width="2.5"/><path d="M${P(-30,0)}L${P(30,0)}L${P(30,44)}L${P(-30,44)}Z" fill="var(--amber)" fill-opacity=".6" stroke="var(--ink)" stroke-width="2"/>`;
+ const m=P(0,22).split(' ').map(Number);g+=HKAR(m[0],m[1],0,70,'var(--red)')+XT(m[0]+8,m[1]+76,'F_G','ein1');
+ if(k>.3)g+=HKAR(m[0],m[1],-60*c,60*s,'var(--flow)')+XT(m[0]-60*c-34,m[1]+60*s+4,'F_H','ein1');
+ if(k>.6)g+=HKAR(m[0]+22*c,m[1]-22*s,80*c,-80*s,'var(--ok)')+XT(m[0]+104*c,m[1]-104*s-6,'F','ein1');
+ return g+XT(x0+70,y0-8,'α','ein1')};
+HXV.k14d=z=>{const {m,al,mu,FG,FH,FN,FR,F}=z;return[
+ XS(0,10,`Eine Kiste wird gleichmäßig eine Rampe hinaufgezogen. Die Zugkraft muss die Hangabtriebskraft und die Reibung überwinden.`,k=>HRAMP(al,k)+HGIV(300,40,[`m = ${m} kg`,`α = ${al}°, μ = ${hh(mu,2)}`]),'Aufgabe'),
+ XS(0,7,`Schritt 1: Gewichtskraft gleich Masse mal g.`,k=>XFX(k,[['F_G = m · g','h'],[`F_G = ${m} kg · 9,81 m/s²`,'m'],[`F_G = ${hh(FG,1)} N`,'r']])),
+ XS(1,9,`Schritt 2: Der Anteil hangabwärts ist F G mal Sinus alpha.`,k=>XFX(k,[['F_H = F_G · sin α','h'],[`F_H = ${hh(FG,1)} N · sin ${al}°`,'m'],[`F_H = ${hh(FH,1)} N`,'r']])),
+ XS(2,9,`Schritt 3: Der Anteil senkrecht auf die Rampe ist F G mal Kosinus alpha. Das ist die Normalkraft.`,k=>XFX(k,[['F_N = F_G · cos α','h'],[`F_N = ${hh(FG,1)} N · cos ${al}°`,'m'],[`F_N = ${hh(FN,1)} N`,'r']])),
+ XS(3,8,`Schritt 4: Reibungskraft gleich Reibungszahl mal Normalkraft.`,k=>XFX(k,[['F_R = μ · F_N','h'],[`F_R = ${hh(mu,2)} · ${hh(FN,1)} N`,'m'],[`F_R = ${hh(FR,1)} N`,'r']])),
+ XS(4,9,`Schritt 5: Die Zugkraft muss beides überwinden: Hangabtrieb und Reibung.`,k=>XFX(k,[['F = F_H + F_R','h'],[`F = ${hh(FH,1)} N + ${hh(FR,1)} N`,'m'],[`F = ${hh(F,0)} N`,'r']])),
+ XS(99,8,`Merke: Zugkraft auf der Rampe gleich Hangabtrieb plus Reibung.`,(k,t)=>XMRK(k,t,HRAMP(al,1),'F = F_G · sin α + μ · F_G · cos α','F_H mit sin, F_N mit cos'),'Merke')]};
+
+/* Zwei Seile im rechten Winkel und die Resultierende */
+const HSEIL=(F1,F2,k=1)=>{const S=190/Math.max(F1,F2),a=F1*S,b=F2*S,x=90,y=236;
+ return`<circle cx="${x}" cy="${y}" r="7" fill="var(--ink)"/>`+HKAR(x,y,a,0,'var(--flow)')+XT(x+a/2,y+26,'F₁','ein1','middle')+HKAR(x,y,0,-b,'var(--amber)')+XT(x-12,y-b/2,'F₂','ein1','end')+
+ (k>.3?`<path d="M${x+a} ${y}V${y-b}H${x}" fill="none" stroke="var(--mute)" stroke-width="2" stroke-dasharray="6 5"/>`:'')+(k>.5?HKAR(x,y,a,-b,'var(--red)')+XT(x+a+10,y-b-6,'F_res','ein1'):'')+(k>.7?XT(x+44,y-10,'α','ein1'):'')};
+HXV.k14e=z=>{const {F1,F2,R,al}=z;return[
+ XS(0,9,`Zwei Seile ziehen im rechten Winkel an einer Maschine. Wie groß ist die resultierende Kraft?`,k=>HSEIL(F1,F2,0)+HGIV(300,60,[`F₁ = ${F1} N`,`F₂ = ${F2} N`]),'Aufgabe'),
+ XS(0,10,`Schritt 1: Stehen die Kräfte im rechten Winkel, wird das Kräfteparallelogramm zum Rechteck. Die Diagonale ist die Resultierende, also Pythagoras.`,k=>HSEIL(F1,F2,k),'Schritt 1'),
+ XS(1,9,`Werte einsetzen.`,k=>XFX(k,[['F_res = √(F₁² + F₂²)','h'],[`F_res = √((${F1} N)² + (${F2} N)²)`,'m'],[`F_res = ${hh(R,0)} N`,'r']])),
+ XS(2,9,`Schritt 2: Die Richtung mit dem Tangens: Gegenkathete durch Ankathete.`,k=>XFX(k,[['tan α = F₂ / F₁','h'],[`tan α = ${F2} N / ${F1} N`,'m'],[`α ≈ ${hh(al,1)}°`,'r']],['gegenüber Seil 1'])),
+ XS(99,8,`Merke: Kräfte im rechten Winkel addiert man mit Pythagoras.`,(k,t)=>XMRK(k,t,HSEIL(F1,F2,1),'F_res = √(F₁² + F₂²)','tan α = F₂ / F₁'),'Merke')]};
+/* HXV-H14-END */
+/* HXV-H15-START */
+/* Hausaufgaben-Videos, Kapitel 1.5: Hydraulik, Pneumatik, Elektrotechnik (5 Aufgaben) */
+HXV.k15a=z=>{const {d,p,A,F}=z,sk=()=>HZYL(40,90,['p','F'])+XDIM(44,156,236,'')+XT(100,262,`d = ${d} mm`,'ein2','middle');return[
+ XS(0,9,`Ein Hydraulikzylinder wird mit Öldruck betrieben. Kraft gleich Druck mal Kolbenfläche.`,k=>sk()+HGIV(230,80,[`d = ${d} mm`,`p = ${p} bar`,'gesucht: F in kN']),'Aufgabe'),
+ XS(0,9,`Schritt 1: Die Kolbenfläche ist eine Kreisfläche.`,k=>XFX(k,[['A = π · d² / 4','h'],[`A = π · (${d} mm)² / 4`,'m'],[`A = ${hh(A,0)} mm²`,'r']])),
+ XS(1,9,`Schritt 2: Ein bar sind 0,1 Newton pro Quadratmillimeter. So passt der Druck zur Fläche in Quadratmillimetern.`,k=>XFX(k,[['1 bar = 0,1 N/mm²','h'],[`p = ${p} · 0,1 N/mm²`,'m'],[`p = ${hh(p*.1,1)} N/mm²`,'r']])),
+ XS(2,9,`Schritt 3: Kraft gleich Druck mal Fläche. Quadratmillimeter kürzt sich.`,k=>XFX(k,[['F = p · A','h'],[`F = ${hh(p*.1,1)} N/mm² · ${hh(A,0)} mm²`,'m'],[`F = ${hh(F,0)} N = ${hh(F/1000,2)} kN`,'r']])),
+ XS(99,8,`Merke: Kolbenkraft gleich Druck mal Fläche. Ein bar sind 0,1 Newton pro Quadratmillimeter.`,(k,t)=>XMRK(k,t,sk(),'F = p · A','1 bar = 0,1 N/mm²'),'Merke')]};
+
+/* Gemischte Schaltung: Quelle links, R₁ oben in Reihe, R₂ und R₃ parallel rechts */
+const HSCH=(z,k=1)=>{const {U,R1,R2,R3}=z,R=(x,y,w,h,l,v)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="var(--card)" stroke="var(--ink)" stroke-width="2.5"/>`+XT(x+w/2,y+h/2+7,l,'ein1','middle')+XT(x+w+8,y+h/2+6,v,'ein2');
+ return`<path d="M60 70H330M330 70V100M330 100H290V125M330 100H400V125M290 175V200H400V175M345 200V230H60V152M60 140V70" fill="none" stroke="var(--ink)" stroke-width="2.5"/>`+
+ `<path d="M48 140H72M54 152H66" stroke="var(--ink)" stroke-width="3"/>`+XT(84,152,`${U} V`,'ein1')+
+ R(150,56,70,28,'R₁','')+XT(185,108,`${R1} Ω`,'ein2','middle')+R(270,125,40,50,'R₂','')+R(380,125,40,50,'R₃','')+XT(264,156,`${R2} Ω`,'ein2','end')+XT(426,156,`${R3} Ω`,'ein2','start')+
+ (k>.4?`<rect x="258" y="104" width="176" height="90" rx="10" fill="none" stroke="var(--amber)" stroke-width="3" stroke-dasharray="7 5"/>`+XT(346,226,'R₂₃ parallel','ein2','middle'):'')};
+HXV.k15b=z=>{const {U,R1,R2,R3,Rp,Rg,I}=z;return[
+ XS(0,10,`R eins liegt in Reihe mit einer Parallelschaltung aus R zwei und R drei. Erst die Parallelschaltung zusammenfassen.`,k=>HSCH(z,k),'Aufgabe'),
+ XS(0,10,`Schritt 1: Für zwei parallele Widerstände gilt: Produkt durch Summe.`,k=>XFX(k,[['R₂₃ = R₂ · R₃ / (R₂ + R₃)','h'],[`R₂₃ = ${R2} Ω · ${R3} Ω / ${R2+R3} Ω`,'m'],[`R₂₃ = ${hh(Rp,2)} Ω`,'r']])),
+ XS(1,8,`Schritt 2: In Reihe werden Widerstände addiert.`,k=>XFX(k,[['R = R₁ + R₂₃','h'],[`R = ${R1} Ω + ${hh(Rp,2)} Ω`,'m'],[`R = ${hh(Rg,2)} Ω`,'r']])),
+ XS(2,8,`Schritt 3: Ohmsches Gesetz für die ganze Schaltung.`,k=>XFX(k,[['I = U / R','h'],[`I = ${U} V / ${hh(Rg,2)} Ω`,'m'],[`I = ${hh(I,3)} A`,'r']])),
+ XS(99,8,`Merke: Parallel ist der Ersatzwiderstand kleiner als der kleinste Einzelwiderstand. In Reihe wird addiert.`,(k,t)=>XMRK(k,t,HSCH(z,1),'R₂₃ = R₂ · R₃ / (R₂ + R₃)','Reihe: R = R₁ + R₂₃'),'Merke')]};
+
+/* Steuerkette (offen) und Regelkreis (geschlossen) */
+const HSTR=(rg,k=1)=>{const B=(x,y,w,l)=>HBOX(x,y,w,44)+XT(x+w/2,y+28,l,'ein2','middle');
+ if(!rg)return XT(30,40,'Steuern: offene Kette','ein1')+B(20,90,120,'Zeitschaltuhr')+HKAR(142,112,36,0,'var(--ink)')+B(180,90,110,'Motor')+HKAR(292,112,36,0,'var(--ink)')+B(330,90,130,'Förderband')+XT(240,190,'keine Rückmeldung','ein2','middle');
+ return XT(30,40,'Regeln: geschlossener Kreis','ein1')+B(20,90,120,'Regler')+HKAR(142,112,36,0,'var(--ink)')+B(180,90,110,'Heizung')+HKAR(292,112,36,0,'var(--ink)')+B(330,90,130,'Ofen')+
+  (k>.4?`<path d="M395 136V200H80V138" fill="none" stroke="var(--red)" stroke-width="3"/>`+HKAR(80,150,0,-12,'var(--red)')+XT(240,224,'Ist-Wert messen, mit Soll-Wert vergleichen','ein2','middle'):'')};
+HXV.k15c=()=>[
+ XS(0,9,`Steuern und Regeln unterscheiden, dazu Hydraulik und Pneumatik vergleichen.`,k=>HGIV(40,70,['Steuern oder Regeln?','je ein Beispiel','Hydraulik oder Pneumatik?','Begründung mit dem Medium']),'Aufgabe'),
+ XS(0,10,`Schritt 1: Beim Steuern wirkt der Ablauf nur in eine Richtung. Ob das Ergebnis stimmt, wird nicht zurückgemeldet.`,k=>HSTR(0,k),'Schritt 1'),
+ XS(0,11,`Beim Regeln wird die Regelgröße fortlaufend gemessen, mit dem Sollwert verglichen und bei Abweichung nachgestellt.`,k=>HSTR(1,k),'Schritt 1'),
+ XS(1,10,`Schritt 2: Öl lässt sich praktisch nicht zusammendrücken. Hydraulik bringt große Kräfte und genaue Positionen.`,k=>HLST(k,'Hydraulik: Öl',['praktisch nicht zusammendrückbar','sehr große Kräfte, genau positionierbar','Pressen, Hebebühnen, Bagger']),'Schritt 2'),
+ XS(1,10,`Luft lässt sich zusammendrücken. Pneumatik ist schnell, sauber und überlastsicher, aber weniger genau.`,k=>HLST(k,'Pneumatik: Druckluft',['zusammendrückbar','schnell, sauber, überlastsicher','kleinere Kräfte, weniger genau','Spannen, Greifen, Sortieren']),'Schritt 2'),
+ XS(99,8,`Merke: Regeln heißt messen, vergleichen, nachstellen.`,(k,t)=>XMRK(k,t,HSTR(1,1),'Regeln: Soll-Ist-Vergleich','Hydraulik: große Kräfte, Pneumatik: schnell'),'Merke')];
+
+HXV.k15d=z=>{const {d,v,A,Am,Q,QL}=z;return[
+ XS(0,9,`Ein Hydraulikzylinder soll mit einer bestimmten Geschwindigkeit ausfahren. Die Pumpe muss das Volumen nachliefern, das der Kolben freigibt.`,k=>HZYL(40,90,['Q','v'],1)+HGIV(230,80,[`d = ${d} mm`,`v = ${hh(v,2)} m/s`,'gesucht: Q in L/min']),'Aufgabe'),
+ XS(0,7,`Schritt 1: Volumenstrom gleich Fläche mal Geschwindigkeit.`,k=>XFX(k,[['Q = A · v','h']],['Fläche in m², Geschwindigkeit in m/s'])),
+ XS(1,10,`Schritt 2: Die Kolbenfläche in Quadratmetern. Ein Quadratmeter hat eine Million Quadratmillimeter.`,k=>XFX(k,[['A = π · d² / 4','h'],[`A = π · (${d} mm)² / 4 = ${hh(A,0)} mm²`,'m'],[`A = ${hh(Am,6)} m²`,'r']])),
+ XS(2,8,`Schritt 3: Quadratmeter mal Meter pro Sekunde gibt Kubikmeter pro Sekunde.`,k=>XFX(k,[[`Q = ${hh(Am,6)} m² · ${hh(v,2)} m/s`,'m'],[`Q = ${hh(Q,6)} m³/s`,'r']])),
+ XS(3,10,`Schritt 4: Ein Kubikmeter sind tausend Liter, eine Minute hat sechzig Sekunden.`,k=>XFX(k,[[`Q = ${hh(Q,6)} m³/s · 1000 L/m³ · 60 s/min`,'m'],[`Q = ${hh(QL,1)} L/min`,'r']])),
+ XS(99,8,`Merke: Volumenstrom gleich Fläche mal Geschwindigkeit.`,(k,t)=>XMRK(k,t,HZYL(40,90,['Q','v'],1),'Q = A · v','1 m³/s = 60 000 L/min'),'Merke')]};
+
+/* Bohrmaschine mit Körperschluss: Schutzleiter leitet ab */
+const HRCD=(k=1)=>`<rect x="190" y="70" width="150" height="90" rx="18" fill="var(--mute)" fill-opacity=".4" stroke="var(--ink)" stroke-width="2.5"/><rect x="340" y="104" width="80" height="16" fill="var(--mute)" stroke="var(--ink)" stroke-width="2"/>`+
+ XT(265,120,'Metallgehäuse','ein2','middle')+`<path d="M40 90H190M40 120H190" stroke="var(--ink)" stroke-width="2.5"/><path d="M40 150H210V160" stroke="#16a34a" stroke-width="4" stroke-dasharray="10 6"/>`+
+ XT(30,96,'L','ein1','end')+XT(30,126,'N','ein1','end')+XT(30,156,'PE','ein1','end')+
+ (k>.3?`<path d="M190 90l20 -4" stroke="var(--red)" stroke-width="4"/>`+XT(240,56,'Körperschluss','ein1','middle'):'')+
+ (k>.6?HKAR(200,175,-150,0,'var(--red)')+XT(30,204,'Fehlerstrom über PE','ein2','start')+XT(30,232,'Sicherung oder RCD schaltet ab','ein2','start'):'');
+HXV.k15e=()=>[
+ XS(0,9,`Eine Bohrmaschine mit Metallgehäuse hat einen Körperschluss. Wie schützen Schutzleiter und RCD?`,k=>HGIV(40,70,['Körperschluss: was passiert?','Schutzleiter und RCD','Warum 30 mA?','Warum ersetzt der RCD den PE nicht?']),'Aufgabe'),
+ XS(0,12,`Schritt 1: Bei Körperschluss liegt Spannung am Gehäuse. Der Schutzleiter leitet einen großen Fehlerstrom ab, die Sicherung löst aus.`,k=>HRCD(k),'Schritt 1'),
+ XS(1,11,`Schritt 2: Der RCD vergleicht den Strom im Hinleiter mit dem im Rückleiter. Fehlen dreißig Milliampere, schaltet er in Sekundenbruchteilen ab.`,k=>XFX(k,[['I_hin − I_rück ≥ 30 mA','h'],['→ RCD schaltet ab','r']],['fließt Strom über PE oder Mensch zur Erde ab'])),
+ XS(2,10,`Schritt 3: Dreißig Milliampere liegen unter der Grenze für Herzkammerflimmern. Deshalb schützt der RCD auch beim direkten Berühren.`,k=>HLST(k,'Warum 30 mA?',['unter der Grenze für Herzkammerflimmern','schützt auch beim direkten Berühren','schaltet in Sekundenbruchteilen ab']),'Schritt 3'),
+ XS(3,11,`Schritt 4: Ohne Schutzleiter fließt erst Strom, wenn ein Mensch berührt. Fließt Strom von Außenleiter zu Neutralleiter durch den Körper, merkt der RCD nichts.`,k=>HLST(k,'Grenzen des RCD',['ohne PE: erst beim Berühren Strom','L zu N durch den Körper: keine Differenz','regelmäßig Prüftaste drücken']),'Schritt 4'),
+ XS(99,8,`Merke: Schutzleiter und RCD ergänzen sich.`,(k,t)=>XMRK(k,t,HRCD(1),'RCD: I_hin − I_rück ≥ 30 mA','PE leitet ab, RCD schützt den Menschen'),'Merke')];
+/* HXV-H15-END */
 function einShow(n){const w=$('#ein'),S=EIN[n];if(einP)einP.stop();einP=null;if(!w)return;w.innerHTML='';w.hidden=!S;if(!S)return;
  const tot=S.reduce((a,x)=>a+x.d,0),mm=s=>Math.floor(s/60)+':'+String(Math.round(s%60)).padStart(2,'0');
  const b=document.createElement('button');b.type='button';b.className='einb';b.innerHTML='<span class="einpl" aria-hidden="true">▶</span><span aria-hidden="true">🎬</span> Kurz erklärt <span class="einz">'+mm(tot)+' min</span>';w.appendChild(b);
@@ -21247,7 +21586,7 @@ document.addEventListener('input',e=>{if(e.target&&e.target.id==='pin')save()});
 .einbar{display:flex;gap:4px;margin:8px 0 2px}.einbar i{flex:1;height:4px;background:var(--line);border-radius:2px;overflow:hidden}.einbar b{display:block;height:100%;width:0;background:var(--acc)}
 .einc{min-height:4.2em;margin:6px 0 8px;font-weight:600;line-height:1.4}
 .einctl{display:flex;flex-wrap:wrap;gap:8px}.einctl button{font:inherit;font-weight:600;min-width:44px;min-height:42px;padding:6px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
-#pvid{margin-top:12px}#pvid .einp{margin:0}
+#pvid,.hxv{margin-top:12px}#pvid .einp,.hxv .einp{margin:0}
 .einctl .einpp,.einctl .eingo{background:var(--acc);color:#fff;border-color:transparent}
 </style>
 <!-- Roter Faden (M1–M9, 01.11.2026) -->
