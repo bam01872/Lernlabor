@@ -14692,9 +14692,9 @@ EXV['Pumpspeicherwerk: Speichern und Zurückgewinnen']=v=>{const {H,V,ep,et,E,Wz
  XS(99,10,`Merke: Rechnest Du vom Nutzen zurück auf den Aufwand, teilst Du durch η. Rechnest Du vom Aufwand zum Nutzen, nimmst Du mal η.`,(k,t)=>XMRK(k,t,XSAE(v,1,[0,1,2]),'W_zu = E / η_P,  W_ab = E · η_T','η_ges = η_P · η_T'),'Merke')]};
 
 /* Einbindung in die Prüfungsaufgaben: Knopf unter dem Lösungsweg bzw. nach dem letzten Schritt */
-let PVP=null;
+let PVP=null,PVEND=0;
 function pvUpd(){const w=$('#pvid');if(!w)return;const c=PS.cur,nm=c&&(c.xp||c.n),G=c&&c.k==='steps'&&c.ev&&EXV[nm],ps=$('#psol');
- const A0=G?G(c.ev):[],L=Math.max(0,...A0.filter(x=>x.st<99).map(x=>x.st)),last=!!G&&(c.i>L||c.done&&c.i>=L),show=!!G&&(!ps.hidden||!!c.done)&&(last||A0.some(x=>x.st===c.i)),key=show?nm+'|'+c.i+'|'+(last?1:0):'';
+ const A0=G?G(c.ev):[],L=Math.max(0,...A0.filter(x=>x.st<99).map(x=>x.st)),last=!!G&&(c.i>L||c.done&&c.i>=L),show=!!G&&(!ps.hidden||!!c.done)&&(last||!PVEND&&A0.some(x=>x.st===c.i)),key=show?nm+'|'+c.i+'|'+(last?1:0):'';
  if(w.previousElementSibling!==ps)ps.after(w);if(w.dataset.k===key)return;if(PVP){PVP.stop();PVP=null}w.innerHTML='';w.hidden=!show;w.dataset.k=key;if(!show)return;
  const N=c.steps.length,S=A0.filter(x=>x.st<=c.i||last&&x.st>=99),i0=last?0:Math.max(0,S.findIndex(x=>x.st===c.i)),tot=S.slice(i0).reduce((a,x)=>a+x.d,0),mm=s=>Math.floor(s/60)+':'+String(Math.round(s%60)).padStart(2,'0');
  const b=document.createElement('button');b.type='button';b.className='einb';b.innerHTML=`<span class="einpl" aria-hidden="true">▶</span><span aria-hidden="true">🎬</span> ${last?'Ganze Lösung als Video':N>1?'Schritt '+(c.i+1)+' als Video':'Lösung als Video'} <span class="einz">${mm(tot)} min</span>`;w.appendChild(b);
@@ -21775,7 +21775,7 @@ document.addEventListener('input',e=>{if(e.target&&e.target.id==='pin')save()});
 .einbar{display:flex;gap:4px;margin:8px 0 2px}.einbar i{flex:1;height:4px;background:var(--line);border-radius:2px;overflow:hidden}.einbar b{display:block;height:100%;width:0;background:var(--acc)}
 .einc{min-height:4.2em;margin:6px 0 8px;font-weight:600;line-height:1.4}
 .einctl{display:flex;flex-wrap:wrap;gap:8px}.einctl button{font:inherit;font-weight:600;min-width:44px;min-height:42px;padding:6px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
-#pvid,.hxv{margin-top:12px}#pvid .einp,.hxv .einp{margin:0}
+#pvid,.hxv{margin-top:12px}#pvid .einp,.hxv .einp{margin:0}#pvid .einb,.hxv .einb{white-space:nowrap;max-width:100%;box-sizing:border-box;font-size:clamp(13px,3.9vw,16px);gap:8px;padding-right:14px}#pvid .einz,.hxv .einz{font-size:.88em}
 .einctl .einpp,.einctl .eingo{background:var(--acc);color:#fff;border-color:transparent}
 </style>
 <!-- Roter Faden (M1–M9, 01.11.2026) -->
