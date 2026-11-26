@@ -14692,7 +14692,7 @@ EXV['Pumpspeicherwerk: Speichern und Zurückgewinnen']=v=>{const {H,V,ep,et,E,Wz
  XS(99,10,`Merke: Rechnest Du vom Nutzen zurück auf den Aufwand, teilst Du durch η. Rechnest Du vom Aufwand zum Nutzen, nimmst Du mal η.`,(k,t)=>XMRK(k,t,XSAE(v,1,[0,1,2]),'W_zu = E / η_P,  W_ab = E · η_T','η_ges = η_P · η_T'),'Merke')]};
 
 /* Einbindung in die Prüfungsaufgaben: Knopf unter dem Lösungsweg bzw. nach dem letzten Schritt */
-let PVP=null,PVEND=0;
+let PVP=null,PVEND=1;
 function pvUpd(){const w=$('#pvid');if(!w)return;const c=PS.cur,nm=c&&(c.xp||c.n),G=c&&c.k==='steps'&&c.ev&&EXV[nm],ps=$('#psol');
  const A0=G?G(c.ev):[],L=Math.max(0,...A0.filter(x=>x.st<99).map(x=>x.st)),last=!!G&&(c.i>L||c.done&&c.i>=L),show=!!G&&(!ps.hidden||!!c.done)&&(last||!PVEND&&A0.some(x=>x.st===c.i)),key=show?nm+'|'+c.i+'|'+(last?1:0):'';
  if(w.previousElementSibling!==ps)ps.after(w);if(w.dataset.k===key)return;if(PVP){PVP.stop();PVP=null}w.innerHTML='';w.hidden=!show;w.dataset.k=key;if(!show)return;
